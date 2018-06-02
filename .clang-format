@@ -1,0 +1,8 @@
+Language:        Cpp
+BasedOnStyle:  Google
+
+BreakBeforeBraces: Allman
+SpaceBeforeParens: Never
+TabWidth:        2
+UseTab:          Always
+Standard:		Cpp11
