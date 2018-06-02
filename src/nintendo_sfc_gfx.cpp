@@ -24,7 +24,7 @@ const chr* nintendo_sfc_cx::get_chr_sfc(BYTE* data)
 	for(size_t row = 0; row < 16; row += 2)
 	{
 		thisPxlRow.clear();
-		thisPxlRow.reserve(8);
+		thisPxlRow.reserve(traits.width);
 		for(int8_t shift = 7; shift >= 0; shift--)
 		{
 			thisPxl = 0;
