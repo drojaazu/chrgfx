@@ -4,7 +4,7 @@ using namespace png;
 
 namespace gfx
 {
-palette* make_pal(bool blank = false)
+palette* make_pal(bool blank)
 {
 	auto outpal = new palette();
 	outpal->reserve(256);

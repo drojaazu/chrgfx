@@ -27,6 +27,7 @@ const chr* bpp1_cx::get_chr_1bpp(BYTE* data)
 
 		_out->put_row(row, this_pxlrow);
 	}
+	return _out;
 }
 
 const chr* bpp1_cx::get_chr(BYTE* data) { return bpp1_cx::get_chr_1bpp(data); }
