@@ -5,6 +5,7 @@ using namespace std;
 using namespace gfx;
 
 const map<string, chr_xform*> chrx_list = {
+		{string("1bpp"), new bpp1_cx()},
 		{string("sega_md"), new sega_md_cx()},
 		{string("nintendo_sfc"), new nintendo_sfc_cx()}};
 
@@ -26,13 +27,16 @@ pal_xform* palx = nullptr;
 const palette* work_pal;
 bank work_bank;
 
-
 int main(int argc, char** argv)
 {
-	try
+	/*try
 	{
+	*/
 		process_args(argc, argv);
 
+		// set defaults & check sanity
+		if(chrx == nullptr) chrx = chrx_list.at("1bpp");
+		
 		if(pal_data == nullptr)
 			work_pal = gfx::make_pal();
 		else
@@ -43,7 +47,7 @@ int main(int argc, char** argv)
 			auto palbuffer = new char[length];
 			pal_data->read(palbuffer, length);
 			work_pal = palx->get_pal((uint8_t*)palbuffer);
-			delete palbuffer;
+			delete[] palbuffer;
 			delete pal_data;
 		}
 
@@ -51,9 +55,6 @@ int main(int argc, char** argv)
 			chr_data = &cin;
 		else
 			chr_data->seekg(0);
-		// read input from either stream or file for tile data
-		// read file input for palette data
-
 		/*
 		stream read psuedocode
 		1. get data size of tile from converter traits = x
@@ -65,13 +66,6 @@ int main(int argc, char** argv)
 		6. repeat until end of stream
 
 		*/
-
-		// 5/31
-		// at last check, things were mostly working with command line stuff
-		// do some more testing, flesh it out, clean up some of this messy code
-
-		// add some proper error checking
-
 		auto chunkSize = chrx->get_traits()->data_size;
 		auto thisChunk = new char[chunkSize];
 
@@ -89,13 +83,13 @@ int main(int argc, char** argv)
 			outimg->write_stream(cout);
 		else
 			outimg->write(outfile);
-	}
+	//}
 
-	catch(const exception& e)
+	/*catch(const exception& e)
 	{
 		cerr << "Fatal error: " << e.what() << endl;
 		return -1;
-	}
+	}*/
 
 	return 0;
 }

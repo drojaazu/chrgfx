@@ -1,12 +1,12 @@
-CC := g++
-#CC := clang++
-CFLAGS := -g -Wall
+#CC := g++
+CC := clang++
+CFLAGS := -g -Wall -std=c++11
 
 SRCDIR := src
 BUILDDIR := build
 BINDIR := bin
 
-TARGET := $(BINDIR)/outbin
+TARGET := $(BINDIR)/gfx
 INC := -I inc
 
 SRCEXT := cpp

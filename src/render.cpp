@@ -27,8 +27,9 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 			img_tileCols = traits->cols,
 			// img_tileRows = (tiles->size() / img_tileCols) + (tiles->size() %
 			// img_tileCols > 0 ? 1 : 0);
-			img_tileRows = chr_bank->size() / img_tileCols,
-
+			img_tileRows = chr_bank->size() / img_tileCols;
+		
+	uint32_t
 			// ... in pixels
 			// to do: add border calculation: height + ((border size * tile rows) +
 			// border size), width + ((border size * tile cols) + border size)
