@@ -41,11 +41,25 @@ int main(int argc, char** argv)
 		// if no pal format was passed, see if there is a palx with same name as the chrx
 		if(palx == nullptr && palx_list.find(chrx_name) != palx_list.end()) palx = palx_list.at(chrx_name);
 
+		if(chr_data == nullptr)
+			chr_data = &cin;
+		else{
+			if(!chr_data->good()) {
+				cerr << "CHR data file could not be opened" << endl;
+				return 2;
+			}
+			chr_data->seekg(0);
+		}
+
 		// use system palette if no palette data supplied
 		if(pal_data == nullptr)
 			work_pal = gfx::make_pal();
 		else
 		{
+			if(!pal_data->good()) {
+				cerr << "PAL data file could not be opened" << endl;
+				return 2;
+			}
 			pal_data->seekg(0, pal_data->end);
 			int length = pal_data->tellg();
 			pal_data->seekg(0, pal_data->beg);
@@ -55,11 +69,6 @@ int main(int argc, char** argv)
 			delete[] palbuffer;
 			delete pal_data;
 		}
-
-		if(chr_data == nullptr)
-			chr_data = &cin;
-		else
-			chr_data->seekg(0);
 
 		/*
 		stream read psuedocode
