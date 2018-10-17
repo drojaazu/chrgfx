@@ -14,7 +14,8 @@ const map<string, pal_xform*> palx_list = {
 		{string("nintendo_sfc"), new nintendo_sfc_px()},
 		{string("tilelayerpro"), new tilelayerpro_px()}};
 
-string outfile;
+string	outfile,
+		chrx_name;
 
 render_traits rtraits;
 
@@ -29,14 +30,18 @@ bank work_bank;
 
 int main(int argc, char** argv)
 {
-	/*try
+	try
 	{
-	*/
 		process_args(argc, argv);
 
 		// set defaults & check sanity
+		// default to 1bpp if no chrx specified
 		if(chrx == nullptr) chrx = chrx_list.at("1bpp");
 		
+		// if no pal format was passed, see if there is a palx with same name as the chrx
+		if(palx == nullptr && palx_list.find(chrx_name) != palx_list.end()) palx = palx_list.at(chrx_name);
+
+		// use system palette if no palette data supplied
 		if(pal_data == nullptr)
 			work_pal = gfx::make_pal();
 		else
@@ -55,6 +60,7 @@ int main(int argc, char** argv)
 			chr_data = &cin;
 		else
 			chr_data->seekg(0);
+
 		/*
 		stream read psuedocode
 		1. get data size of tile from converter traits = x
@@ -66,15 +72,18 @@ int main(int argc, char** argv)
 		6. repeat until end of stream
 
 		*/
-		auto chunkSize = chrx->get_traits()->data_size;
-		auto thisChunk = new char[chunkSize];
+		auto chunksize = chrx->get_traits()->data_size;
+		auto chunkbuffer = new char[chunksize];
 
 		while(!chr_data->eof())
 		{
-			chr_data->read(thisChunk, chunkSize);
+			chr_data->read(chunkbuffer, chunksize);
 			// what does read() do if we run out of bytes?
-			work_bank.push_back(chrx->get_chr((uint8_t*)thisChunk));
+			work_bank.push_back(chrx->get_chr((uint8_t*)chunkbuffer));
 		}
+
+		if(chr_data != &cin) delete chr_data;
+		delete[] chunkbuffer;
 
 		png::image<png::index_pixel>* outimg =
 				render(&work_bank, work_pal, &rtraits);
@@ -83,13 +92,13 @@ int main(int argc, char** argv)
 			outimg->write_stream(cout);
 		else
 			outimg->write(outfile);
-	//}
+	}
 
-	/*catch(const exception& e)
+	catch(const exception& e)
 	{
 		cerr << "Fatal error: " << e.what() << endl;
 		return -1;
-	}*/
+	}
 
 	return 0;
 }
@@ -98,14 +107,14 @@ void process_args(int argc, char** argv)
 {
 	const char* const shortOpts = "f:g:t:p:o:r:c:s";
 	const option longOpts[] = {
-			{"tile-format", required_argument, nullptr, 'f'},
-			{"palette-format", required_argument, nullptr, 'g'},
-			{"tile-data", required_argument, nullptr, 't'},
-			{"palette-data", required_argument, nullptr, 'p'},
+			{"chr-format", required_argument, nullptr, 'f'},
+			{"pal-format", required_argument, nullptr, 'g'},
+			{"chr-data", required_argument, nullptr, 't'},
+			{"pal-data", required_argument, nullptr, 'p'},
 			{"output", required_argument, nullptr, 'o'},
 			{"trns", no_argument, nullptr, 'r'},
 			{"columns", required_argument, nullptr, 'c'},
-			{"palette-shift", required_argument, nullptr, 's'},
+			{"pal-offset", required_argument, nullptr, 's'},
 			{nullptr, 0, nullptr, 0}};
 
 	while(true)
@@ -118,6 +127,7 @@ void process_args(int argc, char** argv)
 		{
 			// tile-format
 			case 'f':
+				chrx_name = optarg;
 				chrx = chrx_list.at(optarg);
 				break;
 
@@ -151,7 +161,7 @@ void process_args(int argc, char** argv)
 				rtraits.cols = stoi(optarg);
 				break;
 
-			// palette-shift
+			// palette-offset
 			case 's':
 				rtraits.palette_offset = stoi(optarg);
 				break;
