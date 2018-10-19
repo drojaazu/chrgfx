@@ -4,6 +4,7 @@
 #include <map>
 
 #include "1bpp_gfx.hpp"
+#include "nintendo_fc_gfx.hpp"
 #include "nintendo_sfc_gfx.hpp"
 #include "render.hpp"
 #include "sega_md_gfx.hpp"

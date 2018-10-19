@@ -7,10 +7,12 @@ using namespace gfx;
 const map<string, chr_xform*> chrx_list = {
 		{string("1bpp"), new bpp1_cx()},
 		{string("sega_md"), new sega_md_cx()},
+		{string("nintendo_fc"), new nintendo_fc_cx()},
 		{string("nintendo_sfc"), new nintendo_sfc_cx()}};
 
 const map<string, pal_xform*> palx_list = {
 		{string("sega_md"), new sega_md_px()},
+		{string("nintendo_fc"), new nintendo_fc_px()},
 		{string("nintendo_sfc"), new nintendo_sfc_px()},
 		{string("tilelayerpro"), new tilelayerpro_px()}};
 
