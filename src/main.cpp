@@ -17,7 +17,8 @@ const map<string, pal_xform*> palx_list = {
 		{string("tilelayerpro"), new tilelayerpro_px()}};
 
 string	outfile,
-		chrx_name;
+		chrx_name,
+		palx_name;
 
 render_traits rtraits;
 
@@ -41,7 +42,10 @@ int main(int argc, char** argv)
 		if(chrx == nullptr) chrx = chrx_list.at("1bpp");
 		
 		// if no pal format was passed, see if there is a palx with same name as the chrx
-		if(palx == nullptr && palx_list.find(chrx_name) != palx_list.end()) palx = palx_list.at(chrx_name);
+		if(palx == nullptr && palx_list.find(chrx_name) != palx_list.end()) {
+			palx_name = chrx_name;
+			palx = palx_list.at(chrx_name);
+		}
 
 		if(chr_data == nullptr)
 			chr_data = &cin;
@@ -55,7 +59,15 @@ int main(int argc, char** argv)
 
 		// use system palette if no palette data supplied
 		if(pal_data == nullptr)
-			work_pal = gfx::make_pal();
+			// special case for Famicom (internal palette)
+			// TODO: work out a better way to deal with this
+			// there may be other similar cases in the future
+			if(palx_name == "nintendo_fc") {
+				work_pal = palx->get_pal(nullptr);
+			}
+			else {
+				work_pal = gfx::make_pal();
+			}
 		else
 		{
 			if(!pal_data->good()) {
@@ -144,6 +156,7 @@ void process_args(int argc, char** argv)
 
 			// palette-format
 			case 'g':
+				palx_name = optarg;
 				palx = palx_list.at(optarg);
 				break;
 
