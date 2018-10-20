@@ -9,6 +9,7 @@ This is early in development! It is part of rewrite of my old Dumpster/dumplib t
 ### Tiles
 - Generic 1bpp
 - Sega Megadrive/Genesis
+- Nintendo Famicom/NES
 - Nintendo Super Famicom/SNES
 
 ### Palettes
@@ -21,12 +22,14 @@ This is early in development! It is part of rewrite of my old Dumpster/dumplib t
 Specifies tile data format. Currently supported values are:
 - 1bpp
 - sega_md
+- nintendo_fc
 - nintendo_sfc
 
 ```--pal-format```,```-g```
 Specifies the palette data format. Currently supported values are:
 - tilelayerpro
 - sega_md
+- nintendo_fc
 - nintendo_sfc
 
 Note: If the palette format identifier is the same as the tile format identifier, you do not need to specify the palette format. I.E., if you use ```--chr-format sega_md``` you do not need to use ```--pal-format sega_md``` as well.
