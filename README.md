@@ -29,7 +29,6 @@ Specifies tile data format. Currently supported values are:
 Specifies the palette data format. Currently supported values are:
 - tilelayerpro
 - sega_md
-- nintendo_fc
 - nintendo_sfc
 
 Note: If the palette format identifier is the same as the tile format identifier, you do not need to specify the palette format. I.E., if you use ```--chr-format sega_md``` you do not need to use ```--pal-format sega_md``` as well.
