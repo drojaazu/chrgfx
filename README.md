@@ -9,6 +9,7 @@ This is early in development! It is part of rewrite of my old Dumpster/dumplib t
 ### Tiles
 - Generic 1bpp
 - Sega Megadrive/Genesis
+- Nintendo Famicom/NES
 - Nintendo Super Famicom/SNES
 
 ### Palettes
@@ -21,6 +22,7 @@ This is early in development! It is part of rewrite of my old Dumpster/dumplib t
 Specifies tile data format. Currently supported values are:
 - 1bpp
 - sega_md
+- nintendo_fc
 - nintendo_sfc
 
 ```--pal-format```,```-g```
