@@ -28,7 +28,7 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 			// img_tileRows = (tiles->size() / img_tileCols) + (tiles->size() %
 			// img_tileCols > 0 ? 1 : 0);
 			img_tileRows = chr_bank->size() / img_tileCols;
-		
+
 	uint32_t
 			// ... in pixels
 			// to do: add border calculation: height + ((border size * tile rows) +
@@ -98,7 +98,16 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 	if(traits->use_trns)
 	{
 		png::tRNS* trans = new png::tRNS();
-		trans->push_back(0);
+
+		// this could probably be done better...
+		if(!traits->trns_entry)
+			trans->push_back(0);
+		else
+		{
+			trans->resize(traits->trns_entry + 1);
+			std::fill(trans->begin(), trans->end(), 255);
+			trans->at(traits->trns_entry) = 0;
+		}
 		outimg->set_tRNS(*trans);
 		delete trans;
 	}

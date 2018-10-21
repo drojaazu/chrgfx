@@ -134,13 +134,14 @@ int main(int argc, char** argv)
 
 void process_args(int argc, char** argv)
 {
-	const char* const shortOpts = "f:g:t:p:o:r:c:s";
+	const char* const shortOpts = ":f:g:t:p:o:rc:s";
 	const option longOpts[] = {{"chr-format", required_argument, nullptr, 'f'},
 														 {"pal-format", required_argument, nullptr, 'g'},
 														 {"chr-data", required_argument, nullptr, 't'},
 														 {"pal-data", required_argument, nullptr, 'p'},
 														 {"output", required_argument, nullptr, 'o'},
 														 {"trns", no_argument, nullptr, 'r'},
+														 {"trns-entry", required_argument, nullptr, 'e'},
 														 {"columns", required_argument, nullptr, 'c'},
 														 {"pal-offset", required_argument, nullptr, 's'},
 														 {nullptr, 0, nullptr, 0}};
@@ -183,6 +184,10 @@ void process_args(int argc, char** argv)
 			// trns
 			case 'r':
 				rtraits.use_trns = true;
+				break;
+			// trns entry
+			case 'e':
+				rtraits.trns_entry = stoi(optarg);
 				break;
 
 			// columns

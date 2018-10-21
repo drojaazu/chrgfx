@@ -47,6 +47,9 @@ Specifies output PNG file to write to. If not specified, will write to stdout.
 ```--trns```,```-r```
 Use palette index 0 as transparency in output image.
 
+```--trns-entry```,```-e```
+Specify which palette entry to use as transparency
+
 ```--columns```,```-c```
 Number of tile columns (horizontal) to render for output image.
 
