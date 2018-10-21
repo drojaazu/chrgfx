@@ -8,7 +8,8 @@ const map<string, chr_xform*> chrx_list = {
 		{string("1bpp"), new bpp1_cx()},
 		{string("sega_md"), new sega_md_cx()},
 		{string("nintendo_fc"), new nintendo_fc_cx()},
-		{string("nintendo_sfc"), new nintendo_sfc_cx()}};
+		{string("nintendo_sfc"), new nintendo_sfc_cx()},
+		{string("capcom_cps"), new capcom_cps_cx()}};
 
 const map<string, pal_xform*> palx_list = {
 		{string("sega_md"), new sega_md_px()},
@@ -16,9 +17,7 @@ const map<string, pal_xform*> palx_list = {
 		{string("nintendo_sfc"), new nintendo_sfc_px()},
 		{string("tilelayerpro"), new tilelayerpro_px()}};
 
-string	outfile,
-		chrx_name,
-		palx_name;
+string outfile, chrx_name, palx_name;
 
 render_traits rtraits;
 
@@ -40,17 +39,21 @@ int main(int argc, char** argv)
 		// set defaults & check sanity
 		// default to 1bpp if no chrx specified
 		if(chrx == nullptr) chrx = chrx_list.at("1bpp");
-		
-		// if no pal format was passed, see if there is a palx with same name as the chrx
-		if(palx == nullptr && palx_list.find(chrx_name) != palx_list.end()) {
+
+		// if no pal format was passed, see if there is a palx with same name as the
+		// chrx
+		if(palx == nullptr && palx_list.find(chrx_name) != palx_list.end())
+		{
 			palx_name = chrx_name;
 			palx = palx_list.at(chrx_name);
 		}
 
 		if(chr_data == nullptr)
 			chr_data = &cin;
-		else{
-			if(!chr_data->good()) {
+		else
+		{
+			if(!chr_data->good())
+			{
 				cerr << "CHR data file could not be opened" << endl;
 				return 2;
 			}
@@ -62,15 +65,18 @@ int main(int argc, char** argv)
 			// special case for Famicom (internal palette)
 			// TODO: work out a better way to deal with this
 			// there may be other similar cases in the future
-			if(palx_name == "nintendo_fc") {
+			if(palx_name == "nintendo_fc")
+			{
 				work_pal = palx->get_pal(nullptr);
 			}
-			else {
+			else
+			{
 				work_pal = gfx::make_pal();
 			}
 		else
 		{
-			if(!pal_data->good()) {
+			if(!pal_data->good())
+			{
 				cerr << "PAL data file could not be opened" << endl;
 				return 2;
 			}
@@ -129,16 +135,15 @@ int main(int argc, char** argv)
 void process_args(int argc, char** argv)
 {
 	const char* const shortOpts = "f:g:t:p:o:r:c:s";
-	const option longOpts[] = {
-			{"chr-format", required_argument, nullptr, 'f'},
-			{"pal-format", required_argument, nullptr, 'g'},
-			{"chr-data", required_argument, nullptr, 't'},
-			{"pal-data", required_argument, nullptr, 'p'},
-			{"output", required_argument, nullptr, 'o'},
-			{"trns", no_argument, nullptr, 'r'},
-			{"columns", required_argument, nullptr, 'c'},
-			{"pal-offset", required_argument, nullptr, 's'},
-			{nullptr, 0, nullptr, 0}};
+	const option longOpts[] = {{"chr-format", required_argument, nullptr, 'f'},
+														 {"pal-format", required_argument, nullptr, 'g'},
+														 {"chr-data", required_argument, nullptr, 't'},
+														 {"pal-data", required_argument, nullptr, 'p'},
+														 {"output", required_argument, nullptr, 'o'},
+														 {"trns", no_argument, nullptr, 'r'},
+														 {"columns", required_argument, nullptr, 'c'},
+														 {"pal-offset", required_argument, nullptr, 's'},
+														 {nullptr, 0, nullptr, 0}};
 
 	while(true)
 	{

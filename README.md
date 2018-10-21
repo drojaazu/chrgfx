@@ -11,6 +11,7 @@ This is early in development! It is part of rewrite of my old Dumpster/dumplib t
 - Sega Megadrive/Genesis
 - Nintendo Famicom/NES
 - Nintendo Super Famicom/SNES
+- Capcom CPS1/CPS2 tiles
 
 ### Palettes
 - Tile Layer Pro
@@ -24,6 +25,7 @@ Specifies tile data format. Currently supported values are:
 - sega_md
 - nintendo_fc
 - nintendo_sfc
+- capcom_cps
 
 ```--pal-format```,```-g```
 Specifies the palette data format. Currently supported values are:
