@@ -206,6 +206,13 @@ void process_args(int argc, char** argv)
 				print_help();
 				exit(0);
 				break;
+
+			case ':':
+				cerr << "Missing arg for option: " << (char)optopt << endl;
+				exit(1);
+				break;
+			case '?':
+				cout << "Unknown option: " << (char)optopt << endl;
 			default:
 				print_help();
 				exit(1);
