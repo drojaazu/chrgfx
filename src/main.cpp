@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 
 void process_args(int argc, char** argv)
 {
-	const char* const shortOpts = ":f:g:t:p:o:rc:s";
+	const char* const shortOpts = ":f:g:t:p:o:rc:s:h";
 	const option longOpts[] = {{"chr-format", required_argument, nullptr, 'f'},
 														 {"pal-format", required_argument, nullptr, 'g'},
 														 {"chr-data", required_argument, nullptr, 't'},
@@ -144,6 +144,7 @@ void process_args(int argc, char** argv)
 														 {"trns-entry", required_argument, nullptr, 'e'},
 														 {"columns", required_argument, nullptr, 'c'},
 														 {"pal-offset", required_argument, nullptr, 's'},
+														 {"help", no_argument, nullptr, 'h'},
 														 {nullptr, 0, nullptr, 0}};
 
 	while(true)
@@ -154,24 +155,24 @@ void process_args(int argc, char** argv)
 
 		switch(thisOpt)
 		{
-			// tile-format
+			// chr-format
 			case 'f':
 				chrx_name = optarg;
 				chrx = chrx_list.at(optarg);
 				break;
 
-			// palette-format
+			// pal-format
 			case 'g':
 				palx_name = optarg;
 				palx = palx_list.at(optarg);
 				break;
 
-			// tile-data
+			// chr-data
 			case 't':
 				chr_data = new ifstream(optarg);
 				break;
 
-			// palette-data
+			// pal-data
 			case 'p':
 				pal_data = new ifstream(optarg);
 				break;
@@ -202,9 +203,12 @@ void process_args(int argc, char** argv)
 
 			// help
 			case 'h':
-			case '?':
+				print_help();
+				exit(0);
+				break;
 			default:
 				print_help();
+				exit(1);
 				break;
 		}
 	}
@@ -212,6 +216,21 @@ void process_args(int argc, char** argv)
 
 void print_help()
 {
-	cout << "help screen here" << endl;
-	exit(1);
+	cout << "Valid options:" << endl;
+	cout << "  --chr-format, -f   Specify tile data format" << endl;
+	cout << "  --chr-data, -t     Filename to input tile data" << endl;
+	cout << "  --pal-format, -g   Specify palette data format" << endl;
+	cout << "  --pal-data, -p     Filename to input palette data" << endl;
+	cout << "  --output, -o       Specify output PNG image filename" << endl;
+	cout << "  --trns, -r         Use image transparency" << endl;
+	cout << "  --trns-entry       Specify palette entry to use as transparency "
+					"(default is 0)"
+			 << endl;
+	cout << "  --columns, -c      Specify number of columns per row of tiles in "
+					"output image"
+			 << endl;
+	cout << "  --pal-offset, -s   Specify palette entry at which to begin "
+					"(default is 0)"
+			 << endl;
+	cout << "  --help, -h         Display this text" << endl;
 }
