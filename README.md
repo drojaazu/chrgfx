@@ -1,4 +1,4 @@
-# gfx
+# chrgfx
 ---
 Converts tile (CHR) based bitmap graphics from retro hardware systems, similar to Tile Layer Pro and such.
 
@@ -57,4 +57,4 @@ Number of tile columns (horizontal) to render for output image.
 Number of source palette entries to skip. For example, if source palette has 256 colors, but the 16 color palette for your sprite starts on palette "line" 3, the offset would be 48.
 
 ### Usage Example
-    cat ../etc/sonic_sprite | ./gfx --chr-format sega_md --pal-data ../etc/sonic1.cram --trns --columns 32 > test.png
+    cat ../etc/sonic_sprite | ./chrgfx --chr-format sega_md --pal-data ../etc/sonic1.cram --trns --columns 32 > test.png

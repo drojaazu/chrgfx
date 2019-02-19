@@ -6,7 +6,7 @@ SRCDIR := src
 BUILDDIR := build
 BINDIR := bin
 
-TARGET := $(BINDIR)/gfx
+TARGET := $(BINDIR)/chrgfx
 INC := -I inc
 
 SRCEXT := cpp
