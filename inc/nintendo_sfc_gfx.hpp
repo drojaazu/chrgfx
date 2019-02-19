@@ -11,22 +11,22 @@ class nintendo_sfc_cx : public chr_xform
 {
  private:
 	static const chr_traits traits;
-	static const chr* get_chr_sfc(BYTE* data);
+	static const chr* get_chr_sfc(u8* data);
 
  public:
 	const chr_traits* get_traits();
-	const chr* get_chr(BYTE* data);
+	const chr* get_chr(u8* data);
 };
 
 class nintendo_sfc_3bpp_cx : public chr_xform
 {
  private:
 	static const chr_traits traits;
-	static chr* get_chr_sfc_3bpp(BYTE* data);
+	static chr* get_chr_sfc_3bpp(u8* data);
 
  public:
 	const chr_traits* get_traits();
-	const chr* get_chr(BYTE* data);
+	const chr* get_chr(u8* data);
 };
 
 class nintendo_sfc_px : public pal_xform
@@ -36,8 +36,8 @@ class nintendo_sfc_px : public pal_xform
 
  public:
 	const pal_traits* get_traits();
-	const color* get_rgb(BYTE* data);
-	const palette* get_pal(BYTE* data);
+	const color* get_rgb(u8* data);
+	const palette* get_pal(u8* data);
 };
 
 }	// namespace gfx

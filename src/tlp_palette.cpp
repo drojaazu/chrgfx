@@ -11,7 +11,7 @@ const pal_traits* tilelayerpro_px::get_traits()
 	return &tilelayerpro_px::traits;
 }
 
-const palette* tilelayerpro_px::get_pal_tlp(BYTE* data)
+const palette* tilelayerpro_px::get_pal_tlp(u8* data)
 {
 	if(data[0] != 0x54 || data[1] != 0x50 || data[2] != 0x4c)
 		std::cerr << "Warning: Does not appear to be a valid TLP palette"
@@ -57,12 +57,12 @@ const palette* tilelayerpro_px::get_pal_tlp(BYTE* data)
 	return nullptr;
 }
 
-const color* tilelayerpro_px::get_rgb(BYTE* data)
+const color* tilelayerpro_px::get_rgb(u8* data)
 {
 	return new color(data[0], data[1], data[2]);
 }
 
-const palette* tilelayerpro_px::get_pal(BYTE* data)
+const palette* tilelayerpro_px::get_pal(u8* data)
 {
 	return get_pal_tlp(data);
 }

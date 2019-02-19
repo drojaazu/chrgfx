@@ -12,13 +12,13 @@ const chr_traits* nintendo_fc_cx::get_traits()
 	return &nintendo_fc_cx::traits;
 }
 
-const chr* nintendo_fc_cx::get_chr(BYTE* data) { return get_chr_nes(data); }
+const chr* nintendo_fc_cx::get_chr(u8* data) { return get_chr_nes(data); }
 
-const chr* nintendo_fc_cx::get_chr_nes(BYTE* data)
+const chr* nintendo_fc_cx::get_chr_nes(u8* data)
 {
 	auto _out = new chr(traits.width, traits.height);
 	size_t pxlRowCount = 0;
-	BYTE thisPxl;
+	u8 thisPxl;
 	auto thisPxlRow = std::vector<index_pixel>();
 
 	for(size_t row = 0; row < 8; row++)
@@ -260,7 +260,7 @@ const palette nintendo_fc_px::std_fc_pal = palette {
 		color(0x00,0x00,0x00)
 };
 
-const color* nintendo_fc_px::get_rgb(BYTE* data)
+const color* nintendo_fc_px::get_rgb(u8* data)
 {
 	if(*data > 0x40)
 		throw std::out_of_range("Invalid NES palette entry");
@@ -273,7 +273,7 @@ const palette* nintendo_fc_px::get_pal()
 	return nintendo_fc_px::get_pal(nullptr);
 }
 
-const palette* nintendo_fc_px::get_pal(BYTE* data)
+const palette* nintendo_fc_px::get_pal(u8* data)
 {
 	// ignore whatever is passed in
 	return &nintendo_fc_px::std_fc_pal;

@@ -43,7 +43,7 @@ palette* make_pal(bool blank)
 	return outpal;
 }
 
-std::vector<const chr*>* get_bank(chr_xform* xform, BYTE* data, size_t count)
+std::vector<const chr*>* get_bank(chr_xform* xform, u8* data, size_t count)
 {
 	if(count < 1) throw std::length_error("CHR count needs to be greater than 0");
 
@@ -60,7 +60,7 @@ std::vector<const chr*>* get_bank(chr_xform* xform, BYTE* data, size_t count)
 	return outbank;
 }
 
-palette* get_pal(pal_xform* xform, BYTE* data, size_t count)
+palette* get_pal(pal_xform* xform, u8* data, size_t count)
 {
 	auto outpal = new palette();
 	outpal->reserve(256);
@@ -82,9 +82,9 @@ void fill_pal(palette* pal)
 {
 	if(pal->size() >= 256) return;
 
-	BYTE toFill = 256 - pal->size();
+	u8 toFill = 256 - pal->size();
 
-	for(BYTE fillIter = 0; fillIter < toFill; fillIter++)
+	for(u8 fillIter = 0; fillIter < toFill; fillIter++)
 		pal->push_back(color(0, 0, 0));
 
 	return;

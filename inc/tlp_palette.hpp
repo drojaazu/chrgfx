@@ -10,13 +10,13 @@ namespace gfx
 class tilelayerpro_px : public pal_xform
 {
  private:
-	static const palette* get_pal_tlp(BYTE* data);
+	static const palette* get_pal_tlp(u8* data);
 	static const pal_traits traits;
 
  public:
 	const pal_traits* get_traits();
-	const color* get_rgb(BYTE* data);
-	const palette* get_pal(BYTE* data);
+	const color* get_rgb(u8* data);
+	const palette* get_pal(u8* data);
 };
 
 }	// namespace gfx

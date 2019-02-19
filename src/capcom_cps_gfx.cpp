@@ -14,13 +14,13 @@ const chr_traits capcom_cps_cx::traits = {
 
 const chr_traits* capcom_cps_cx::get_traits() { return &capcom_cps_cx::traits; }
 
-const chr* capcom_cps_cx::get_chr(BYTE* data) { return get_chr_cps(data); }
+const chr* capcom_cps_cx::get_chr(u8* data) { return get_chr_cps(data); }
 
-const chr* capcom_cps_cx::get_chr_cps(BYTE* data)
+const chr* capcom_cps_cx::get_chr_cps(u8* data)
 {
 	auto _out = new chr(traits.width, traits.height);
 	size_t pxlRowCount = 0;
-	BYTE thisPxl;
+	u8 thisPxl;
 	auto thisPxlRow = std::vector<index_pixel>();
 
 	// need to put some thought into making this code a bit more graceful
