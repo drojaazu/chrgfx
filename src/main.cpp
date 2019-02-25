@@ -1,5 +1,6 @@
 
 #include "main.hpp"
+#include <chrono>
 
 using namespace std;
 using namespace gfx;
@@ -101,6 +102,10 @@ int main(int argc, char** argv)
 		6. repeat until end of stream
 
 		*/
+#ifdef DEBUG
+		std::chrono::high_resolution_clock::time_point t1 =
+				std::chrono::high_resolution_clock::now();
+#endif
 		auto chunksize = chrx->get_traits()->data_size;
 		auto chunkbuffer = new char[chunksize];
 
@@ -114,8 +119,26 @@ int main(int argc, char** argv)
 		if(chr_data != &cin) delete chr_data;
 		delete[] chunkbuffer;
 
+#ifdef DEBUG
+		std::chrono::high_resolution_clock::time_point t2 =
+				std::chrono::high_resolution_clock::now();
+		auto duration =
+				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+		cerr << "Tile conversion: " << duration << endl;
+
+		t1 = std::chrono::high_resolution_clock::now();
+#endif
+
 		png::image<png::index_pixel>* outimg =
 				render(&work_bank, work_pal, &rtraits);
+
+#ifdef DEBUG
+		t2 = std::chrono::high_resolution_clock::now();
+		duration =
+				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+		cerr << "Rendering: " << duration << endl;
+#endif
 
 		if(outfile.empty())
 			outimg->write_stream(cout);
