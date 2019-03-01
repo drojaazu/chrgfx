@@ -65,8 +65,8 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 				// std::back_inserter(thisImg_pxlRow));
 				// std::copy(thisTileRow.begin(), thisTileRow.end(),
 				//					std::back_inserter(thisImg_pxlRow));
-				std::copy(chrs->at(tileIter) + (colIter * tileWidth),
-									chrs->at(tileIter) + ((colIter * tileWidth) + tileWidth),
+				std::copy(chrs->at(tileIter) + (pxlrowIter * tileWidth),
+									chrs->at(tileIter) + ((pxlrowIter * tileWidth) + tileWidth),
 									std::back_inserter(thisImg_pxlRow));
 				tileIter++;
 				// end of tile pixels, add border if present

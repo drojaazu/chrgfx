@@ -36,7 +36,7 @@ const chr_traits std_1bpp_tile{
 };
 
 // helper functions
-bank* get_bank(chr_xform* xform, u8* data, size_t count);
+// bank* get_bank(chr_xform* xform, u8* data, size_t count);
 palette* make_pal(bool blank = false);
 palette* get_pal(pal_xform* xform, u8* data, size_t count);
 void fill_pal(palette* pal);

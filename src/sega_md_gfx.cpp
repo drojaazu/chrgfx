@@ -9,23 +9,19 @@ const chr_traits sega_md_cx::traits = std_4bpp_tile;
 
 const chr_traits* sega_md_cx::get_traits() { return &sega_md_cx::traits; }
 
+const u8 CHR_PXL_COUNT = 64;	// traits.width * traits.height
+
 const chr* sega_md_cx::get_chr_smd(u8* data)
 {
-	chr* outchr = new chr(traits.width, traits.height);
+	// u8 dataIter{0}, rowIter, pixelIter;
+	u16 data_idx{0}, pxl_iter;
 
-	u8 dataIter{0}, rowIter, pixelIter;
-	std::vector<index_pixel> thisRow = std::vector<index_pixel>();
+	chr* outchr = new chr[CHR_PXL_COUNT];
 
-	for(rowIter = 0; rowIter < traits.height; rowIter++)
+	for(pxl_iter = 0; pxl_iter < CHR_PXL_COUNT;)
 	{
-		thisRow.clear();
-		thisRow.reserve(traits.width);
-		for(pixelIter = 0; pixelIter < 4; pixelIter++)
-		{
-			thisRow.push_back((data[dataIter] & 0xf0) >> 4);
-			thisRow.push_back(data[dataIter++] & 0xf);
-		}
-		outchr->put_row(rowIter, thisRow);
+		outchr[pxl_iter++] = ((data[data_idx] & 0xf0) >> 4);
+		outchr[pxl_iter++] = (u8)(data[data_idx++] & 0xf);
 	}
 
 	return outchr;

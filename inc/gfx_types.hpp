@@ -61,13 +61,12 @@ class bank
 	bank(const chr_traits *traits, std::vector<const chr *> *data)
 			: c_traits(traits), c_data(data){};
 
-	bank(const chr_traits *traits) : c_traits(traits){};
-
-	~bank()
+	bank(const chr_traits *traits) : c_traits(traits)
 	{
-		delete c_traits;
-		delete c_data;
+		c_data = new std::vector<const chr *>();
 	};
+
+	~bank(){};
 
 	const chr_traits *traits() { return c_traits; }
 	std::vector<const chr *> *data() { return c_data; }
