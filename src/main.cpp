@@ -6,16 +6,10 @@ using namespace std;
 using namespace gfx;
 
 const map<string, chr_xform*> chrx_list = {
-		{string("1bpp"), new bpp1_cx()},
-		{string("sega_md"), new sega_md_cx()},
-		{string("nintendo_fc"), new nintendo_fc_cx()},
-		{string("nintendo_sfc"), new nintendo_sfc_cx()},
-		{string("capcom_cps"), new capcom_cps_cx()}};
+		{string("sega_md"), new sega_md_cx()}};
 
 const map<string, pal_xform*> palx_list = {
 		{string("sega_md"), new sega_md_px()},
-		{string("nintendo_fc"), new nintendo_fc_px()},
-		{string("nintendo_sfc"), new nintendo_sfc_px()},
 		{string("tilelayerpro"), new tilelayerpro_px()}};
 
 string outfile, chrx_name, palx_name;
@@ -29,7 +23,7 @@ chr_xform* chrx = nullptr;
 pal_xform* palx = nullptr;
 
 const palette* work_pal;
-bank work_bank;
+bank work_bank = nullptr;
 
 int main(int argc, char** argv)
 {
@@ -91,6 +85,7 @@ int main(int argc, char** argv)
 			delete pal_data;
 		}
 
+		work_bank = bank(chrx->get_traits());
 		/*
 		stream read psuedocode
 		1. get data size of tile from converter traits = x
@@ -113,7 +108,7 @@ int main(int argc, char** argv)
 		{
 			chr_data->read(chunkbuffer, chunksize);
 			// what does read() do if we run out of bytes?
-			work_bank.push_back(chrx->get_chr((uint8_t*)chunkbuffer));
+			work_bank.data()->push_back(chrx->get_chr((uint8_t*)chunkbuffer));
 		}
 
 		if(chr_data != &cin) delete chr_data;

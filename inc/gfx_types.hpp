@@ -11,8 +11,9 @@ typedef uint32_t u32;
 
 namespace gfx
 {
-typedef pixel_buffer<index_pixel> chr;
-typedef std::vector<const chr*> bank;
+// typedef pixel_buffer<index_pixel> chr;
+typedef u8 chr;
+// typedef std::vector<const chr*> bank;
 
 struct chr_traits
 {
@@ -35,8 +36,8 @@ struct pal_traits
 class chr_xform
 {
  public:
-	virtual const chr_traits* get_traits() = 0;
-	virtual const chr* get_chr(u8* data) = 0;
+	virtual const chr_traits *get_traits() = 0;
+	virtual const chr *get_chr(u8 *data) = 0;
 };
 
 /**
@@ -46,9 +47,30 @@ class chr_xform
 class pal_xform
 {
  public:
-	virtual const pal_traits* get_traits() = 0;
-	virtual const color* get_rgb(u8* data) = 0;
-	virtual const palette* get_pal(u8* data) = 0;
+	virtual const pal_traits *get_traits() = 0;
+	virtual const color *get_rgb(u8 *data) = 0;
+	virtual const palette *get_pal(u8 *data) = 0;
+};
+
+class bank
+{
+	const chr_traits *c_traits;
+	std::vector<const chr *> *c_data;
+
+ public:
+	bank(const chr_traits *traits, std::vector<const chr *> *data)
+			: c_traits(traits), c_data(data){};
+
+	bank(const chr_traits *traits) : c_traits(traits){};
+
+	~bank()
+	{
+		delete c_traits;
+		delete c_data;
+	};
+
+	const chr_traits *traits() { return c_traits; }
+	std::vector<const chr *> *data() { return c_data; }
 };
 
 }	// namespace gfx

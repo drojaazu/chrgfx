@@ -8,18 +8,19 @@ using namespace gfx;
 image<index_pixel>* render(bank* chr_bank, const palette* pal,
 													 render_traits* traits)
 {
-	if(chr_bank->size() < 1)
+	if(chr_bank->data()->size() < 1)
 		throw std::length_error("Tile vector is empty, nothing to render");
 
+	std::vector<const chr*>* chrs = chr_bank->data();
+
 	// tile dimensions
-	uint16_t tileWidth = chr_bank->at(0)->get_width(),
-					 tileHeight = chr_bank->at(0)->get_height();
+	uint16_t tileWidth = chr_bank->traits()->width,
+					 tileHeight = chr_bank->traits()->height;
 
 	// add empty tiles to end of buffer so we have an evenly divisible amount
-	if(chr_bank->size() % traits->cols > 0)
-		chr_bank->insert(chr_bank->end(),
-										 (traits->cols - (chr_bank->size() % traits->cols)),
-										 new chr(tileWidth, tileHeight));
+	if(chrs->size() % traits->cols > 0)
+		chrs->insert(chrs->end(), (traits->cols - (chrs->size() % traits->cols)),
+								 new chr(tileWidth * tileHeight));
 
 	// final image dimensions
 	uint16_t
@@ -27,7 +28,7 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 			img_tileCols = traits->cols,
 			// img_tileRows = (tiles->size() / img_tileCols) + (tiles->size() %
 			// img_tileCols > 0 ? 1 : 0);
-			img_tileRows = chr_bank->size() / img_tileCols;
+			img_tileRows = chrs->size() / img_tileCols;
 
 	uint32_t
 			// ... in pixels
@@ -42,7 +43,7 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 	std::vector<index_pixel> thisTileRow = std::vector<index_pixel>();
 
 	// pixel buffer to be sent to the final image
-	chr imgBuffer = chr(outimg_width, outimg_height);
+	auto imgBuffer = pixel_buffer<index_pixel>(outimg_width, outimg_height);
 	// top of image, add border if present
 
 	// tile rows
@@ -59,11 +60,15 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 			// columns
 			for(colIter = 0; colIter < img_tileCols; colIter++)
 			{
-				thisTileRow = chr_bank->at(tileIter++)->get_row(pxlrowIter);
+				// thisTileRow = chrs->at(tileIter++)->get_row(pxlrowIter);
 				// std::copy(std::begin(thisTileRow), std::end(thisTileRow),
 				// std::back_inserter(thisImg_pxlRow));
-				std::copy(thisTileRow.begin(), thisTileRow.end(),
+				// std::copy(thisTileRow.begin(), thisTileRow.end(),
+				//					std::back_inserter(thisImg_pxlRow));
+				std::copy(chrs->at(tileIter) + (colIter * tileWidth),
+									chrs->at(tileIter) + ((colIter * tileWidth) + tileWidth),
 									std::back_inserter(thisImg_pxlRow));
+				tileIter++;
 				// end of tile pixels, add border if present
 			}
 			// reset to point back to the first tile in the tile row
