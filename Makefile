@@ -1,6 +1,6 @@
 #CC := g++
 CC := clang++
-# CFLAGS := -g -Wall -std=c++11 -DDEBUG
+#CFLAGS := -g -Wall -std=c++11 -DDEBUG
 CFLAGS := -g -Wall -std=c++11
 
 SRCDIR := src

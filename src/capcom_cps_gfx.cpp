@@ -4,7 +4,7 @@ using namespace png;
 
 namespace gfx
 {
-// -------- CHR
+// ----------------- CHR
 const chr_traits capcom_cps_cx::traits = {
 		16,	// 16px width
 		16,	// 16px height
@@ -12,44 +12,29 @@ const chr_traits capcom_cps_cx::traits = {
 		128	// 128 bytes
 };
 
+const u16 CHR_PXL_COUNT = 256;	// traits.width * traits.height
+
 const chr_traits* capcom_cps_cx::get_traits() { return &capcom_cps_cx::traits; }
 
 const chr* capcom_cps_cx::get_chr(u8* data) { return get_chr_cps(data); }
 
 const chr* capcom_cps_cx::get_chr_cps(u8* data)
 {
-	auto _out = new chr(traits.width, traits.height);
-	size_t pxlRowCount = 0;
-	u8 thisPxl;
-	auto thisPxlRow = std::vector<index_pixel>();
+	u8 this_pxl, pxl_idx{0};
 
-	// need to put some thought into making this code a bit more graceful
-	// but it works for now
-	for(size_t row = 0; row < 128; row += 4)
+	chr* _out = new chr[CHR_PXL_COUNT];
+
+	for(u16 row = 0; row < 128; row += 4)
 	{
-		thisPxlRow.clear();
-		thisPxlRow.reserve(traits.width);
 		for(int8_t shift = 7; shift >= 0; shift--)
 		{
-			thisPxl = 0;
-			if((data[row] >> shift) & 1) thisPxl++;
-			if((data[row + 1] >> shift) & 1) thisPxl += 2;
-			if((data[row + 2] >> shift) & 1) thisPxl += 4;
-			if((data[row + 3] >> shift) & 1) thisPxl += 8;
-			thisPxlRow.push_back(thisPxl);
+			this_pxl = 0;
+			if((data[row] >> shift) & 1) this_pxl |= 1;
+			if((data[row + 1] >> shift) & 1) this_pxl |= 2;
+			if((data[row + 2] >> shift) & 1) this_pxl |= 4;
+			if((data[row + 3] >> shift) & 1) this_pxl |= 8;
+			_out[pxl_idx++] = this_pxl;
 		}
-		row += 4;
-		for(int8_t shift = 7; shift >= 0; shift--)
-		{
-			thisPxl = 0;
-			if((data[row] >> shift) & 1) thisPxl++;
-			if((data[row + 1] >> shift) & 1) thisPxl += 2;
-			if((data[row + 2] >> shift) & 1) thisPxl += 4;
-			if((data[row + 3] >> shift) & 1) thisPxl += 8;
-			thisPxlRow.push_back(thisPxl);
-		}
-		_out->put_row(pxlRowCount, thisPxlRow);
-		pxlRowCount++;
 	}
 
 	return _out;

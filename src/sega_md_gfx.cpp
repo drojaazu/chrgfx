@@ -4,40 +4,34 @@ using namespace png;
 
 namespace gfx
 {
-// TILES
+// ----------------- CHR
 const chr_traits sega_md_cx::traits = std_4bpp_tile;
+
+const u8 CHR_PXL_COUNT = 64;	// traits.width * traits.height
 
 const chr_traits* sega_md_cx::get_traits() { return &sega_md_cx::traits; }
 
-const chr* sega_md_cx::get_chr_smd(u8* data)
+const chr* sega_md_cx::get_chr_smd(chr* data)
 {
-	chr* outchr = new chr(traits.width, traits.height);
+	u8 data_idx{0}, pxl_iter;
 
-	u8 dataIter{0}, rowIter, pixelIter;
-	std::vector<index_pixel> thisRow = std::vector<index_pixel>();
+	auto outchr = new chr[CHR_PXL_COUNT];
 
-	for(rowIter = 0; rowIter < traits.height; rowIter++)
+	for(pxl_iter = 0; pxl_iter < CHR_PXL_COUNT;)
 	{
-		thisRow.clear();
-		thisRow.reserve(traits.width);
-		for(pixelIter = 0; pixelIter < 4; pixelIter++)
-		{
-			thisRow.push_back((data[dataIter] & 0xf0) >> 4);
-			thisRow.push_back(data[dataIter++] & 0xf);
-		}
-		outchr->put_row(rowIter, thisRow);
+		outchr[pxl_iter++] = ((data[data_idx] & 0xf0) >> 4);
+		outchr[pxl_iter++] = (u8)(data[data_idx++] & 0xf);
 	}
 
 	return outchr;
 }
 
-// ------- PALETTES
-
+// ----------------- PALETTES
 // 64 colors per palette, 2 bytes per color
 const pal_traits sega_md_px::traits = {64, 2};
 const pal_traits* sega_md_px::get_traits() { return &sega_md_px::traits; }
 
-const chr* sega_md_cx::get_chr(u8* data) { return get_chr_smd(data); }
+const chr* sega_md_cx::get_chr(chr* data) { return get_chr_smd(data); }
 
 // PALETTES
 const color* sega_md_px::get_rgb_smd(u8* data)

@@ -4,8 +4,10 @@ using namespace png;
 
 namespace gfx
 {
-// -------- CHR
+// ----------------- CHR
 const chr_traits nintendo_sfc_cx::traits = std_4bpp_tile;
+
+const u8 CHR_PXL_COUNT = 64;	// traits.width * traits.height
 
 const chr_traits* nintendo_sfc_cx::get_traits()
 {
@@ -16,32 +18,26 @@ const chr* nintendo_sfc_cx::get_chr(u8* data) { return get_chr_sfc(data); }
 
 const chr* nintendo_sfc_cx::get_chr_sfc(u8* data)
 {
-	auto _out = new chr(traits.width, traits.height);
-	size_t pxlRowCount = 0;
-	u8 thisPxl;
-	auto thisPxlRow = std::vector<index_pixel>();
+	auto _out = new chr[CHR_PXL_COUNT];
+	u8 this_pxl, pxl_idx{0};
 
-	for(size_t row = 0; row < 16; row += 2)
+	for(u8 row = 0; row < 16; row += 2)
 	{
-		thisPxlRow.clear();
-		thisPxlRow.reserve(traits.width);
 		for(int8_t shift = 7; shift >= 0; shift--)
 		{
-			thisPxl = 0;
-			if((data[row] >> shift) & 1) thisPxl++;
-			if((data[row + 1] >> shift) & 1) thisPxl += 2;
-			if((data[row + 16] >> shift) & 1) thisPxl += 4;
-			if((data[row + 17] >> shift) & 1) thisPxl += 8;
-			thisPxlRow.push_back(thisPxl);
+			this_pxl = 0;
+			if((data[row] >> shift) & 1) this_pxl |= 1;
+			if((data[row + 1] >> shift) & 1) this_pxl |= 2;
+			if((data[row + 16] >> shift) & 1) this_pxl |= 4;
+			if((data[row + 17] >> shift) & 1) this_pxl |= 8;
+			_out[pxl_idx++] = this_pxl;
 		}
-		_out->put_row(pxlRowCount, thisPxlRow);
-		pxlRowCount++;
 	}
 
 	return _out;
 }
 
-// ----------------- PALETTE
+// ----------------- PALETTES
 // 256 colors per palette, 2 bytes per color
 const pal_traits nintendo_sfc_px::traits = {255, 2};
 
