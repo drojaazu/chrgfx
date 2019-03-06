@@ -6,90 +6,101 @@ using namespace png;
 using namespace gfx;
 
 image<index_pixel>* render(bank* chr_bank, const palette* pal,
-													 render_traits* traits)
+													 render_traits* rtraits)
 {
 	if(chr_bank->data()->size() < 1)
 		throw std::length_error("Tile vector is empty, nothing to render");
 
 	std::vector<const chr*>* chrs = chr_bank->data();
 
-	// tile dimensions
-	uint16_t tileWidth = chr_bank->traits()->width,
-					 tileHeight = chr_bank->traits()->height;
+	u16
+			// chr dimensions
+			chr_pxlwidth = chr_bank->traits().width,
+			chr_pxlheight = chr_bank->traits().height,
 
-	// add empty tiles to end of buffer so we have an evenly divisible amount
-	if(chrs->size() % traits->cols > 0)
-		chrs->insert(chrs->end(), (traits->cols - (chrs->size() % traits->cols)),
-								 new chr(tileWidth * tileHeight));
+			// number of chrs to add to end of buffer to get an evenly divisible count
+			chrs_to_pad = (chrs->size() % rtraits->cols > 0)
+												? (rtraits->cols - (chrs->size() % rtraits->cols))
+												: 0,
 
-	// final image dimensions
-	uint16_t
-			// ... in tiles
-			img_tileCols = traits->cols,
-			// img_tileRows = (tiles->size() / img_tileCols) + (tiles->size() %
-			// img_tileCols > 0 ? 1 : 0);
-			img_tileRows = chrs->size() / img_tileCols;
+			// final image dimensions (in chrs)
+			outimg_colwidth = rtraits->cols,
+			outimg_rowheight = chrs->size() / outimg_colwidth;
 
-	uint32_t
-			// ... in pixels
+	u32
+			// final image dimensions (in pixels)
 			// to do: add border calculation: height + ((border size * tile rows) +
 			// border size), width + ((border size * tile cols) + border size)
-			outimg_width = img_tileCols * tileWidth,
-			outimg_height = img_tileRows * tileHeight;
+			outimg_pxlwidth = outimg_colwidth * chr_pxlwidth,
+			outimg_pxlheight = outimg_rowheight * chr_pxlheight;
+
+#ifdef DEBUG
+	std::cerr << "chrs size: " << (int)chrs->size() << std::endl;
+	std::cerr << "chrs to pad: " << (int)chrs_to_pad << std::endl;
+	std::cerr << "chr chunk size: " << (int)(chr_pxlwidth * chr_pxlheight)
+						<< std::endl;
+#endif
+
+	// pad with empty chrs if necessary
+	if(chrs_to_pad > 0)
+		for(u16 addchr_iter = 0; addchr_iter < chrs_to_pad; addchr_iter++)
+			chrs->push_back(new chr[chr_pxlwidth * chr_pxlheight]{0});
+
+#ifdef DEBUG
+	std::cerr << "chrs size after padding: " << (int)chrs->size() << std::endl;
+	std::cerr << "final img size: " << (int)outimg_pxlwidth << "x"
+						<< (int)outimg_pxlheight << std::endl;
+#endif
 
 	// declare iters and buffers and such for processing
-	size_t tilerowIter, pxlrowIter, colIter, tileIter = 0, imgrowIdx = 0;
-	std::vector<index_pixel> thisImg_pxlRow = std::vector<index_pixel>();
-	std::vector<index_pixel> thisTileRow = std::vector<index_pixel>();
+	size_t chrrow_iter, chr_pxlrow_iter, chrcol_iter, chr_iter = 0,
+																										outimg_pxlrow_idx = 0;
+	auto this_outimg_pxlrow = std::vector<index_pixel>(),
+			 this_chr_pxlrow = std::vector<index_pixel>();
+	const chr* this_chroffset;
 
 	// pixel buffer to be sent to the final image
-	auto imgBuffer = pixel_buffer<index_pixel>(outimg_width, outimg_height);
+	auto imgBuffer = pixel_buffer<index_pixel>(outimg_pxlwidth, outimg_pxlheight);
 	// top of image, add border if present
 
-	// tile rows
-	for(tilerowIter = 0; tilerowIter < img_tileRows; tilerowIter++)
+	// for each chr row...
+	for(chrrow_iter = 0; chrrow_iter < outimg_rowheight; chrrow_iter++)
 	{
-		// tile pixel rows
-		for(pxlrowIter = 0; pxlrowIter < tileHeight; pxlrowIter++)
+		// for each pixel in that chr row...
+		for(chr_pxlrow_iter = 0; chr_pxlrow_iter < chr_pxlheight; chr_pxlrow_iter++)
 		{
-			// reset the outimg pixel row buffer
-			thisImg_pxlRow.clear();
-			thisImg_pxlRow.reserve(outimg_width);
-			// beginning of imgout pixel row, add border if present
+			this_outimg_pxlrow.clear();
+			this_outimg_pxlrow.reserve(outimg_pxlwidth);
 
-			// columns
-			for(colIter = 0; colIter < img_tileCols; colIter++)
+			// beginning of imgout pixel row, add border if present
+			// for each chr column in the row...
+			for(chrcol_iter = 0; chrcol_iter < outimg_colwidth; chrcol_iter++)
 			{
-				// thisTileRow = chrs->at(tileIter++)->get_row(pxlrowIter);
-				// std::copy(std::begin(thisTileRow), std::end(thisTileRow),
-				// std::back_inserter(thisImg_pxlRow));
-				// std::copy(thisTileRow.begin(), thisTileRow.end(),
-				//					std::back_inserter(thisImg_pxlRow));
-				std::copy(chrs->at(tileIter) + (pxlrowIter * tileWidth),
-									chrs->at(tileIter) + ((pxlrowIter * tileWidth) + tileWidth),
-									std::back_inserter(thisImg_pxlRow));
-				tileIter++;
+				this_chroffset = chrs->at(chr_iter) + (chr_pxlrow_iter * chr_pxlwidth);
+				std::copy(this_chroffset, this_chroffset + chr_pxlwidth,
+									std::back_inserter(this_outimg_pxlrow));
+				chr_iter++;
 				// end of tile pixels, add border if present
 			}
+
 			// reset to point back to the first tile in the tile row
-			tileIter -= img_tileCols;
+			chr_iter -= outimg_colwidth;
 			// put rendered row at the end of the final image
-			imgBuffer.put_row(imgrowIdx++, thisImg_pxlRow);
+			imgBuffer.put_row(outimg_pxlrow_idx++, this_outimg_pxlrow);
 		}
 		// bottom of tile row, add border if present
 
 		// move to the next row of tiles
-		tileIter += img_tileCols;
+		chr_iter += outimg_colwidth;
 	}
 
-	image<index_pixel>* outimg =
-			new image<index_pixel>(outimg_width, outimg_height);
+	auto outimg = new image<index_pixel>(outimg_pxlwidth, outimg_pxlheight);
 
 	// check for palette shift
-	if(traits->palette_offset > 0)
+	if(rtraits->palette_offset > 0)
 	{
 		auto newPal = new palette(*pal);
-		newPal->erase(newPal->begin(), newPal->begin() + traits->palette_offset);
+		newPal->erase(newPal->begin(), newPal->begin() + rtraits->palette_offset);
 		gfx::fill_pal(newPal);
 		outimg->set_palette(*newPal);
 		delete newPal;
@@ -100,18 +111,18 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 	}
 
 	// check for palette transparency
-	if(traits->use_trns)
+	if(rtraits->use_trns)
 	{
 		png::tRNS* trans = new png::tRNS();
 
 		// this could probably be done better...
-		if(!traits->trns_entry)
+		if(!rtraits->trns_entry)
 			trans->push_back(0);
 		else
 		{
-			trans->resize(traits->trns_entry + 1);
+			trans->resize(rtraits->trns_entry + 1);
 			std::fill(trans->begin(), trans->end(), 255);
-			trans->at(traits->trns_entry) = 0;
+			trans->at(rtraits->trns_entry) = 0;
 		}
 		outimg->set_tRNS(*trans);
 		delete trans;

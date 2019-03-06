@@ -4,19 +4,18 @@ using namespace png;
 
 namespace gfx
 {
-// TILES
+// ----------------- CHR
 const chr_traits sega_md_cx::traits = std_4bpp_tile;
-
-const chr_traits* sega_md_cx::get_traits() { return &sega_md_cx::traits; }
 
 const u8 CHR_PXL_COUNT = 64;	// traits.width * traits.height
 
-const chr* sega_md_cx::get_chr_smd(u8* data)
-{
-	// u8 dataIter{0}, rowIter, pixelIter;
-	u16 data_idx{0}, pxl_iter;
+const chr_traits* sega_md_cx::get_traits() { return &sega_md_cx::traits; }
 
-	chr* outchr = new chr[CHR_PXL_COUNT];
+const chr* sega_md_cx::get_chr_smd(chr* data)
+{
+	u8 data_idx{0}, pxl_iter;
+
+	auto outchr = new chr[CHR_PXL_COUNT];
 
 	for(pxl_iter = 0; pxl_iter < CHR_PXL_COUNT;)
 	{
@@ -27,13 +26,12 @@ const chr* sega_md_cx::get_chr_smd(u8* data)
 	return outchr;
 }
 
-// ------- PALETTES
-
+// ----------------- PALETTES
 // 64 colors per palette, 2 bytes per color
 const pal_traits sega_md_px::traits = {64, 2};
 const pal_traits* sega_md_px::get_traits() { return &sega_md_px::traits; }
 
-const chr* sega_md_cx::get_chr(u8* data) { return get_chr_smd(data); }
+const chr* sega_md_cx::get_chr(chr* data) { return get_chr_smd(data); }
 
 // PALETTES
 const color* sega_md_px::get_rgb_smd(u8* data)
