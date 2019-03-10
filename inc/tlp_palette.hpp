@@ -5,7 +5,7 @@
 
 using namespace png;
 
-namespace gfx
+namespace chrgfx
 {
 class tilelayerpro_px : public pal_xform
 {
@@ -19,6 +19,6 @@ class tilelayerpro_px : public pal_xform
 	const palette* get_pal(u8* data);
 };
 
-}	// namespace gfx
+}	// namespace chrgfx
 
 #endif

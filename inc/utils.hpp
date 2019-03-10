@@ -5,7 +5,7 @@
 
 using namespace png;
 
-namespace gfx
+namespace chrgfx
 {
 const chr_traits std_8bpp_tile{
 		8,	// 8px width
@@ -41,6 +41,6 @@ palette* make_pal(bool blank = false);
 palette* get_pal(pal_xform* xform, u8* data, size_t count);
 void fill_pal(palette* pal);
 
-}	// namespace gfx
+}	// namespace chrgfx
 
 #endif

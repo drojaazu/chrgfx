@@ -2,7 +2,7 @@
 
 using namespace png;
 
-namespace gfx
+namespace chrgfx
 {
 // ----------------- CHR
 const chr_traits nintendo_sfc_cx::traits = std_4bpp_tile;
@@ -66,7 +66,7 @@ const color* nintendo_sfc_px::get_rgb(u8* data)
 
 const palette* nintendo_sfc_px::get_pal(u8* data)
 {
-	return gfx::get_pal(this, data, 256);
+	return chrgfx::get_pal(this, data, 256);
 }
 
-}	// namespace gfx
+}	// namespace chrgfx

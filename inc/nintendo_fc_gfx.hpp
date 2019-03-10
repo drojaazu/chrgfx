@@ -5,7 +5,7 @@
 
 using namespace png;
 
-namespace gfx
+namespace chrgfx
 {
 class nintendo_fc_cx : public chr_xform
 {
@@ -31,6 +31,6 @@ class nintendo_fc_px : public pal_xform
 	const palette* get_pal();
 };
 
-}	// namespace gfx
+}	// namespace chrgfx
 
 #endif

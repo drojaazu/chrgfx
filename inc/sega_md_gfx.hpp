@@ -5,7 +5,7 @@
 
 using namespace png;
 
-namespace gfx
+namespace chrgfx
 {
 class sega_md_cx : public chr_xform
 {
@@ -29,6 +29,6 @@ class sega_md_px : public pal_xform
 	const color* get_rgb(u8* data);
 	const palette* get_pal(u8* data);
 };
-}	// namespace gfx
+}	// namespace chrgfx
 
 #endif

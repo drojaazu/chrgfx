@@ -5,7 +5,7 @@
 
 using namespace png;
 
-namespace gfx
+namespace chrgfx
 {
 class bpp1_cx : public chr_xform
 {
@@ -18,6 +18,6 @@ class bpp1_cx : public chr_xform
 	const chr* get_chr(u8* data);
 };
 
-}	// namespace gfx
+}	// namespace chrgfx
 
 #endif
