@@ -3,7 +3,7 @@
 #include <algorithm>
 
 using namespace png;
-using namespace gfx;
+using namespace chrgfx;
 
 image<index_pixel>* render(bank* chr_bank, const palette* pal,
 													 render_traits* rtraits)
@@ -101,7 +101,7 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 	{
 		auto newPal = new palette(*pal);
 		newPal->erase(newPal->begin(), newPal->begin() + rtraits->palette_offset);
-		gfx::fill_pal(newPal);
+		chrgfx::fill_pal(newPal);
 		outimg->set_palette(*newPal);
 		delete newPal;
 	}

@@ -2,9 +2,9 @@
 
 using namespace png;
 
-namespace gfx
+namespace chrgfx
 {
-const chr_traits bpp1_cx::traits = gfx::std_1bpp_tile;
+const chr_traits bpp1_cx::traits = std_1bpp_tile;
 
 const u8 CHR_PXL_COUNT = 64;	// traits.width * traits.height
 
@@ -31,4 +31,4 @@ const chr* bpp1_cx::get_chr_1bpp(u8* data)
 
 const chr* bpp1_cx::get_chr(u8* data) { return bpp1_cx::get_chr_1bpp(data); }
 
-}	// namespace gfx
+}	// namespace chrgfx

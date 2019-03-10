@@ -2,7 +2,7 @@
 
 using namespace png;
 
-namespace gfx
+namespace chrgfx
 {
 palette* make_pal(bool blank)
 {
@@ -90,4 +90,4 @@ void fill_pal(palette* pal)
 	return;
 }
 
-}	// namespace gfx
+}	// namespace chrgfx

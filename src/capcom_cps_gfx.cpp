@@ -2,7 +2,7 @@
 
 using namespace png;
 
-namespace gfx
+namespace chrgfx
 {
 // ----------------- CHR
 const chr_traits capcom_cps_cx::traits = {
@@ -40,4 +40,4 @@ const chr* capcom_cps_cx::get_chr_cps(u8* data)
 	return _out;
 }
 
-}	// namespace gfx
+}	// namespace chrgfx

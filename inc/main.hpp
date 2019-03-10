@@ -8,6 +8,7 @@
 #include "nintendo_fc_gfx.hpp"
 #include "nintendo_sfc_gfx.hpp"
 #include "render.hpp"
+#include "sega_8bit_gfx.hpp"
 #include "sega_md_gfx.hpp"
 #include "tlp_palette.hpp"
 /*

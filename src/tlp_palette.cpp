@@ -2,7 +2,7 @@
 
 using namespace png;
 
-namespace gfx
+namespace chrgfx
 {
 const pal_traits tilelayerpro_px::traits{255, 3};
 
@@ -62,8 +62,5 @@ const color* tilelayerpro_px::get_rgb(u8* data)
 	return new color(data[0], data[1], data[2]);
 }
 
-const palette* tilelayerpro_px::get_pal(u8* data)
-{
-	return get_pal_tlp(data);
-}
-}	// namespace gfx
+const palette* tilelayerpro_px::get_pal(u8* data) { return get_pal_tlp(data); }
+}	// namespace chrgfx

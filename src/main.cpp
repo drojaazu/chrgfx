@@ -3,18 +3,21 @@
 #include <chrono>
 
 using namespace std;
-using namespace gfx;
+using namespace chrgfx;
 
 const map<string, chr_xform*> chrx_list = {
 		{string("1bpp"), new bpp1_cx()},
 		{string("sega_md"), new sega_md_cx()},
 		{string("nintendo_sfc"), new nintendo_sfc_cx()},
 		{string("nintendo_fc"), new nintendo_fc_cx()},
-		{string("capcom_cps"), new capcom_cps_cx()}};
+		{string("capcom_cps"), new capcom_cps_cx()},
+		{string("sega_8bit"), new sega_8bit_cx()}};
 
 const map<string, pal_xform*> palx_list = {
 		{string("sega_md"), new sega_md_px()},
-		{string("tilelayerpro"), new tilelayerpro_px()}};
+		{string("tilelayerpro"), new tilelayerpro_px()},
+		{string("sega_sms"), new sega_mastersys_px()},
+		{string("sega_gg"), new sega_gamegear_px()}};
 
 string outfile, chrx_name, palx_name;
 
@@ -69,7 +72,7 @@ int main(int argc, char** argv)
 			}
 			else
 			{
-				work_pal = gfx::make_pal();
+				work_pal = chrgfx::make_pal();
 			}
 		else
 		{

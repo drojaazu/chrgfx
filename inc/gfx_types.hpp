@@ -9,7 +9,7 @@ typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
 
-namespace gfx
+namespace chrgfx
 {
 typedef u8 chr;
 
@@ -74,6 +74,6 @@ class bank
 	std::vector<const chr *> *data() { return this->c_data; }
 };
 
-}	// namespace gfx
+}	// namespace chrgfx
 
 #endif

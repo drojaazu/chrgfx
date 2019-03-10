@@ -3,7 +3,7 @@
 
 #include "utils.hpp"
 
-using namespace gfx;
+using namespace chrgfx;
 using namespace png;
 
 struct render_traits

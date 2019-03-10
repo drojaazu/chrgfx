@@ -2,7 +2,7 @@
 
 using namespace png;
 
-namespace gfx
+namespace chrgfx
 {
 // ----------------- CHR
 const chr_traits sega_md_cx::traits = std_4bpp_tile;
@@ -53,7 +53,7 @@ const color* sega_md_px::get_rgb(u8* data) { return get_rgb_smd(data); }
 
 const palette* sega_md_px::get_pal(u8* data)
 {
-	return gfx::get_pal(this, data, 64);
+	return chrgfx::get_pal(this, data, 64);
 }
 
-}	// namespace gfx
+}	// namespace chrgfx
