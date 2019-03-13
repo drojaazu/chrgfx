@@ -10,6 +10,7 @@ const map<string, chr_xform*> chrx_list = {
 		{string("sega_md"), new sega_md_cx()},
 		{string("nintendo_sfc"), new nintendo_sfc_cx()},
 		{string("nintendo_fc"), new nintendo_fc_cx()},
+		{string("nintendo_gb"), new nintendo_gb_cx()},
 		{string("capcom_cps"), new capcom_cps_cx()},
 		{string("sega_8bit"), new sega_8bit_cx()}};
 
@@ -17,7 +18,12 @@ const map<string, pal_xform*> palx_list = {
 		{string("sega_md"), new sega_md_px()},
 		{string("tilelayerpro"), new tilelayerpro_px()},
 		{string("sega_sms"), new sega_mastersys_px()},
-		{string("sega_gg"), new sega_gamegear_px()}};
+		{string("sega_gg"), new sega_gamegear_px()},
+		{string("nintendo_fc"), new nintendo_fc_px()},
+		{string("nintendo_sfc"), new nintendo_sfc_px()},
+		{string("nintendo_gb"), new nintendo_gb_px()},
+		{string("nintendo_gb_pocket"), new nintendo_gbpocket_px()},
+		{string("nintendo_gb_color"), new nintendo_gbcolor_px()}};
 
 string outfile, chrx_name, palx_name;
 
@@ -176,7 +182,7 @@ void process_args(int argc, char** argv)
 														 {"pal-data", required_argument, nullptr, 'p'},
 														 {"output", required_argument, nullptr, 'o'},
 														 {"trns", no_argument, nullptr, 'r'},
-														 {"trns-entry", required_argument, nullptr, 'e'},
+														 {"trns-index", required_argument, nullptr, 'i'},
 														 {"columns", required_argument, nullptr, 'c'},
 														 {"pal-offset", required_argument, nullptr, 's'},
 														 {"help", no_argument, nullptr, 'h'},
@@ -222,7 +228,7 @@ void process_args(int argc, char** argv)
 				rtraits.use_trns = true;
 				break;
 			// trns entry
-			case 'e':
+			case 'i':
 				rtraits.trns_entry = stoi(optarg);
 				break;
 

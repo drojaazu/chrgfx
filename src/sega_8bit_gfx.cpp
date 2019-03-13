@@ -45,7 +45,8 @@ const pal_traits* sega_mastersys_px::get_traits()
 
 const color* sega_mastersys_px::get_rgb(u8* data)
 {
-	// 00BBGGRR
+	// 8|      |0
+	//  xxBBGGRR
 
 	u8 r = data[0] & 3;
 	u8 g = (data[0] & 0xC) >> 2;
@@ -74,18 +75,13 @@ const pal_traits* sega_gamegear_px::get_traits()
 
 const color* sega_gamegear_px::get_rgb(u8* data)
 {
-	// ----BBBBGGGGRRRR
-	// little endian, so:
-	// GGGGRRRR----BBBB
+	// 16|               |0
+	//   xxxxBBBB GGGGRRRR
+	// (little endian)
 
 	u8 g = (data[0] & 0xf0) >> 4;
 	u8 b = data[1] & 0x0f;
 	u8 r = data[0] & 0x0f;
-
-	// stretch the color range so it works with rgb
-	// r = (r * 255) / 7;
-	// g = (g * 255) / 7;
-	// b = (b * 255) / 7;
 
 	r = (r << 4) | r;
 	g = (g << 4) | g;

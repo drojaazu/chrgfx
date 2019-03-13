@@ -23,7 +23,7 @@ const chr* nintendo_fc_cx::get_chr_nes(u8* data)
 
 	for(u8 row = 0; row < 8; row++)
 	{
-		for(u8 shift = 7; shift >= 0; shift--)
+		for(int8_t shift = 7; shift >= 0; shift--)
 		{
 			this_pxl = 0;
 			if((data[row] >> shift) & 1) this_pxl |= 1;
