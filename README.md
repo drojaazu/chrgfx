@@ -68,6 +68,7 @@ Specifies output PNG file to write to. If not specified, image will be written t
 Enable palette transparency. Default transparent index is 0.
 
 ```--trns-index```,```-i```
+
 Specify which palette index to use as transparency
 
 ```--columns```,```-c```
@@ -82,8 +83,6 @@ Number of source palette entries to skip. For example, if source palette has 256
     cat ../etc/sonic_sprite | ./chrgfx --chr-format sega_md --pal-data ../etc/sonic1.cram --trns --columns 32 > test.png
 
 ## Format Specific Notes
-### Nintendo Famicom palettes (nintendo\fc)
-
 
 ### Nintendo GameBoy palettes (nintendo\_gb and nintendo\_gb\_pocket)
 Original GameBoy colors are 2 bit, with 4 color palettes, making one palette 1 byte in size. There are three palettes in the system's PPU: BGRDPAL, OBJ0PAL, and OBJ1PAL. These three palettes are stored respectively within the system's IO port memory range, starting at 0xFF47 to 0xFF49.
