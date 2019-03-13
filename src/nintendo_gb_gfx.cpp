@@ -61,7 +61,11 @@ const color nintendo_gb_px::gameboy_colors_pocket[] = {
 		color(0x6b, 0x73, 0x53),	 // 02
 		color(0x41, 0x41, 0x41)};	// 03 - darkest
 
-const color* nintendo_gb_px::get_rgb(u8* data) { return nullptr; }
+const color* nintendo_gb_px::get_rgb(u8* data)
+{
+	if(*data > 3) throw std::out_of_range("Invalid GameBoy palette entry");
+	return &gameboy_colors_original[*data];
+}
 
 const palette* nintendo_gb_px::get_gb_pal(u8* data, const color* gb_palette)
 {
@@ -94,6 +98,12 @@ const palette* nintendo_gbpocket_px::get_pal(u8* data)
 {
 	return nintendo_gb_px::get_gb_pal(data,
 																		nintendo_gb_px::gameboy_colors_pocket);
+}
+
+const color* nintendo_gbpocket_px::get_rgb(u8* data)
+{
+	if(*data > 3) throw std::out_of_range("Invalid GameBoy palette entry");
+	return &gameboy_colors_pocket[*data];
 }
 
 // GameBoy Color palettes

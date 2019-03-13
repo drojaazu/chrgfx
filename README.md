@@ -84,6 +84,15 @@ Number of source palette entries to skip. For example, if source palette has 256
 
 ## Format Specific Notes
 
+### Nintendo Famicom palettes (nintendo\_fc)
+The Famicom color set is "hardcoded" by the PPU. This system palette has 64 values available, though there are only 54 distinct colors due to quirks in how the hardware operates. CHR palettes consist of three colors which each  entry being 1 byte. However, palettes are 4 bytes in size total; the first byte is mirrored across all palettes and makes up the screen background color.
+
+There are four background palettes and four sprite palettes available, which comes out to 32 bytes of CHR palettes. These are stored sequentially in the PPU memory starting at 0x3F00. These 32 bytes can be dumped to a file to make up palette data for chrgfx to work with.
+
+Since the PPU generates NTSC signals directly instead of working with RGB values, colors must be approximated. Moreover, different revisions of the PPU have slightly different system palettes. The chrgfx converter uses rendition of the colors from the site below, based on the standard 2C02 PPU:
+
+https://wiki.nesdev.com/w/index.php/PPU_palettes
+
 ### Nintendo GameBoy palettes (nintendo\_gb and nintendo\_gb\_pocket)
 Original GameBoy colors are 2 bit, with 4 color palettes, making one palette 1 byte in size. There are three palettes in the system's PPU: BGRDPAL, OBJ0PAL, and OBJ1PAL. These three palettes are stored respectively within the system's IO port memory range, starting at 0xFF47 to 0xFF49.
 

@@ -37,6 +37,7 @@ class nintendo_gb_px : public pal_xform
 class nintendo_gbpocket_px : public nintendo_gb_px
 {
  public:
+	const color* get_rgb(u8* data);
 	const palette* get_pal(u8* data);
 };
 

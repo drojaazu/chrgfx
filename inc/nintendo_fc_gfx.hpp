@@ -22,13 +22,12 @@ class nintendo_fc_px : public pal_xform
 {
  private:
 	static const pal_traits traits;
-	static const palette std_fc_pal;
+	static const color std_fc_pal[];
 
  public:
 	const pal_traits* get_traits();
 	const color* get_rgb(u8* data);
 	const palette* get_pal(u8* data);
-	const palette* get_pal();
 };
 
 }	// namespace chrgfx
