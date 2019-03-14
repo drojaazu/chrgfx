@@ -22,7 +22,18 @@ class nintendo_sfc_3bpp_cx : public chr_xform
 {
  private:
 	static const chr_traits traits;
-	static chr* get_chr_sfc_3bpp(u8* data);
+	static const chr* get_chr_sfc_3bpp(u8* data);
+
+ public:
+	const chr_traits* get_traits();
+	const chr* get_chr(u8* data);
+};
+
+class nintendo_sfc_8bpp_cx : public chr_xform
+{
+ private:
+	static const chr_traits traits;
+	static const chr* get_chr_sfc_8bpp(u8* data);
 
  public:
 	const chr_traits* get_traits();

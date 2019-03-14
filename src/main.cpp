@@ -9,6 +9,8 @@ const map<string, chr_xform*> chrx_list = {
 		{string("1bpp"), new bpp1_cx()},
 		{string("sega_md"), new sega_md_cx()},
 		{string("nintendo_sfc"), new nintendo_sfc_cx()},
+		{string("nintendo_sfc_3bpp"), new nintendo_sfc_3bpp_cx()},
+		{string("nintendo_sfc_8bpp"), new nintendo_sfc_8bpp_cx()},
 		{string("nintendo_fc"), new nintendo_fc_cx()},
 		{string("nintendo_gb"), new nintendo_gb_cx()},
 		{string("capcom_cps"), new capcom_cps_cx()},
