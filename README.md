@@ -11,6 +11,7 @@ Converts tile (CHR) based bitmap graphics from retro hardware systems, similar t
 - Nintendo GameBoy & GameBoy Color (nintendo_gb)
 - Nintendo Super Famicom/NEC PC Engine (nintendo_sfc)
 - Capcom CPS1/CPS2 16x16 tiles (capcom_cps)
+- SNK NeoGeo Pocket (snk_ngp)
 
 ### Palettes
 - Tile Layer Pro (tilelayerpro)
@@ -21,6 +22,7 @@ Converts tile (CHR) based bitmap graphics from retro hardware systems, similar t
 - Nintendo GameBoy (nintendo_gb & nintendo_gb_pocket)
 - Nintendo GameBoy Color (nintendo_gb_color)
 - Nintendo Super Famicom/SNES CGRAM dump (nintendo_sfc)
+- SNK NeoGeo Pocket & Pocket Color (snk_ngp & snk_ngpc)
 
 ## Usage
 ```--chr-format```,```-f```
@@ -34,6 +36,7 @@ Specifies tile data format. Currently supported values are:
 - nintendo_gb
 - nintendo_sfc
 - capcom_cps
+- snk_ngp
 
 ```--pal-format```,```-g```
 
@@ -48,6 +51,8 @@ Specifies the palette data format. Currently supported values are:
 - nintendo_gb_pocket
 - nintendo_gb_color
 - nintendo_sfc
+- snk_ngp
+- snk_ngpc
 
 Note: If the palette format identifier is the same as the CHR format identifier, you do not need to specify the palette format. I.E., if you use ```--chr-format sega_md``` you do not need to use ```--pal-format sega_md``` as well.
 
@@ -104,3 +109,8 @@ More info on the Gameboy hardware can be found here: https://fms.komkon.org/Game
 
 ### Nintendo GameBoy Color palettes
 GameBoy Color paletts consist of four 15-bit colors. There are 8 palettes for background graphics, and 8 palettes for sprites, for a total of 128 bytes of color RAM split across two buffers (for background and sprite palettes). The chrgfx converter will use one of these buffers; therefore the palette data should be 64 bytes in length. Each palette is offset by 4 colors, and the `--pal-offset` option can be used to specify which palette line to use.
+
+### SNK NeoGeo Pocket palettes (snk_ngp)
+Palettes for the original, monochrome Pocket are made up 3 bit shades of gray. There are three system palettes, for Sprite, Scroll 1 and Scroll 2. Each palette has two subpalettes, each with four colors each. Each color is 1 byte: the lowest three bits are the color shade, while the rest are not used. The palette data is stored in memory starting at 0x8100, with 8 bytes for each of the system palettes.
+
+The chrgfx palette converter will take in these 24 bytes as the palette data.

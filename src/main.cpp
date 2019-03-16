@@ -14,7 +14,8 @@ const map<string, chr_xform*> chrx_list = {
 		{string("nintendo_fc"), new nintendo_fc_cx()},
 		{string("nintendo_gb"), new nintendo_gb_cx()},
 		{string("capcom_cps"), new capcom_cps_cx()},
-		{string("sega_8bit"), new sega_8bit_cx()}};
+		{string("sega_8bit"), new sega_8bit_cx()},
+		{string("snk_ngp"), new snk_ngp_cx()}};
 
 const map<string, pal_xform*> palx_list = {
 		{string("sega_md"), new sega_md_px()},
@@ -25,7 +26,9 @@ const map<string, pal_xform*> palx_list = {
 		{string("nintendo_sfc"), new nintendo_sfc_px()},
 		{string("nintendo_gb"), new nintendo_gb_px()},
 		{string("nintendo_gb_pocket"), new nintendo_gbpocket_px()},
-		{string("nintendo_gb_color"), new nintendo_gbcolor_px()}};
+		{string("nintendo_gb_color"), new nintendo_gbcolor_px()},
+		{string("snk_ngp"), new snk_ngp_px()},
+		{string("snk_ngpc"), new snk_ngpc_px()}};
 
 string outfile, chrx_name, palx_name;
 

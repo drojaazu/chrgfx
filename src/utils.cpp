@@ -72,7 +72,7 @@ palette* get_pal(pal_xform* xform, u8* data, size_t count)
 		data += datasize;
 	}
 
-	fill_pal(outpal);
+	// fill_pal(outpal);
 
 	return outpal;
 }
