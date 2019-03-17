@@ -97,7 +97,7 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 	auto outimg = new image<index_pixel>(outimg_pxlwidth, outimg_pxlheight);
 
 	// check for palette shift
-	if(rtraits->palette_offset > 0)
+	/*if(rtraits->subpalette >= 0)
 	{
 		auto newPal = new palette(*pal);
 		newPal->erase(newPal->begin(), newPal->begin() + rtraits->palette_offset);
@@ -106,9 +106,9 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 		delete newPal;
 	}
 	else
-	{
-		outimg->set_palette(*pal);
-	}
+	{*/
+	outimg->set_palette(*pal);
+	//}
 
 	// check for palette transparency
 	if(rtraits->use_trns)
@@ -120,7 +120,7 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 			trans->push_back(0);
 		else
 		{
-			trans->resize(rtraits->trns_entry + 1);
+			trans->reserve(rtraits->trns_entry + 1);
 			std::fill(trans->begin(), trans->end(), 255);
 			trans->at(rtraits->trns_entry) = 0;
 		}

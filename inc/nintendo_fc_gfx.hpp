@@ -27,7 +27,7 @@ class nintendo_fc_px : public pal_xform
  public:
 	const pal_traits* get_traits();
 	const color* get_rgb(u8* data);
-	const palette* get_pal(u8* data);
+	const palette* get_pal(u8* data, int8_t subpal);
 };
 
 }	// namespace chrgfx

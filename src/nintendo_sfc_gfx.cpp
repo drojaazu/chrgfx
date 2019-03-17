@@ -113,34 +113,34 @@ const chr* nintendo_sfc_8bpp_cx::get_chr_sfc_8bpp(u8* data)
 
 // ----------------- PALETTES
 // 256 colors per palette, 2 bytes per color
-const pal_traits nintendo_sfc_px::traits = {255, 2};
+// subpalettes can vary based on graphics mode
+// default is 16 subpalettes of 16 colors each
+const pal_traits nintendo_sfc_px::traits{255, 2, 16, 16};
 
-const pal_traits* nintendo_sfc_px::get_traits()
-{
-	return &nintendo_sfc_px::traits;
-}
+const pal_traits* nintendo_sfc_px::get_traits() { return &traits; }
 
-const color* nintendo_sfc_px::get_rgb(u8* data)
+const color* nintendo_sfc_px::get_rgb_sfc(u8* data)
 {
-	// 0BBBBBGGGGGRRRRR, planar, little endian
-	// GGGRRRRR0BBBBBGG
-	// |||G lo bits  ||G hi bits
+	// 16|               |0
+	//   xBBBBBGG GGGRRRRR
+	// (little endian)
 
 	u8 r = data[0] & 0x1f;
 	u8 g = ((data[0] & 0xe0) >> 5) | ((data[1] & 0x3) << 3);
 	u8 b = (data[1] & 0x7c) >> 2;
 
-	// stretch the color range so it works with rgb
-	r = (r * 255) / 31;
-	g = (g * 255) / 31;
-	b = (b * 255) / 31;
+	r = (r << 3);
+	g = (g << 3);
+	b = (b << 3);
 
 	return new color(r, g, b);
 }
 
-const palette* nintendo_sfc_px::get_pal(u8* data)
+const color* nintendo_sfc_px::get_rgb(u8* data) { return get_rgb_sfc(data); }
+
+const palette* nintendo_sfc_px::get_pal(u8* data, int8_t subpal)
 {
-	return chrgfx::get_pal(this, data, 256);
+	return chrgfx::get_pal(this, data, subpal);
 }
 
 }	// namespace chrgfx

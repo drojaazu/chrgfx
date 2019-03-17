@@ -36,13 +36,11 @@ const chr* nintendo_fc_cx::get_chr_nes(u8* data)
 }
 
 // ----------------- PALETTES
-// 64 colors, set by hardware
-const pal_traits nintendo_fc_px::traits = {64, 0};
+// 32 colors, each color is 1 byte; 8 palettes, 4 colors each (color 0 is always
+// transparent)
+const pal_traits nintendo_fc_px::traits{32, 1, 8, 4};
 
-const pal_traits* nintendo_fc_px::get_traits()
-{
-	return &nintendo_fc_px::traits;
-}
+const pal_traits* nintendo_fc_px::get_traits() { return &traits; }
 
 // a 'standard' 2C02 PPU palette, from:
 // https://wiki.nesdev.com/w/index.php/PPU_palettes
@@ -109,25 +107,8 @@ const color* nintendo_fc_px::get_rgb(u8* data)
 	return &std_fc_pal[*data];
 }
 
-const palette* nintendo_fc_px::get_pal(u8* data)
+const palette* nintendo_fc_px::get_pal(u8* data, int8_t subpal)
 {
-	u8 this_color{0};
-	auto _out = new palette();
-	_out->reserve(0x20);
-
-	for(u8 pal_iter = 0; pal_iter < 0x20; pal_iter++)
-	{
-		this_color = data[pal_iter];
-		if(this_color > 0x3f)
-		{
-			std::cerr << "Warning: palette data offset " << (int)pal_iter
-								<< " is invalid; setting to 0" << std::endl;
-			this_color = 0;
-		}
-
-		_out->push_back(std_fc_pal[this_color]);
-	}
-
-	return _out;
+	return chrgfx::get_pal(this, data, subpal);
 }
 }	// namespace chrgfx

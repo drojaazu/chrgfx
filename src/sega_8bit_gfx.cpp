@@ -35,15 +35,15 @@ const chr* sega_8bit_cx::get_chr_sega8bit(u8* data)
 }
 
 // ----------------- PALETTES
-// 32 colors per palette, 1 bytes per color
-const pal_traits sega_mastersys_px::traits = {32, 1};
+// ------ Mark III/Master System
+// 32 colors per palette, 1 byte per color; 2 subpalettes, 16 colors each
+// subpalette 0 - background palette, 1 - sprite palette
+// http://www.smspower.org/maxim/HowToProgram/Palette
+const pal_traits sega_mastersys_px::traits{32, 1, 2, 16};
 
-const pal_traits* sega_mastersys_px::get_traits()
-{
-	return &sega_mastersys_px::traits;
-}
+const pal_traits* sega_mastersys_px::get_traits() { return &traits; }
 
-const color* sega_mastersys_px::get_rgb(u8* data)
+const color* sega_mastersys_px::get_rgb_ms(u8* data)
 {
 	// 8|      |0
 	//  xxBBGGRR
@@ -51,8 +51,6 @@ const color* sega_mastersys_px::get_rgb(u8* data)
 	u8 r = data[0] & 3;
 	u8 g = (data[0] & 0xC) >> 2;
 	u8 b = (data[0] & 0x30) >> 4;
-
-	// stretch the color range so it works with rgb
 	r = (((r << 2) | r) << 4) | (r << 2 | r);
 	g = (((g << 2) | g) << 4) | (g << 2 | g);
 	b = (((b << 2) | b) << 4) | (b << 2 | b);
@@ -60,20 +58,20 @@ const color* sega_mastersys_px::get_rgb(u8* data)
 	return new color(r, g, b);
 }
 
-const palette* sega_mastersys_px::get_pal(u8* data)
+const color* sega_mastersys_px::get_rgb(u8* data) { return get_rgb_ms(data); }
+
+const palette* sega_mastersys_px::get_pal(u8* data, int8_t subpalette)
 {
-	// 32 bytes of cram, 32 colors in the palette
-	return chrgfx::get_pal(this, data, 32);
+	return chrgfx::get_pal(this, data, subpalette);
 }
 
-const pal_traits sega_gamegear_px::traits = {32, 2};
+// ------ GameGear
+// 32 colors per palette, 2 byte per color; 2 subpalettes, 16 colors each
+const pal_traits sega_gamegear_px::traits{32, 2, 2, 16};
 
-const pal_traits* sega_gamegear_px::get_traits()
-{
-	return &sega_gamegear_px::traits;
-}
+const pal_traits* sega_gamegear_px::get_traits() { return &traits; }
 
-const color* sega_gamegear_px::get_rgb(u8* data)
+const color* sega_gamegear_px::get_rgb_gg(u8* data)
 {
 	// 16|               |0
 	//   xxxxBBBB GGGGRRRR
@@ -90,10 +88,11 @@ const color* sega_gamegear_px::get_rgb(u8* data)
 	return new color(r, g, b);
 }
 
-const palette* sega_gamegear_px::get_pal(u8* data)
+const color* sega_gamegear_px::get_rgb(u8* data) { return get_rgb_gg(data); }
+
+const palette* sega_gamegear_px::get_pal(u8* data, int8_t subpalette)
 {
-	// gg has 64 bytes of cram, each color is a word = 32 colors
-	return chrgfx::get_pal(this, data, 32);
+	return chrgfx::get_pal(this, data, subpalette);
 }
 
 }	// namespace chrgfx

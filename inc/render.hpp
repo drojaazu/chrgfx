@@ -10,7 +10,6 @@ struct render_traits
 {
 	u16 cols = 8;
 	u8 tile_border = 0;
-	u8 palette_offset = 0;
 	bool use_trns = false;
 	u8 trns_entry = 0;
 };

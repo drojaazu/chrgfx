@@ -60,13 +60,46 @@ palette* make_pal(bool blank)
 	return outbank;
 }*/
 
-palette* get_pal(pal_xform* xform, u8* data, size_t count)
+palette* get_pal(pal_xform* xform, u8* data, int8_t subpal)
 {
 	auto outpal = new palette();
-	outpal->reserve(256);
-	auto datasize = xform->get_traits()->color_size;
 
-	for(size_t paliter = 0; paliter < count; paliter++)
+	// if subpalette < 0, do not use subpalettes
+	// - get count from palette traits (palette_length)
+	// if subpalette > 0, use subpalettes
+	// - start of paliter loop is: subpalette * subpalette_length
+	// - paliter loop cound: subpalette_length
+
+	u8 count{0};
+	auto traits = xform->get_traits();
+
+	// subpalettes are 0 indexed
+	if(subpal > (traits->subpalette_count - 1))
+	{
+		std::cerr << "Warning: invalid subpalette specified; using full palette"
+							<< std::endl;
+		subpal = -1;
+	}
+
+	auto datasize = traits->color_size;
+
+	if(subpal < 0)
+	{
+		outpal->reserve(traits->palette_length);
+		count = traits->palette_length;
+	}
+	else
+	{
+		outpal->reserve(traits->subpalette_length);
+		count = traits->subpalette_length;
+		data += traits->subpalette_length * subpal * datasize;
+#ifdef DEBUG
+		std::cerr << "subpal: " << (int)subpal << std::endl;
+		std::cerr << "count: " << (int)count << std::endl;
+#endif
+	}
+
+	for(u8 paliter = 0; paliter < count; paliter++)
 	{
 		outpal->push_back(*(xform->get_rgb(data)));
 		data += datasize;
