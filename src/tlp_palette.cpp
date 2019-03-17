@@ -4,12 +4,9 @@ using namespace png;
 
 namespace chrgfx
 {
-const pal_traits tilelayerpro_px::traits{255, 3};
+const pal_traits tilelayerpro_px::traits{256, 3, 0, 0};
 
-const pal_traits* tilelayerpro_px::get_traits()
-{
-	return &tilelayerpro_px::traits;
-}
+const pal_traits* tilelayerpro_px::get_traits() { return &traits; }
 
 const palette* tilelayerpro_px::get_pal_tlp(u8* data)
 {
@@ -62,5 +59,14 @@ const color* tilelayerpro_px::get_rgb(u8* data)
 	return new color(data[0], data[1], data[2]);
 }
 
-const palette* tilelayerpro_px::get_pal(u8* data) { return get_pal_tlp(data); }
+const palette* tilelayerpro_px::get_pal(u8* data, int8_t subpal)
+{
+	if(subpal > 0)
+	{
+		std::cerr << "Warning: TLP palettes do not have subpalettes; subpalette "
+								 "option ignored"
+							<< std::endl;
+	}
+	return get_pal_tlp(data);
+}
 }	// namespace chrgfx

@@ -27,16 +27,18 @@ const chr* sega_md_cx::get_chr_smd(chr* data)
 }
 
 // ----------------- PALETTES
-// 64 colors per palette, 2 bytes per color
-const pal_traits sega_md_px::traits = {64, 2};
-const pal_traits* sega_md_px::get_traits() { return &sega_md_px::traits; }
+// 64 colors per palette, 2 bytes per color; 4 subpalettes of 16 colors each
+const pal_traits sega_md_px::traits = {64, 2, 4, 16};
+
+const pal_traits* sega_md_px::get_traits() { return &traits; }
 
 const chr* sega_md_cx::get_chr(chr* data) { return get_chr_smd(data); }
 
 // PALETTES
 const color* sega_md_px::get_rgb_smd(u8* data)
 {
-	//  xxxxBBBB GGGGRRRR, linear
+	// 16|               |0
+	//   xxxxBBBB GGGGRRRR
 
 	// duplicate the four bits to fill out the whole byte
 	u8 b = data[0] & 0xf;
@@ -51,9 +53,9 @@ const color* sega_md_px::get_rgb_smd(u8* data)
 
 const color* sega_md_px::get_rgb(u8* data) { return get_rgb_smd(data); }
 
-const palette* sega_md_px::get_pal(u8* data)
+const palette* sega_md_px::get_pal(u8* data, int8_t subpal)
 {
-	return chrgfx::get_pal(this, data, 64);
+	return chrgfx::get_pal(this, data, subpal);
 }
 
 }	// namespace chrgfx

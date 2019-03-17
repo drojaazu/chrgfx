@@ -36,14 +36,11 @@ const chr* nintendo_gb_cx::get_chr_gb(u8* data)
 }
 
 // ----------------- PALETTES
-// 4 colors, 2 bits per color (1 byte per palette)
+// 4 colors, 2 bits per color, packed (1 byte per palette)
 // 3 palettes (3 bytes, stored at 0xFF47 in memory)
-const pal_traits nintendo_gb_px::traits = {12, 1};
+const pal_traits nintendo_gb_px::traits{12, 1, 3, 1};
 
-const pal_traits* nintendo_gb_px::get_traits()
-{
-	return &nintendo_gb_px::traits;
-}
+const pal_traits* nintendo_gb_px::get_traits() { return &traits; }
 
 // colors based on the yellow-green screen of the original GameBoy
 // (based on MAME output)
@@ -67,37 +64,55 @@ const color* nintendo_gb_px::get_rgb(u8* data)
 	return &gameboy_colors_original[*data];
 }
 
-const palette* nintendo_gb_px::get_gb_pal(u8* data, const color* gb_palette)
+const palette* nintendo_gb_px::get_gb_pal(u8* data, const color* gb_palette,
+																					int8_t subpal)
 {
 	auto _out = new palette();
-	_out->reserve(12);
+	u8 paliter{0}, count{3};
+
+	if(subpal > 2)
+	{
+		std::cerr << "Warning: invalid subpalette specified; using full palette"
+							<< std::endl;
+		subpal = -1;
+	}
+
+	if(subpal < 0)
+	{
+		_out->reserve(12);
+	}
+	else
+	{
+		_out->reserve(4);
+		paliter = subpal;
+		count = paliter + 1;
+	}
 
 	// 3 palettes (BGRD, OBJ0, OBJ1)
 	// 8 bits, every 2 bits is a palette entry
 	// 3  2  1  0   pal entry
 	// 11 11 11 11  bit
-	for(u8 pal_iter = 0; pal_iter < 3; pal_iter++)
+	for(; paliter < count; paliter++)
 	{
 		for(u8 shift = 0; shift < 8; shift += 2)
 		{
-			u8 this_entry = (data[pal_iter] >> shift) & 3;
-			_out->push_back(gb_palette[this_entry]);
+			_out->push_back(gb_palette[(data[paliter] >> shift) & 3]);
 		}
 	}
 
 	return _out;
 }
 
-const palette* nintendo_gb_px::get_pal(u8* data)
+const palette* nintendo_gb_px::get_pal(u8* data, int8_t subpal)
 {
-	return nintendo_gb_px::get_gb_pal(data,
-																		nintendo_gb_px::gameboy_colors_original);
+	return nintendo_gb_px::get_gb_pal(
+			data, nintendo_gb_px::gameboy_colors_original, subpal);
 }
 
-const palette* nintendo_gbpocket_px::get_pal(u8* data)
+const palette* nintendo_gbpocket_px::get_pal(u8* data, int8_t subpal)
 {
-	return nintendo_gb_px::get_gb_pal(data,
-																		nintendo_gb_px::gameboy_colors_pocket);
+	return nintendo_gb_px::get_gb_pal(data, nintendo_gb_px::gameboy_colors_pocket,
+																		subpal);
 }
 
 const color* nintendo_gbpocket_px::get_rgb(u8* data)
@@ -107,13 +122,10 @@ const color* nintendo_gbpocket_px::get_rgb(u8* data)
 }
 
 // GameBoy Color palettes
+// 32 colors, 2 bytes per color; 8 subpalettes, 4 colors per subpal
+const pal_traits nintendo_gbcolor_px::traits{32, 2, 8, 4};
 
-const pal_traits nintendo_gbcolor_px::traits = {32, 2};
-
-const pal_traits* nintendo_gbcolor_px::get_traits()
-{
-	return &nintendo_gbcolor_px::traits;
-}
+const pal_traits* nintendo_gbcolor_px::get_traits() { return &traits; }
 
 const color* nintendo_gbcolor_px::get_rgb(u8* data)
 {
@@ -131,9 +143,9 @@ const color* nintendo_gbcolor_px::get_rgb(u8* data)
 	return new color(r, g, b);
 }
 
-const palette* nintendo_gbcolor_px::get_pal(u8* data)
+const palette* nintendo_gbcolor_px::get_pal(u8* data, int8_t subpal)
 {
-	return chrgfx::get_pal(this, data, 32);
+	return chrgfx::get_pal(this, data, subpal);
 }
 
 }	// namespace chrgfx

@@ -20,22 +20,24 @@ class sega_mastersys_px : public pal_xform
 {
  private:
 	static const pal_traits traits;
+	static const color* get_rgb_ms(u8* data);
 
  public:
 	const pal_traits* get_traits();
 	const color* get_rgb(u8* data);
-	const palette* get_pal(u8* data);
+	const palette* get_pal(u8* data, int8_t subpalette);
 };
 
 class sega_gamegear_px : public pal_xform
 {
  private:
 	static const pal_traits traits;
+	static const color* get_rgb_gg(u8* data);
 
  public:
 	const pal_traits* get_traits();
 	const color* get_rgb(u8* data);
-	const palette* get_pal(u8* data);
+	const palette* get_pal(u8* data, int8_t subpalette);
 };
 
 }	// namespace chrgfx

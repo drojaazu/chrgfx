@@ -80,9 +80,9 @@ Specify which palette index to use as transparency
 
 Number of tile columns (horizontal) to render for output image.
 
-```--pal-offset```,```-s```
+```--subpalette```,```-s```
 
-Number of source palette entries to skip. For example, if source palette has 256 colors, but the 16 color palette for your sprite starts on palette "line" 3, the offset would be 48.
+Specify the subpalette to be used from within the palette data. This is system specific.
 
 ### Usage Example
     cat ../etc/sonic_sprite | ./chrgfx --chr-format sega_md --pal-data ../etc/sonic1.cram --trns --columns 32 > test.png
@@ -107,8 +107,8 @@ There are two flavors of GameBoy palette converter: Original and Pocket. The onl
 
 More info on the Gameboy hardware can be found here: https://fms.komkon.org/GameBoy/Tech/Software.html
 
-### Nintendo GameBoy Color palettes
-GameBoy Color paletts consist of four 15-bit colors. There are 8 palettes for background graphics, and 8 palettes for sprites, for a total of 128 bytes of color RAM split across two buffers (for background and sprite palettes). The chrgfx converter will use one of these buffers; therefore the palette data should be 64 bytes in length. Each palette is offset by 4 colors, and the `--pal-offset` option can be used to specify which palette line to use.
+### Nintendo GameBoy Color palettes (nintendo\_gb\_color)
+GameBoy Color palettes consist of four 15-bit colors. There are 8 palettes for background graphics, and 8 palettes for sprites, for a total of 128 bytes of color RAM split across two buffers (for background and sprite palettes). The chrgfx converter will use one of these buffers; therefore the palette data should be 64 bytes in length. Each palette is offset by 4 colors, and the `--pal-offset` option can be used to specify which palette line to use.
 
 ### SNK NeoGeo Pocket palettes (snk_ngp)
 Palettes for the original, monochrome Pocket are made up 3 bit shades of gray. There are three system palettes, for Sprite, Scroll 1 and Scroll 2. Each palette has two subpalettes, each with four colors each. Each color is 1 byte: the lowest three bits are the color shade, while the rest are not used. The palette data is stored in memory starting at 0x8100, with 8 bytes for each of the system palettes.

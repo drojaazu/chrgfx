@@ -41,6 +41,7 @@ chr_xform* chrx = nullptr;
 pal_xform* palx = nullptr;
 
 const palette* work_pal;
+int8_t subpalette{-1};
 
 int main(int argc, char** argv)
 {
@@ -74,17 +75,7 @@ int main(int argc, char** argv)
 
 		// use system palette if no palette data supplied
 		if(pal_data == nullptr)
-			// special case for Famicom (internal palette)
-			// TODO: work out a better way to deal with this
-			// there may be other similar cases in the future
-			if(palx_name == "nintendo_fc")
-			{
-				work_pal = palx->get_pal(nullptr);
-			}
-			else
-			{
-				work_pal = chrgfx::make_pal();
-			}
+			work_pal = chrgfx::make_pal();
 		else
 		{
 			if(!pal_data->good())
@@ -97,7 +88,7 @@ int main(int argc, char** argv)
 			pal_data->seekg(0, pal_data->beg);
 			auto palbuffer = new char[length];
 			pal_data->read(palbuffer, length);
-			work_pal = palx->get_pal((uint8_t*)palbuffer);
+			work_pal = palx->get_pal((uint8_t*)palbuffer, subpalette);
 			delete[] palbuffer;
 			delete pal_data;
 		}
@@ -189,7 +180,7 @@ void process_args(int argc, char** argv)
 														 {"trns", no_argument, nullptr, 'r'},
 														 {"trns-index", required_argument, nullptr, 'i'},
 														 {"columns", required_argument, nullptr, 'c'},
-														 {"pal-offset", required_argument, nullptr, 's'},
+														 {"subpalette", required_argument, nullptr, 's'},
 														 {"help", no_argument, nullptr, 'h'},
 														 {nullptr, 0, nullptr, 0}};
 
@@ -242,9 +233,9 @@ void process_args(int argc, char** argv)
 				rtraits.cols = stoi(optarg);
 				break;
 
-			// palette-offset
+			// subpalette
 			case 's':
-				rtraits.palette_offset = stoi(optarg);
+				subpalette = stoi(optarg);
 				break;
 
 			// help

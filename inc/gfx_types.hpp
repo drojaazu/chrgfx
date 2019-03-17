@@ -24,8 +24,11 @@ struct chr_traits
 
 struct pal_traits
 {
-	const u8 palette_length;	// number of colors in a palette
-	const u8 color_size;			// size of each color in bytes
+	const u16 palette_length;	// number of colors in a palette
+	const u8 color_size;			 // size of each color in bytes
+	const int8_t
+			subpalette_count;				 // number of subpalettes within the whole palette
+	const u8 subpalette_length;	// number of colors in a subpalette
 };
 
 /**
@@ -49,9 +52,11 @@ class pal_xform
  public:
 	virtual const pal_traits *get_traits() = 0;
 	virtual const color *get_rgb(u8 *data) = 0;
-	virtual const palette *get_pal(u8 *data) = 0;
+	virtual const palette *get_pal(u8 *data, int8_t subpalette) = 0;
 	virtual ~pal_xform(){};
 };
+
+// const pal_traits pal_xform::traits{0, 0, 0, 0};
 
 class bank
 {

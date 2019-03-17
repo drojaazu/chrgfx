@@ -7,9 +7,9 @@ namespace chrgfx
 // ----------------- CHR
 const chr_traits snk_ngp_cx::traits = std_2bpp_tile;
 
-const u8 CHR_PXL_COUNT = 64;
-
 const chr_traits* snk_ngp_cx::get_traits() { return &snk_ngp_cx::traits; }
+
+const u8 CHR_PXL_COUNT = 64;
 
 const chr* snk_ngp_cx::get_chr(u8* data) { return get_chr_ngp(data); }
 
@@ -39,9 +39,10 @@ const chr* snk_ngp_cx::get_chr_ngp(u8* data)
 
 // NeoGeo Pocket (monochrome)
 // 6 palettes, 4 colors each; 1 byte per color
-const pal_traits snk_ngp_px::traits = {8, 2};
 
-const pal_traits* snk_ngp_px::get_traits() { return &snk_ngp_px::traits; }
+const pal_traits snk_ngp_px::traits{24, 1, 6, 4};
+
+const pal_traits* snk_ngp_px::get_traits() { return &traits; }
 
 // colors based on MAME output
 const color snk_ngp_px::ngp_colors[] = {
@@ -60,25 +61,16 @@ const color* snk_ngp_px::get_rgb(u8* data)
 	return &ngp_colors[*data];
 }
 
-const palette* snk_ngp_px::get_pal(u8* data)
+const palette* snk_ngp_px::get_pal(u8* data, int8_t subpal)
 {
-	auto _out = new palette();
-	_out->reserve(24);
-
-	// bits 0-2 = 8 possible shades
-	for(u8 this_color = 0; this_color < 24; this_color++)
-	{
-		_out->push_back(ngp_colors[data[this_color] & 3]);
-	}
-
-	return _out;
+	return chrgfx::get_pal(this, data, subpal);
 }
 
 // NeoGeo Pocket Color
 // 16 palettes, 4 colors each; 2 bytes per color
-const pal_traits snk_ngpc_px::traits = {64, 2};
+const pal_traits snk_ngpc_px::traits{64, 2, 16, 4};
 
-const pal_traits* snk_ngpc_px::get_traits() { return &snk_ngpc_px::traits; }
+const pal_traits* snk_ngpc_px::get_traits() { return &traits; }
 
 const color* snk_ngpc_px::get_rgb(u8* data)
 {
@@ -96,9 +88,9 @@ const color* snk_ngpc_px::get_rgb(u8* data)
 	return new color(r, g, b);
 }
 
-const palette* snk_ngpc_px::get_pal(u8* data)
+const palette* snk_ngpc_px::get_pal(u8* data, int8_t subpal)
 {
-	return chrgfx::get_pal(this, data, 64);
+	return chrgfx::get_pal(this, data, subpal);
 }
 
 }	// namespace chrgfx
