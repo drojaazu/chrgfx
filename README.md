@@ -9,6 +9,7 @@ Converts tile (CHR) based bitmap graphics from retro hardware systems, similar t
 - Nintendo Famicom/NES (nintendo_fc)
 - Nintendo GameBoy & GameBoy Color (nintendo_gb)
 - Nintendo Super Famicom/NEC PC Engine (nintendo_sfc)
+- Nintendo VirtualBoy (nintendo_vb)
 - Capcom CPS1/CPS2 16x16 tiles (capcom_cps)
 - SNK NeoGeo Pocket (snk_ngp)
 
@@ -21,6 +22,7 @@ Converts tile (CHR) based bitmap graphics from retro hardware systems, similar t
 - Nintendo GameBoy (nintendo_gb & nintendo_gb_pocket)
 - Nintendo GameBoy Color (nintendo_gb_color)
 - Nintendo Super Famicom/SNES CGRAM dump (nintendo_sfc)
+- Nintendo VirtualBoy (nintendo_vb)
 - SNK NeoGeo Pocket & Pocket Color (snk_ngp & snk_ngpc)
 
 ## Usage
