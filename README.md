@@ -34,6 +34,7 @@ Specifies tile data format. Currently supported values are:
 - nintendo_fc
 - nintendo_gb
 - nintendo_sfc
+- nintendo_vb
 - capcom_cps
 - snk_ngp
 
@@ -50,6 +51,7 @@ Specifies the palette data format. Currently supported values are:
 - nintendo_gb_pocket
 - nintendo_gb_color
 - nintendo_sfc
+- nintendo_vb
 - snk_ngp
 - snk_ngpc
 
@@ -100,16 +102,19 @@ https://wiki.nesdev.com/w/index.php/PPU_palettes
 ### Nintendo GameBoy palettes (nintendo\_gb and nintendo\_gb\_pocket)
 Original GameBoy colors are 2 bit, with 4 color palettes, making one palette 1 byte in size. There are three palettes in the system's PPU: BGRDPAL, OBJ0PAL, and OBJ1PAL. These three palettes are stored respectively within the system's IO port memory range, starting at 0xFF47 to 0xFF49.
 
-The chrgfx GameBoy palette converters will use these three bytes to form a system palette. To create such a palette, simply copy the three bytes as shown in memory (by means of e.g. an emulator debugger) into a file and reference that file as the `--pal-data`. The `--pal-offset` option can then be used to specify an offset (in steps of 4) to the desired palette line. 
+The chrgfx GameBoy palette converters will use these three bytes to form a system palette. To create such a palette, simply copy the three bytes as shown in memory (by means of e.g. an emulator debugger) into a file and reference that file as the `--pal-data`.
 
 There are two flavors of GameBoy palette converter: Original and Pocket. The only difference is the color shading. Original has a yellow-green tint, while the Pocket is more gray.
 
 More info on the Gameboy hardware can be found here: https://fms.komkon.org/GameBoy/Tech/Software.html
 
 ### Nintendo GameBoy Color palettes (nintendo\_gb\_color)
-GameBoy Color palettes consist of four 15-bit colors. There are 8 palettes for background graphics, and 8 palettes for sprites, for a total of 128 bytes of color RAM split across two buffers (for background and sprite palettes). The chrgfx converter will use one of these buffers; therefore the palette data should be 64 bytes in length. Each palette is offset by 4 colors, and the `--pal-offset` option can be used to specify which palette line to use.
+GameBoy Color palettes consist of four 15-bit colors. There are 8 palettes for background graphics, and 8 palettes for sprites, for a total of 128 bytes of color RAM split across two buffers (for background and sprite palettes). The chrgfx converter will use one of these buffers; therefore the palette data should be 64 bytes in length.
 
-### SNK NeoGeo Pocket palettes (snk_ngp)
+### Nintendo VirtualBoy palettes (nintendo\_vb)
+VirtualBoy palettes consist of 4 colors, each color being 2 bits, making a palette 1 byte in size. There are 8 palettes total: 4 for background, 4 for objects. They are stored at 0x5F860 in memory. Despite each palette being only 1 byte, there are 2 bytes allocated for each entry. The palette value is mirrored across both bytes. Altogether, with the byte mirroring, the full runtime palette is 16 bytes. The chrgfx palette converter takes in these 16 bytes as palette data.
+
+### SNK NeoGeo Pocket palettes (snk\_ngp)
 Palettes for the original, monochrome Pocket are made up 3 bit shades of gray. There are three system palettes, for Sprite, Scroll 1 and Scroll 2. Each palette has two subpalettes, each with four colors each. Each color is 1 byte: the lowest three bits are the color shade, while the rest are not used. The palette data is stored in memory starting at 0x8100, with 8 bytes for each of the system palettes.
 
 The chrgfx palette converter will take in these 24 bytes as the palette data.
