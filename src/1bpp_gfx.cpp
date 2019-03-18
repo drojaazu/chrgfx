@@ -10,7 +10,7 @@ const u8 CHR_PXL_COUNT = 64;	// traits.width * traits.height
 
 const chr_traits* bpp1_cx::get_traits() { return &bpp1_cx::traits; }
 
-const chr* bpp1_cx::get_chr_1bpp(u8* data)
+const chr* bpp1_cx::get_chr_1bpp(const u8* data)
 {
 	// for 8x8 1bpp chr, 1 row = 1 u8
 	u8 pxl_idx{0};
@@ -29,6 +29,9 @@ const chr* bpp1_cx::get_chr_1bpp(u8* data)
 	return _out;
 }
 
-const chr* bpp1_cx::get_chr(u8* data) { return bpp1_cx::get_chr_1bpp(data); }
+const chr* bpp1_cx::get_chr(const u8* data)
+{
+	return bpp1_cx::get_chr_1bpp(data);
+}
 
 }	// namespace chrgfx

@@ -14,9 +14,9 @@ const chr_traits* nintendo_gb_cx::get_traits()
 	return &nintendo_gb_cx::traits;
 }
 
-const chr* nintendo_gb_cx::get_chr(u8* data) { return get_chr_gb(data); }
+const chr* nintendo_gb_cx::get_chr(const u8* data) { return get_chr_gb(data); }
 
-const chr* nintendo_gb_cx::get_chr_gb(u8* data)
+const chr* nintendo_gb_cx::get_chr_gb(const u8* data)
 {
 	auto _out = new chr[CHR_PXL_COUNT];
 	u8 this_pxl, pxl_idx{0};
@@ -58,13 +58,14 @@ const color nintendo_gb_px::gameboy_colors_pocket[] = {
 		color(0x6b, 0x73, 0x53),	 // 02
 		color(0x41, 0x41, 0x41)};	// 03 - darkest
 
-const color* nintendo_gb_px::get_rgb(u8* data)
+const color* nintendo_gb_px::get_rgb(const u8* data)
 {
 	if(*data > 3) throw std::out_of_range("Invalid GameBoy palette entry");
 	return &gameboy_colors_original[*data];
 }
 
-const palette* nintendo_gb_px::get_gb_pal(u8* data, const color* gb_palette,
+const palette* nintendo_gb_px::get_gb_pal(const u8* data,
+																					const color* gb_palette,
 																					int8_t subpal)
 {
 	auto _out = new palette();
@@ -103,19 +104,19 @@ const palette* nintendo_gb_px::get_gb_pal(u8* data, const color* gb_palette,
 	return _out;
 }
 
-const palette* nintendo_gb_px::get_pal(u8* data, int8_t subpal)
+const palette* nintendo_gb_px::get_pal(const u8* data, int8_t subpal)
 {
 	return nintendo_gb_px::get_gb_pal(
 			data, nintendo_gb_px::gameboy_colors_original, subpal);
 }
 
-const palette* nintendo_gbpocket_px::get_pal(u8* data, int8_t subpal)
+const palette* nintendo_gbpocket_px::get_pal(const u8* data, int8_t subpal)
 {
 	return nintendo_gb_px::get_gb_pal(data, nintendo_gb_px::gameboy_colors_pocket,
 																		subpal);
 }
 
-const color* nintendo_gbpocket_px::get_rgb(u8* data)
+const color* nintendo_gbpocket_px::get_rgb(const u8* data)
 {
 	if(*data > 3) throw std::out_of_range("Invalid GameBoy palette entry");
 	return &gameboy_colors_pocket[*data];
@@ -127,7 +128,7 @@ const pal_traits nintendo_gbcolor_px::traits{32, 2, 8, 4};
 
 const pal_traits* nintendo_gbcolor_px::get_traits() { return &traits; }
 
-const color* nintendo_gbcolor_px::get_rgb(u8* data)
+const color* nintendo_gbcolor_px::get_rgb(const u8* data)
 {
 	// 16|               |0
 	//   xBBBBBGG GGGRRRRR
@@ -143,7 +144,7 @@ const color* nintendo_gbcolor_px::get_rgb(u8* data)
 	return new color(r, g, b);
 }
 
-const palette* nintendo_gbcolor_px::get_pal(u8* data, int8_t subpal)
+const palette* nintendo_gbcolor_px::get_pal(const u8* data, int8_t subpal)
 {
 	return chrgfx::get_pal(this, data, subpal);
 }

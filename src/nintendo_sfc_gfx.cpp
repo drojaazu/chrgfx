@@ -14,9 +14,12 @@ const chr_traits* nintendo_sfc_cx::get_traits()
 	return &nintendo_sfc_cx::traits;
 }
 
-const chr* nintendo_sfc_cx::get_chr(u8* data) { return get_chr_sfc(data); }
+const chr* nintendo_sfc_cx::get_chr(const u8* data)
+{
+	return get_chr_sfc(data);
+}
 
-const chr* nintendo_sfc_cx::get_chr_sfc(u8* data)
+const chr* nintendo_sfc_cx::get_chr_sfc(const u8* data)
 {
 	auto _out = new chr[CHR_PXL_COUNT];
 	u8 this_pxl, pxl_idx{0};
@@ -49,12 +52,12 @@ const chr_traits* nintendo_sfc_3bpp_cx::get_traits()
 	return &nintendo_sfc_3bpp_cx::traits;
 }
 
-const chr* nintendo_sfc_3bpp_cx::get_chr(u8* data)
+const chr* nintendo_sfc_3bpp_cx::get_chr(const u8* data)
 {
 	return get_chr_sfc_3bpp(data);
 }
 
-const chr* nintendo_sfc_3bpp_cx::get_chr_sfc_3bpp(u8* data)
+const chr* nintendo_sfc_3bpp_cx::get_chr_sfc_3bpp(const u8* data)
 {
 	auto _out = new chr[CHR_PXL_COUNT];
 	u8 this_pxl, pxl_idx{0}, third_plane{16};
@@ -81,12 +84,12 @@ const chr_traits* nintendo_sfc_8bpp_cx::get_traits()
 	return &nintendo_sfc_8bpp_cx::traits;
 }
 
-const chr* nintendo_sfc_8bpp_cx::get_chr(u8* data)
+const chr* nintendo_sfc_8bpp_cx::get_chr(const u8* data)
 {
 	return get_chr_sfc_8bpp(data);
 }
 
-const chr* nintendo_sfc_8bpp_cx::get_chr_sfc_8bpp(u8* data)
+const chr* nintendo_sfc_8bpp_cx::get_chr_sfc_8bpp(const u8* data)
 {
 	auto _out = new chr[CHR_PXL_COUNT];
 	u8 this_pxl, pxl_idx{0};
@@ -119,7 +122,7 @@ const pal_traits nintendo_sfc_px::traits{255, 2, 16, 16};
 
 const pal_traits* nintendo_sfc_px::get_traits() { return &traits; }
 
-const color* nintendo_sfc_px::get_rgb_sfc(u8* data)
+const color* nintendo_sfc_px::get_rgb_sfc(const u8* data)
 {
 	// 16|               |0
 	//   xBBBBBGG GGGRRRRR
@@ -136,9 +139,12 @@ const color* nintendo_sfc_px::get_rgb_sfc(u8* data)
 	return new color(r, g, b);
 }
 
-const color* nintendo_sfc_px::get_rgb(u8* data) { return get_rgb_sfc(data); }
+const color* nintendo_sfc_px::get_rgb(const u8* data)
+{
+	return get_rgb_sfc(data);
+}
 
-const palette* nintendo_sfc_px::get_pal(u8* data, int8_t subpal)
+const palette* nintendo_sfc_px::get_pal(const u8* data, int8_t subpal)
 {
 	return chrgfx::get_pal(this, data, subpal);
 }

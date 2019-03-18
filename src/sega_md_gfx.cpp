@@ -11,7 +11,7 @@ const u8 CHR_PXL_COUNT = 64;	// traits.width * traits.height
 
 const chr_traits* sega_md_cx::get_traits() { return &sega_md_cx::traits; }
 
-const chr* sega_md_cx::get_chr_smd(chr* data)
+const chr* sega_md_cx::get_chr_smd(const chr* data)
 {
 	u8 data_idx{0}, pxl_iter;
 
@@ -32,10 +32,10 @@ const pal_traits sega_md_px::traits = {64, 2, 4, 16};
 
 const pal_traits* sega_md_px::get_traits() { return &traits; }
 
-const chr* sega_md_cx::get_chr(chr* data) { return get_chr_smd(data); }
+const chr* sega_md_cx::get_chr(const chr* data) { return get_chr_smd(data); }
 
 // PALETTES
-const color* sega_md_px::get_rgb_smd(u8* data)
+const color* sega_md_px::get_rgb_smd(const u8* data)
 {
 	// 16|               |0
 	//   xxxxBBBB GGGGRRRR
@@ -51,9 +51,9 @@ const color* sega_md_px::get_rgb_smd(u8* data)
 	return new color(r, g, b);
 }
 
-const color* sega_md_px::get_rgb(u8* data) { return get_rgb_smd(data); }
+const color* sega_md_px::get_rgb(const u8* data) { return get_rgb_smd(data); }
 
-const palette* sega_md_px::get_pal(u8* data, int8_t subpal)
+const palette* sega_md_px::get_pal(const u8* data, int8_t subpal)
 {
 	return chrgfx::get_pal(this, data, subpal);
 }

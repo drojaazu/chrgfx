@@ -38,7 +38,7 @@ const chr_traits std_1bpp_tile{
 // helper functions
 // bank* get_bank(chr_xform* xform, u8* data, size_t count);
 palette* make_pal(bool blank = false);
-palette* get_pal(pal_xform* xform, u8* data, int8_t subpal);
+palette* get_pal(pal_xform* xform, const u8* data, int8_t subpal);
 void fill_pal(palette* pal);
 
 }	// namespace chrgfx

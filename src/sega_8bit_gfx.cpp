@@ -11,9 +11,12 @@ const u8 CHR_PXL_COUNT = 64;	// traits.width * traits.height
 
 const chr_traits* sega_8bit_cx::get_traits() { return &sega_8bit_cx::traits; }
 
-const chr* sega_8bit_cx::get_chr(u8* data) { return get_chr_sega8bit(data); }
+const chr* sega_8bit_cx::get_chr(const u8* data)
+{
+	return get_chr_sega8bit(data);
+}
 
-const chr* sega_8bit_cx::get_chr_sega8bit(u8* data)
+const chr* sega_8bit_cx::get_chr_sega8bit(const u8* data)
 {
 	auto _out = new chr[CHR_PXL_COUNT];
 	u8 this_pxl, pxl_idx{0};
@@ -43,7 +46,7 @@ const pal_traits sega_mastersys_px::traits{32, 1, 2, 16};
 
 const pal_traits* sega_mastersys_px::get_traits() { return &traits; }
 
-const color* sega_mastersys_px::get_rgb_ms(u8* data)
+const color* sega_mastersys_px::get_rgb_ms(const u8* data)
 {
 	// 8|      |0
 	//  xxBBGGRR
@@ -58,9 +61,12 @@ const color* sega_mastersys_px::get_rgb_ms(u8* data)
 	return new color(r, g, b);
 }
 
-const color* sega_mastersys_px::get_rgb(u8* data) { return get_rgb_ms(data); }
+const color* sega_mastersys_px::get_rgb(const u8* data)
+{
+	return get_rgb_ms(data);
+}
 
-const palette* sega_mastersys_px::get_pal(u8* data, int8_t subpalette)
+const palette* sega_mastersys_px::get_pal(const u8* data, int8_t subpalette)
 {
 	return chrgfx::get_pal(this, data, subpalette);
 }
@@ -71,7 +77,7 @@ const pal_traits sega_gamegear_px::traits{32, 2, 2, 16};
 
 const pal_traits* sega_gamegear_px::get_traits() { return &traits; }
 
-const color* sega_gamegear_px::get_rgb_gg(u8* data)
+const color* sega_gamegear_px::get_rgb_gg(const u8* data)
 {
 	// 16|               |0
 	//   xxxxBBBB GGGGRRRR
@@ -88,9 +94,12 @@ const color* sega_gamegear_px::get_rgb_gg(u8* data)
 	return new color(r, g, b);
 }
 
-const color* sega_gamegear_px::get_rgb(u8* data) { return get_rgb_gg(data); }
+const color* sega_gamegear_px::get_rgb(const u8* data)
+{
+	return get_rgb_gg(data);
+}
 
-const palette* sega_gamegear_px::get_pal(u8* data, int8_t subpalette)
+const palette* sega_gamegear_px::get_pal(const u8* data, int8_t subpalette)
 {
 	return chrgfx::get_pal(this, data, subpalette);
 }

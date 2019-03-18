@@ -14,9 +14,9 @@ const chr_traits* nintendo_fc_cx::get_traits()
 	return &nintendo_fc_cx::traits;
 }
 
-const chr* nintendo_fc_cx::get_chr(u8* data) { return get_chr_nes(data); }
+const chr* nintendo_fc_cx::get_chr(const u8* data) { return get_chr_nes(data); }
 
-const chr* nintendo_fc_cx::get_chr_nes(u8* data)
+const chr* nintendo_fc_cx::get_chr_nes(const u8* data)
 {
 	auto _out = new chr[CHR_PXL_COUNT];
 	u8 this_pxl, pxl_idx{0};
@@ -101,13 +101,13 @@ const color nintendo_fc_px::std_fc_pal[] = {
 		color(0xF8, 0xD8, 0xF8), color(0x00, 0x00, 0x00), color(0x00, 0x00, 0x00)};
 */
 
-const color* nintendo_fc_px::get_rgb(u8* data)
+const color* nintendo_fc_px::get_rgb(const u8* data)
 {
 	if(*data > 0x3f) throw std::out_of_range("Invalid Famicom palette entry");
 	return &std_fc_pal[*data];
 }
 
-const palette* nintendo_fc_px::get_pal(u8* data, int8_t subpal)
+const palette* nintendo_fc_px::get_pal(const u8* data, int8_t subpal)
 {
 	return chrgfx::get_pal(this, data, subpal);
 }

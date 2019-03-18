@@ -1,5 +1,4 @@
 # chrgfx
----
 Converts tile (CHR) based bitmap graphics from retro hardware systems, similar to Tile Layer Pro and such.
 
 ## Supported formats

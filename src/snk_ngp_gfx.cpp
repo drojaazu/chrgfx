@@ -11,9 +11,9 @@ const chr_traits* snk_ngp_cx::get_traits() { return &snk_ngp_cx::traits; }
 
 const u8 CHR_PXL_COUNT = 64;
 
-const chr* snk_ngp_cx::get_chr(u8* data) { return get_chr_ngp(data); }
+const chr* snk_ngp_cx::get_chr(const u8* data) { return get_chr_ngp(data); }
 
-const chr* snk_ngp_cx::get_chr_ngp(u8* data)
+const chr* snk_ngp_cx::get_chr_ngp(const u8* data)
 {
 	auto _out = new chr[CHR_PXL_COUNT];
 	u8 pxl_idx{0};
@@ -55,13 +55,13 @@ const color snk_ngp_px::ngp_colors[] = {
 		color(0x24, 0x24, 0x24),	// 06
 		color(0, 0, 0)};					// 07 - darkest
 
-const color* snk_ngp_px::get_rgb(u8* data)
+const color* snk_ngp_px::get_rgb(const u8* data)
 {
 	if(*data > 3) throw std::out_of_range("Invalid NeoGeo Pocket palette entry");
 	return &ngp_colors[*data];
 }
 
-const palette* snk_ngp_px::get_pal(u8* data, int8_t subpal)
+const palette* snk_ngp_px::get_pal(const u8* data, int8_t subpal)
 {
 	return chrgfx::get_pal(this, data, subpal);
 }
@@ -72,7 +72,7 @@ const pal_traits snk_ngpc_px::traits{64, 2, 16, 4};
 
 const pal_traits* snk_ngpc_px::get_traits() { return &traits; }
 
-const color* snk_ngpc_px::get_rgb(u8* data)
+const color* snk_ngpc_px::get_rgb(const u8* data)
 {
 	// 16|               |0
 	//   GGGGBBBB xxxxRRRR
@@ -88,7 +88,7 @@ const color* snk_ngpc_px::get_rgb(u8* data)
 	return new color(r, g, b);
 }
 
-const palette* snk_ngpc_px::get_pal(u8* data, int8_t subpal)
+const palette* snk_ngpc_px::get_pal(const u8* data, int8_t subpal)
 {
 	return chrgfx::get_pal(this, data, subpal);
 }

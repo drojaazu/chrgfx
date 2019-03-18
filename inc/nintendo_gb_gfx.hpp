@@ -11,11 +11,11 @@ class nintendo_gb_cx : public chr_xform
 {
  private:
 	static const chr_traits traits;
-	static const chr* get_chr_gb(u8* data);
+	static const chr* get_chr_gb(const u8* data);
 
  public:
 	const chr_traits* get_traits();
-	const chr* get_chr(u8* data);
+	const chr* get_chr(const u8* data);
 };
 
 class nintendo_gb_px : public pal_xform
@@ -24,21 +24,22 @@ class nintendo_gb_px : public pal_xform
 	static const pal_traits traits;
 
  protected:
-	static const palette* get_gb_pal(u8* data, const color* gb, int8_t subpal);
+	static const palette* get_gb_pal(const u8* data, const color* gb,
+																	 int8_t subpal);
 	static const color gameboy_colors_original[];
 	static const color gameboy_colors_pocket[];
 
  public:
 	const pal_traits* get_traits();
-	const color* get_rgb(u8* data);
-	const palette* get_pal(u8* data, int8_t subpal);
+	const color* get_rgb(const u8* data);
+	const palette* get_pal(const u8* data, int8_t subpal);
 };
 
 class nintendo_gbpocket_px : public nintendo_gb_px
 {
  public:
-	const color* get_rgb(u8* data);
-	const palette* get_pal(u8* data, int8_t subpal);
+	const color* get_rgb(const u8* data);
+	const palette* get_pal(const u8* data, int8_t subpal);
 };
 
 class nintendo_gbcolor_px : public pal_xform
@@ -48,8 +49,8 @@ class nintendo_gbcolor_px : public pal_xform
 
  public:
 	const pal_traits* get_traits();
-	const color* get_rgb(u8* data);
-	const palette* get_pal(u8* data, int8_t subpal);
+	const color* get_rgb(const u8* data);
+	const palette* get_pal(const u8* data, int8_t subpal);
 };
 
 }	// namespace chrgfx

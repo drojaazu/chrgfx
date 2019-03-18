@@ -16,9 +16,9 @@ const u16 CHR_PXL_COUNT = 256;	// traits.width * traits.height
 
 const chr_traits* capcom_cps_cx::get_traits() { return &capcom_cps_cx::traits; }
 
-const chr* capcom_cps_cx::get_chr(u8* data) { return get_chr_cps(data); }
+const chr* capcom_cps_cx::get_chr(const u8* data) { return get_chr_cps(data); }
 
-const chr* capcom_cps_cx::get_chr_cps(u8* data)
+const chr* capcom_cps_cx::get_chr_cps(const u8* data)
 {
 	u8 this_pxl, pxl_idx{0};
 

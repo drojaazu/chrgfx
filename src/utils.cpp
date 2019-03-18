@@ -43,24 +43,7 @@ palette* make_pal(bool blank)
 	return outpal;
 }
 
-/*std::vector<const chr*>* get_bank(chr_xform* xform, u8* data, size_t count)
-{
-	if(count < 1) throw std::length_error("CHR count needs to be greater than 0");
-
-	auto outbank = new std::vector<const chr*>();
-	outbank->reserve(count);
-	auto dataSize = xform->get_traits()->data_size;
-
-	for(size_t countIter = 0; countIter < count; countIter++)
-	{
-		outbank->push_back(xform->get_chr(data));
-		data += dataSize;
-	}
-
-	return outbank;
-}*/
-
-palette* get_pal(pal_xform* xform, u8* data, int8_t subpal)
+palette* get_pal(pal_xform* xform, const u8* data, int8_t subpal)
 {
 	auto outpal = new palette();
 
