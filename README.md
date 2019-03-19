@@ -144,6 +144,8 @@ The NeoGeo MVS is a somewhat unique system in that tile data is not loaded into 
 
 More info on how C ROM data is split can be found here: https://wiki.neogeodev.org/index.php?title=Sprite_graphics_format
 
+CHR data for NeoGeo CD is stored in the SPR files on the disc. It can be processed as-is with the ```snk_neogeocd``` format.
+
 ### SNK NeoGeo palette (snk\_neogeo)
 The NeoGeo system palette is a bit unique. It is made up of 256 16-color palettes, yielding 4096 (!) colors in the system palette. Since the maximum amount of colors in an indexed image is 256, we cannot export all 4096 colors in one image. Therefore, the code will stop processing data once it hits 256 colors in the output palette.
 
