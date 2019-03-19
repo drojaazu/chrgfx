@@ -9,6 +9,10 @@ typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
 
+typedef int8_t s8;
+typedef int16_t s16;
+typedef int32_t s32;
+
 namespace chrgfx
 {
 typedef u8 chr;
@@ -32,7 +36,7 @@ struct pal_traits
 {
 	const u16 palette_length;	//!< Number of colors in the palette
 	const u8 color_size;			 //!< Data size of each color in bytes
-	const int8_t
+	const int16_t
 			subpalette_count;	//!< Number of subpalettes within the whole palette
 	const u8 subpalette_length;	//<<! Number of colors in a subpalette
 };
@@ -56,7 +60,7 @@ class pal_xform
  public:
 	virtual const pal_traits *get_traits() = 0;
 	virtual const color *get_rgb(const u8 *data) = 0;
-	virtual const palette *get_pal(const u8 *data, int8_t subpalette) = 0;
+	virtual const palette *get_pal(const u8 *data, int16_t subpalette) = 0;
 	virtual ~pal_xform(){};
 };
 

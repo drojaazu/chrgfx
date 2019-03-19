@@ -37,7 +37,7 @@ const chr* sega_md_cx::get_chr(const chr* data) { return get_chr_smd(data); }
 // PALETTES
 const color* sega_md_px::get_rgb_smd(const u8* data)
 {
-	// 16|               |0
+	// 15|               |0
 	//   xxxxBBBB GGGGRRRR
 
 	// duplicate the four bits to fill out the whole byte
@@ -53,7 +53,7 @@ const color* sega_md_px::get_rgb_smd(const u8* data)
 
 const color* sega_md_px::get_rgb(const u8* data) { return get_rgb_smd(data); }
 
-const palette* sega_md_px::get_pal(const u8* data, int8_t subpal)
+const palette* sega_md_px::get_pal(const u8* data, s16 subpal)
 {
 	return chrgfx::get_pal(this, data, subpal);
 }

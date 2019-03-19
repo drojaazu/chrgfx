@@ -56,7 +56,7 @@ const color* nintendo_vboy_px::get_rgb(const u8* data)
 	return &vboy_colors[*data];
 }
 
-const palette* nintendo_vboy_px::get_pal(const u8* data, int8_t subpal)
+const palette* nintendo_vboy_px::get_pal(const u8* data, s16 subpal)
 {
 	auto _out = new palette();
 	u8 paliter{1}, count{16};

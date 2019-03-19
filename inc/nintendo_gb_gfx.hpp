@@ -25,21 +25,21 @@ class nintendo_gb_px : public pal_xform
 
  protected:
 	static const palette* get_gb_pal(const u8* data, const color* gb,
-																	 int8_t subpal);
+																	 s16 subpal);
 	static const color gameboy_colors_original[];
 	static const color gameboy_colors_pocket[];
 
  public:
 	const pal_traits* get_traits();
 	const color* get_rgb(const u8* data);
-	const palette* get_pal(const u8* data, int8_t subpal);
+	const palette* get_pal(const u8* data, s16 subpal);
 };
 
 class nintendo_gbpocket_px : public nintendo_gb_px
 {
  public:
 	const color* get_rgb(const u8* data);
-	const palette* get_pal(const u8* data, int8_t subpal);
+	const palette* get_pal(const u8* data, s16 subpal);
 };
 
 class nintendo_gbcolor_px : public pal_xform
@@ -50,7 +50,7 @@ class nintendo_gbcolor_px : public pal_xform
  public:
 	const pal_traits* get_traits();
 	const color* get_rgb(const u8* data);
-	const palette* get_pal(const u8* data, int8_t subpal);
+	const palette* get_pal(const u8* data, s16 subpal);
 };
 
 }	// namespace chrgfx

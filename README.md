@@ -11,18 +11,22 @@ Converts tile (CHR) based bitmap graphics from retro hardware systems, similar t
 - Nintendo Super Famicom/NEC PC Engine (nintendo_sfc)
 - Nintendo VirtualBoy (nintendo_vb)
 - Capcom CPS1/CPS2 16x16 tiles (capcom_cps)
+- SNK NeoGeo (snk_neogeo)
+- SNK NeoGeo CD (snk_neogeocd)
 - SNK NeoGeo Pocket (snk_ngp)
 
 ### Palettes
 - Tile Layer Pro (tilelayerpro)
-- Sega Megadrive CRAM dump (sega_md)
-- Sega Master System CRAM dump (sega_sms)
-- Sega Game Gear CRAM dump (sega_gg)
+- Sega Megadrive (sega_md)
+- Sega Master System (sega_sms)
+- Sega Game Gear (sega_gg)
 - Nintendo Famicom/NES (nintendo_fc)
-- Nintendo GameBoy (nintendo_gb & nintendo_gb_pocket)
+- Nintendo GameBoy (nintendo_gb)
+- Nintendo GameBoy Pocket (nintendo_gb_pocket)
 - Nintendo GameBoy Color (nintendo_gb_color)
 - Nintendo Super Famicom/SNES CGRAM dump (nintendo_sfc)
 - Nintendo VirtualBoy (nintendo_vb)
+- SNK NeoGeo (snk_neogeo)
 - SNK NeoGeo Pocket & Pocket Color (snk_ngp & snk_ngpc)
 
 ## Usage
@@ -38,6 +42,8 @@ Specifies tile data format. Currently supported values are:
 - nintendo_sfc
 - nintendo_vb
 - capcom_cps
+- snk_neogeo
+- snk_neogeocd
 - snk_ngp
 
 ```--pal-format```,```-g```
@@ -54,10 +60,11 @@ Specifies the palette data format. Currently supported values are:
 - nintendo_gb_color
 - nintendo_sfc
 - nintendo_vb
+- snk_neogeo
 - snk_ngp
 - snk_ngpc
 
-Note: If the palette format identifier is the same as the CHR format identifier, you do not need to specify the palette format. I.E., if you use ```--chr-format sega_md``` you do not need to use ```--pal-format sega_md``` as well.
+Note: If the palette format identifier is the same as the CHR format identifier, you do not need to specify the palette format. I.E., if you use ```--chr-format sega_md``` you do not need to use ```--pal-format sega_md``` as well. However, it's not smart enough to detect CHR variants that may use the same palette system. For example, if you use ```--chr-format nintendo_gb``` with palette data, you will need to manually specify ```--pal-format snk_neogeo```
 
 ```--chr-data```,```-t```
 
@@ -85,10 +92,26 @@ Number of tile columns (horizontal) to render for output image.
 
 ```--subpalette```,```-s```
 
-Specify the subpalette to be used from within the palette data. This is system specific.
+Specify the subpalette to be used from within the palette data. This is system specific. The value is zero indexed.
 
 ### Usage Example
     cat ../etc/sonic_sprite | ./chrgfx --chr-format sega_md --pal-data ../etc/sonic1.cram --trns --columns 32 > test.png
+
+## CHRs
+A CHR is short for 'char,' which is short for character. This evolved from the world of programming, where the char data type is an unsigned 8-bit value. It was commonly used for holding single text characters. In early game development days, it became synonymous with the basic unit of graphics, the 8x8 tile.
+
+This page has a pretty good introduction to the concept of 8x8 tiles and how old game systems displayed graphics: https://n3s.io/index.php?title=How_It_Works
+
+While CHRs are traditionally 8x8 pixels in size, I use the term to refer to any sized graphics tile (16x16, 32x32, etc), just for convenience's sake.
+
+## Palettes
+Color palette data varies wildly across systems. The code is written to operate on the palette data as it is stored inside the machine's memory during runtime. Often this is stored inside the video RAM along with CHR and mapping data, though in some cases it has it's own discrete memory. In either case, the data needs to be extracted as a raw, binary chunk and stored in a file.
+
+You will likely need to use an emulator that has a debugger capable of dumping memory, or at least viewing memory so bytes can be manually copied by hand. Some emulators store raw memory dumps in savestate files, which may be useful for obtaining palette data. Please see the Format Specific Notes below for information that may be useful to you.
+
+Devices generally have a large 'system palette' which is subdivided into small palettes to be used for different objects and graphics on the screen. For example, the Sega Megadrive has a 64 color system palette which is divided into four 16 color palettes. Since the Megadrive CHR graphics are 4bpp, they can address, at most, 16 colors. If a tile uses colors from the third subpalette, that subpalette will need to be specified with the ```--subpalette``` option. Otherwise, it will always use the first subpalette and the colors will be incorrect.
+
+Aside from device specific formats, there are also generic formats. Currently the only one implemented is the TileLayer Pro format. The colors in this palette can be applied to CHR data from any device.
 
 ## Format Specific Notes
 
@@ -115,6 +138,20 @@ GameBoy Color palettes consist of four 15-bit colors. There are 8 palettes for b
 
 ### Nintendo VirtualBoy palettes (nintendo\_vb)
 VirtualBoy palettes consist of 4 colors, each color being 2 bits, making a palette 1 byte in size. There are 8 palettes total: 4 for background, 4 for objects. They are stored at 0x5F860 in memory. Despite each palette being only 1 byte, there are 2 bytes allocated for each entry. The palette value is mirrored across both bytes. Altogether, with the byte mirroring, the full runtime palette is 16 bytes. The chrgfx palette converter takes in these 16 bytes as palette data.
+
+### SNK NeoGeo and GeoGeo CD CHR data (snk\_neogeo & snk\_neogeocd)
+The NeoGeo MVS is a somewhat unique system in that tile data is not loaded into VRAM, but rather addressed directly from it's ROM. You will need to the use dumps of the C ROMs. Moreover, you will need to interleave the odd and even dumps into one file in order to use the data in chrgfx. Interleave odd first then even, at two bytes each.
+
+More info on how C ROM data is split can be found here: https://wiki.neogeodev.org/index.php?title=Sprite_graphics_format
+
+### SNK NeoGeo palette (snk\_neogeo)
+The NeoGeo system palette is a bit unique. It is made up of 256 16-color palettes, yielding 4096 (!) colors in the system palette. Since the maximum amount of colors in an indexed image is 256, we cannot export all 4096 colors in one image. Therefore, the code will stop processing data once it hits 256 colors in the output palette.
+
+However, any of the 256 subpalettes may be addressed, which is a preferable method anyway.
+
+The total size for the system palette is 8192 bytes (exactly 8KB). This data starts at 0x400000 in memory. The code will operate on all 8KB of data.
+
+More info on NeoGeo color palettes can be found here: https://wiki.neogeodev.org/index.php?title=Palettes
 
 ### SNK NeoGeo Pocket palettes (snk\_ngp)
 Palettes for the original, monochrome Pocket are made up 3 bit shades of gray. There are three system palettes, for Sprite, Scroll 1 and Scroll 2. Each palette has two subpalettes, each with four colors each. Each color is 1 byte: the lowest three bits are the color shade, while the rest are not used. The palette data is stored in memory starting at 0x8100, with 8 bytes for each of the system palettes.
