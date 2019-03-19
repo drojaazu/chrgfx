@@ -118,13 +118,13 @@ const chr* nintendo_sfc_8bpp_cx::get_chr_sfc_8bpp(const u8* data)
 // 256 colors per palette, 2 bytes per color
 // subpalettes can vary based on graphics mode
 // default is 16 subpalettes of 16 colors each
-const pal_traits nintendo_sfc_px::traits{255, 2, 16, 16};
+const pal_traits nintendo_sfc_px::traits{256, 2, 16, 16};
 
 const pal_traits* nintendo_sfc_px::get_traits() { return &traits; }
 
 const color* nintendo_sfc_px::get_rgb_sfc(const u8* data)
 {
-	// 16|               |0
+	// 15|               |0
 	//   xBBBBBGG GGGRRRRR
 	// (little endian)
 
@@ -144,7 +144,7 @@ const color* nintendo_sfc_px::get_rgb(const u8* data)
 	return get_rgb_sfc(data);
 }
 
-const palette* nintendo_sfc_px::get_pal(const u8* data, int8_t subpal)
+const palette* nintendo_sfc_px::get_pal(const u8* data, s16 subpal)
 {
 	return chrgfx::get_pal(this, data, subpal);
 }

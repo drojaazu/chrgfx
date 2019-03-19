@@ -27,7 +27,7 @@ class sega_md_px : public pal_xform
  public:
 	const pal_traits* get_traits();
 	const color* get_rgb(const u8* data);
-	const palette* get_pal(const u8* data, int8_t subpal);
+	const palette* get_pal(const u8* data, s16 subpal);
 };
 }	// namespace chrgfx
 

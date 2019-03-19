@@ -66,7 +66,7 @@ const color* sega_mastersys_px::get_rgb(const u8* data)
 	return get_rgb_ms(data);
 }
 
-const palette* sega_mastersys_px::get_pal(const u8* data, int8_t subpalette)
+const palette* sega_mastersys_px::get_pal(const u8* data, s16 subpalette)
 {
 	return chrgfx::get_pal(this, data, subpalette);
 }
@@ -79,7 +79,7 @@ const pal_traits* sega_gamegear_px::get_traits() { return &traits; }
 
 const color* sega_gamegear_px::get_rgb_gg(const u8* data)
 {
-	// 16|               |0
+	// 15|               |0
 	//   xxxxBBBB GGGGRRRR
 	// (little endian)
 
@@ -99,7 +99,7 @@ const color* sega_gamegear_px::get_rgb(const u8* data)
 	return get_rgb_gg(data);
 }
 
-const palette* sega_gamegear_px::get_pal(const u8* data, int8_t subpalette)
+const palette* sega_gamegear_px::get_pal(const u8* data, s16 subpalette)
 {
 	return chrgfx::get_pal(this, data, subpalette);
 }

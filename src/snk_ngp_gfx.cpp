@@ -61,7 +61,7 @@ const color* snk_ngp_px::get_rgb(const u8* data)
 	return &ngp_colors[*data];
 }
 
-const palette* snk_ngp_px::get_pal(const u8* data, int8_t subpal)
+const palette* snk_ngp_px::get_pal(const u8* data, s16 subpal)
 {
 	return chrgfx::get_pal(this, data, subpal);
 }
@@ -74,7 +74,7 @@ const pal_traits* snk_ngpc_px::get_traits() { return &traits; }
 
 const color* snk_ngpc_px::get_rgb(const u8* data)
 {
-	// 16|               |0
+	// 15|               |0
 	//   GGGGBBBB xxxxRRRR
 	// little endian
 
@@ -88,7 +88,7 @@ const color* snk_ngpc_px::get_rgb(const u8* data)
 	return new color(r, g, b);
 }
 
-const palette* snk_ngpc_px::get_pal(const u8* data, int8_t subpal)
+const palette* snk_ngpc_px::get_pal(const u8* data, s16 subpal)
 {
 	return chrgfx::get_pal(this, data, subpal);
 }

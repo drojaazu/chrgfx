@@ -43,7 +43,7 @@ palette* make_pal(bool blank)
 	return outpal;
 }
 
-palette* get_pal(pal_xform* xform, const u8* data, int8_t subpal)
+palette* get_pal(pal_xform* xform, const u8* data, s16 subpal)
 {
 	auto outpal = new palette();
 
@@ -84,6 +84,10 @@ palette* get_pal(pal_xform* xform, const u8* data, int8_t subpal)
 
 	for(u8 paliter = 0; paliter < count; paliter++)
 	{
+		// palettes are only valid up to 256 colors
+		// though some devices (such as NeoGeo) have system palettes that are much
+		// larger stop adding if we've hit this limit
+		if(outpal->size() >= 256) return outpal;
 		outpal->push_back(*(xform->get_rgb(data)));
 		data += datasize;
 	}

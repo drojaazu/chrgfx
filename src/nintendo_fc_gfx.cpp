@@ -107,7 +107,7 @@ const color* nintendo_fc_px::get_rgb(const u8* data)
 	return &std_fc_pal[*data];
 }
 
-const palette* nintendo_fc_px::get_pal(const u8* data, int8_t subpal)
+const palette* nintendo_fc_px::get_pal(const u8* data, s16 subpal)
 {
 	return chrgfx::get_pal(this, data, subpal);
 }

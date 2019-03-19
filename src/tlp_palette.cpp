@@ -59,7 +59,7 @@ const color* tilelayerpro_px::get_rgb(const u8* data)
 	return new color(data[0], data[1], data[2]);
 }
 
-const palette* tilelayerpro_px::get_pal(const u8* data, int8_t subpal)
+const palette* tilelayerpro_px::get_pal(const u8* data, s16 subpal)
 {
 	if(subpal > 0)
 	{

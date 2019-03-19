@@ -15,6 +15,8 @@ const map<string, chr_xform*> chrx_list = {
 		{string("nintendo_vb"), new nintendo_vboy_cx()},
 		{string("capcom_cps"), new capcom_cps_cx()},
 		{string("sega_8bit"), new sega_8bit_cx()},
+		{string("snk_neogeo"), new snk_neogeo_cx()},
+		{string("snk_neogeocd"), new snk_neogeocd_cx()},
 		{string("snk_ngp"), new snk_ngp_cx()}};
 
 const map<string, pal_xform*> palx_list = {
@@ -28,6 +30,7 @@ const map<string, pal_xform*> palx_list = {
 		{string("nintendo_gb_pocket"), new nintendo_gbpocket_px()},
 		{string("nintendo_gb_color"), new nintendo_gbcolor_px()},
 		{string("nintendo_vb"), new nintendo_vboy_px()},
+		{string("snk_neogeo"), new snk_neogeo_px()},
 		{string("snk_ngp"), new snk_ngp_px()},
 		{string("snk_ngpc"), new snk_ngpc_px()}};
 
@@ -42,7 +45,7 @@ chr_xform* chrx = nullptr;
 pal_xform* palx = nullptr;
 
 const palette* work_pal;
-int8_t subpalette{-1};
+s16 subpalette{-1};
 
 int main(int argc, char** argv)
 {

@@ -65,8 +65,7 @@ const color* nintendo_gb_px::get_rgb(const u8* data)
 }
 
 const palette* nintendo_gb_px::get_gb_pal(const u8* data,
-																					const color* gb_palette,
-																					int8_t subpal)
+																					const color* gb_palette, s16 subpal)
 {
 	auto _out = new palette();
 	u8 paliter{0}, count{3};
@@ -104,13 +103,13 @@ const palette* nintendo_gb_px::get_gb_pal(const u8* data,
 	return _out;
 }
 
-const palette* nintendo_gb_px::get_pal(const u8* data, int8_t subpal)
+const palette* nintendo_gb_px::get_pal(const u8* data, s16 subpal)
 {
 	return nintendo_gb_px::get_gb_pal(
 			data, nintendo_gb_px::gameboy_colors_original, subpal);
 }
 
-const palette* nintendo_gbpocket_px::get_pal(const u8* data, int8_t subpal)
+const palette* nintendo_gbpocket_px::get_pal(const u8* data, s16 subpal)
 {
 	return nintendo_gb_px::get_gb_pal(data, nintendo_gb_px::gameboy_colors_pocket,
 																		subpal);
@@ -130,7 +129,7 @@ const pal_traits* nintendo_gbcolor_px::get_traits() { return &traits; }
 
 const color* nintendo_gbcolor_px::get_rgb(const u8* data)
 {
-	// 16|               |0
+	// 15|               |0
 	//   xBBBBBGG GGGRRRRR
 	// (little endian in rom, big endian in memory; process as big endian)
 	u8 r = data[1] & 0x1F;
@@ -144,7 +143,7 @@ const color* nintendo_gbcolor_px::get_rgb(const u8* data)
 	return new color(r, g, b);
 }
 
-const palette* nintendo_gbcolor_px::get_pal(const u8* data, int8_t subpal)
+const palette* nintendo_gbcolor_px::get_pal(const u8* data, s16 subpal)
 {
 	return chrgfx::get_pal(this, data, subpal);
 }

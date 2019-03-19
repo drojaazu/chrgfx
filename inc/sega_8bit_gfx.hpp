@@ -25,7 +25,7 @@ class sega_mastersys_px : public pal_xform
  public:
 	const pal_traits* get_traits();
 	const color* get_rgb(const u8* data);
-	const palette* get_pal(const u8* data, int8_t subpalette);
+	const palette* get_pal(const u8* data, s16 subpalette);
 };
 
 class sega_gamegear_px : public pal_xform
@@ -37,7 +37,7 @@ class sega_gamegear_px : public pal_xform
  public:
 	const pal_traits* get_traits();
 	const color* get_rgb(const u8* data);
-	const palette* get_pal(const u8* data, int8_t subpalette);
+	const palette* get_pal(const u8* data, s16 subpalette);
 };
 
 }	// namespace chrgfx
