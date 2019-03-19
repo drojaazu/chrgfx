@@ -15,6 +15,8 @@ const map<string, chr_xform*> chrx_list = {
 		{string("nintendo_vb"), new nintendo_vboy_cx()},
 		{string("capcom_cps"), new capcom_cps_cx()},
 		{string("sega_8bit"), new sega_8bit_cx()},
+		{string("snk_neogeo"), new snk_neogeo_cx()},
+		{string("snk_neogeocd"), new snk_neogeocd_cx()},
 		{string("snk_ngp"), new snk_ngp_cx()}};
 
 const map<string, pal_xform*> palx_list = {
