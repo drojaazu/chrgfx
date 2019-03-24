@@ -1,8 +1,10 @@
-Language:        Cpp
-BasedOnStyle:  Google
-
+Language: Cpp
+Standard: Cpp11
+BasedOnStyle: Google
 BreakBeforeBraces: Allman
 SpaceBeforeParens: Never
-TabWidth:        2
-UseTab:          Always
-Standard:		Cpp11
+TabWidth: 2
+UseTab: Always
+AlignTrailingComments: true
+AllowShortIfStatementsOnASingleLine: true
+Cpp11BracedListStyle: true
