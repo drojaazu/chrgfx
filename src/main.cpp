@@ -1,8 +1,12 @@
 #include "main.hpp"
+#ifdef DEBUG
 #include <chrono>
+#endif
 
 using namespace std;
 using namespace chrgfx;
+
+const string version = string("0.1");
 
 const map<string, chr_xform*> chrx_list = {
 		{string("1bpp"), new bpp1_cx()},
@@ -199,12 +203,16 @@ void process_args(int argc, char** argv)
 			// chr-format
 			case 'f':
 				chrx_name = optarg;
+				if(chrx_list.find(chrx_name) == chrx_list.end())
+					throw invalid_argument("Invalid CHR format specified");
 				chrx = chrx_list.at(optarg);
 				break;
 
 			// pal-format
 			case 'g':
 				palx_name = optarg;
+				if(palx_list.find(palx_name) == palx_list.end())
+					throw invalid_argument("Invalid palette format specified");
 				palx = palx_list.at(optarg);
 				break;
 
@@ -229,12 +237,26 @@ void process_args(int argc, char** argv)
 				break;
 			// trns entry
 			case 'i':
-				rtraits.trns_entry = stoi(optarg);
+				try
+				{
+					rtraits.trns_entry = stoi(optarg);
+				}
+				catch(const invalid_argument& e)
+				{
+					throw invalid_argument("Invalid transparency index value");
+				}
 				break;
 
 			// columns
 			case 'c':
-				rtraits.cols = stoi(optarg);
+				try
+				{
+					rtraits.cols = stoi(optarg);
+				}
+				catch(const invalid_argument& e)
+				{
+					throw invalid_argument("Invalid columns value");
+				}
 				break;
 
 			// subpalette
@@ -253,7 +275,7 @@ void process_args(int argc, char** argv)
 				exit(1);
 				break;
 			case '?':
-				cout << "Unknown option: " << (char)optopt << endl;
+				cerr << "Unknown option: " << (char)optopt << endl;
 			default:
 				print_help();
 				exit(1);
@@ -264,21 +286,22 @@ void process_args(int argc, char** argv)
 
 void print_help()
 {
-	cout << "Valid options:" << endl;
-	cout << "  --chr-format, -f   Specify tile data format" << endl;
-	cout << "  --chr-data, -t     Filename to input tile data" << endl;
-	cout << "  --pal-format, -g   Specify palette data format" << endl;
-	cout << "  --pal-data, -p     Filename to input palette data" << endl;
-	cout << "  --output, -o       Specify output PNG image filename" << endl;
-	cout << "  --trns, -r         Use image transparency" << endl;
-	cout << "  --trns-entry       Specify palette entry to use as transparency "
+	cerr << "chrgfx version " << version << endl << endl;
+	cerr << "Valid options:" << endl;
+	cerr << "  --chr-format, -f   Specify tile data format" << endl;
+	cerr << "  --chr-data, -t     Filename to input tile data" << endl;
+	cerr << "  --pal-format, -g   Specify palette data format" << endl;
+	cerr << "  --pal-data, -p     Filename to input palette data" << endl;
+	cerr << "  --output, -o       Specify output PNG image filename" << endl;
+	cerr << "  --trns, -r         Use image transparency" << endl;
+	cerr << "  --trns-entry, -i   Specify palette entry to use as transparency "
 					"(default is 0)"
 			 << endl;
-	cout << "  --columns, -c      Specify number of columns per row of tiles in "
+	cerr << "  --columns, -c      Specify number of columns per row of tiles in "
 					"output image"
 			 << endl;
-	cout << "  --pal-offset, -s   Specify palette entry at which to begin "
+	cerr << "  --pal-offset, -s   Specify palette entry at which to begin "
 					"(default is 0)"
 			 << endl;
-	cout << "  --help, -h         Display this text" << endl;
+	cerr << "  --help, -h         Display this text" << endl;
 }
