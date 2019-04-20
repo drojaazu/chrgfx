@@ -38,16 +38,15 @@ const chr* sega_md_cx::get_chr(const chr* data) { return get_chr_smd(data); }
 const color* sega_md_px::get_rgb_smd(const u8* data)
 {
 	// 15|               |0
-	//   xxxxBBBB GGGGRRRR
+	//   xxxxBBBx GGGxRRRx
+	u8 g = (data[1] & 0xe0);
+	u8 b = data[0] & 0xe;
+	u8 r = data[1] & 0xe;
 
-	// duplicate the four bits to fill out the whole byte
-	u8 b = data[0] & 0xf;
-	b = (b << 4) | b;
-	u8 g = (data[1] & 0xf0);
-	g = (g >> 4) | g;
-	u8 r = data[1] & 0xf;
+	// duplicate the data to fill out the whole byte
 	r = (r << 4) | r;
-
+	g = (g >> 4) | g;
+	b = (b << 4) | b;
 	return new color(r, g, b);
 }
 
