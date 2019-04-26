@@ -20,6 +20,7 @@ Converts tile (CHR) based bitmap graphics from retro hardware systems, similar t
 - Sega Megadrive (sega_md)
 - Sega Master System (sega_sms)
 - Sega Game Gear (sega_gg)
+- Sega Puzzle Construction data file (sega_pzlcnst)
 - Nintendo Famicom/NES (nintendo_fc)
 - Nintendo GameBoy (nintendo_gb)
 - Nintendo GameBoy Pocket (nintendo_gb_pocket)
@@ -159,3 +160,10 @@ More info on NeoGeo color palettes can be found here: https://wiki.neogeodev.org
 Palettes for the original, monochrome Pocket are made up 3 bit shades of gray. There are three system palettes, for Sprite, Scroll 1 and Scroll 2. Each palette has two subpalettes, each with four colors each. Each color is 1 byte: the lowest three bits are the color shade, while the rest are not used. The palette data is stored in memory starting at 0x8100, with 8 bytes for each of the system palettes.
 
 The chrgfx palette converter will take in these 24 bytes as the palette data.
+
+### Sega Puzzle Construction data files (sega\_pzlcnst)
+Puzzle Construction is an application for the Sega Teradrive allowing users to design puzzles on the PC side and play them on the Megadrive side. Many of the data files for the PC application (in the PZL diretory) are stored as Mega Drive CHR patterns with the palette at the beginning of the file. The palette is slightly different from the native CRAM format. The colors are still 3 bit but are split across three bytes as R/G/B rather than being packed into two bytes.
+
+Since chrgfx expects palette and CHR data to be in seperate files, you will need to manually split the data. The format is very simple: the first 0x100 bytes are palette data (though only up to 0xc0 is valid, since the Mega Drive memory for 64 colors in CRAM) while the rest that follows is pattern data. You can split these into two files, or make use of a tool like dd to split up data over a pipe:
+```dd bs=$((0x100)) skip=1 if=MENU.PTN | chrgfx --chr-format=sega_md --pal-format=sega_pzlcnst --pal-data=MENU.PTN --columns=29 > pzlcnst_menu.png```
+

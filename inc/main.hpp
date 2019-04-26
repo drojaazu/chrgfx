@@ -12,6 +12,7 @@
 #include "render.hpp"
 #include "sega_8bit_gfx.hpp"
 #include "sega_md_gfx.hpp"
+#include "sega_pzlcnst_gfx.hpp"
 #include "snk_neogeo.hpp"
 #include "snk_ngp_gfx.hpp"
 #include "tlp_palette.hpp"

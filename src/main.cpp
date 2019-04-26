@@ -25,6 +25,7 @@ const map<string, chr_xform*> chrx_list = {
 
 const map<string, pal_xform*> palx_list = {
 		{string("sega_md"), new sega_md_px()},
+		{string("sega_pzlcnst"), new sega_pzlcnst_px()},
 		{string("tilelayerpro"), new tilelayerpro_px()},
 		{string("sega_sms"), new sega_mastersys_px()},
 		{string("sega_gg"), new sega_gamegear_px()},
