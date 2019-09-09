@@ -54,7 +54,7 @@ const color nintendo_gb_px::gameboy_colors_original[] = {
 // (based on MAME output)
 const color nintendo_gb_px::gameboy_colors_pocket[] = {
 		color(0xc4, 0xcf, 0xa1),	 // 00 - lightest
-		color(0x8b, 0x95, 0x6d),	 // 01
+		color(0x8b, 0x95, 0x6d),	 // 01do pc=-
 		color(0x6b, 0x73, 0x53),	 // 02
 		color(0x41, 0x41, 0x41)};	// 03 - darkest
 
@@ -90,7 +90,7 @@ const palette* nintendo_gb_px::get_gb_pal(const u8* data,
 
 	// 3 palettes (BGRD, OBJ0, OBJ1)
 	// 8 bits, every 2 bits is a palette entry
-	// 3  2  1  0   pal entry
+	// 3  2  1  0   pal entr`y
 	// 11 11 11 11  bit
 	for(; paliter < count; paliter++)
 	{

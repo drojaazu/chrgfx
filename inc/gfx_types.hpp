@@ -64,18 +64,69 @@ class pal_xform
 	virtual ~pal_xform(){};
 };
 
-/*!
- * \brief A collection of CHRs of the same type, with supporting attributes
+constexpr u16 MAX_GFX_PLANES = 8;
+constexpr u16 MAX_GFX_SIZE = 32;
+
+// This is based on gfx_layout in mame, with the exlusion of a couple of unused
+// fields
+struct chr_def
+{
+	u16 width;												// pixel width of each element
+	u16 height;												// pixel height of each element
+	u16 planes;												// number of bitplanes
+	u32 planeoffset[MAX_GFX_PLANES];	// bit offset of each bitplane
+	u32 xoffset[MAX_GFX_SIZE];				// bit offset of each horizontal pixel
+	u32 yoffset[MAX_GFX_SIZE];				// bit offset of each vertical pixel
+	u32 charincrement;	// distance between two consecutive elements (in bits)
+};
+
+constexpr u16 MAX_PASS = 16;
+constexpr u16 MAX_COLORS = 256;
+struct color_def
+{
+	// color info
+	u16 passes;
+	u16 red_shift[MAX_PASS];
+	u16 red_mask[MAX_PASS];
+	u16 green_shift[MAX_PASS];
+	u16 green_mask[MAX_PASS];
+	u16 blue_shift[MAX_PASS];
+	u16 blue_mask[MAX_PASS];
+};
+
+/**
+ * System palette definiton
+ */
+struct pal_def
+{
+	/**
+	 * The number of entries in the system palette
+	 */
+	u16 syspal_size;
+	/**
+	 * The number entries in a subpalette
+	 */
+	u16 subpal_size;
+
+	u16 entry_size;	// per color, in bytes
+
+	/**
+	 * Pointer to the hard coded system palette, if relevant
+	 */
+	const color *syspal;
+
+	const color_def *colordef;
+};
+
+/*
+ * A collection of CHRs of the same type, with supporting attributes
  */
 class bank
 {
-	const chr_traits c_traits;
-	std::vector<const chr *> *c_data = nullptr;
-
  public:
-	bank(const chr_traits traits) : c_traits(traits)
+	bank(const chr_def chrdef) : c_def(chrdef)
 	{
-		this->c_data = new std::vector<const chr *>();
+		this->c_data = new std::vector<const u8 *>();
 	};
 
 	~bank()
@@ -84,8 +135,12 @@ class bank
 		delete this->c_data;
 	};
 
-	const chr_traits traits() { return this->c_traits; }
-	std::vector<const chr *> *data() { return this->c_data; }
+	const chr_def chrdef() { return this->c_def; }
+	std::vector<const u8 *> *data() { return this->c_data; }
+
+ private:
+	chr_def c_def;
+	std::vector<const u8 *> *c_data;
 };
 
 }	// namespace chrgfx

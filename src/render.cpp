@@ -11,18 +11,26 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 	if(chr_bank->data()->size() < 1)
 		throw std::length_error("Tile vector is empty, nothing to render");
 
-	std::vector<const chr*>* chrs = chr_bank->data();
+	std::vector<const u8*>* chrs = chr_bank->data();
 
 	u16
 			// chr dimensions
-			chr_pxlwidth = chr_bank->traits().width,
-			chr_pxlheight = chr_bank->traits().height,
+			chr_pxlwidth = chr_bank->chrdef().width,
+			chr_pxlheight = chr_bank->chrdef().height,
 
 			// number of chrs to add to end of buffer to get an evenly divisible count
 			chrs_to_pad = (chrs->size() % rtraits->cols > 0)
 												? (rtraits->cols - (chrs->size() % rtraits->cols))
-												: 0,
+												: 0;
 
+	// pad with empty chrs if necessary
+	// (it's IMPORTANT that we take care of this before calculating final image
+	// sizes)
+	if(chrs_to_pad > 0)
+		for(u16 addchr_iter = 0; addchr_iter < chrs_to_pad; addchr_iter++)
+			chrs->push_back(new chr[chr_pxlwidth * chr_pxlheight]{0});
+
+	u16
 			// final image dimensions (in chrs)
 			outimg_colwidth = rtraits->cols,
 			outimg_rowheight = chrs->size() / outimg_colwidth;
@@ -40,11 +48,6 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 	std::cerr << "chr chunk size: " << (int)(chr_pxlwidth * chr_pxlheight)
 						<< std::endl;
 #endif
-
-	// pad with empty chrs if necessary
-	if(chrs_to_pad > 0)
-		for(u16 addchr_iter = 0; addchr_iter < chrs_to_pad; addchr_iter++)
-			chrs->push_back(new chr[chr_pxlwidth * chr_pxlheight]{0});
 
 #ifdef DEBUG
 	std::cerr << "chrs size after padding: " << (int)chrs->size() << std::endl;

@@ -6,48 +6,32 @@
 using namespace std;
 using namespace chrgfx;
 
-const string version = string("0.1");
+const string version = string("1.1");
 
-const map<string, chr_xform*> chrx_list = {
-		{string("1bpp"), new bpp1_cx()},
-		{string("sega_md"), new sega_md_cx()},
-		{string("nintendo_sfc"), new nintendo_sfc_cx()},
-		{string("nintendo_sfc_3bpp"), new nintendo_sfc_3bpp_cx()},
-		{string("nintendo_sfc_8bpp"), new nintendo_sfc_8bpp_cx()},
-		{string("nintendo_fc"), new nintendo_fc_cx()},
-		{string("nintendo_gb"), new nintendo_gb_cx()},
-		{string("nintendo_vb"), new nintendo_vboy_cx()},
-		{string("capcom_cps"), new capcom_cps_cx()},
-		{string("sega_8bit"), new sega_8bit_cx()},
-		{string("snk_neogeo"), new snk_neogeo_cx()},
-		{string("snk_neogeocd"), new snk_neogeocd_cx()},
-		{string("snk_ngp"), new snk_ngp_cx()}};
+const map<string, const chr_def> chrdef_list = {
+		{string("mono"), chrdefs::chr_8x8x1},
+		{string("sega_md"), chrdefs::chr_8x8x4_packed},
+		{string("sega_8bit"), chrdefs::sega_8bit},
+		{string("nintendo_sfc"), chrdefs::nintendo_sfc},
+		{string("nintendo_fc"), chrdefs::nintendo_fc},
+		{string("nintendo_gb"), chrdefs::nintendo_2bpp},
+		{string("seta"), chrdefs::seta_chr}};
 
-const map<string, pal_xform*> palx_list = {
-		{string("sega_md"), new sega_md_px()},
-		{string("sega_pzlcnst"), new sega_pzlcnst_px()},
-		{string("tilelayerpro"), new tilelayerpro_px()},
-		{string("sega_sms"), new sega_mastersys_px()},
-		{string("sega_gg"), new sega_gamegear_px()},
-		{string("nintendo_fc"), new nintendo_fc_px()},
-		{string("nintendo_sfc"), new nintendo_sfc_px()},
-		{string("nintendo_gb"), new nintendo_gb_px()},
-		{string("nintendo_gb_pocket"), new nintendo_gbpocket_px()},
-		{string("nintendo_gb_color"), new nintendo_gbcolor_px()},
-		{string("nintendo_vb"), new nintendo_vboy_px()},
-		{string("snk_neogeo"), new snk_neogeo_px()},
-		{string("snk_ngp"), new snk_ngp_px()},
-		{string("snk_ngpc"), new snk_ngpc_px()}};
+const map<string, const pal_def> paldef_list = {
+		{string("sega_md"), paldefs::sega_md_pal},
+		{string("nintendo_gb"), paldefs::nintendo_gb_pal}};
 
-string outfile, chrx_name, palx_name;
+string outfile, chrdef_name, palx_name;
 
 render_traits rtraits;
 
 istream* chr_data = nullptr;
 istream* pal_data = nullptr;
 
-chr_xform* chrx = nullptr;
-pal_xform* palx = nullptr;
+// chr_xform* chrx = nullptr;
+// pal_xform* palx = nullptr;
+pal_decode paldecoder(paldefs::sega_md_pal);
+chr_decode chrdecoder(chrdefs::chr_8x8x1);
 
 const palette* work_pal;
 s16 subpalette{-1};
@@ -60,15 +44,15 @@ int main(int argc, char** argv)
 
 		// set defaults & check sanity
 		// default to 1bpp if no chrx specified
-		if(chrx == nullptr) chrx = chrx_list.at("1bpp");
+		// if(chrdecoder == 1) chrdecoder = chrdef_list.at("mono");
 
 		// if no pal format was passed, see if there is a palx with same name as the
 		// chrx
-		if(palx == nullptr && palx_list.find(chrx_name) != palx_list.end())
-		{
-			palx_name = chrx_name;
-			palx = palx_list.at(chrx_name);
-		}
+		// if(palx == nullptr && paldef_list.find(chrdef_name) != palx_list.end())
+		//{
+		//	palx_name = chrdef_name;
+		//	palx = palx_list.at(chrdef_name);
+		//}
 
 		if(chr_data == nullptr)
 			chr_data = &cin;
@@ -97,12 +81,13 @@ int main(int argc, char** argv)
 			pal_data->seekg(0, pal_data->beg);
 			auto palbuffer = new char[length];
 			pal_data->read(palbuffer, length);
-			work_pal = palx->get_pal((uint8_t*)palbuffer, subpalette);
+			// work_pal = paldecoder.get_pal((u8*)palbuffer, subpalette);
+			work_pal = paldecoder.get_pal((u8*)palbuffer);
 			delete[] palbuffer;
 			delete pal_data;
 		}
 
-		bank work_bank = bank(*chrx->get_traits());
+		bank work_bank = bank(*chrdecoder.get_def());
 		/*
 		stream read psuedocode
 		1. get data size of tile from converter traits = x
@@ -114,18 +99,23 @@ int main(int argc, char** argv)
 		6. repeat until end of stream
 
 		*/
+
 #ifdef DEBUG
 		std::chrono::high_resolution_clock::time_point t1 =
 				std::chrono::high_resolution_clock::now();
 #endif
-		auto chunksize = chrx->get_traits()->data_size;
+		// auto chunksize = chrx->get_traits()->data_size;
+
+		const u16 chunksize = (chrdecoder.get_def()->charincrement / 8);
 		auto chunkbuffer = new char[chunksize];
 
 		while(!chr_data->eof())
 		{
 			chr_data->read(chunkbuffer, chunksize);
 			// what does read() do if we run out of bytes?
-			work_bank.data()->push_back(chrx->get_chr((u8*)chunkbuffer));
+			work_bank.data()->push_back(chrdecoder.get_chr((u8*)chunkbuffer));
+
+			// work_bank.data()->push_back(chrx->get_chr((u8*)chunkbuffer));
 		}
 
 		if(chr_data != &cin) delete chr_data;
@@ -173,9 +163,7 @@ int main(int argc, char** argv)
 
 void free_vectors()
 {
-	for(auto const& this_chrx : chrx_list) delete this_chrx.second;
-
-	for(auto const& this_palx : palx_list) delete this_palx.second;
+	// for(auto const& this_palx : palx_list) delete this_palx.second;
 }
 
 void process_args(int argc, char** argv)
@@ -203,18 +191,18 @@ void process_args(int argc, char** argv)
 		{
 			// chr-format
 			case 'f':
-				chrx_name = optarg;
-				if(chrx_list.find(chrx_name) == chrx_list.end())
+				chrdef_name = optarg;
+				if(chrdef_list.find(chrdef_name) == chrdef_list.end())
 					throw invalid_argument("Invalid CHR format specified");
-				chrx = chrx_list.at(optarg);
+				chrdecoder = chr_decode(chrdef_list.at(optarg));
 				break;
 
 			// pal-format
 			case 'g':
 				palx_name = optarg;
-				if(palx_list.find(palx_name) == palx_list.end())
+				if(paldef_list.find(palx_name) == paldef_list.end())
 					throw invalid_argument("Invalid palette format specified");
-				palx = palx_list.at(optarg);
+				paldecoder = paldef_list.at(optarg);
 				break;
 
 			// chr-data
