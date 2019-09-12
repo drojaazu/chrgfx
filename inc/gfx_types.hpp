@@ -15,7 +15,22 @@ typedef int32_t s32;
 
 namespace chrgfx
 {
-typedef u8 chr;
+enum class endianness
+{
+	little = 0,
+	big = 1,
+};
+
+inline endianness get_system_endianness()
+{
+	const int value{0x01};
+	const void *address = static_cast<const void *>(&value);
+	const unsigned char *least_significant_address =
+			static_cast<const unsigned char *>(address);
+	return (*least_significant_address == 0x01) ? endianness::little
+																							: endianness::big;
+}
+// typedef u8 chr;
 
 /*!
  * \brief CHR attributes
@@ -48,7 +63,7 @@ class chr_xform
 {
  public:
 	virtual const chr_traits *get_traits() = 0;
-	virtual const chr *get_chr(const u8 *data) = 0;
+	virtual const u8 *get_chr(const u8 *data) = 0;
 	virtual ~chr_xform(){};
 };
 
@@ -92,6 +107,7 @@ struct color_def
 	u16 green_mask[MAX_PASS];
 	u16 blue_shift[MAX_PASS];
 	u16 blue_mask[MAX_PASS];
+	endianness byteorder;
 };
 
 /**
@@ -99,10 +115,35 @@ struct color_def
  */
 struct pal_def
 {
+	pal_def(u16 palette_size, u16 subpal_size, u16 entry_size,
+					palette (*decoder)(const pal_def *, const u8 *data),
+					const color_def *colordef, const palette *syspal)
+			: palette_size(palette_size),
+				subpal_size(subpal_size),
+				entry_size(entry_size),
+				decoder(decoder),
+				colordef(colordef),
+				syspal(syspal)
+
+	{
+	}
+
+	pal_def &operator=(const pal_def &_pal_def)
+	/*		: palette_size(_pal_def.palette_size),
+					subpal_size(_pal_def.subpal_size),
+					entry_size(_pal_def.entry_size),
+					decoder(_pal_def.decoder),
+					colordef(_pal_def.colordef),
+					syspal(_pal_def.syspal) */
+	{
+		if(&_pal_def == this) return *this;
+		// this->palette_size = _pal_def.palette_size;
+		return *this;
+	}
 	/**
 	 * The number of entries in the system palette
 	 */
-	u16 syspal_size;
+	u16 palette_size;
 	/**
 	 * The number entries in a subpalette
 	 */
@@ -110,12 +151,11 @@ struct pal_def
 
 	u16 entry_size;	// per color, in bytes
 
-	/**
-	 * Pointer to the hard coded system palette, if relevant
-	 */
-	const color *syspal;
+	palette (*decoder)(const pal_def *, const u8 *data);
 
 	const color_def *colordef;
+
+	const palette *syspal;
 };
 
 /*
@@ -131,7 +171,7 @@ class bank
 
 	~bank()
 	{
-		for(const chr *this_chr : *(this->c_data)) delete[] this_chr;
+		for(const u8 *this_chr : *(this->c_data)) delete[] this_chr;
 		delete this->c_data;
 	};
 

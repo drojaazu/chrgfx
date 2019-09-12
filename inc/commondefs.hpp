@@ -1,7 +1,6 @@
 #ifndef COMMONDEFS_H
 #define COMMONDEFS_H
-#include "chrdef.hpp"
-#include "paldef.hpp"
+#include "paldecode.hpp"
 
 namespace chrgfx
 {
@@ -41,7 +40,7 @@ const static chr_def sega_8bit = {
 		8,
 		8,
 		4,
-		{0, 8, 16, 24},
+		{24, 16, 8, 0},
 		{0, 1, 2, 3, 4, 5, 6, 7},
 		{0 * 32, 1 * 32, 2 * 32, 3 * 32, 4 * 32, 5 * 32, 6 * 32, 7 * 32},
 		8 * 32};
@@ -111,12 +110,19 @@ namespace paldefs
 const static color_def sega_md_color = {
 		// 15|               |0
 		//   xxxxBBBx GGGxRRRx
-		1,	 {1}, {7}, {5},
-		{7}, {9}, {7}
+		1,
+		{1},
+		{7},
+		{5},
+		{7},
+		{9},
+		{7},
+		endianness::big
 
 };
 
-const static pal_def sega_md_pal = {64, 16, 2, nullptr, &sega_md_color};
+const static pal_def sega_md_pal = {
+		64, 16, 2, &pal_decode_calc, &sega_md_color, nullptr};
 
 const static color nintendo_gb_classic_pal[] = {
 		color(0xc4, 0xcf, 0xa1),	// 00 - lightest
@@ -125,8 +131,9 @@ const static color nintendo_gb_classic_pal[] = {
 		color(0x41, 0x41, 0x41)		// 03 - darkest
 };
 
-const static pal_def nintendo_gb_pal = {32, 4, 1, nintendo_gb_classic_pal,
-																				nullptr};
+// const static pal_def nintendo_gb_pal = {32, 4, 1, nintendo_gb_classic_pal,
+//																				nullptr};
+
 }	// namespace paldefs
 }	// namespace chrgfx
 #endif

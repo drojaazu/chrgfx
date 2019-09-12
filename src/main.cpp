@@ -17,9 +17,8 @@ const map<string, const chr_def> chrdef_list = {
 		{string("nintendo_gb"), chrdefs::nintendo_2bpp},
 		{string("seta"), chrdefs::seta_chr}};
 
-const map<string, const pal_def> paldef_list = {
-		{string("sega_md"), paldefs::sega_md_pal},
-		{string("nintendo_gb"), paldefs::nintendo_gb_pal}};
+const map<string, pal_def> paldef_list = {
+		{string("sega_md"), paldefs::sega_md_pal}};
 
 string outfile, chrdef_name, palx_name;
 
@@ -30,16 +29,17 @@ istream* pal_data = nullptr;
 
 // chr_xform* chrx = nullptr;
 // pal_xform* palx = nullptr;
-pal_decode paldecoder(paldefs::sega_md_pal);
+pal_def paldecoder(paldefs::sega_md_pal);
 chr_decode chrdecoder(chrdefs::chr_8x8x1);
 
-const palette* work_pal;
+palette work_pal;
 s16 subpalette{-1};
 
 int main(int argc, char** argv)
 {
 	try
 	{
+		
 		process_args(argc, argv);
 
 		// set defaults & check sanity
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 
 		// use system palette if no palette data supplied
 		if(pal_data == nullptr)
-			work_pal = chrgfx::make_pal();
+			work_pal = *(chrgfx::make_pal());
 		else
 		{
 			if(!pal_data->good())
@@ -82,7 +82,8 @@ int main(int argc, char** argv)
 			auto palbuffer = new char[length];
 			pal_data->read(palbuffer, length);
 			// work_pal = paldecoder.get_pal((u8*)palbuffer, subpalette);
-			work_pal = paldecoder.get_pal((u8*)palbuffer);
+			// work_pal = paldecoder.get_pal((u8*)palbuffer);
+			work_pal = paldecoder.decoder(&paldecoder, (u8*)palbuffer);
 			delete[] palbuffer;
 			delete pal_data;
 		}
@@ -133,7 +134,7 @@ int main(int argc, char** argv)
 #endif
 
 		png::image<png::index_pixel>* outimg =
-				render(&work_bank, work_pal, &rtraits);
+				render(&work_bank, &work_pal, &rtraits);
 
 #ifdef DEBUG
 		t2 = std::chrono::high_resolution_clock::now();

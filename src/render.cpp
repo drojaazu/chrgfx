@@ -28,7 +28,7 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 	// sizes)
 	if(chrs_to_pad > 0)
 		for(u16 addchr_iter = 0; addchr_iter < chrs_to_pad; addchr_iter++)
-			chrs->push_back(new chr[chr_pxlwidth * chr_pxlheight]{0});
+			chrs->push_back(new u8[chr_pxlwidth * chr_pxlheight]{0});
 
 	u16
 			// final image dimensions (in chrs)
@@ -60,7 +60,7 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 																										outimg_pxlrow_idx = 0;
 	auto this_outimg_pxlrow = std::vector<index_pixel>(),
 			 this_chr_pxlrow = std::vector<index_pixel>();
-	const chr* this_chroffset;
+	const u8* this_chroffset;
 
 	// pixel buffer to be sent to the final image
 	auto imgBuffer = pixel_buffer<index_pixel>(outimg_pxlwidth, outimg_pxlheight);
