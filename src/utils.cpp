@@ -4,6 +4,26 @@ using namespace png;
 
 namespace chrgfx
 {
+/**
+ * Returns a value with set bits equivalent to the number of bits requested
+ * e.g. 5 bits = 0x0000001F (0x1F = 00011111)
+ */
+u32 create_bitmask(u8 bitcount)
+{
+	// max 32 bits, anything higher would waste cycles
+	if(bitcount > 31)
+	{
+		return 0xffffffff;
+	}
+
+	u32 bitmask = 0;
+	for(s16 mask_iter = 0; mask_iter < bitcount; ++mask_iter)
+	{
+		bitmask |= (bitmask << 1) | 1;
+	}
+	return bitmask;
+}
+
 palette* make_pal(bool blank)
 {
 	auto outpal = new palette();

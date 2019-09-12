@@ -21,6 +21,8 @@ enum class endianness
 	big = 1,
 };
 
+// shamelessly stolen from stack overflow
+// https://stackoverflow.com/questions/1001307/detecting-endianness-programmatically-in-a-c-program/56191401#56191401
 inline endianness get_system_endianness()
 {
 	const int value{0x01};
@@ -115,12 +117,12 @@ struct color_def
  */
 struct pal_def
 {
-	pal_def(u16 palette_size, u16 subpal_size, u16 entry_size,
+	pal_def(u8 entry_datasize, u8 subpal_length, u8 subpal_count,
 					palette (*decoder)(const pal_def *, const u8 *data),
 					const color_def *colordef, const palette *syspal)
-			: palette_size(palette_size),
-				subpal_size(subpal_size),
-				entry_size(entry_size),
+			: entry_datasize(entry_datasize),
+				subpal_length(subpal_length),
+				subpal_count(subpal_count),
 				decoder(decoder),
 				colordef(colordef),
 				syspal(syspal)
@@ -128,33 +130,34 @@ struct pal_def
 	{
 	}
 
-	pal_def &operator=(const pal_def &_pal_def)
-	/*		: palette_size(_pal_def.palette_size),
-					subpal_size(_pal_def.subpal_size),
-					entry_size(_pal_def.entry_size),
-					decoder(_pal_def.decoder),
-					colordef(_pal_def.colordef),
-					syspal(_pal_def.syspal) */
-	{
-		if(&_pal_def == this) return *this;
-		// this->palette_size = _pal_def.palette_size;
-		return *this;
-	}
 	/**
-	 * The number of entries in the system palette
+	 * The size of each palette entry in bits
 	 */
-	u16 palette_size;
+	u8 entry_datasize;
+
 	/**
 	 * The number entries in a subpalette
 	 */
-	u16 subpal_size;
+	u8 subpal_length;
 
-	u16 entry_size;	// per color, in bytes
+	/**
+	 * The number of subpalettes in a full palette
+	 */
+	u8 subpal_count;
 
+	/**
+	 * Pointer to the decoding method
+	 */
 	palette (*decoder)(const pal_def *, const u8 *data);
 
+	/**
+	 * Pointer to the color definition (for calculated palettes)
+	 */
 	const color_def *colordef;
 
+	/**
+	 * Pointer to system palette (for fixed palettes)
+	 */
 	const palette *syspal;
 };
 

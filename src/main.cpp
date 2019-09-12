@@ -18,7 +18,8 @@ const map<string, const chr_def> chrdef_list = {
 		{string("seta"), chrdefs::seta_chr}};
 
 const map<string, pal_def> paldef_list = {
-		{string("sega_md"), paldefs::sega_md_pal}};
+		{string("sega_md"), paldefs::sega_md_pal},
+		{string("nintendo_gb_classic"), paldefs::nintendo_gb_classic_pal}};
 
 string outfile, chrdef_name, palx_name;
 
@@ -39,7 +40,6 @@ int main(int argc, char** argv)
 {
 	try
 	{
-		
 		process_args(argc, argv);
 
 		// set defaults & check sanity

@@ -122,14 +122,19 @@ const static color_def sega_md_color = {
 };
 
 const static pal_def sega_md_pal = {
-		64, 16, 2, &pal_decode_calc, &sega_md_color, nullptr};
+		16, 16, 4, &pal_decode_calc, &sega_md_color, nullptr};
 
-const static color nintendo_gb_classic_pal[] = {
+const static palette nintendo_gb_classic_syspal = {
 		color(0xc4, 0xcf, 0xa1),	// 00 - lightest
 		color(0x8b, 0x95, 0x6d),	// 01
 		color(0x6b, 0x73, 0x53),	// 02
 		color(0x41, 0x41, 0x41)		// 03 - darkest
 };
+
+// 4 colors, 2 bits per color, packed (1 byte per palette)
+// 3 palettes (3 bytes, stored at 0xFF47 in memory)
+const static pal_def nintendo_gb_classic_pal = {
+		2, 4, 3, &pal_decode_fixed, nullptr, &nintendo_gb_classic_syspal};
 
 // const static pal_def nintendo_gb_pal = {32, 4, 1, nintendo_gb_classic_pal,
 //																				nullptr};

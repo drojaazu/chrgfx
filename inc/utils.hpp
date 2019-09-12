@@ -7,6 +7,8 @@ using namespace png;
 
 namespace chrgfx
 {
+u32 create_bitmask(u8 bitcount);
+
 const chr_traits std_8bpp_tile{
 		8,	// 8px width
 		8,	// 8px height
