@@ -4,7 +4,10 @@
 
 namespace chrgfx
 {
-// hardware that uses RGB to form colors
+palette pal_decode(const pal_def* paldef, const u8* data,
+									 color (*get_color)(const pal_def*, const u32 rawvalue));
+
+// hardware that uses RGB to create colors
 // uses colordef to return colors
 palette pal_decode_calc(const pal_def* paldef, const u8* data);
 
@@ -15,7 +18,7 @@ palette pal_decode_fixed(const pal_def* paldef, const u8* data);
 // Tile Layer Pro
 palette pal_decode_soft_tlp(const pal_def* paldef, const u8* data);
 
-color get_color(const color_def* colordef, const u32 data);
+color calc_color(const color_def* colordef, const u32 data);
 
 }	// namespace chrgfx
 #endif

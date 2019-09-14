@@ -5,10 +5,53 @@ using namespace png;
 namespace chrgfx
 {
 /**
+ * Expands bits to fill out a full byte.
+ */
+u8 expand_bits(u8 data, u8 bitcount)
+{
+	// shamelessly stolen from MAME
+	if(bitcount == 1)
+	{
+		return (data & 1) ? 0xff : 0x00;
+	}
+	if(bitcount == 2)
+	{
+		data &= 3;
+		return (data << 6) | (data << 4) | (data << 2) | data;
+	}
+	if(bitcount == 3)
+	{
+		data &= 7;
+		return (data << 5) | (data << 2) | (data >> 1);
+	}
+	if(bitcount == 4)
+	{
+		data &= 0xf;
+		return (data << 4) | data;
+	}
+	if(bitcount == 5)
+	{
+		data &= 0x1f;
+		return (data << 3) | (data >> 2);
+	}
+	if(bitcount == 6)
+	{
+		data &= 0x3f;
+		return (data << 2) | (data >> 4);
+	}
+	if(bitcount == 7)
+	{
+		data &= 0x7f;
+		return (data << 1) | (data >> 6);
+	}
+	return data;
+}
+
+/**
  * Returns a value with set bits equivalent to the number of bits requested
  * e.g. 5 bits = 0x0000001F (0x1F = 00011111)
  */
-u32 create_bitmask(u8 bitcount)
+u32 create_bitmask32(u8 bitcount)
 {
 	// max 32 bits, anything higher would waste cycles
 	if(bitcount > 31)
@@ -16,8 +59,38 @@ u32 create_bitmask(u8 bitcount)
 		return 0xffffffff;
 	}
 
-	u32 bitmask = 0;
-	for(s16 mask_iter = 0; mask_iter < bitcount; ++mask_iter)
+	u32 bitmask{0};
+	for(s16 mask_iter{0}; mask_iter < bitcount; ++mask_iter)
+	{
+		bitmask |= (bitmask << 1) | 1;
+	}
+	return bitmask;
+}
+
+u16 create_bitmask16(u8 bitcount)
+{
+	if(bitcount > 15)
+	{
+		return 0xffff;
+	}
+
+	u16 bitmask{0};
+	for(s16 mask_iter{0}; mask_iter < bitcount; ++mask_iter)
+	{
+		bitmask |= (bitmask << 1) | 1;
+	}
+	return bitmask;
+}
+
+u8 create_bitmask8(u8 bitcount)
+{
+	if(bitcount > 7)
+	{
+		return 0xff;
+	}
+
+	u8 bitmask{0};
+	for(s16 mask_iter{0}; mask_iter < bitcount; ++mask_iter)
 	{
 		bitmask |= (bitmask << 1) | 1;
 	}
@@ -60,60 +133,6 @@ palette* make_pal(bool blank)
 			outpal->push_back(color(255, 255, 255));
 		}
 	}
-	return outpal;
-}
-
-palette* get_pal(pal_xform* xform, const u8* data, s16 subpal)
-{
-	auto outpal = new palette();
-
-	// if subpalette < 0, do not use subpalettes
-	// - get count from palette traits (palette_length)
-	// if subpalette > 0, use subpalettes
-	// - start of paliter loop is: subpalette * subpalette_length
-	// - paliter loop cound: subpalette_length
-
-	u8 count{0};
-	auto traits = xform->get_traits();
-
-	// subpalettes are 0 indexed
-	if(subpal > (traits->subpalette_count - 1))
-	{
-		std::cerr << "Warning: invalid subpalette specified; using full palette"
-							<< std::endl;
-		subpal = -1;
-	}
-
-	auto datasize = traits->color_size;
-
-	if(subpal < 0)
-	{
-		outpal->reserve(traits->palette_length);
-		count = traits->palette_length;
-	}
-	else
-	{
-		outpal->reserve(traits->subpalette_length);
-		count = traits->subpalette_length;
-		data += traits->subpalette_length * subpal * datasize;
-#ifdef DEBUG
-		std::cerr << "subpal: " << (int)subpal << std::endl;
-		std::cerr << "count: " << (int)count << std::endl;
-#endif
-	}
-
-	for(u8 paliter = 0; paliter < count; paliter++)
-	{
-		// palettes are only valid up to 256 colors
-		// though some devices (such as NeoGeo) have system palettes that are much
-		// larger stop adding if we've hit this limit
-		if(outpal->size() >= 256) return outpal;
-		outpal->push_back(*(xform->get_rgb(data)));
-		data += datasize;
-	}
-
-	// fill_pal(outpal);
-
 	return outpal;
 }
 

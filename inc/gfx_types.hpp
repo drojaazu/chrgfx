@@ -21,10 +21,13 @@ enum class endianness
 	big = 1,
 };
 
-// shamelessly stolen from stack overflow
-// https://stackoverflow.com/questions/1001307/detecting-endianness-programmatically-in-a-c-program/56191401#56191401
+/**
+ * Determins the endianness of the local system
+ */
 inline endianness get_system_endianness()
 {
+	// shamelessly stolen from stack overflow
+	// https://stackoverflow.com/questions/1001307/detecting-endianness-programmatically-in-a-c-program/56191401#56191401
 	const int value{0x01};
 	const void *address = static_cast<const void *>(&value);
 	const unsigned char *least_significant_address =
@@ -32,54 +35,6 @@ inline endianness get_system_endianness()
 	return (*least_significant_address == 0x01) ? endianness::little
 																							: endianness::big;
 }
-// typedef u8 chr;
-
-/*!
- * \brief CHR attributes
- */
-struct chr_traits
-{
-	const u8 width;		//!< Width in pixels
-	const u8 height;	//!< Height in pixels
-	const u8 bpp;			//!< Color bits per pixel
-	const u16
-			data_size;	//!< Calculated as (tile_height * tile_width) / (8 / tile_bpp)
-};
-
-/*!
- * \brief Palette attributes
- */
-struct pal_traits
-{
-	const u16 palette_length;	//!< Number of colors in the palette
-	const u8 color_size;			 //!< Data size of each color in bytes
-	const int16_t
-			subpalette_count;	//!< Number of subpalettes within the whole palette
-	const u8 subpalette_length;	//<<! Number of colors in a subpalette
-};
-
-/*!
- * \brief Abstract class for CHR transformers
- */
-class chr_xform
-{
- public:
-	virtual const chr_traits *get_traits() = 0;
-	virtual const u8 *get_chr(const u8 *data) = 0;
-	virtual ~chr_xform(){};
-};
-
-/*!
- * \brief Abstract class for palette transformers
- */
-class pal_xform
-{
- public:
-	virtual const pal_traits *get_traits() = 0;
-	virtual const color *get_rgb(const u8 *data) = 0;
-	virtual const palette *get_pal(const u8 *data, int16_t subpalette) = 0;
-	virtual ~pal_xform(){};
-};
 
 constexpr u16 MAX_GFX_PLANES = 8;
 constexpr u16 MAX_GFX_SIZE = 32;
@@ -102,14 +57,13 @@ constexpr u16 MAX_COLORS = 256;
 struct color_def
 {
 	// color info
-	u16 passes;
-	u16 red_shift[MAX_PASS];
-	u16 red_mask[MAX_PASS];
-	u16 green_shift[MAX_PASS];
-	u16 green_mask[MAX_PASS];
-	u16 blue_shift[MAX_PASS];
-	u16 blue_mask[MAX_PASS];
-	endianness byteorder;
+	u8 passes;
+	u8 red_shift[MAX_PASS];
+	u8 red_bitcount[MAX_PASS];
+	u8 green_shift[MAX_PASS];
+	u8 green_bitcount[MAX_PASS];
+	u8 blue_shift[MAX_PASS];
+	u8 blue_bitcount[MAX_PASS];
 };
 
 /**
@@ -117,18 +71,23 @@ struct color_def
  */
 struct pal_def
 {
-	pal_def(u8 entry_datasize, u8 subpal_length, u8 subpal_count,
-					palette (*decoder)(const pal_def *, const u8 *data),
-					const color_def *colordef, const palette *syspal)
-			: entry_datasize(entry_datasize),
+	pal_def(palette (*decoder)(const pal_def *, const u8 *data),
+					u8 entry_datasize = 0, u8 subpal_length = 0, u8 subpal_count = 0,
+					const color_def *colordef = nullptr, const palette *syspal = nullptr,
+					endianness byteorder = endianness::big)
+			: decoder(decoder),
+				entry_datasize(entry_datasize),
 				subpal_length(subpal_length),
 				subpal_count(subpal_count),
-				decoder(decoder),
 				colordef(colordef),
-				syspal(syspal)
-
+				syspal(syspal),
+				byteorder(byteorder)
 	{
 	}
+	/**
+	 * Pointer to the decoding method
+	 */
+	palette (*decoder)(const pal_def *, const u8 *data);
 
 	/**
 	 * The size of each palette entry in bits
@@ -146,11 +105,6 @@ struct pal_def
 	u8 subpal_count;
 
 	/**
-	 * Pointer to the decoding method
-	 */
-	palette (*decoder)(const pal_def *, const u8 *data);
-
-	/**
 	 * Pointer to the color definition (for calculated palettes)
 	 */
 	const color_def *colordef;
@@ -159,6 +113,11 @@ struct pal_def
 	 * Pointer to system palette (for fixed palettes)
 	 */
 	const palette *syspal;
+
+	/**
+	 * Specify the endianness of the data in the palette
+	 */
+	endianness byteorder;
 };
 
 /*

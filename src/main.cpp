@@ -3,6 +3,8 @@
 #include <chrono>
 #endif
 
+// TODO - rearrange all the helper functions/PODs!
+
 using namespace std;
 using namespace chrgfx;
 
@@ -15,11 +17,21 @@ const map<string, const chr_def> chrdef_list = {
 		{string("nintendo_sfc"), chrdefs::nintendo_sfc},
 		{string("nintendo_fc"), chrdefs::nintendo_fc},
 		{string("nintendo_gb"), chrdefs::nintendo_2bpp},
-		{string("seta"), chrdefs::seta_chr}};
+		{string("capcom_cps1"), chrdefs::capcom_cps1},
+		{string("snk_neogeo"), chrdefs::snk_neogeo},
+		{string("snk_neogeocd"), chrdefs::snk_neogeocd},
+		{string("capcom_cps3"), chrdefs::capcom_cps3},
+		{string("saturn_16x16x8"), chrdefs::saturn_16x16x8},
+		{string("saturn_16x16x4"), chrdefs::saturn_16x16x4},
+		{string("saturn_8x8x8"), chrdefs::saturn_8x8x8}};
 
 const map<string, pal_def> paldef_list = {
 		{string("sega_md"), paldefs::sega_md_pal},
-		{string("nintendo_gb_classic"), paldefs::nintendo_gb_classic_pal}};
+		{string("nintendo_gb_classic"), paldefs::nintendo_gb_classic_pal},
+		{string("nintendo_fc"), paldefs::nintendo_fc_pal},
+		{string("snk_neogeo"), paldefs::snk_neogeo_pal},
+		{string("snk_neogeo_noshadow"), paldefs::snk_neogeo_noshadow_pal},
+		{string("tlp"), paldefs::tilelayerpro}};
 
 string outfile, chrdef_name, palx_name;
 
@@ -28,10 +40,8 @@ render_traits rtraits;
 istream* chr_data = nullptr;
 istream* pal_data = nullptr;
 
-// chr_xform* chrx = nullptr;
-// pal_xform* palx = nullptr;
-pal_def paldecoder(paldefs::sega_md_pal);
-chr_decode chrdecoder(chrdefs::chr_8x8x1);
+pal_def paldef(paldefs::sega_md_pal);
+chr_def chrdef(chrdefs::chr_8x8x1);
 
 palette work_pal;
 s16 subpalette{-1};
@@ -43,8 +53,6 @@ int main(int argc, char** argv)
 		process_args(argc, argv);
 
 		// set defaults & check sanity
-		// default to 1bpp if no chrx specified
-		// if(chrdecoder == 1) chrdecoder = chrdef_list.at("mono");
 
 		// if no pal format was passed, see if there is a palx with same name as the
 		// chrx
@@ -68,7 +76,7 @@ int main(int argc, char** argv)
 
 		// use system palette if no palette data supplied
 		if(pal_data == nullptr)
-			work_pal = *(chrgfx::make_pal());
+			work_pal = *(chrgfx::make_pal(false));
 		else
 		{
 			if(!pal_data->good())
@@ -81,14 +89,12 @@ int main(int argc, char** argv)
 			pal_data->seekg(0, pal_data->beg);
 			auto palbuffer = new char[length];
 			pal_data->read(palbuffer, length);
-			// work_pal = paldecoder.get_pal((u8*)palbuffer, subpalette);
-			// work_pal = paldecoder.get_pal((u8*)palbuffer);
-			work_pal = paldecoder.decoder(&paldecoder, (u8*)palbuffer);
+			work_pal = paldef.decoder(&paldef, (u8*)palbuffer);
 			delete[] palbuffer;
 			delete pal_data;
 		}
 
-		bank work_bank = bank(*chrdecoder.get_def());
+		bank work_bank = bank(chrdef);
 		/*
 		stream read psuedocode
 		1. get data size of tile from converter traits = x
@@ -107,16 +113,14 @@ int main(int argc, char** argv)
 #endif
 		// auto chunksize = chrx->get_traits()->data_size;
 
-		const u16 chunksize = (chrdecoder.get_def()->charincrement / 8);
+		const u16 chunksize = (chrdef.charincrement / 8);
 		auto chunkbuffer = new char[chunksize];
 
 		while(!chr_data->eof())
 		{
 			chr_data->read(chunkbuffer, chunksize);
 			// what does read() do if we run out of bytes?
-			work_bank.data()->push_back(chrdecoder.get_chr((u8*)chunkbuffer));
-
-			// work_bank.data()->push_back(chrx->get_chr((u8*)chunkbuffer));
+			work_bank.data()->push_back(get_chr(&chrdef, (u8*)chunkbuffer));
 		}
 
 		if(chr_data != &cin) delete chr_data;
@@ -195,7 +199,7 @@ void process_args(int argc, char** argv)
 				chrdef_name = optarg;
 				if(chrdef_list.find(chrdef_name) == chrdef_list.end())
 					throw invalid_argument("Invalid CHR format specified");
-				chrdecoder = chr_decode(chrdef_list.at(optarg));
+				chrdef = chrdef_list.at(optarg);
 				break;
 
 			// pal-format
@@ -203,7 +207,7 @@ void process_args(int argc, char** argv)
 				palx_name = optarg;
 				if(paldef_list.find(palx_name) == paldef_list.end())
 					throw invalid_argument("Invalid palette format specified");
-				paldecoder = paldef_list.at(optarg);
+				paldef = paldef_list.at(optarg);
 				break;
 
 			// chr-data
@@ -284,7 +288,7 @@ void print_help()
 	cerr << "  --pal-data, -p     Filename to input palette data" << endl;
 	cerr << "  --output, -o       Specify output PNG image filename" << endl;
 	cerr << "  --trns, -r         Use image transparency" << endl;
-	cerr << "  --trns-entry, -i   Specify palette entry to use as transparency "
+	cerr << "  --trns-index, -i   Specify palette entry to use as transparency "
 					"(default is 0)"
 			 << endl;
 	cerr << "  --columns, -c      Specify number of columns per row of tiles in "

@@ -120,11 +120,14 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 
 		// this could probably be done better...
 		if(!rtraits->trns_entry)
+		{
 			trans->push_back(0);
+		}
 		else
 		{
-			trans->reserve(rtraits->trns_entry + 1);
+			trans->resize(rtraits->trns_entry + 1);
 			std::fill(trans->begin(), trans->end(), 255);
+			std::cerr << trans->size() << std::endl;
 			trans->at(rtraits->trns_entry) = 0;
 		}
 		outimg->set_tRNS(*trans);
