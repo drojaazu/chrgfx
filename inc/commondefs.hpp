@@ -104,6 +104,15 @@ const chr_def seta_8bit_chr = {
 		 1216, 1248},
 		16 * 16 * 8};
 
+const chr_def seta_sprites = {
+		16,
+		16,
+		4,
+		{24, 16, 8, 0},
+		{0, 1, 2, 3, 4, 5, 6, 7, 256, 257, 258, 259, 260, 261, 262, 263},
+		{0, 32, 64, 96, 128, 160, 192, 224, 512, 544, 576, 608, 640, 672, 704, 736},
+		1024};
+
 const chr_def capcom_cps1 = {
 		16,
 		16,
@@ -132,69 +141,14 @@ const chr_def snk_neogeocd = {
 		{0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480},
 		4 * 16 * 16};
 
-const chr_def capcom_cps3 = {
-		16,
-		16,
-		8,
-		{0, 1, 2, 3, 4, 5, 6, 7},
-		{3 * 8, 2 * 8, 1 * 8, 0 * 8, 7 * 8, 6 * 8, 5 * 8, 4 * 8, 11 * 8, 10 * 8,
-		 9 * 8, 8 * 8, 15 * 8, 14 * 8, 13 * 8, 12 * 8},
-		{0, 128, 256, 384, 512, 640, 768, 896, 1024, 1152, 1280, 1408, 1536, 1664,
-		 1792, 1920},
-		8 * 256};
+const chr_def snk_neogeo_pocket = {8,
+																	 8,
+																	 2,
+																	 {0, 1},
+																	 {8, 10, 12, 14, 0, 2, 4, 6},
+																	 {0, 16, 32, 48, 64, 80, 96, 112},
+																	 8 * 8 * 2};
 
-const chr_def saturn_16x16x8 = {
-		16,
-		16,
-		8,
-		{0, 1, 2, 3, 4, 5, 6, 7},
-		{0, 8, 16, 24, 32, 40, 48, 56, 64 * 8 + 0, 65 * 8, 66 * 8, 67 * 8, 68 * 8,
-		 69 * 8, 70 * 8, 71 * 8
-
-		},
-		{0 * 64, 1 * 64, 2 * 64, 3 * 64, 4 * 64, 5 * 64, 6 * 64, 7 * 64, 64 * 16,
-		 64 * 17, 64 * 18, 64 * 19, 64 * 20, 64 * 21, 64 * 22, 64 * 23},
-		128 * 16 /* really 128*16, but granularity is 32 bytes */
-};
-const chr_def saturn_16x16x4 = {
-		16,
-		16,
-		4,
-		{0, 1, 2, 3},
-		{
-				0,
-				4,
-				8,
-				12,
-				16,
-				20,
-				24,
-				28,
-				32 * 8 + 0,
-				32 * 8 + 4,
-				32 * 8 + 8,
-				32 * 8 + 12,
-				32 * 8 + 16,
-				32 * 8 + 20,
-				32 * 8 + 24,
-				32 * 8 + 28,
-
-		},
-		{0 * 32, 1 * 32, 2 * 32, 3 * 32, 4 * 32, 5 * 32, 6 * 32, 7 * 32, 32 * 16,
-		 32 * 17, 32 * 18, 32 * 19, 32 * 20, 32 * 21, 32 * 22, 32 * 23
-
-		},
-		32 * 32};
-
-const static chr_def saturn_8x8x8 = {
-		8,
-		8,
-		8,
-		{0, 1, 2, 3, 4, 5, 6, 7},
-		{0, 8, 16, 24, 32, 40, 48, 56},
-		{0 * 64, 1 * 64, 2 * 64, 3 * 64, 4 * 64, 5 * 64, 6 * 64, 7 * 64},
-		64 * 8 /* really 64*8, but granularity is 32 bytes */
-};
 }	// namespace chrdefs
 
 namespace paldefs
@@ -218,6 +172,35 @@ const static pal_def snk_neogeo_noshadow_pal = {&pal_decode_calc, 16, 16, 16,
 
 const static pal_def sega_md_pal = {
 		&pal_decode_calc, 16, 16, 4, &sega_md_color, nullptr, endianness::big};
+
+// NeoGeo Pocket Color
+// 16 palettes, 4 colors each; 2 bytes per color
+// 15|               |0
+//   xxxxRRRR GGGGBBBB
+// little endian
+const static color_def snk_neogeo_pocket_color = {1,	 {8}, {4}, {4},
+																									{4}, {0}, {4}};
+
+const static pal_def snk_neogeo_pocket_pal = {
+		&pal_decode_calc,	16, 4, 16, &snk_neogeo_pocket_color, nullptr,
+		endianness::little};
+
+// 15|               |0
+//   xBBBBBGG GGGRRRRR
+// (little endian)
+const static color_def nintendo_sfc_color = {1, {0}, {5}, {5}, {5}, {10}, {5}};
+
+// 256 colors per palette, 2 bytes per color
+// subpalettes can vary based on graphics mode
+// default is 16 subpalettes of 16 colors each
+const static pal_def nintendo_sfc_pal = {
+		&pal_decode_calc,	16, 16, 16, &nintendo_sfc_color, nullptr,
+		endianness::little};
+
+const static color_def seta_color = {1, {10}, {5}, {5}, {5}, {0}, {5}};
+
+const static pal_def seta_pal = {
+		&pal_decode_calc, 16, 16, 16, &seta_color, nullptr, endianness::big};
 
 const static palette nintendo_gb_classic_syspal = {
 		color(0xc4, 0xcf, 0xa1),	// 00 - lightest

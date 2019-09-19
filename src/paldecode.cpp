@@ -7,7 +7,8 @@ namespace chrgfx
 // TODO - add subpalette option
 
 palette pal_decode(const pal_def* paldef, const u8* data,
-									 color (*get_color)(const pal_def*, const u32 rawvalue))
+									 color (*get_color)(const pal_def*, const u32 rawvalue),
+									 s16 subpal_idx)
 {
 	/*
 	psuedo:
@@ -30,13 +31,27 @@ palette pal_decode(const pal_def* paldef, const u8* data,
 				push value to palette
 
 	 */
+	if(subpal_idx >= paldef->subpal_count)
+	{
+		throw "Specified subpalette index is invalid for given pal_def";
+	}
 
-	// total size of full palette in bytes
-	u16 fullpal_datasize =
-			(paldef->entry_datasize * paldef->subpal_length * paldef->subpal_count) /
-			8;
 	u8 entry_bits = paldef->entry_datasize % 8;
 	u8 entry_bytes = (paldef->entry_datasize / 8) + (entry_bits ? 1 : 0);
+
+	// total size of full palette in bytes
+	u16 fullpal_datasize{0};
+	if(subpal_idx >= 0)
+	{
+		fullpal_datasize = (paldef->entry_datasize * paldef->subpal_length) / 8;
+		data += (fullpal_datasize * subpal_idx);
+	}
+	else
+	{
+		fullpal_datasize = (paldef->entry_datasize * paldef->subpal_length *
+												paldef->subpal_count) /
+											 8;
+	}
 
 	u32 bitmask = create_bitmask32(paldef->entry_datasize);
 
@@ -76,23 +91,30 @@ palette pal_decode(const pal_def* paldef, const u8* data,
 	return out;
 };
 
-palette pal_decode_fixed(const pal_def* paldef, const u8* data)
+palette pal_decode_fixed(const pal_def* paldef, const u8* data,
+												 const s16 subpal_idx)
 {
-	return pal_decode(paldef, data,
-										[](const pal_def* paldef, const u32 rawvalue) -> color {
-											return paldef->syspal->at(rawvalue);
-										});
+	return pal_decode(
+			paldef, data,
+			[](const pal_def* paldef, const u32 rawvalue) -> color {
+				return paldef->syspal->at(rawvalue);
+			},
+			subpal_idx);
 }
 
-palette pal_decode_calc(const pal_def* paldef, const u8* data)
+palette pal_decode_calc(const pal_def* paldef, const u8* data,
+												const s16 subpal_idx)
 {
-	return pal_decode(paldef, data,
-										[](const pal_def* paldef, const u32 rawvalue) -> color {
-											return calc_color(paldef->colordef, rawvalue);
-										});
+	return pal_decode(
+			paldef, data,
+			[](const pal_def* paldef, const u32 rawvalue) -> color {
+				return calc_color(paldef->colordef, rawvalue);
+			},
+			subpal_idx);
 };
 
-palette pal_decode_soft_tlp(const pal_def* paldef, const u8* data)
+palette pal_decode_soft_tlp(const pal_def* paldef, const u8* data,
+														const s16 subpal_idx)
 {
 	if(data[0] != 0x54 || data[1] != 0x50 || data[2] != 0x4c)
 		std::cerr << "Warning: Does not appear to be a valid TLP palette"

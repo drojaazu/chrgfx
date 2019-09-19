@@ -1,4 +1,5 @@
 #include "chrdecode.hpp"
+#include <iomanip>
 
 namespace chrgfx
 {
@@ -9,6 +10,17 @@ const u8* get_chr(const chr_def* chrdef, const u8* data)
 	u16 line_offset, pixel_offset, plane_offset;
 
 	u8* out_chr = new u8[chrdef->width * chrdef->height];
+
+#ifdef DEBUG
+	std::cerr << "This chr data:" << std::endl;
+	std::cerr << std::hex;
+	for(s16 datadump = 0; datadump < (chrdef->charincrement / 8); ++datadump)
+	{
+		std::cerr << std::setw(2) << std::setfill('0') << (int)data[datadump]
+							<< " ";
+	}
+	std::cerr << std::dec << std::endl << std::endl;
+#endif
 
 	// for every line...
 	for(line_iter = 0; line_iter < chrdef->height; ++line_iter)

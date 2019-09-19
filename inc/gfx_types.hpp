@@ -71,7 +71,8 @@ struct color_def
  */
 struct pal_def
 {
-	pal_def(palette (*decoder)(const pal_def *, const u8 *data),
+	pal_def(palette (*decoder)(const pal_def *, const u8 *data,
+														 const s16 subpal_idx),
 					u8 entry_datasize = 0, u8 subpal_length = 0, u8 subpal_count = 0,
 					const color_def *colordef = nullptr, const palette *syspal = nullptr,
 					endianness byteorder = endianness::big)
@@ -87,7 +88,7 @@ struct pal_def
 	/**
 	 * Pointer to the decoding method
 	 */
-	palette (*decoder)(const pal_def *, const u8 *data);
+	palette (*decoder)(const pal_def *, const u8 *data, const s16 subpal_idx);
 
 	/**
 	 * The size of each palette entry in bits

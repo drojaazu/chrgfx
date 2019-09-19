@@ -20,18 +20,20 @@ const map<string, const chr_def> chrdef_list = {
 		{string("capcom_cps1"), chrdefs::capcom_cps1},
 		{string("snk_neogeo"), chrdefs::snk_neogeo},
 		{string("snk_neogeocd"), chrdefs::snk_neogeocd},
-		{string("capcom_cps3"), chrdefs::capcom_cps3},
-		{string("saturn_16x16x8"), chrdefs::saturn_16x16x8},
-		{string("saturn_16x16x4"), chrdefs::saturn_16x16x4},
-		{string("saturn_8x8x8"), chrdefs::saturn_8x8x8}};
+		{string("snk_neogeo_pocket"), chrdefs::snk_neogeo_pocket},
+		{string("seta"), chrdefs::seta_chr},
+		{string("seta_sprites"), chrdefs::seta_sprites}};
 
 const map<string, pal_def> paldef_list = {
 		{string("sega_md"), paldefs::sega_md_pal},
 		{string("nintendo_gb_classic"), paldefs::nintendo_gb_classic_pal},
 		{string("nintendo_fc"), paldefs::nintendo_fc_pal},
+		{string("nintendo_sfc"), paldefs::nintendo_sfc_pal},
 		{string("snk_neogeo"), paldefs::snk_neogeo_pal},
 		{string("snk_neogeo_noshadow"), paldefs::snk_neogeo_noshadow_pal},
-		{string("tlp"), paldefs::tilelayerpro}};
+		{string("snk_neogeo_pocket"), paldefs::snk_neogeo_pocket_pal},
+		{string("tlp"), paldefs::tilelayerpro},
+		{string("seta"), paldefs::seta_pal}};
 
 string outfile, chrdef_name, palx_name;
 
@@ -89,7 +91,7 @@ int main(int argc, char** argv)
 			pal_data->seekg(0, pal_data->beg);
 			auto palbuffer = new char[length];
 			pal_data->read(palbuffer, length);
-			work_pal = paldef.decoder(&paldef, (u8*)palbuffer);
+			work_pal = paldef.decoder(&paldef, (u8*)palbuffer, subpalette);
 			delete[] palbuffer;
 			delete pal_data;
 		}
@@ -255,9 +257,15 @@ void process_args(int argc, char** argv)
 
 			// subpalette
 			case 's':
-				subpalette = stoi(optarg);
+				try
+				{
+					subpalette = stoi(optarg);
+				}
+				catch(const invalid_argument& e)
+				{
+					throw invalid_argument("Invalid subpalette index");
+				}
 				break;
-
 			// help
 			case 'h':
 				print_help();
