@@ -8,15 +8,15 @@ using namespace chrgfx;
 image<index_pixel>* render(bank* chr_bank, const palette* pal,
 													 render_traits* rtraits)
 {
-	if(chr_bank->data()->size() < 1)
+	if(chr_bank->chrs->size() < 1)
 		throw std::length_error("Tile vector is empty, nothing to render");
 
-	std::vector<const u8*>* chrs = chr_bank->data();
+	std::vector<const u8*>* chrs = chr_bank->chrs;
 
 	u16
 			// chr dimensions
-			chr_pxlwidth = chr_bank->chrdef().width,
-			chr_pxlheight = chr_bank->chrdef().height,
+			chr_pxlwidth = chr_bank->chrdef->width,
+			chr_pxlheight = chr_bank->chrdef->height,
 
 			// number of chrs to add to end of buffer to get an evenly divisible count
 			chrs_to_pad = (chrs->size() % rtraits->cols > 0)
@@ -99,19 +99,7 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 
 	auto outimg = new image<index_pixel>(outimg_pxlwidth, outimg_pxlheight);
 
-	// check for palette shift
-	/*if(rtraits->subpalette >= 0)
-	{
-		auto newPal = new palette(*pal);
-		newPal->erase(newPal->begin(), newPal->begin() + rtraits->palette_offset);
-		chrgfx::fill_pal(newPal);
-		outimg->set_palette(*newPal);
-		delete newPal;
-	}
-	else
-	{*/
 	outimg->set_palette(*pal);
-	//}
 
 	// check for palette transparency
 	if(rtraits->use_trns)

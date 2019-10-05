@@ -53,7 +53,7 @@ u8 expand_bits(u8 data, u8 bitcount)
  */
 u32 create_bitmask32(u8 bitcount)
 {
-	// max 32 bits, anything higher would waste cycles
+	// max 32 bits
 	if(bitcount > 31)
 	{
 		return 0xffffffff;
@@ -69,6 +69,7 @@ u32 create_bitmask32(u8 bitcount)
 
 u16 create_bitmask16(u8 bitcount)
 {
+	// max 16 bits
 	if(bitcount > 15)
 	{
 		return 0xffff;
@@ -84,6 +85,7 @@ u16 create_bitmask16(u8 bitcount)
 
 u8 create_bitmask8(u8 bitcount)
 {
+	// max 8 bits
 	if(bitcount > 7)
 	{
 		return 0xff;
@@ -97,7 +99,7 @@ u8 create_bitmask8(u8 bitcount)
 	return bitmask;
 }
 
-palette* make_pal(bool blank)
+palette *make_pal(bool blank)
 {
 	auto outpal = new palette();
 	outpal->reserve(256);
@@ -137,16 +139,30 @@ palette* make_pal(bool blank)
 }
 
 // fill in any blank entries in a palette to bring it up to 256
-void fill_pal(palette* pal)
+void fill_pal(palette *pal)
 {
 	if(pal->size() >= 256) return;
 
-	u8 toFill = 256 - pal->size();
+	u16 toFill = 256 - pal->size();
 
-	for(u8 fillIter = 0; fillIter < toFill; fillIter++)
+	for(u16 fillIter = 0; fillIter < toFill; fillIter++)
 		pal->push_back(color(0, 0, 0));
 
 	return;
+}
+
+/**
+ * Determines the endianness of the local system
+ */
+bool is_system_bigendian()
+{
+	// shamelessly stolen from stack overflow
+	// https://stackoverflow.com/questions/1001307/detecting-endianness-programmatically-in-a-c-program/56191401#56191401
+	const int value{0x01};
+	const void *address = static_cast<const void *>(&value);
+	const unsigned char *least_significant_address =
+			static_cast<const unsigned char *>(address);
+	return (*least_significant_address == 0x01) ? false : true;
 }
 
 }	// namespace chrgfx

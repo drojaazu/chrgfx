@@ -16,13 +16,14 @@ const map<string, const chr_def> chrdef_list = {
 		{string("sega_8bit"), chrdefs::sega_8bit},
 		{string("nintendo_sfc"), chrdefs::nintendo_sfc},
 		{string("nintendo_fc"), chrdefs::nintendo_fc},
-		{string("nintendo_gb"), chrdefs::nintendo_2bpp},
-		{string("capcom_cps1"), chrdefs::capcom_cps1},
-		{string("snk_neogeo"), chrdefs::snk_neogeo},
-		{string("snk_neogeocd"), chrdefs::snk_neogeocd},
-		{string("snk_neogeo_pocket"), chrdefs::snk_neogeo_pocket},
-		{string("seta"), chrdefs::seta_chr},
-		{string("seta_sprites"), chrdefs::seta_sprites}};
+		{string("nintendo_gb"), chrdefs::nintendo_2bpp}};
+/*{string("capcom_cps1"), chrdefs::capcom_cps1},
+{string("snk_neogeo"), chrdefs::snk_neogeo},
+{string("snk_neogeocd"), chrdefs::snk_neogeocd},
+{string("snk_neogeo_pocket"), chrdefs::snk_neogeo_pocket},
+{string("seta"), chrdefs::seta_chr},
+{string("seta_sprites"), chrdefs::seta_sprites}};
+*/
 
 const map<string, pal_def> paldef_list = {
 		{string("sega_md"), paldefs::sega_md_pal},
@@ -32,8 +33,7 @@ const map<string, pal_def> paldef_list = {
 		{string("snk_neogeo"), paldefs::snk_neogeo_pal},
 		{string("snk_neogeo_noshadow"), paldefs::snk_neogeo_noshadow_pal},
 		{string("snk_neogeo_pocket"), paldefs::snk_neogeo_pocket_pal},
-		{string("tlp"), paldefs::tilelayerpro},
-		{string("seta"), paldefs::seta_pal}};
+		{string("tlp"), paldefs::tilelayerpro}};
 
 string outfile, chrdef_name, palx_name;
 
@@ -42,10 +42,10 @@ render_traits rtraits;
 istream* chr_data = nullptr;
 istream* pal_data = nullptr;
 
-pal_def paldef(paldefs::sega_md_pal);
-chr_def chrdef(chrdefs::chr_8x8x1);
+const pal_def* paldef = nullptr;
+const chr_def* chrdef = nullptr;
 
-palette work_pal;
+const palette* work_pal;
 s16 subpalette{-1};
 
 int main(int argc, char** argv)
@@ -54,15 +54,18 @@ int main(int argc, char** argv)
 	{
 		process_args(argc, argv);
 
-		// set defaults & check sanity
+		if(chrdef == nullptr)
+		{
+			chrdef = &chrdefs::chr_8x8x1;
+		}
 
 		// if no pal format was passed, see if there is a palx with same name as the
 		// chrx
-		// if(palx == nullptr && paldef_list.find(chrdef_name) != palx_list.end())
-		//{
-		//	palx_name = chrdef_name;
-		//	palx = palx_list.at(chrdef_name);
-		//}
+		if(paldef == nullptr && paldef_list.find(chrdef_name) != paldef_list.end())
+		{
+			palx_name = chrdef_name;
+			paldef = &paldef_list.at(chrdef_name);
+		}
 
 		if(chr_data == nullptr)
 			chr_data = &cin;
@@ -78,7 +81,7 @@ int main(int argc, char** argv)
 
 		// use system palette if no palette data supplied
 		if(pal_data == nullptr)
-			work_pal = *(chrgfx::make_pal(false));
+			work_pal = chrgfx::make_pal(false);
 		else
 		{
 			if(!pal_data->good())
@@ -91,7 +94,7 @@ int main(int argc, char** argv)
 			pal_data->seekg(0, pal_data->beg);
 			auto palbuffer = new char[length];
 			pal_data->read(palbuffer, length);
-			work_pal = paldef.decoder(&paldef, (u8*)palbuffer, subpalette);
+			work_pal = paldef->converter(paldef, (u8*)palbuffer, subpalette);
 			delete[] palbuffer;
 			delete pal_data;
 		}
@@ -113,16 +116,17 @@ int main(int argc, char** argv)
 		std::chrono::high_resolution_clock::time_point t1 =
 				std::chrono::high_resolution_clock::now();
 #endif
-		// auto chunksize = chrx->get_traits()->data_size;
-
-		const u16 chunksize = (chrdef.charincrement / 8);
+		
+		// read the file in chunks, convert each chunk and store it in a vector
+		auto chunksize = (chrdef->datasize / 8);
 		auto chunkbuffer = new char[chunksize];
 
-		while(!chr_data->eof())
+		while(1)
 		{
 			chr_data->read(chunkbuffer, chunksize);
-			// what does read() do if we run out of bytes?
-			work_bank.data()->push_back(get_chr(&chrdef, (u8*)chunkbuffer));
+			if(chr_data->eof()) break;
+
+			work_bank.chrs->push_back(chrdef->converter(chrdef, (u8*)chunkbuffer));
 		}
 
 		if(chr_data != &cin) delete chr_data;
@@ -140,7 +144,7 @@ int main(int argc, char** argv)
 #endif
 
 		png::image<png::index_pixel>* outimg =
-				render(&work_bank, &work_pal, &rtraits);
+				render(&work_bank, work_pal, &rtraits);
 
 #ifdef DEBUG
 		t2 = std::chrono::high_resolution_clock::now();
@@ -154,23 +158,17 @@ int main(int argc, char** argv)
 		else
 			outimg->write(outfile);
 
+		delete work_pal;
 		delete outimg;
-		free_vectors();
 	}
 
 	catch(const exception& e)
 	{
-		free_vectors();
 		cerr << "Fatal error: " << e.what() << endl;
 		return -1;
 	}
 
 	return 0;
-}
-
-void free_vectors()
-{
-	// for(auto const& this_palx : palx_list) delete this_palx.second;
 }
 
 void process_args(int argc, char** argv)
@@ -201,7 +199,7 @@ void process_args(int argc, char** argv)
 				chrdef_name = optarg;
 				if(chrdef_list.find(chrdef_name) == chrdef_list.end())
 					throw invalid_argument("Invalid CHR format specified");
-				chrdef = chrdef_list.at(optarg);
+				chrdef = &chrdef_list.at(optarg);
 				break;
 
 			// pal-format
@@ -209,7 +207,7 @@ void process_args(int argc, char** argv)
 				palx_name = optarg;
 				if(paldef_list.find(palx_name) == paldef_list.end())
 					throw invalid_argument("Invalid palette format specified");
-				paldef = paldef_list.at(optarg);
+				paldef = &paldef_list.at(optarg);
 				break;
 
 			// chr-data
@@ -302,7 +300,7 @@ void print_help()
 	cerr << "  --columns, -c      Specify number of columns per row of tiles in "
 					"output image"
 			 << endl;
-	cerr << "  --pal-offset, -s   Specify palette entry at which to begin "
+	cerr << "  --subpalette, -s   Specify palette entry at which to begin "
 					"(default is 0)"
 			 << endl;
 	cerr << "  --help, -h         Display this text" << endl;

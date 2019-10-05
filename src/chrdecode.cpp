@@ -34,7 +34,7 @@ const u8* get_chr(const chr_def* chrdef, const u8* data)
 			work_pixel = 0;
 
 			// for every bit plane in the pixel...
-			for(plane_iter = 0; plane_iter < chrdef->planes; ++plane_iter)
+			for(plane_iter = 0; plane_iter < chrdef->bitplanes; ++plane_iter)
 			{
 				plane_offset = pixel_offset + chrdef->planeoffset[plane_iter];
 
@@ -42,7 +42,7 @@ const u8* get_chr(const chr_def* chrdef, const u8* data)
 				work_bit = plane_offset % 8;
 
 				work_pixel |= ((work_byte << work_bit) & 0x80) >>
-											((8 - chrdef->planes) + plane_iter);
+											((8 - chrdef->bitplanes) + plane_iter);
 			}
 			out_chr[this_pixel++] = work_pixel;
 		}

@@ -10,4 +10,3 @@
 
 void process_args(int argc, char** argv);
 void print_help();
-void free_vectors();

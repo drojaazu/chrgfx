@@ -4,11 +4,10 @@
 
 namespace chrgfx
 {
-// TODO - add subpalette option
-
-palette pal_decode(const pal_def* paldef, const u8* data,
-									 color (*get_color)(const pal_def*, const u32 rawvalue),
-									 s16 subpal_idx)
+const palette* pal_decode(const pal_def* paldef, const u8* data,
+													color (*get_color)(const pal_def*,
+																						 const u32 rawvalue),
+													s16 subpal_idx)
 {
 	/*
 	psuedo:
@@ -36,63 +35,72 @@ palette pal_decode(const pal_def* paldef, const u8* data,
 		throw "Specified subpalette index is invalid for given pal_def";
 	}
 
-	u8 entry_bits = paldef->entry_datasize % 8;
-	u8 entry_bytes = (paldef->entry_datasize / 8) + (entry_bits ? 1 : 0);
+	u8 workentry_bitsize = paldef->entry_datasize % 8;
+	u8 workentry_bytesize =
+			(paldef->entry_datasize / 8) + (workentry_bitsize ? 1 : 0);
 
 	// total size of full palette in bytes
 	u16 fullpal_datasize{0};
 	if(subpal_idx >= 0)
 	{
+		// if we're using a subpalette
 		fullpal_datasize = (paldef->entry_datasize * paldef->subpal_length) / 8;
 		data += (fullpal_datasize * subpal_idx);
 	}
 	else
 	{
-		fullpal_datasize = (paldef->entry_datasize * paldef->subpal_length *
-												paldef->subpal_count) /
-											 8;
+		// if we're using the full palette
+		// limit the total number of entries in the final palette to 256
+		u16 entry_count = (((paldef->subpal_count * paldef->subpal_length) > 256)
+													 ? 256
+													 : paldef->subpal_count * paldef->subpal_length);
+		fullpal_datasize = (paldef->entry_datasize * entry_count) / 8;
 	}
 
 	u32 bitmask = create_bitmask32(paldef->entry_datasize);
 
-	palette out = palette();
-	endianness sysorder = get_system_endianness();
+	palette* out = new palette();
+	u8* (*copyfunc)(const u8*, const u8*, u8*);
 
-	for(u16 data_iter{0}; data_iter < fullpal_datasize; data_iter += entry_bytes)
+	if(is_system_bigendian() == paldef->is_big_endian)
 	{
-		if(entry_bytes == 1 && entry_bits > 0)
+		copyfunc = std::copy;
+	}
+	else
+	{
+		copyfunc = std::reverse_copy;
+	}
+
+	for(u16 data_iter{0}; data_iter < fullpal_datasize;
+			data_iter += workentry_bytesize)
+	{
+		if(workentry_bytesize == 1 && workentry_bitsize > 0)
 		{
+			// color entry is less than a full byte
 			u32 dataval{data[data_iter]};
-			for(u8 shift_iter{0}; shift_iter < (8 / entry_bits); ++shift_iter)
+			for(u8 shift_iter{0}; shift_iter < (8 / workentry_bitsize); ++shift_iter)
 			{
-				out.push_back(paldef->syspal->at(
-						(dataval >> (entry_bits * shift_iter)) & bitmask));
+				out->push_back(paldef->syspal->at(
+						(dataval >> (workentry_bitsize * shift_iter)) & bitmask));
 			}
 		}
 		else
 		{
-			u8 temparr[entry_bytes];
-			if(sysorder == paldef->byteorder)
-			{
-				std::copy(data + data_iter, data + (data_iter + entry_bytes), temparr);
-			}
-			else
-			{
-				std::reverse_copy(data + data_iter, data + (data_iter + entry_bytes),
-													temparr);
-			}
+			u8 temparr[workentry_bytesize];
+			copyfunc(data + data_iter, data + (data_iter + workentry_bytesize),
+							 temparr);
 
 			u32 rawcolor = *reinterpret_cast<u32*>(temparr);
 			rawcolor &= bitmask;
 			color t = get_color(paldef, rawcolor);
-			out.push_back(t);
+			out->push_back(t);
 		}
 	}
 	return out;
 };
 
-palette pal_decode_fixed(const pal_def* paldef, const u8* data,
-												 const s16 subpal_idx)
+const palette* pal_decode_fixed(const pal_def* paldef, const u8* data,
+																const s16 subpal_idx)
 {
 	return pal_decode(
 			paldef, data,
@@ -102,8 +110,8 @@ palette pal_decode_fixed(const pal_def* paldef, const u8* data,
 			subpal_idx);
 }
 
-palette pal_decode_calc(const pal_def* paldef, const u8* data,
-												const s16 subpal_idx)
+const palette* pal_decode_calc(const pal_def* paldef, const u8* data,
+															 const s16 subpal_idx)
 {
 	return pal_decode(
 			paldef, data,
@@ -113,8 +121,8 @@ palette pal_decode_calc(const pal_def* paldef, const u8* data,
 			subpal_idx);
 };
 
-palette pal_decode_soft_tlp(const pal_def* paldef, const u8* data,
-														const s16 subpal_idx)
+const palette* pal_decode_soft_tlp(const pal_def* paldef, const u8* data,
+																	 const s16 subpal_idx)
 {
 	if(data[0] != 0x54 || data[1] != 0x50 || data[2] != 0x4c)
 		std::cerr << "Warning: Does not appear to be a valid TLP palette"
@@ -127,15 +135,15 @@ palette pal_decode_soft_tlp(const pal_def* paldef, const u8* data,
 			// rgb
 			data += 4;
 			// return palette_converter::get_palette_generic(this, data, 3, 256);
-			auto _out = palette();
-			_out.reserve(256);
+			auto out = new palette();
+			out->reserve(256);
 
 			for(size_t palEntryIter = 0; palEntryIter < 256; palEntryIter++)
 			{
-				_out.push_back(color(data[0], data[1], data[2]));
+				out->push_back(color(data[0], data[1], data[2]));
 				data += 3;
 			}
-			return _out;
+			return out;
 			break;
 		}
 		case 1:
@@ -158,21 +166,18 @@ color calc_color(const color_def* colordef, const u32 data)
 {
 	/*
 psuedo:
-check if color_def is null
-
 -ptr to u32 data
 -for each pass
 	-shift red, apply mask, OR with R var
 	-shift green, apply mask, OR with G var
 	-shift blue, apply mask, OR with B var
 -expand R, G, B
-TODO: how does MAME expand bits?
 
  */
 	u8 red{0}, green{0}, blue{0};
 	u8 red_bitcount{0}, green_bitcount{0}, blue_bitcount{0};
 	u8 bitmask{0};
-	for(u16 pass_iter = 0; pass_iter < colordef->passes; pass_iter++)
+	for(u16 pass_iter = 0; pass_iter < colordef->color_passes; pass_iter++)
 	{
 		bitmask = create_bitmask8(colordef->red_bitcount[pass_iter]);
 		red |= ((data >> colordef->red_shift[pass_iter]) & bitmask) << red_bitcount;
@@ -189,7 +194,6 @@ TODO: how does MAME expand bits?
 		blue_bitcount += colordef->blue_bitcount[pass_iter];
 	}
 
-	// expand bits
 	red = expand_bits(red, red_bitcount);
 	green = expand_bits(green, green_bitcount);
 	blue = expand_bits(blue, blue_bitcount);

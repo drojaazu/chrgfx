@@ -1,6 +1,6 @@
 #ifndef CHRDECODE_H
 #define CHRDECODE_H
-#include "gfx_types.hpp"
+#include "global.hpp"
 
 namespace chrgfx
 {

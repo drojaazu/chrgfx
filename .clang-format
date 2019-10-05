@@ -6,5 +6,6 @@ SpaceBeforeParens: Never
 TabWidth: 2
 UseTab: Always
 AlignTrailingComments: true
+
 AllowShortIfStatementsOnASingleLine: true
 Cpp11BracedListStyle: true
