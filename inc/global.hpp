@@ -107,7 +107,7 @@ class pal_def
 		return *out;
 	}
 	/**
-	 * The size of each palette entry in bits
+	 * The size of each color entry in bits
 	 */
 	const u8 entry_datasize;
 
