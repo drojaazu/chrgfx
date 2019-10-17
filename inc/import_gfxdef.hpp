@@ -1,9 +1,15 @@
 #ifndef IMPORTGFXDEF_H
 #define IMPORTGFXDEF_H
+#include <bits/stdc++.h>
+
 #include <array>
 #include <fstream>
 #include <map>
+#include <sstream>
+
+#include "chrdecode.hpp"
 #include "global.hpp"
+#include "paldecode.hpp"
 
 namespace chrgfx
 {
@@ -25,10 +31,27 @@ static const std::string PAL_COLORSIZE = "colorsize",
 												 PAL_BLUE_SHIFT = "blue_shift",
 												 PAL_BLUE_BITCOUNT = "blue_bitcount";
 
-}	// namespace defopts
+}	 // namespace defopts
 
 void parse_gfxdef(std::ifstream* infile, const chr_def* chrdef,
 									const pal_def* paldef);
-}	// namespace chrgfx
+
+void validate_chrdef_opts(std::map<const std::string, std::string>* chrdef_opts,
+													const chr_def* chrdef);
+
+void validate_paldef_opts(std::map<const std::string, std::string>* paldef_opts,
+													const pal_def* paldef);
+
+u32 str_validate_ispos(std::string value);
+
+u32 str_validate_nonneg(std::string value);
+
+std::vector<u32> str_validate_array_vals_nonneg(std::string value);
+
+std::vector<u32> str_validate_array_vals_ispos_length(std::string value,
+																											s32 req_length);
+
+palette* str_validate_array_get_palette(std::string value);
+}	 // namespace chrgfx
 
 #endif

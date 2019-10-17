@@ -19,19 +19,18 @@ namespace chrgfx
 /*
 constants for array sizes
 these values are more or less arbitrary and can be set to anything allowed by
-the data type though they probably shouldn't need to be)
+the data type (though they shouldn't need to be)
 */
 // Maximum number of color bitplanes allowed
 // (since we use 8 bits for a color in normal RGB space, this shouldn't ever
 // need to be higher)
-constexpr u8 MAX_GFX_PLANES = 4;
-// Maximum pixel size of a single chr
-constexpr u16 MAX_GFX_SIZE = 8;
+constexpr u8 MAX_CHR_PLANES = 8;
+
+// Maximum dimensions of a single chr (in pixels)
+constexpr u16 MAX_CHR_SIZE = 64;
+
 // Maximum number of color conversion passes
 constexpr u8 MAX_COLOR_PASSES = 16;
-// Maximum number of colors in a palette
-// (PNG supports up to 256 entries in a palette, so that's our max)
-constexpr u16 MAX_COLORS = 256;
 
 /**
  * This defines the format of a chr by describing the offsets of pixels and
@@ -41,9 +40,9 @@ class chr_def
 {
  public:
 	chr_def(u16 width, u16 height, u8 bitplanes,
-					std::array<u32, MAX_GFX_PLANES> planeoffset,
-					std::array<u32, MAX_GFX_SIZE> xoffset,
-					std::array<u32, MAX_GFX_SIZE> yoffset,
+					std::array<u32, MAX_CHR_PLANES> planeoffset,
+					std::array<u32, MAX_CHR_SIZE> xoffset,
+					std::array<u32, MAX_CHR_SIZE> yoffset,
 					const u8 *(*converter)(const chr_def *chrdef, const u8 *data))
 			: width(width),
 				height(height),
@@ -66,11 +65,11 @@ class chr_def
 	const u16 width;		 // pixel width of each element
 	const u16 height;		 // pixel height of each element
 	const u8 bitplanes;	// number of color bitplanes
-	const std::array<u32, MAX_GFX_PLANES>
+	const std::array<u32, MAX_CHR_PLANES>
 			planeoffset;	// bit offset of each bitplane
-	const std::array<u32, MAX_GFX_SIZE>
+	const std::array<u32, MAX_CHR_SIZE>
 			xoffset;	// bit offset of each horizontal pixel
-	const std::array<u32, MAX_GFX_SIZE>
+	const std::array<u32, MAX_CHR_SIZE>
 			yoffset;	// bit offset of each vertical pixel
 	const u8 *(*converter)(const chr_def *, const u8 *);
 	const u32 datasize;	// size of one chr in bits
@@ -83,6 +82,19 @@ class chr_def
 class color_def
 {
  public:
+	color_def(u8 color_passes, std::array<u8, MAX_COLOR_PASSES> red_shift,
+						std::array<u8, MAX_COLOR_PASSES> red_bitcount,
+						std::array<u8, MAX_COLOR_PASSES> green_shift,
+						std::array<u8, MAX_COLOR_PASSES> green_bitcount,
+						std::array<u8, MAX_COLOR_PASSES> blue_shift,
+						std::array<u8, MAX_COLOR_PASSES> blue_bitcount)
+			: color_passes(color_passes),
+				red_shift(red_shift),
+				red_bitcount(red_bitcount),
+				green_shift(green_shift),
+				green_bitcount(green_bitcount),
+				blue_shift(blue_shift),
+				blue_bitcount(blue_bitcount){};
 	const u8 color_passes;
 	const std::array<u8, MAX_COLOR_PASSES> red_shift;
 	const std::array<u8, MAX_COLOR_PASSES> red_bitcount;
@@ -100,6 +112,19 @@ class color_def
 class pal_def
 {
  public:
+	pal_def(u8 entry_datasize, u8 subpal_length, u8 subpal_count,
+					const color_def *colordef, const palette *syspal,
+					const palette *(*converter)(const pal_def *paldef, const u8 *data,
+																			const s16 subpal_idx),
+					bool is_big_endian = false )
+			: entry_datasize(entry_datasize),
+				subpal_length(subpal_length),
+				subpal_count(subpal_count),
+				colordef(colordef),
+				syspal(syspal),
+				converter(converter),
+				is_big_endian(is_big_endian){};
+
 	pal_def &operator=(const pal_def &paldef)
 	{
 		if(&paldef == this) return *this;
