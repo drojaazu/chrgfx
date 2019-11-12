@@ -5,7 +5,7 @@ colorsize 16
 subpal_length 4
 subpal_count 16
 
-big_endian false
+big_endian 0
 
 # Neo-Geo Pocket Color color format
 # 15|               |0

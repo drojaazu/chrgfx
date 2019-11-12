@@ -167,7 +167,7 @@ int main(int argc, char **argv)
 		auto duration =
 				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-		cerr << "Tile conversion: " << duration << endl;
+		cerr << "Tile conversion: " << duration << " ticks" << endl;
 
 		t1 = std::chrono::high_resolution_clock::now();
 #endif
@@ -179,7 +179,7 @@ int main(int argc, char **argv)
 			t2 = std::chrono::high_resolution_clock::now();
 			duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
 										 .count();
-			cerr << "Rendering: " << duration << endl;
+			cerr << "Rendering: " << duration << " ticks" << endl;
 #endif
 
 			if(cfg.outfile.empty())

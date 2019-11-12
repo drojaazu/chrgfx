@@ -10,14 +10,32 @@ namespace chrgfx
 palette *pal_decode(pal_def &paldef, bptr data,
 										color (*get_color)(pal_def &, u32 rawvalue), s16 subpal_idx)
 {
+	/* abandon hope, all who enter here
+			this algorithm is a ~mess~ right now, as I wedged in support for weird
+			cases (LOOKIN' AT YOU, VIRTUAL BOY PALETTES)
+			the psuedo code below is only partially valid anymore
+			needs a serious cleanup, but that's for another branch, another day...
+	*/
+
 	/*
 	psuedo:
-	 Loop on number of bytes for a full palette
-		data size of palette = (bits/entry * entries/subpal * subpals/fullpal) / 8
-		bits per entry = entry size % 8
-		bytes per entry = (entry size / 8) + (bits per entry > 0 ? 1 : 0)
+	 Loop on number of bytes for a palette
+	 Palette is either full sys palette or subpalette
+		get size of a single subpalette:
+			- defined in paldef? if so use that
+			- if not defined: size is ((bits/entry * entries/subpal) / 8) [if 0, then
+	= 1] get data size of output palette:
+			- using subpalette? size is same as datasize of single subpal
+			- else: size is (subpal_datasize * subpals/fullpal)
+	/ 8 bits per entry = colorsize % 8 bytes per entry = (colorsize / 8) + (bits
+	per entry > 0 ? 1 : 0)
 
 		for(data size of palette)
+			if(bytes per entry == 1 && bits > 0)
+				if subpal size > bytes per entry
+					apply endianness
+
+
 			if(bytes per entry == 1 && bits > 0)
 				for(8 / bits per entry)
 					data >> (iter * bits per entry)
@@ -40,12 +58,19 @@ palette *pal_decode(pal_def &paldef, bptr data,
 	u8 workentry_bytesize =
 			(paldef.get_entry_datasize() / 8) + (workentry_bitsize ? 1 : 0);
 
+	u16 subpal_datasize = paldef.get_subpal_datasize();
+	if(subpal_datasize == 0) {
+		subpal_datasize = (workentry_bytesize * 8) * paldef.get_subpal_length();
+	}
+	u16 temp = (subpal_datasize / 8);
+
 	// total size of full palette in bytes
 	u16 fullpal_datasize{0};
 	if(subpal_idx >= 0) {
 		// if we're using a subpalette
-		fullpal_datasize =
-				(paldef.get_entry_datasize() * paldef.get_subpal_length()) / 8;
+		// fullpal_datasize =
+		//		(paldef.get_entry_datasize() * paldef.get_subpal_length()) / 8;
+		fullpal_datasize = subpal_datasize / 8;
 		data += (fullpal_datasize * subpal_idx);
 	} else {
 		// if we're using the full palette
@@ -68,11 +93,25 @@ palette *pal_decode(pal_def &paldef, bptr data,
 		copyfunc = std::reverse_copy;
 	}
 
-	for(u16 data_iter{0}; data_iter < fullpal_datasize;
-			data_iter += workentry_bytesize) {
+	u16 data_inc{0};
+	if(workentry_bytesize == 1 && temp > workentry_bytesize) {
+		data_inc = temp;
+	} else {
+		data_inc = workentry_bytesize;
+	}
+
+	for(u16 data_iter{0}; data_iter < fullpal_datasize; data_iter += data_inc) {
 		if(workentry_bytesize == 1 && workentry_bitsize > 0) {
 			// color entry is less than a full byte
-			u32 dataval{data[data_iter]};
+			u32 dataval{0};
+			if(temp > workentry_bytesize) {
+				u8 temparr[temp];
+				copyfunc(data + data_iter, data + (data_iter + temp), temparr);
+				u32 rawcolor{*reinterpret_cast<u32 *>(temparr)};
+				dataval = rawcolor;
+			} else {
+				dataval = data[data_iter];
+			}
 			for(u8 shift_iter{0}; shift_iter < (8 / workentry_bitsize);
 					++shift_iter) {
 				out->push_back(paldef.get_syspal()->at(

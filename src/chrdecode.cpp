@@ -12,15 +12,17 @@ u8 const *get_chr(chr_def &chrdef, u8 const *data)
 
 	u8 *out_chr = new u8[chrdef.get_width() * chrdef.get_height()];
 
-#ifdef DEBUG
-	std::cerr << "This chr data:" << std::endl;
-	std::cerr << std::hex;
-	for(s16 datadump = 0; datadump < (chrdef->charincrement / 8); ++datadump) {
-		std::cerr << std::setw(2) << std::setfill('0') << (int)data[datadump]
-							<< " ";
-	}
-	std::cerr << std::dec << std::endl << std::endl;
-#endif
+	/*
+	#ifdef DEBUG
+		std::cerr << "This chr data:" << std::endl;
+		std::cerr << std::hex;
+		for(s16 datadump = 0; datadump < (chrdef->charincrement / 8); ++datadump) {
+			std::cerr << std::setw(2) << std::setfill('0') << (int)data[datadump]
+								<< " ";
+		}
+		std::cerr << std::dec << std::endl << std::endl;
+	#endif
+	*/
 
 	// for every line...
 	for(line_iter = 0; line_iter < chrdef.get_height(); ++line_iter) {

@@ -165,10 +165,11 @@ public:
 	pal_def(u8 entry_datasize, u8 subpal_length, u8 subpal_count,
 					color_def *colordef, palette *syspal,
 					palette *(*converter)(pal_def &paldef, bptr data, s16 subpal_idx),
-					bool is_big_endian = false)
+					bool is_big_endian = false, u8 subpal_datasize = 0)
 			: entry_datasize(entry_datasize), subpal_length(subpal_length),
 				subpal_count(subpal_count), colordef(colordef), syspal(syspal),
-				converter(converter), is_big_endian(is_big_endian){};
+				converter(converter), is_big_endian(is_big_endian),
+				subpal_datasize(subpal_datasize){};
 	/*
 		pal_def &operator=(const pal_def &paldef)
 		{
@@ -184,6 +185,8 @@ public:
 	u8 get_subpal_length() { return subpal_length; }
 
 	u8 get_subpal_count() { return subpal_count; }
+
+	u8 get_subpal_datasize() { return subpal_datasize; }
 
 	color_def *get_colordef() { return colordef; }
 
@@ -211,6 +214,8 @@ private:
 	 * The number of subpalettes in a full palette
 	 */
 	u8 subpal_count;
+
+	u8 subpal_datasize;
 
 	/**
 	 * Pointer to the color definition (for calculated palettes)

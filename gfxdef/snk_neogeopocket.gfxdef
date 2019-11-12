@@ -18,4 +18,4 @@ subpal_count 6
 # black & white "colors" are based on intensity values
 # so we need an RGB equivalent palette
 # this is based on output from MAME
-syspal #ffffff,#dbdbdb,#b6b6b6,#929292,#6d6d6d,#494949,#242424,#000000
+refpal #ffffff,#dbdbdb,#b6b6b6,#929292,#6d6d6d,#494949,#242424,#000000

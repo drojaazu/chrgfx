@@ -18,6 +18,8 @@ colorsize 16
 subpal_length 16
 subpal_count 16
 
+big_endian 1
+
 # Neo-Geo MVS/AES color format
 # 15 |                               |0
 #    DDR0G0B0R4R3R2R1 G4G3G2G1B4B3B2B1
@@ -29,5 +31,3 @@ green_shift 15,13,4
 green_size 1,1,4
 blue_shift 15,12,0
 blue_size 1,1,4
-
-big_endian true

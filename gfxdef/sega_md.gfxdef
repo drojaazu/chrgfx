@@ -10,9 +10,11 @@ yoffset 0,32,64,96,128,160,192,224
 
 #### PALETTE/COLORS
 # Sega Megadrive palette
+# 4 subpalettes of 16 colors each (64 colors total)
 colorsize 16
 subpal_length 16
 subpal_count 4
+big_endian 1
 
 # Sega Megadrive color format
 # 15|               |0
@@ -24,4 +26,3 @@ green_shift 5
 green_size 3
 blue_shift 9
 blue_size 3
-big_endian true

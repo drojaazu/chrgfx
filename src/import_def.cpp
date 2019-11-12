@@ -3,6 +3,8 @@
 // this is all kinds of a mess, and maybe there's a better way to do
 // things, but gotta start somewhere...
 
+#define DEFOPT(optname) def_opts.at(defopts::optname)
+
 namespace chrgfx
 {
 kvmap parse_file(std::ifstream &infile)
@@ -14,16 +16,25 @@ kvmap parse_file(std::ifstream &infile)
 	infile.seekg(std::ios::beg);
 
 	// map of all possible definition keys
-	kvmap def_opts = {
-			{defopts::CHR_WIDTH, ""},					{defopts::CHR_HEIGHT, ""},
-			{defopts::CHR_BPP, ""},						{defopts::CHR_PLANEOFFSET, ""},
-			{defopts::CHR_XOFFSET, ""},				{defopts::CHR_YOFFSET, ""},
-			{defopts::PAL_COLORSIZE, ""},			{defopts::PAL_COLOR_PASSES, ""},
-			{defopts::PAL_SUBPAL_LENGTH, ""}, {defopts::PAL_SUBPAL_COUNT, ""},
-			{defopts::PAL_SYSPAL, ""},				{defopts::PAL_RED_SHIFT, ""},
-			{defopts::PAL_RED_SIZE, ""},			{defopts::PAL_GREEN_SHIFT, ""},
-			{defopts::PAL_GREEN_SIZE, ""},		{defopts::PAL_BLUE_SHIFT, ""},
-			{defopts::PAL_BLUE_SIZE, ""}};
+	kvmap def_opts = {{defopts::CHR_WIDTH, ""},
+										{defopts::CHR_HEIGHT, ""},
+										{defopts::CHR_BPP, ""},
+										{defopts::CHR_PLANEOFFSET, ""},
+										{defopts::CHR_XOFFSET, ""},
+										{defopts::CHR_YOFFSET, ""},
+										{defopts::PAL_COLORSIZE, ""},
+										{defopts::PAL_COLOR_PASSES, ""},
+										{defopts::PAL_SUBPAL_LENGTH, ""},
+										{defopts::PAL_SUBPAL_COUNT, ""},
+										{defopts::PAL_REFPAL, ""},
+										{defopts::PAL_RED_SHIFT, ""},
+										{defopts::PAL_RED_SIZE, ""},
+										{defopts::PAL_GREEN_SHIFT, ""},
+										{defopts::PAL_GREEN_SIZE, ""},
+										{defopts::PAL_BLUE_SHIFT, ""},
+										{defopts::PAL_BLUE_SIZE, ""},
+										{defopts::PAL_BIG_ENDIAN, ""},
+										{defopts::PAL_SUBPAL_DATASIZE, ""}};
 
 	int linenumber = 0;
 	std::string this_line, this_key, this_val;
@@ -58,7 +69,7 @@ kvmap parse_file(std::ifstream &infile)
 			def_opts[this_key] = this_val;
 #if DEBUG
 		else
-			std::cerr << "Unknown key value in gfxdef: " << this_key;
+			std::cerr << "Unknown key value in gfxdef: " << std::endl << this_key;
 #endif
 	}
 
@@ -71,12 +82,9 @@ chr_def *get_chrdef(std::ifstream &infile)
 	std::map<const std::string, std::string> def_opts = parse_file(infile);
 
 	// check that all required options have a value
-	if(def_opts.at(defopts::CHR_WIDTH).empty() ||
-		 def_opts.at(defopts::CHR_HEIGHT).empty() ||
-		 def_opts.at(defopts::CHR_BPP).empty() ||
-		 def_opts.at(defopts::CHR_PLANEOFFSET).empty() ||
-		 def_opts.at(defopts::CHR_XOFFSET).empty() ||
-		 def_opts.at(defopts::CHR_YOFFSET).empty()) {
+	if(DEFOPT(CHR_WIDTH).empty() || DEFOPT(CHR_HEIGHT).empty() ||
+		 DEFOPT(CHR_BPP).empty() || DEFOPT(CHR_PLANEOFFSET).empty() ||
+		 DEFOPT(CHR_XOFFSET).empty() || DEFOPT(CHR_YOFFSET).empty()) {
 		throw "One or more required options missing in chrdef";
 	}
 
@@ -89,22 +97,22 @@ chr_def *get_chrdef(std::ifstream &infile)
 		yoffset: array length must match height, values grater than 0
 	 */
 
-	u16 chr_width_temp = str_validate_ispos(def_opts.at(defopts::CHR_WIDTH));
-	u16 chr_height_temp = str_validate_ispos(def_opts.at(defopts::CHR_HEIGHT));
-	u16 chr_bpp_temp = str_validate_ispos(def_opts.at(defopts::CHR_BPP));
+	u16 chr_width_temp = str_validate_ispos(DEFOPT(CHR_WIDTH));
+	u16 chr_height_temp = str_validate_ispos(DEFOPT(CHR_HEIGHT));
+	u16 chr_bpp_temp = str_validate_ispos(DEFOPT(CHR_BPP));
 
 	std::vector<u32> temp = str_validate_array_vals_nonneg_length(
-			def_opts.at(defopts::CHR_PLANEOFFSET), chr_bpp_temp);
+			DEFOPT(CHR_PLANEOFFSET), chr_bpp_temp);
 	std::array<u32, MAX_CHR_PLANES> chr_planeoffset_temp;
 	std::move(temp.begin(), temp.end(), chr_planeoffset_temp.begin());
 
-	temp = str_validate_array_vals_nonneg_length(
-			def_opts.at(defopts::CHR_XOFFSET), chr_width_temp);
+	temp = str_validate_array_vals_nonneg_length(DEFOPT(CHR_XOFFSET),
+																							 chr_width_temp);
 	std::array<u32, MAX_CHR_SIZE> chr_xoffset_temp;
 	std::move(temp.begin(), temp.end(), chr_xoffset_temp.begin());
 
-	temp = str_validate_array_vals_nonneg_length(
-			def_opts.at(defopts::CHR_YOFFSET), chr_height_temp);
+	temp = str_validate_array_vals_nonneg_length(DEFOPT(CHR_YOFFSET),
+																							 chr_height_temp);
 	std::array<u32, MAX_CHR_SIZE> chr_yoffset_temp;
 	std::move(temp.begin(), temp.end(), chr_yoffset_temp.begin());
 
@@ -121,7 +129,7 @@ pal_def *get_paldef(std::ifstream &infile)
 	colorsize: greater than 0
 	subpal_length: greater than 0
 	subpal_count: greater than 0
-	syspal: optionally defined, but if not defined, color calc must be set
+	refpal: optionally defined, but if not defined, color calc must be set
 	passes: greater than 0, eq/lt MAX_COLOR_PASSES
 	shift: non negative
 	bitcount: greater than 0
@@ -129,98 +137,119 @@ pal_def *get_paldef(std::ifstream &infile)
 
 	// VALIDATE PALDEF HERE
 	// if any colordef options are set, then ALL must be set
-	// if both syspal and colordef are undefined, error
-	// if both syspal and colordef are defined, issue warning that syspal will
+	// if both refpal and colordef are undefined, error
+	// if both refpal and colordef are defined, issue warning that refpal will
 	// be used
-	bool use_syspal = false;
+	bool use_refpal = false;
 
-	if(!def_opts.at(defopts::PAL_SYSPAL).empty()) {
-		use_syspal = true;
+	if(!DEFOPT(PAL_REFPAL).empty()) {
+		use_refpal = true;
 	}
 
 	// check that all required options have a value
-	if(def_opts.at(defopts::PAL_COLORSIZE).empty() ||
-		 def_opts.at(defopts::PAL_SUBPAL_LENGTH).empty() ||
-		 def_opts.at(defopts::PAL_SUBPAL_COUNT).empty() ||
-		 (!use_syspal & (def_opts.at(defopts::PAL_COLOR_PASSES).empty() ||
-										 def_opts.at(defopts::PAL_RED_SHIFT).empty() ||
-										 def_opts.at(defopts::PAL_RED_SIZE).empty() ||
-										 def_opts.at(defopts::PAL_GREEN_SHIFT).empty() ||
-										 def_opts.at(defopts::PAL_GREEN_SIZE).empty() ||
-										 def_opts.at(defopts::PAL_BLUE_SHIFT).empty() ||
-										 def_opts.at(defopts::PAL_BLUE_SIZE).empty()))) {
+	if(DEFOPT(PAL_COLORSIZE).empty() || DEFOPT(PAL_SUBPAL_LENGTH).empty() ||
+		 DEFOPT(PAL_SUBPAL_COUNT).empty() ||
+		 (!use_refpal &
+			(DEFOPT(PAL_COLOR_PASSES).empty() || DEFOPT(PAL_RED_SHIFT).empty() ||
+			 DEFOPT(PAL_RED_SIZE).empty() || DEFOPT(PAL_GREEN_SHIFT).empty() ||
+			 DEFOPT(PAL_GREEN_SIZE).empty() || DEFOPT(PAL_BLUE_SHIFT).empty() ||
+			 DEFOPT(PAL_BLUE_SIZE).empty()))) {
 		throw std::invalid_argument(
 				"One or more required options missing in paldef");
 	}
 
-	u8 colorsize_temp = str_validate_ispos(def_opts.at(defopts::PAL_COLORSIZE));
-	u8 subpal_length_temp =
-			str_validate_ispos(def_opts.at(defopts::PAL_SUBPAL_LENGTH));
-	u8 subpal_count_temp =
-			str_validate_ispos(def_opts.at(defopts::PAL_SUBPAL_COUNT));
+	u8 colorsize_temp = str_validate_ispos(DEFOPT(PAL_COLORSIZE));
+	u8 subpal_length_temp = str_validate_ispos(DEFOPT(PAL_SUBPAL_LENGTH));
+	u8 subpal_count_temp = str_validate_ispos(DEFOPT(PAL_SUBPAL_COUNT));
 
-	palette *syspal_temp = nullptr;
+	u8 subpal_datasize_temp =
+			DEFOPT(PAL_SUBPAL_DATASIZE).empty()
+					? 0
+					: str_validate_nonneg(DEFOPT(PAL_SUBPAL_DATASIZE));
+
+	palette *refpal_temp = nullptr;
 	color_def *colordef_temp = nullptr;
-	if(use_syspal) {
-		syspal_temp =
-				str_validate_array_get_palette(def_opts.at(defopts::PAL_SYSPAL));
+	if(use_refpal) {
+		refpal_temp = str_validate_array_get_palette(DEFOPT(PAL_REFPAL));
 	} else {
 		// validate calc color settings
-		u32 color_passes_temp =
-				str_validate_ispos(def_opts.at(defopts::PAL_COLOR_PASSES));
+		u32 color_passes_temp = str_validate_ispos(DEFOPT(PAL_COLOR_PASSES));
 		std::array<u8, MAX_COLOR_PASSES> red_shift_temp, red_bitcount_temp,
 				green_shift_temp, green_bitcount_temp, blue_shift_temp,
 				blue_bitcount_temp;
 		std::vector<u32> temp;
 
-		temp = str_validate_array_vals_nonneg(def_opts.at(defopts::PAL_RED_SHIFT));
+		temp = str_validate_array_vals_nonneg(DEFOPT(PAL_RED_SHIFT));
 		std::move(temp.begin(), temp.end(), red_shift_temp.begin());
 
-		temp = str_validate_array_vals_nonneg(def_opts.at(defopts::PAL_RED_SIZE));
+		temp = str_validate_array_vals_nonneg(DEFOPT(PAL_RED_SIZE));
 		std::move(temp.begin(), temp.end(), red_bitcount_temp.begin());
 
-		temp =
-				str_validate_array_vals_nonneg(def_opts.at(defopts::PAL_GREEN_SHIFT));
+		temp = str_validate_array_vals_nonneg(DEFOPT(PAL_GREEN_SHIFT));
 		std::move(temp.begin(), temp.end(), green_shift_temp.begin());
 
-		temp = str_validate_array_vals_nonneg(def_opts.at(defopts::PAL_GREEN_SIZE));
+		temp = str_validate_array_vals_nonneg(DEFOPT(PAL_GREEN_SIZE));
 		std::move(temp.begin(), temp.end(), green_bitcount_temp.begin());
 
-		temp = str_validate_array_vals_nonneg(def_opts.at(defopts::PAL_BLUE_SHIFT));
+		temp = str_validate_array_vals_nonneg(DEFOPT(PAL_BLUE_SHIFT));
 		std::move(temp.begin(), temp.end(), blue_shift_temp.begin());
 
-		temp = str_validate_array_vals_nonneg(def_opts.at(defopts::PAL_BLUE_SIZE));
+		temp = str_validate_array_vals_nonneg(DEFOPT(PAL_BLUE_SIZE));
 		std::move(temp.begin(), temp.end(), blue_bitcount_temp.begin());
 
 		colordef_temp = new color_def(
 				color_passes_temp, red_shift_temp, red_bitcount_temp, green_shift_temp,
 				green_bitcount_temp, blue_shift_temp, blue_bitcount_temp);
 	}
-	// todo: check is_big_endian
-	bool is_big_endian_temp = true;
 
-	if(use_syspal)
+	bool is_big_endian_temp =
+			DEFOPT(PAL_BIG_ENDIAN).empty() ? true : str_bool(DEFOPT(PAL_BIG_ENDIAN));
+
+	if(use_refpal)
 		return new pal_def(colorsize_temp, subpal_length_temp, subpal_count_temp,
-											 nullptr, syspal_temp, pal_decode_fixed,
-											 is_big_endian_temp);
+											 nullptr, refpal_temp, pal_decode_fixed,
+											 is_big_endian_temp, subpal_datasize_temp);
 	else
 		return new pal_def(colorsize_temp, subpal_length_temp, subpal_count_temp,
 											 colordef_temp, nullptr, pal_decode_calc,
-											 is_big_endian_temp);
+											 is_big_endian_temp, subpal_datasize_temp);
 }
 
+inline bool str_bool(std::string value)
+{
+	try {
+		int temp = std::stoi(value);
+		if(temp > 0)
+			return true;
+		else
+			return false;
+	} catch(const std::invalid_argument &e) {
+#ifdef DEBUG
+		std::cerr << "str_bool: Invalid value: " << value << std::endl;
+#endif
+		throw std::invalid_argument(
+				"Value is not valid for true/false (use 0 = false, 1 = true)");
+	}
+}
 inline u32 str_validate_ispos(std::string value)
 {
 	int out = -1;
 	try {
 		out = std::stoi(value);
 	} catch(const std::invalid_argument &e) {
+#ifdef DEBUG
+		std::cerr << "str_validate_ispos: Invalid value: " << value << std::endl;
+#endif
 		throw std::invalid_argument("Value is not a valid number string");
 	}
 
-	if(out < 1)
+	if(out < 1) {
+#ifdef DEBUG
+		std::cerr << "str_validate_ispos: Invalid value: " << value << std::endl;
+#endif
 		throw std::invalid_argument(
 				"Value is not a valid number; must be 1 or greater");
+	}
 
 	return (u32)out;
 }
@@ -231,11 +260,18 @@ inline u32 str_validate_nonneg(std::string value)
 	try {
 		out = std::stoi(value);
 	} catch(const std::invalid_argument &e) {
+#ifdef DEBUG
+		std::cerr << "str_validate_nonneg: Invalid value: " << value << std::endl;
+#endif
 		throw std::invalid_argument("Value is not a valid number string");
 	}
 
 	if(out < 0) {
+#ifdef DEBUG
+		std::cerr << "str_validate_nonneg: Invalid value: " << value << std::endl;
+#endif
 		throw std::invalid_argument(
+
 				"Value is not a valid number; must be 0 or greater");
 	}
 
@@ -297,7 +333,7 @@ inline palette *str_validate_array_get_palette(std::string value)
 			if(this_value[0] == '#')
 				this_value.erase(this_value.begin(), this_value.begin() + 1);
 			if(this_value.length() != 6)
-				throw std::invalid_argument("Invalid hex color in syspal definition");
+				throw std::invalid_argument("Invalid hex color in refpal definition");
 
 			red = std::stoi(this_value.substr(0, 2), nullptr, 16);
 			green = std::stoi(this_value.substr(2, 2), nullptr, 16);
@@ -312,3 +348,5 @@ inline palette *str_validate_array_get_palette(std::string value)
 	return out;
 }
 } // namespace chrgfx
+
+#undef DEFOPT

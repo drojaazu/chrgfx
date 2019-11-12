@@ -38,7 +38,8 @@ static const std::string PAL_COLORSIZE = "colorsize",
 												 PAL_COLOR_PASSES = "color_passes",
 												 PAL_SUBPAL_LENGTH = "subpal_length",
 												 PAL_SUBPAL_COUNT = "subpal_count",
-												 PAL_SYSPAL = "syspal", PAL_BIG_ENDIAN = "big_endian",
+												 PAL_SUBPAL_DATASIZE = "subpal_datasize",
+												 PAL_REFPAL = "refpal", PAL_BIG_ENDIAN = "big_endian",
 												 PAL_RED_SHIFT = "red_shift", PAL_RED_SIZE = "red_size",
 												 PAL_GREEN_SHIFT = "green_shift",
 												 PAL_GREEN_SIZE = "green_size",
@@ -61,6 +62,11 @@ pal_def *get_paldef(std::ifstream &infile);
  * Parse the gfxdef text file into valid key-value pairs
  */
 kvmap parse_file(std::ifstream &infile);
+
+/**
+ * Return true if value is > 0, false if <1
+ */
+bool str_bool(std::string value);
 
 /**
  * Ensure value is greater than 0

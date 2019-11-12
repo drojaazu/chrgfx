@@ -43,14 +43,14 @@ image<index_pixel> *render(bank &chr_bank, palette &pal, render_traits &rtraits)
 			outimg_pxlheight = outimg_rowheight * chr_pxlheight;
 
 #ifdef DEBUG
-	std::cerr << "chrs size: " << (int)chrs->size() << std::endl;
+	std::cerr << "chrs size: " << (int)chrs.size() << std::endl;
 	std::cerr << "chrs to pad: " << (int)chrs_to_pad << std::endl;
 	std::cerr << "chr chunk size: " << (int)(chr_pxlwidth * chr_pxlheight)
 						<< std::endl;
 #endif
 
 #ifdef DEBUG
-	std::cerr << "chrs size after padding: " << (int)chrs->size() << std::endl;
+	std::cerr << "chrs size after padding: " << (int)chrs.size() << std::endl;
 	std::cerr << "final img size: " << (int)outimg_pxlwidth << "x"
 						<< (int)outimg_pxlheight << std::endl;
 #endif

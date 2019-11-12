@@ -19,4 +19,4 @@ subpal_count 3
 # black & white "colors" are based on intensity values
 # so we need an RGB equivalent palette
 # this is based on the yellow-green tinted original system
-syspal #c4cfa1,#8b956d,#6b7353,#414141
+refpal #c4cfa1,#8b956d,#6b7353,#414141
