@@ -1,0 +1,9 @@
+#### TILE
+# 16x16 4bpp Planar
+# Used by Capcom CPS and CPS 2
+width 16
+height 16
+bpp 4
+planeoffset 24, 16, 8, 0
+xoffset 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39
+yoffset 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960

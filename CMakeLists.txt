@@ -3,11 +3,13 @@ INCLUDE (CheckIncludeFiles)
 # define project
 cmake_minimum_required (VERSION 3.5)
 project (chrgfx VERSION 1.0 LANGUAGES CXX)
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+set(CMAKE_BUILD_TYPE Debug)
 
 # define target
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src CPPFILES)
 add_executable(chrgfx ${CPPFILES}) 
 

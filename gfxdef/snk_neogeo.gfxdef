@@ -1,0 +1,33 @@
+#### TILE
+# 16x16 4bpp Planar
+# Used by Neo-Geo MVS/AES
+width 16
+height 16
+bpp 4
+planeoffset 24, 16, 8, 0
+xoffset 519, 518, 517, 516, 515, 514, 513, 512, 7, 6, 5, 4, 3, 2, 1, 0
+yoffset 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480
+
+#### PALETTE/COLORS
+# Neo-Geo MVS/AES palette
+# Neo-Geo actually has 256 palettes of 16 colors each
+# which means a total system palette size of 4096 colors!
+# we can only have up to 256 colors in our indexed PNG output
+# so using the subpalette option while rendering is a must!
+colorsize 16
+subpal_length 16
+subpal_count 16
+
+# Neo-Geo MVS/AES color format
+# 15 |                               |0
+#    DDR0G0B0R4R3R2R1 G4G3G2G1B4B3B2B1
+# D = "dark bit", acts as shared LSB for all color components
+color_passes 3
+red_shift 15,14,8
+red_size 1,1,4
+green_shift 15,13,4
+green_size 1,1,4
+blue_shift 15,12,0
+blue_size 1,1,4
+
+big_endian true

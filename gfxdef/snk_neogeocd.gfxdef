@@ -1,0 +1,9 @@
+#### TILE
+# 16x16 4bpp Planar
+# Used by Neo-Geo CD
+width 16
+height 16
+bpp 4
+planeoffset 24, 16, 8, 0
+xoffset 519, 518, 517, 516, 515, 514, 513, 512, 7, 6, 5, 4, 3, 2, 1, 0
+yoffset 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480

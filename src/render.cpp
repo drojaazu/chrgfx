@@ -1,26 +1,26 @@
 #include "render.hpp"
-#include <stdio.h>
 #include <algorithm>
+#include <stdio.h>
 
 using namespace png;
 using namespace chrgfx;
 
-image<index_pixel>* render(bank* chr_bank, const palette* pal,
-													 render_traits* rtraits)
+image<index_pixel> *render(bank &chr_bank, palette &pal, render_traits &rtraits)
 {
-	if(chr_bank->chrs->size() < 1)
+	if(chr_bank.chrs->size() < 1)
 		throw std::length_error("Tile vector is empty, nothing to render");
 
-	std::vector<const u8*>* chrs = chr_bank->chrs;
+	// just a shortcut so don't have to go through chr_bank all over the place...
+	std::vector<bptr> &chrs = *chr_bank.chrs;
 
 	u16
 			// chr dimensions
-			chr_pxlwidth = chr_bank->chrdef->width,
-			chr_pxlheight = chr_bank->chrdef->height,
+			chr_pxlwidth = chr_bank.chrdef.get_width(),
+			chr_pxlheight = chr_bank.chrdef.get_height(),
 
 			// number of chrs to add to end of buffer to get an evenly divisible count
-			chrs_to_pad = (chrs->size() % rtraits->cols > 0)
-												? (rtraits->cols - (chrs->size() % rtraits->cols))
+			chrs_to_pad = (chrs.size() % rtraits.cols > 0)
+												? (rtraits.cols - (chrs.size() % rtraits.cols))
 												: 0;
 
 	// pad with empty chrs if necessary
@@ -28,12 +28,12 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 	// sizes)
 	if(chrs_to_pad > 0)
 		for(u16 addchr_iter = 0; addchr_iter < chrs_to_pad; addchr_iter++)
-			chrs->push_back(new u8[chr_pxlwidth * chr_pxlheight]{0});
+			chrs.push_back(new u8[chr_pxlwidth * chr_pxlheight]{0});
 
 	u16
 			// final image dimensions (in chrs)
-			outimg_colwidth = rtraits->cols,
-			outimg_rowheight = chrs->size() / outimg_colwidth;
+			outimg_colwidth = rtraits.cols,
+			outimg_rowheight = chrs.size() / outimg_colwidth;
 
 	u32
 			// final image dimensions (in pixels)
@@ -56,30 +56,28 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 #endif
 
 	// declare iters and buffers and such for processing
-	size_t chrrow_iter, chr_pxlrow_iter, chrcol_iter, chr_iter = 0,
-																										outimg_pxlrow_idx = 0;
-	auto this_outimg_pxlrow = std::vector<index_pixel>(),
-			 this_chr_pxlrow = std::vector<index_pixel>();
-	const u8* this_chroffset;
+	size_t chrrow_iter, chr_pxlrow_iter, chrcol_iter, chr_iter{0},
+			outimg_pxlrow_idx{0};
+	auto this_outimg_pxlrow{std::vector<index_pixel>()},
+			this_chr_pxlrow{std::vector<index_pixel>()};
+	bptr this_chroffset;
 
 	// pixel buffer to be sent to the final image
-	auto imgBuffer = pixel_buffer<index_pixel>(outimg_pxlwidth, outimg_pxlheight);
+	auto imgbuffer{pixel_buffer<index_pixel>(outimg_pxlwidth, outimg_pxlheight)};
 	// top of image, add border if present
 
 	// for each chr row...
-	for(chrrow_iter = 0; chrrow_iter < outimg_rowheight; chrrow_iter++)
-	{
+	for(chrrow_iter = 0; chrrow_iter < outimg_rowheight; chrrow_iter++) {
 		// for each pixel in that chr row...
-		for(chr_pxlrow_iter = 0; chr_pxlrow_iter < chr_pxlheight; chr_pxlrow_iter++)
-		{
+		for(chr_pxlrow_iter = 0; chr_pxlrow_iter < chr_pxlheight;
+				chr_pxlrow_iter++) {
 			this_outimg_pxlrow.clear();
 			this_outimg_pxlrow.reserve(outimg_pxlwidth);
 
 			// beginning of imgout pixel row, add border if present
 			// for each chr column in the row...
-			for(chrcol_iter = 0; chrcol_iter < outimg_colwidth; chrcol_iter++)
-			{
-				this_chroffset = chrs->at(chr_iter) + (chr_pxlrow_iter * chr_pxlwidth);
+			for(chrcol_iter = 0; chrcol_iter < outimg_colwidth; chrcol_iter++) {
+				this_chroffset = chrs.at(chr_iter) + (chr_pxlrow_iter * chr_pxlwidth);
 				std::copy(this_chroffset, this_chroffset + chr_pxlwidth,
 									std::back_inserter(this_outimg_pxlrow));
 				chr_iter++;
@@ -89,7 +87,7 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 			// reset to point back to the first tile in the tile row
 			chr_iter -= outimg_colwidth;
 			// put rendered row at the end of the final image
-			imgBuffer.put_row(outimg_pxlrow_idx++, this_outimg_pxlrow);
+			imgbuffer.put_row(outimg_pxlrow_idx++, this_outimg_pxlrow);
 		}
 		// bottom of tile row, add border if present
 
@@ -97,32 +95,27 @@ image<index_pixel>* render(bank* chr_bank, const palette* pal,
 		chr_iter += outimg_colwidth;
 	}
 
-	auto outimg = new image<index_pixel>(outimg_pxlwidth, outimg_pxlheight);
+	auto outimg{new image<index_pixel>(outimg_pxlwidth, outimg_pxlheight)};
 
-	outimg->set_palette(*pal);
+	outimg->set_palette(pal);
 
 	// check for palette transparency
-	if(rtraits->use_trns)
-	{
-		png::tRNS* trans = new png::tRNS();
+	if(rtraits.use_trns) {
+		png::tRNS trans;
 
 		// this could probably be done better...
-		if(!rtraits->trns_entry)
-		{
-			trans->push_back(0);
+		if(!rtraits.trns_entry) {
+			trans.push_back(0);
+		} else {
+			trans.resize(rtraits.trns_entry + 1);
+			std::fill(trans.begin(), trans.end(), 255);
+			std::cerr << trans.size() << std::endl;
+			trans.at(rtraits.trns_entry) = 0;
 		}
-		else
-		{
-			trans->resize(rtraits->trns_entry + 1);
-			std::fill(trans->begin(), trans->end(), 255);
-			std::cerr << trans->size() << std::endl;
-			trans->at(rtraits->trns_entry) = 0;
-		}
-		outimg->set_tRNS(*trans);
-		delete trans;
+		outimg->set_tRNS(trans);
 	}
 
-	outimg->set_pixbuf(imgBuffer);
+	outimg->set_pixbuf(imgbuffer);
 
 	return outimg;
 }

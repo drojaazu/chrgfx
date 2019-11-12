@@ -1,136 +1,165 @@
 #include "main.hpp"
+
 #ifdef DEBUG
 #include <chrono>
 #endif
 
-// TODO - rearrange all the helper functions/PODs!
-
 using namespace std;
 using namespace chrgfx;
 
+// application globals
 const string version = string("1.1");
+int return_status;
 
-const map<string, const chr_def> chrdef_list = {
+// built-in graphics formats
+map<string, chr_def> chrdef_list = {
 		{string("mono"), chrdefs::chr_8x8x1},
 		{string("sega_md"), chrdefs::chr_8x8x4_packed},
-		{string("sega_8bit"), chrdefs::sega_8bit},
-		{string("nintendo_sfc"), chrdefs::nintendo_sfc},
-		{string("nintendo_fc"), chrdefs::nintendo_fc},
-		{string("nintendo_gb"), chrdefs::nintendo_2bpp}};
-/*{string("capcom_cps1"), chrdefs::capcom_cps1},
-{string("snk_neogeo"), chrdefs::snk_neogeo},
-{string("snk_neogeocd"), chrdefs::snk_neogeocd},
-{string("snk_neogeo_pocket"), chrdefs::snk_neogeo_pocket},
-{string("seta"), chrdefs::seta_chr},
-{string("seta_sprites"), chrdefs::seta_sprites}};
-*/
+		{string("nintendo_sfc"), chrdefs::nintendo_sfc}};
 
-const map<string, pal_def> paldef_list = {
+map<string, pal_def> paldef_list = {
 		{string("sega_md"), paldefs::sega_md_pal},
-		{string("nintendo_gb_classic"), paldefs::nintendo_gb_classic_pal},
-		{string("nintendo_fc"), paldefs::nintendo_fc_pal},
 		{string("nintendo_sfc"), paldefs::nintendo_sfc_pal},
-		{string("snk_neogeo"), paldefs::snk_neogeo_pal},
-		{string("snk_neogeo_noshadow"), paldefs::snk_neogeo_noshadow_pal},
-		{string("snk_neogeo_pocket"), paldefs::snk_neogeo_pocket_pal},
 		{string("tlp"), paldefs::tilelayerpro}};
 
-string outfile, chrdef_name, palx_name;
+// option settings
+runtime_config cfg;
 
-render_traits rtraits;
-
-istream* chr_data = nullptr;
-istream* pal_data = nullptr;
-
-const pal_def* paldef = nullptr;
-const chr_def* chrdef = nullptr;
-
-const palette* work_pal;
-s16 subpalette{-1};
-
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-	try
-	{
+	// declare our heap variables here in case they need
+	// to be deleted from exception
+	istream *chrdata{nullptr};
+	istream *paldata{nullptr};
+	chr_def *chrdef{nullptr};
+	pal_def *paldef{nullptr};
+
+	palette *workpal{nullptr};
+
+	bool is_internal = true;
+
+	try {
 		process_args(argc, argv);
 
-		if(chrdef == nullptr)
-		{
-			chrdef = &chrdefs::chr_8x8x1;
-		}
+		// SANITY CHECKING HERE
+		/*
+			chrdata is not required; if not present, use cin
 
-		// if no pal format was passed, see if there is a palx with same name as the
-		// chrx
-		if(paldef == nullptr && paldef_list.find(chrdef_name) != paldef_list.end())
-		{
-			palx_name = chrdef_name;
-			paldef = &paldef_list.at(chrdef_name);
-		}
+			chrdef not required; if not present, use internal 1bpp mode
 
-		if(chr_data == nullptr)
-			chr_data = &cin;
-		else
-		{
-			if(!chr_data->good())
-			{
-				cerr << "CHR data file could not be opened" << endl;
-				return 2;
+			paldata is not required; if not present,use system generated colors
+
+			paldef required if paldata present; if present with no paldata, ignore
+		*/
+
+		/*
+			if gfxdef is set, do not check chrdef or paldef
+		*/
+
+		// check data sanity
+		if(cfg.chrdata_name.empty()) {
+			chrdata = &cin;
+		} else {
+			chrdata = new ifstream(cfg.chrdata_name);
+			if(chrdata->fail()) {
+				throw invalid_argument("Tile data file could not be opened");
 			}
-			chr_data->seekg(0);
+		}
+
+		if(cfg.paldata_name.empty()) {
+			paldata = nullptr;
+		} else {
+			paldata = new ifstream(cfg.paldata_name);
+			if(paldata->fail()) {
+				throw invalid_argument("Palette data file could not be opened");
+			}
+		}
+
+		// check def sanity
+		// gfxdef has priority; if it is set, we ignore chr/pal def options
+		if(!cfg.gfxdef_name.empty()) {
+			// use chrdef/paldef from gfxdef
+			ifstream gfxdef_file(cfg.gfxdef_name);
+			if(gfxdef_file.good()) {
+				chrdef = get_chrdef(gfxdef_file);
+				gfxdef_file.clear();
+				if(paldata != nullptr) {
+					paldef = get_paldef(gfxdef_file);
+				}
+				is_internal = false;
+			} else {
+				throw invalid_argument("Unable to open gfxdef file");
+			}
+		} else {
+			// use individual chrdef/paldef settings or internal settings
+			if(cfg.chrdef_name.empty()) {
+				chrdef = &chrdefs::chr_8x8x1;
+			} else {
+				ifstream chrdef_file(cfg.chrdef_name);
+				if(chrdef_file.good()) {
+					chrdef = get_chrdef(chrdef_file);
+					is_internal = false;
+				} else {
+					if(chrdef_list.find(cfg.chrdef_name) == chrdef_list.end()) {
+						throw invalid_argument(
+								"Invalid chrdef file or internal tile format specified");
+					}
+					chrdef = &chrdef_list.at(cfg.chrdef_name);
+					is_internal = true;
+				}
+			}
+
+			// if paldata is null, we don't even bother with the paldef
+			if(paldata != nullptr) {
+				ifstream paldef_file(cfg.paldef_name);
+				if(paldef_file.good()) {
+					paldef = get_paldef(paldef_file);
+					is_internal = false;
+				} else {
+					if(paldef_list.find(cfg.paldef_name) == paldef_list.end()) {
+						throw invalid_argument(
+								"Invalid paldef file or internal palette format specified");
+					}
+					paldef = &paldef_list.at(cfg.paldef_name);
+					is_internal = true;
+				}
+			}
 		}
 
 		// use system palette if no palette data supplied
-		if(pal_data == nullptr)
-			work_pal = chrgfx::make_pal(false);
-		else
-		{
-			if(!pal_data->good())
-			{
-				cerr << "PAL data file could not be opened" << endl;
-				return 2;
-			}
-			pal_data->seekg(0, pal_data->end);
-			int length = pal_data->tellg();
-			pal_data->seekg(0, pal_data->beg);
-			auto palbuffer = new char[length];
-			pal_data->read(palbuffer, length);
-			work_pal = paldef->converter(paldef, (u8*)palbuffer, subpalette);
-			delete[] palbuffer;
-			delete pal_data;
+		if(paldata == nullptr)
+			workpal = chrgfx::make_pal(false);
+		else {
+			// with the rules above, where there's paldata, there's a a paldef
+
+			paldata->seekg(0, paldata->end);
+			int length = paldata->tellg();
+			paldata->seekg(0, paldata->beg);
+
+			char palbuffer[length];
+			paldata->read(palbuffer, length);
+			workpal = paldef->convert((u8 *)palbuffer, cfg.subpalette);
 		}
-
-		bank work_bank = bank(chrdef);
-		/*
-		stream read psuedocode
-		1. get data size of tile from converter traits = x
-		2. allocate array with x bytes
-		3. read x bytes into array
-		3a. not enough bytes, fill with 0s
-		4. call get tile on the array to get a processed tile
-		5. add tile to vector for rendering
-		6. repeat until end of stream
-
-		*/
 
 #ifdef DEBUG
 		std::chrono::high_resolution_clock::time_point t1 =
 				std::chrono::high_resolution_clock::now();
 #endif
-		
+
+		bank workbank = bank(*chrdef);
 		// read the file in chunks, convert each chunk and store it in a vector
-		auto chunksize = (chrdef->datasize / 8);
-		auto chunkbuffer = new char[chunksize];
 
-		while(1)
-		{
-			chr_data->read(chunkbuffer, chunksize);
-			if(chr_data->eof()) break;
+		auto chunksize = (chrdef->get_datasize() / 8);
 
-			work_bank.chrs->push_back(chrdef->converter(chrdef, (u8*)chunkbuffer));
+		char chunkbuffer[chunksize];
+
+		while(1) {
+			chrdata->read(chunkbuffer, chunksize);
+			if(chrdata->eof())
+				break;
+
+			workbank.chrs->push_back(chrdef->convert((u8 *)chunkbuffer));
 		}
-
-		if(chr_data != &cin) delete chr_data;
-		delete[] chunkbuffer;
 
 #ifdef DEBUG
 		std::chrono::high_resolution_clock::time_point t2 =
@@ -142,125 +171,185 @@ int main(int argc, char** argv)
 
 		t1 = std::chrono::high_resolution_clock::now();
 #endif
-
-		png::image<png::index_pixel>* outimg =
-				render(&work_bank, work_pal, &rtraits);
+		png::image<png::index_pixel> *outimg =
+				render(workbank, *workpal, cfg.rendertraits);
+		try {
 
 #ifdef DEBUG
-		t2 = std::chrono::high_resolution_clock::now();
-		duration =
-				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-		cerr << "Rendering: " << duration << endl;
+			t2 = std::chrono::high_resolution_clock::now();
+			duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
+										 .count();
+			cerr << "Rendering: " << duration << endl;
 #endif
 
-		if(outfile.empty())
-			outimg->write_stream(cout);
-		else
-			outimg->write(outfile);
+			if(cfg.outfile.empty())
+				outimg->write_stream(cout);
+			else
+				outimg->write(cfg.outfile);
 
-		delete work_pal;
-		delete outimg;
+			delete outimg;
+		} catch(const exception &e) {
+			delete outimg;
+			throw e;
+		}
+		return_status = 0;
+		goto cleanup;
 	}
 
-	catch(const exception& e)
-	{
+	catch(const exception &e) {
 		cerr << "Fatal error: " << e.what() << endl;
-		return -1;
+		return_status = -1;
+		goto cleanup;
 	}
 
-	return 0;
+cleanup:
+	delete chrdata;
+	delete paldata;
+
+	if(!is_internal) {
+		delete chrdef;
+		if(paldef != nullptr) {
+			delete paldef->get_colordef();
+			delete paldef->get_syspal();
+		}
+		delete paldef;
+	}
+
+	delete workpal;
+	return return_status;
 }
 
-void process_args(int argc, char** argv)
+void process_args(int argc, char **argv)
 {
-	const char* const shortOpts = ":f:g:t:p:o:rc:s:h";
-	const option longOpts[] = {{"chr-format", required_argument, nullptr, 'f'},
-														 {"pal-format", required_argument, nullptr, 'g'},
-														 {"chr-data", required_argument, nullptr, 't'},
+	const char *const shortOpts = ":f:g:t:p:o:rc:s:h";
+	const option longOpts[] = {{"gfx-format", required_argument, nullptr, 'G'},
+														 {"chr-format", required_argument, nullptr, 'C'},
+														 {"pal-format", required_argument, nullptr, 'P'},
+														 {"chr-data", required_argument, nullptr, 'c'},
 														 {"pal-data", required_argument, nullptr, 'p'},
 														 {"output", required_argument, nullptr, 'o'},
-														 {"trns", no_argument, nullptr, 'r'},
+														 {"trns", no_argument, nullptr, 't'},
 														 {"trns-index", required_argument, nullptr, 'i'},
-														 {"columns", required_argument, nullptr, 'c'},
+														 {"columns", required_argument, nullptr, 'd'},
 														 {"subpalette", required_argument, nullptr, 's'},
 														 {"help", no_argument, nullptr, 'h'},
 														 {nullptr, 0, nullptr, 0}};
 
-	while(true)
-	{
+	while(true) {
 		const auto thisOpt = getopt_long(argc, argv, shortOpts, longOpts, nullptr);
 
-		if(thisOpt == -1) break;
+		if(thisOpt == -1)
+			break;
 
-		switch(thisOpt)
-		{
+		ifstream gfxdef_file;
+		switch(thisOpt) {
+			// TODO: format files
+			/*
+				- gfx/chr/pal format can specify either a file or an internal definition
+				- file has priority; if it doesn't exist, check internal; if neither,
+				error
+				- gfxdef loads a chr AND a pal def; if both not found, error
+				- chrdef loads a chr only, and paldef loads pal only
+				- gfxdef AND chr/pal def can be specified; if so, individual chr/pal
+				defs take precedence
+			*/
+			// gfx-format
+			case 'G':
+				cfg.gfxdef_name = optarg;
+				/*
+				gfxdef_file = ifstream(optarg);
+				if(gfxdef_file.good()) {
+					chrdef = get_chrdef(&gfxdef_file);
+					paldef = get_paldef(&gfxdef_file);
+					is_internal = false;
+				} else {
+					throw invalid_argument("Invalid gfxdef file specified");
+				}
+				*/
+				break;
+
 			// chr-format
-			case 'f':
-				chrdef_name = optarg;
-				if(chrdef_list.find(chrdef_name) == chrdef_list.end())
-					throw invalid_argument("Invalid CHR format specified");
-				chrdef = &chrdef_list.at(optarg);
+			case 'C':
+				cfg.chrdef_name = optarg;
+				/*
+				gfxdef_file = ifstream(optarg);
+				if(gfxdef_file.good()) {
+					get_chrdef(&gfxdef_file);
+					is_internal = false;
+				} else {
+					if(chrdef_list.find(chrdef_name) == chrdef_list.end()) {
+						throw invalid_argument("Invalid tile format specified");
+					}
+					chrdef = &chrdef_list.at(optarg);
+					is_internal = true;
+				}
+				*/
 				break;
 
 			// pal-format
-			case 'g':
+			case 'P':
+				cfg.paldef_name = optarg;
+				/*
 				palx_name = optarg;
-				if(paldef_list.find(palx_name) == paldef_list.end())
-					throw invalid_argument("Invalid palette format specified");
-				paldef = &paldef_list.at(optarg);
+				gfxdef_file = ifstream(optarg);
+				if(gfxdef_file.good()) {
+					get_paldef(&gfxdef_file);
+					is_internal = false;
+				} else {
+					if(paldef_list.find(palx_name) == paldef_list.end()) {
+						throw invalid_argument("Invalid palette format specified");
+					}
+					paldef = &paldef_list.at(optarg);
+					is_internal = true;
+				}
+				*/
 				break;
 
 			// chr-data
-			case 't':
-				chr_data = new ifstream(optarg);
+			case 'c':
+				cfg.chrdata_name = optarg;
+				// cfg.chrdata = ifstream(optarg);
 				break;
 
 			// pal-data
 			case 'p':
-				pal_data = new ifstream(optarg);
+				cfg.paldata_name = optarg;
+				// cfg.paldata = ifstream(optarg);
 				break;
 
 			// output
 			case 'o':
-				outfile = optarg;
+				cfg.outfile = optarg;
 				break;
 
 			// trns
-			case 'r':
-				rtraits.use_trns = true;
+			case 't':
+				cfg.rendertraits.use_trns = true;
 				break;
+
 			// trns entry
 			case 'i':
-				try
-				{
-					rtraits.trns_entry = stoi(optarg);
-				}
-				catch(const invalid_argument& e)
-				{
+				try {
+					cfg.rendertraits.trns_entry = stoi(optarg);
+				} catch(const invalid_argument &e) {
 					throw invalid_argument("Invalid transparency index value");
 				}
 				break;
 
 			// columns
-			case 'c':
-				try
-				{
-					rtraits.cols = stoi(optarg);
-				}
-				catch(const invalid_argument& e)
-				{
+			case 'd':
+				try {
+					cfg.rendertraits.cols = stoi(optarg);
+				} catch(const invalid_argument &e) {
 					throw invalid_argument("Invalid columns value");
 				}
 				break;
 
 			// subpalette
 			case 's':
-				try
-				{
-					subpalette = stoi(optarg);
-				}
-				catch(const invalid_argument& e)
-				{
+				try {
+					cfg.subpalette = stoi(optarg);
+				} catch(const invalid_argument &e) {
 					throw invalid_argument("Invalid subpalette index");
 				}
 				break;
@@ -288,12 +377,13 @@ void print_help()
 {
 	cerr << "chrgfx version " << version << endl << endl;
 	cerr << "Valid options:" << endl;
-	cerr << "  --chr-format, -f   Specify tile data format" << endl;
-	cerr << "  --chr-data, -t     Filename to input tile data" << endl;
-	cerr << "  --pal-format, -g   Specify palette data format" << endl;
+	cerr << "  --gfx-format, -G   Specify graphics data format" << endl;
+	cerr << "  --chr-format, -C   Specify tile data format" << endl;
+	cerr << "  --chr-data, -c     Filename to input tile data" << endl;
+	cerr << "  --pal-format, -P   Specify palette data format" << endl;
 	cerr << "  --pal-data, -p     Filename to input palette data" << endl;
 	cerr << "  --output, -o       Specify output PNG image filename" << endl;
-	cerr << "  --trns, -r         Use image transparency" << endl;
+	cerr << "  --trns, -t         Use image transparency" << endl;
 	cerr << "  --trns-index, -i   Specify palette entry to use as transparency "
 					"(default is 0)"
 			 << endl;

@@ -4,8 +4,8 @@
 
 namespace chrgfx
 {
-const u8* get_chr(const chr_def* chrdef, const u8* data);
+u8 const *get_chr(chr_def &chrdef, u8 const *data);
 
-}	// namespace chrgfx
+} // namespace chrgfx
 
 #endif
