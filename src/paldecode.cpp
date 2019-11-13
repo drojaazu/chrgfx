@@ -94,7 +94,8 @@ palette *pal_decode(pal_def &paldef, bptr data,
 	}
 
 	u16 data_inc{0};
-	if(workentry_bytesize == 1 && temp > workentry_bytesize) {
+	if(workentry_bytesize == 1 && workentry_bitsize > 0 &&
+		 temp > workentry_bytesize) {
 		data_inc = temp;
 	} else {
 		data_inc = workentry_bytesize;

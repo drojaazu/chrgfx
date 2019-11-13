@@ -11,7 +11,7 @@ yoffset 0, 16, 32, 48, 64, 80, 96, 112
 #### PALETTE/COLORS
 # Nintendo Virtual Boy palette
 # 2 bits per color, 3 colors per palette
-# each palette is 1 byte; lowest two bits ignored as padding
+# palette data is 1 byte; lowest two bits ignored as padding
 # 8 palettes total
 colorsize 2
 subpal_length 4
@@ -19,7 +19,8 @@ subpal_count 8
 big_endian 0
 
 # We manually specify the subpalette data size here since
-# VB subpalettes are actually 2 bytes
+# VB subpalettes are actually word length, with the upper
+# ignored
 subpal_datasize 16
 
 # VB "colors" are based on four levels of intensity

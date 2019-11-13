@@ -15,6 +15,7 @@ yoffset 0,8,16,24,32,40,48,56
 colorsize 8
 subpal_length 4
 subpal_count 8
+bigendian 0
 
 # a 'standard' 2C02 PPU palette, from:
 # https://wiki.nesdev.com/w/index.php/PPU_palettes
