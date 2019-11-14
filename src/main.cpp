@@ -8,19 +8,9 @@ using namespace std;
 using namespace chrgfx;
 
 // application globals
-const string version = string("1.1");
+const static string version = string("1.1");
 int return_status;
-
-// built-in graphics formats
-map<string, chr_def> chrdef_list = {
-		{string("mono"), chrdefs::chr_8x8x1},
-		{string("sega_md"), chrdefs::chr_8x8x4_packed},
-		{string("nintendo_sfc"), chrdefs::nintendo_sfc}};
-
-map<string, pal_def> paldef_list = {
-		{string("sega_md"), paldefs::sega_md_pal},
-		{string("nintendo_sfc"), paldefs::nintendo_sfc_pal},
-		{string("tlp"), paldefs::tilelayerpro}};
+const static bool bigend_sys = is_system_bigendian();
 
 // option settings
 runtime_config cfg;
@@ -76,13 +66,14 @@ int main(int argc, char **argv)
 		}
 
 		// check def sanity
-		// gfxdef has priority; if it is set, we ignore chr/pal def options
+		// check for --gfx-def first, then override with --chr-def and --pal-def if
+		// present
 		if(!cfg.gfxdef_name.empty()) {
-			// use chrdef/paldef from gfxdef
 			ifstream gfxdef_file(cfg.gfxdef_name);
 			if(gfxdef_file.good()) {
 				chrdef = get_chrdef(gfxdef_file);
 				gfxdef_file.clear();
+				// if paldata is null, don't worry about the paldef
 				if(paldata != nullptr) {
 					paldef = get_paldef(gfxdef_file);
 				}
@@ -90,39 +81,51 @@ int main(int argc, char **argv)
 			} else {
 				throw invalid_argument("Unable to open gfxdef file");
 			}
-		} else {
-			// use individual chrdef/paldef settings or internal settings
-			if(cfg.chrdef_name.empty()) {
-				chrdef = &chrdefs::chr_8x8x1;
-			} else {
-				ifstream chrdef_file(cfg.chrdef_name);
-				if(chrdef_file.good()) {
-					chrdef = get_chrdef(chrdef_file);
-					is_internal = false;
-				} else {
-					if(chrdef_list.find(cfg.chrdef_name) == chrdef_list.end()) {
-						throw invalid_argument(
-								"Invalid chrdef file or internal tile format specified");
-					}
-					chrdef = &chrdef_list.at(cfg.chrdef_name);
-					is_internal = true;
-				}
-			}
+		}
 
-			// if paldata is null, we don't even bother with the paldef
-			if(paldata != nullptr) {
-				ifstream paldef_file(cfg.paldef_name);
-				if(paldef_file.good()) {
-					paldef = get_paldef(paldef_file);
-					is_internal = false;
-				} else {
-					if(paldef_list.find(cfg.paldef_name) == paldef_list.end()) {
-						throw invalid_argument(
-								"Invalid paldef file or internal palette format specified");
-					}
-					paldef = &paldef_list.at(cfg.paldef_name);
-					is_internal = true;
+		// use individual chrdef/paldef settings or internal settings
+		if(!cfg.chrdef_name.empty()) {
+			ifstream chrdef_file(cfg.chrdef_name);
+			if(chrdef_file.good()) {
+				delete chrdef;
+				chrdef = get_chrdef(chrdef_file);
+				if(chrdef == nullptr) {
+					throw invalid_argument("Invalid chrdef file");
 				}
+				is_internal = false;
+			} else {
+				if(internal_chrdefs.find(cfg.chrdef_name) == internal_chrdefs.end()) {
+					throw invalid_argument(
+							"Invalid chrdef file or internal tile format specified");
+				}
+				chrdef = &internal_chrdefs.at(cfg.chrdef_name);
+				is_internal = true;
+			}
+		}
+
+		// if chrdef is still null at this point then a chrdef hasn't been
+		// specified or was invalid, use the fall back
+		if(chrdef == nullptr) {
+			chrdef = &chrdefs::chr_8x8x1;
+		}
+
+		// if paldata is null, we don't even bother with the paldef
+		if(paldata != nullptr && !cfg.paldef_name.empty()) {
+			ifstream paldef_file(cfg.paldef_name);
+			if(paldef_file.good()) {
+				delete paldef;
+				paldef = get_paldef(paldef_file);
+				if(paldef == nullptr) {
+					throw invalid_argument("Invalid paldef file");
+				}
+				is_internal = false;
+			} else {
+				if(internal_paldefs.find(cfg.paldef_name) == internal_paldefs.end()) {
+					throw invalid_argument(
+							"Invalid paldef file or internal palette format specified");
+				}
+				paldef = &internal_paldefs.at(cfg.paldef_name);
+				is_internal = true;
 			}
 		}
 
@@ -131,7 +134,6 @@ int main(int argc, char **argv)
 			workpal = chrgfx::make_pal(false);
 		else {
 			// with the rules above, where there's paldata, there's a a paldef
-
 			paldata->seekg(0, paldata->end);
 			int length = paldata->tellg();
 			paldata->seekg(0, paldata->beg);
@@ -209,7 +211,7 @@ cleanup:
 	if(!is_internal) {
 		delete chrdef;
 		if(paldef != nullptr) {
-			delete paldef->get_colordef();
+			delete paldef->get_coldef();
 			delete paldef->get_syspal();
 		}
 		delete paldef;
@@ -222,9 +224,9 @@ cleanup:
 void process_args(int argc, char **argv)
 {
 	const char *const shortOpts = ":f:g:t:p:o:rc:s:h";
-	const option longOpts[] = {{"gfx-format", required_argument, nullptr, 'G'},
-														 {"chr-format", required_argument, nullptr, 'C'},
-														 {"pal-format", required_argument, nullptr, 'P'},
+	const option longOpts[] = {{"gfx-def", required_argument, nullptr, 'G'},
+														 {"chr-def", required_argument, nullptr, 'C'},
+														 {"pal-def", required_argument, nullptr, 'P'},
 														 {"chr-data", required_argument, nullptr, 'c'},
 														 {"pal-data", required_argument, nullptr, 'p'},
 														 {"output", required_argument, nullptr, 'o'},
@@ -243,78 +245,29 @@ void process_args(int argc, char **argv)
 
 		ifstream gfxdef_file;
 		switch(thisOpt) {
-			// TODO: format files
-			/*
-				- gfx/chr/pal format can specify either a file or an internal definition
-				- file has priority; if it doesn't exist, check internal; if neither,
-				error
-				- gfxdef loads a chr AND a pal def; if both not found, error
-				- chrdef loads a chr only, and paldef loads pal only
-				- gfxdef AND chr/pal def can be specified; if so, individual chr/pal
-				defs take precedence
-			*/
-			// gfx-format
+			// gfx-def
 			case 'G':
 				cfg.gfxdef_name = optarg;
-				/*
-				gfxdef_file = ifstream(optarg);
-				if(gfxdef_file.good()) {
-					chrdef = get_chrdef(&gfxdef_file);
-					paldef = get_paldef(&gfxdef_file);
-					is_internal = false;
-				} else {
-					throw invalid_argument("Invalid gfxdef file specified");
-				}
-				*/
 				break;
 
-			// chr-format
+			// chr-def
 			case 'C':
 				cfg.chrdef_name = optarg;
-				/*
-				gfxdef_file = ifstream(optarg);
-				if(gfxdef_file.good()) {
-					get_chrdef(&gfxdef_file);
-					is_internal = false;
-				} else {
-					if(chrdef_list.find(chrdef_name) == chrdef_list.end()) {
-						throw invalid_argument("Invalid tile format specified");
-					}
-					chrdef = &chrdef_list.at(optarg);
-					is_internal = true;
-				}
-				*/
 				break;
 
-			// pal-format
+			// pal-def
 			case 'P':
 				cfg.paldef_name = optarg;
-				/*
-				palx_name = optarg;
-				gfxdef_file = ifstream(optarg);
-				if(gfxdef_file.good()) {
-					get_paldef(&gfxdef_file);
-					is_internal = false;
-				} else {
-					if(paldef_list.find(palx_name) == paldef_list.end()) {
-						throw invalid_argument("Invalid palette format specified");
-					}
-					paldef = &paldef_list.at(optarg);
-					is_internal = true;
-				}
-				*/
 				break;
 
 			// chr-data
 			case 'c':
 				cfg.chrdata_name = optarg;
-				// cfg.chrdata = ifstream(optarg);
 				break;
 
 			// pal-data
 			case 'p':
 				cfg.paldata_name = optarg;
-				// cfg.paldata = ifstream(optarg);
 				break;
 
 			// output
@@ -377,10 +330,10 @@ void print_help()
 {
 	cerr << "chrgfx version " << version << endl << endl;
 	cerr << "Valid options:" << endl;
-	cerr << "  --gfx-format, -G   Specify graphics data format" << endl;
-	cerr << "  --chr-format, -C   Specify tile data format" << endl;
+	cerr << "  --gfx-def, -G   Specify graphics data format" << endl;
+	cerr << "  --chr-def, -C   Specify tile data format" << endl;
 	cerr << "  --chr-data, -c     Filename to input tile data" << endl;
-	cerr << "  --pal-format, -P   Specify palette data format" << endl;
+	cerr << "  --pal-def, -P   Specify palette data format" << endl;
 	cerr << "  --pal-data, -p     Filename to input palette data" << endl;
 	cerr << "  --output, -o       Specify output PNG image filename" << endl;
 	cerr << "  --trns, -t         Use image transparency" << endl;

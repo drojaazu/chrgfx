@@ -20,7 +20,7 @@ big_endian 0
 
 # We manually specify the subpalette data size here since
 # VB subpalettes are actually word length, with the upper
-# ignored
+# byte ignored
 subpal_datasize 16
 
 # VB "colors" are based on four levels of intensity

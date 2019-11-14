@@ -74,15 +74,6 @@ public:
 				planeoffset(planeoffset), xoffset(xoffset), yoffset(yoffset),
 				converter(converter), datasize(width * height * bitplanes){};
 
-	/*
-		chr_def &operator=(const chr_def &chrdef)
-		{
-			std::swap(width, chrdef.width);
-			width = std::move(chrdef.width);
-			height = std::move(chrdef.height);
-			return *this;
-		};*/
-
 	u8 const *convert(u8 const *data) { return converter(*this, data); }
 
 	u16 get_width() { return width; }
@@ -113,15 +104,15 @@ private:
  * Describes color data by specifying the offset and data size of each component
  * (red, green, blue) within the data
  */
-class color_def
+class col_def
 {
 public:
-	color_def(u8 color_passes, std::array<u8, MAX_COLOR_PASSES> red_shift,
-						std::array<u8, MAX_COLOR_PASSES> red_bitcount,
-						std::array<u8, MAX_COLOR_PASSES> green_shift,
-						std::array<u8, MAX_COLOR_PASSES> green_bitcount,
-						std::array<u8, MAX_COLOR_PASSES> blue_shift,
-						std::array<u8, MAX_COLOR_PASSES> blue_bitcount)
+	col_def(u8 color_passes, std::array<u8, MAX_COLOR_PASSES> red_shift,
+					std::array<u8, MAX_COLOR_PASSES> red_bitcount,
+					std::array<u8, MAX_COLOR_PASSES> green_shift,
+					std::array<u8, MAX_COLOR_PASSES> green_bitcount,
+					std::array<u8, MAX_COLOR_PASSES> blue_shift,
+					std::array<u8, MAX_COLOR_PASSES> blue_bitcount)
 			: color_passes(color_passes), red_shift(red_shift),
 				red_bitcount(red_bitcount), green_shift(green_shift),
 				green_bitcount(green_bitcount), blue_shift(blue_shift),
@@ -162,23 +153,14 @@ class pal_def
 public:
 	pal_def();
 
-	pal_def(u8 entry_datasize, u8 subpal_length, u8 subpal_count,
-					color_def *colordef, palette *syspal,
+	pal_def(u8 entry_datasize, u8 subpal_length, u8 subpal_count, col_def *coldef,
+					palette *syspal,
 					palette *(*converter)(pal_def &paldef, bptr data, s16 subpal_idx),
 					bool is_big_endian = false, u8 subpal_datasize = 0)
 			: entry_datasize(entry_datasize), subpal_length(subpal_length),
-				subpal_count(subpal_count), colordef(colordef), syspal(syspal),
+				subpal_count(subpal_count), coldef(coldef), syspal(syspal),
 				converter(converter), is_big_endian(is_big_endian),
 				subpal_datasize(subpal_datasize){};
-	/*
-		pal_def &operator=(const pal_def &paldef)
-		{
-			if(&paldef == this)
-				return *this;
-			auto out = new pal_def(paldef);
-			return *out;
-		}
-	*/
 
 	u8 get_entry_datasize() { return entry_datasize; }
 
@@ -188,7 +170,7 @@ public:
 
 	u8 get_subpal_datasize() { return subpal_datasize; }
 
-	color_def *get_colordef() { return colordef; }
+	col_def *get_coldef() { return coldef; }
 
 	palette *get_syspal() { return syspal; }
 
@@ -220,7 +202,7 @@ private:
 	/**
 	 * Pointer to the color definition (for calculated palettes)
 	 */
-	color_def *colordef;
+	col_def *coldef;
 
 	/**
 	 * Pointer to system palette (for fixed palettes)

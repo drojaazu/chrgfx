@@ -1,0 +1,34 @@
+#### TILE
+# 8x8 4bpp planar
+# Used by Nintendo Super Famicom, NEC PC Engine
+width 8
+height 8
+bpp 4
+planeoffset 136,128,8,0
+xoffset 0,1,2,3,4,5,6,7
+yoffset 0,16,32,48,64,80,96,112
+
+#### PALETTE/COLORS
+# Nintendo Super Famicom palette
+# 256 colors total
+# Subpalette length varies by video mode
+# Default is 16 palettes of 16 colors each,
+# so that's what we're using here
+# If you modify the subpal_length to match
+# a graphics mode, make sure to update
+# subpal_count as well so length * count = 256!
+colorsize 16
+subpal_length 16
+subpal_count 16
+big_endian 0
+
+# Nintendo Super Famicom color format
+# 15|               |0
+#   xBBBBBGG GGGRRRRR
+color_passes 1
+red_shift 0
+red_size 5
+green_shift 5
+green_size 5
+blue_shift 10
+blue_size 5

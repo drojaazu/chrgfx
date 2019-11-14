@@ -1,4 +1,4 @@
-#include "paldecode.hpp"
+#include "pal_conv.hpp"
 #include "utils.hpp"
 #include <algorithm>
 
@@ -60,7 +60,11 @@ palette *pal_decode(pal_def &paldef, bptr data,
 
 	u16 subpal_datasize = paldef.get_subpal_datasize();
 	if(subpal_datasize == 0) {
-		subpal_datasize = (workentry_bytesize * 8) * paldef.get_subpal_length();
+		if(workentry_bytesize == 1 && workentry_bitsize > 0) {
+			subpal_datasize = workentry_bitsize * paldef.get_subpal_length();
+		} else {
+			subpal_datasize = (workentry_bytesize * 8) * paldef.get_subpal_length();
+		}
 	}
 	u16 temp = (subpal_datasize / 8);
 
@@ -147,7 +151,7 @@ palette *pal_decode_fixed(pal_def &paldef, bptr data, s16 subpal_idx)
 }
 
 /**
- * Returns a standard color palette for a pal_def with a color_def (i.e.
+ * Returns a standard color palette for a pal_def with a col_def (i.e.
  * RGB hardware)
  */
 palette *pal_decode_calc(pal_def &paldef, bptr data, s16 subpal_idx)
@@ -155,7 +159,7 @@ palette *pal_decode_calc(pal_def &paldef, bptr data, s16 subpal_idx)
 	return pal_decode(
 			paldef, data,
 			[](pal_def &paldef, u32 rawvalue) -> color {
-				return calc_color(*paldef.get_colordef(), rawvalue);
+				return calc_color(*paldef.get_coldef(), rawvalue);
 			},
 			subpal_idx);
 };
@@ -198,7 +202,7 @@ palette *pal_decode_soft_tlp(pal_def &paldef, bptr data, s16 subpal_idx)
 	throw std::invalid_argument("Invalid TLP palette type value");
 };
 
-color calc_color(color_def &colordef, u32 data)
+color calc_color(col_def &coldef, u32 data)
 {
 	/*
 psuedo:
@@ -213,21 +217,21 @@ psuedo:
 	u8 red{0}, green{0}, blue{0};
 	u8 red_bitcount{0}, green_bitcount{0}, blue_bitcount{0};
 	u8 bitmask{0};
-	for(u16 pass_iter = 0; pass_iter < colordef.get_color_passes(); pass_iter++) {
-		bitmask = create_bitmask8(colordef.get_red_bitcount()[pass_iter]);
-		red |= ((data >> colordef.get_red_shift()[pass_iter]) & bitmask)
+	for(u16 pass_iter = 0; pass_iter < coldef.get_color_passes(); pass_iter++) {
+		bitmask = create_bitmask8(coldef.get_red_bitcount()[pass_iter]);
+		red |= ((data >> coldef.get_red_shift()[pass_iter]) & bitmask)
 					 << red_bitcount;
-		red_bitcount += colordef.get_red_bitcount()[pass_iter];
+		red_bitcount += coldef.get_red_bitcount()[pass_iter];
 
-		bitmask = create_bitmask8(colordef.get_green_bitcount()[pass_iter]);
-		green |= ((data >> colordef.get_green_shift()[pass_iter]) & bitmask)
+		bitmask = create_bitmask8(coldef.get_green_bitcount()[pass_iter]);
+		green |= ((data >> coldef.get_green_shift()[pass_iter]) & bitmask)
 						 << green_bitcount;
-		green_bitcount += colordef.get_green_bitcount()[pass_iter];
+		green_bitcount += coldef.get_green_bitcount()[pass_iter];
 
-		bitmask = create_bitmask8(colordef.get_blue_bitcount()[pass_iter]);
-		blue |= ((data >> colordef.get_blue_shift()[pass_iter]) & bitmask)
+		bitmask = create_bitmask8(coldef.get_blue_bitcount()[pass_iter]);
+		blue |= ((data >> coldef.get_blue_shift()[pass_iter]) & bitmask)
 						<< blue_bitcount;
-		blue_bitcount += colordef.get_blue_bitcount()[pass_iter];
+		blue_bitcount += coldef.get_blue_bitcount()[pass_iter];
 	}
 
 	red = expand_bits(red, red_bitcount);

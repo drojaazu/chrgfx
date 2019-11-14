@@ -1,4 +1,4 @@
-#include "import_def.hpp"
+#include "import_defs.hpp"
 
 // this is all kinds of a mess, and maybe there's a better way to do
 // things, but gotta start somewhere...
@@ -69,7 +69,7 @@ kvmap parse_file(std::ifstream &infile)
 			def_opts[this_key] = this_val;
 #if DEBUG
 		else
-			std::cerr << "Unknown key value in gfxdef: " << std::endl << this_key;
+			std::cerr << "Unknown key value in gfxdef: " << this_key << std::endl;
 #endif
 	}
 
@@ -80,6 +80,13 @@ kvmap parse_file(std::ifstream &infile)
 chr_def *get_chrdef(std::ifstream &infile)
 {
 	std::map<const std::string, std::string> def_opts = parse_file(infile);
+
+	// if there are NO chfdef options set, return null
+	if(DEFOPT(CHR_WIDTH).empty() && DEFOPT(CHR_HEIGHT).empty() &&
+		 DEFOPT(CHR_BPP).empty() && DEFOPT(CHR_PLANEOFFSET).empty() &&
+		 DEFOPT(CHR_XOFFSET).empty() && DEFOPT(CHR_YOFFSET).empty()) {
+		return nullptr;
+	}
 
 	// check that all required options have a value
 	if(DEFOPT(CHR_WIDTH).empty() || DEFOPT(CHR_HEIGHT).empty() ||
@@ -135,11 +142,19 @@ pal_def *get_paldef(std::ifstream &infile)
 	bitcount: greater than 0
  */
 
+	// if there are NO paldef options set, return null
+	if(DEFOPT(PAL_COLORSIZE).empty() && DEFOPT(PAL_SUBPAL_LENGTH).empty() &&
+		 DEFOPT(PAL_SUBPAL_COUNT).empty() && DEFOPT(PAL_RED_SHIFT).empty() &&
+		 DEFOPT(PAL_RED_SIZE).empty() && DEFOPT(PAL_GREEN_SHIFT).empty() &&
+		 DEFOPT(PAL_GREEN_SIZE).empty() && DEFOPT(PAL_BLUE_SHIFT).empty() &&
+		 DEFOPT(PAL_BLUE_SIZE).empty() && DEFOPT(PAL_REFPAL).empty()) {
+		return nullptr;
+	}
+
 	// VALIDATE PALDEF HERE
-	// if any colordef options are set, then ALL must be set
-	// if both refpal and colordef are undefined, error
-	// if both refpal and colordef are defined, issue warning that refpal will
-	// be used
+	// if any coldef options are set, then ALL must be set
+	// if both refpal and coldef are undefined, error
+	// if both refpal and coldef are defined, use refpal
 	bool use_refpal = false;
 
 	if(!DEFOPT(PAL_REFPAL).empty()) {
@@ -150,10 +165,9 @@ pal_def *get_paldef(std::ifstream &infile)
 	if(DEFOPT(PAL_COLORSIZE).empty() || DEFOPT(PAL_SUBPAL_LENGTH).empty() ||
 		 DEFOPT(PAL_SUBPAL_COUNT).empty() ||
 		 (!use_refpal &
-			(DEFOPT(PAL_COLOR_PASSES).empty() || DEFOPT(PAL_RED_SHIFT).empty() ||
-			 DEFOPT(PAL_RED_SIZE).empty() || DEFOPT(PAL_GREEN_SHIFT).empty() ||
-			 DEFOPT(PAL_GREEN_SIZE).empty() || DEFOPT(PAL_BLUE_SHIFT).empty() ||
-			 DEFOPT(PAL_BLUE_SIZE).empty()))) {
+			(DEFOPT(PAL_RED_SHIFT).empty() || DEFOPT(PAL_RED_SIZE).empty() ||
+			 DEFOPT(PAL_GREEN_SHIFT).empty() || DEFOPT(PAL_GREEN_SIZE).empty() ||
+			 DEFOPT(PAL_BLUE_SHIFT).empty() || DEFOPT(PAL_BLUE_SIZE).empty()))) {
 		throw std::invalid_argument(
 				"One or more required options missing in paldef");
 	}
@@ -168,12 +182,14 @@ pal_def *get_paldef(std::ifstream &infile)
 					: str_validate_nonneg(DEFOPT(PAL_SUBPAL_DATASIZE));
 
 	palette *refpal_temp = nullptr;
-	color_def *colordef_temp = nullptr;
+	col_def *coldef_temp = nullptr;
 	if(use_refpal) {
 		refpal_temp = str_validate_array_get_palette(DEFOPT(PAL_REFPAL));
 	} else {
-		// validate calc color settings
-		u32 color_passes_temp = str_validate_ispos(DEFOPT(PAL_COLOR_PASSES));
+		// validate calc'ed color settings
+		u32 color_passes_temp = DEFOPT(PAL_COLOR_PASSES).empty()
+																? 1
+																: str_validate_ispos(DEFOPT(PAL_COLOR_PASSES));
 		std::array<u8, MAX_COLOR_PASSES> red_shift_temp, red_bitcount_temp,
 				green_shift_temp, green_bitcount_temp, blue_shift_temp,
 				blue_bitcount_temp;
@@ -197,7 +213,7 @@ pal_def *get_paldef(std::ifstream &infile)
 		temp = str_validate_array_vals_nonneg(DEFOPT(PAL_BLUE_SIZE));
 		std::move(temp.begin(), temp.end(), blue_bitcount_temp.begin());
 
-		colordef_temp = new color_def(
+		coldef_temp = new col_def(
 				color_passes_temp, red_shift_temp, red_bitcount_temp, green_shift_temp,
 				green_bitcount_temp, blue_shift_temp, blue_bitcount_temp);
 	}
@@ -211,7 +227,7 @@ pal_def *get_paldef(std::ifstream &infile)
 											 is_big_endian_temp, subpal_datasize_temp);
 	else
 		return new pal_def(colorsize_temp, subpal_length_temp, subpal_count_temp,
-											 colordef_temp, nullptr, pal_decode_calc,
+											 coldef_temp, nullptr, pal_decode_calc,
 											 is_big_endian_temp, subpal_datasize_temp);
 }
 

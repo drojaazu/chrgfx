@@ -2,10 +2,10 @@
 #include <iostream>
 #include <stdio.h>
 
-#include "chrdecode.hpp"
-#include "commondefs.hpp"
-#include "import_def.hpp"
-#include "paldecode.hpp"
+#include "chr_conv.hpp"
+#include "import_defs.hpp"
+#include "internal_defs.hpp"
+#include "pal_conv.hpp"
 #include "render.hpp"
 
 struct runtime_config {

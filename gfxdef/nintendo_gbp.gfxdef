@@ -1,0 +1,10 @@
+#### PALETTE/COLORS
+# Nintendo GameBoy Pocket palette
+# 2 bits per color, 4 colors, packed (1 byte per palette)
+# 3 palettes (3 bytes, stored at 0xFF47 in memory)
+colorsize 2
+subpal_length 4
+subpal_count 3
+
+# this is based on the gray/black tinted GB Pocket screen
+refpal #c4cfa1,#8b956d,#6b7353,#414141

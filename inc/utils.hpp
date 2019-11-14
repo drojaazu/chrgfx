@@ -1,7 +1,7 @@
 #ifndef GFX_UTILS_H
 #define GFX_UTILS_H
 
-#include "global.hpp"
+#include "types.hpp"
 
 using namespace png;
 

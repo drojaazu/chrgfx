@@ -1,9 +1,20 @@
-#include "chrdecode.hpp"
+#include "chr_conv.hpp"
 
 #include <iomanip>
 
 namespace chrgfx
 {
+	/*
+		TILE CONVERSION ROUTINES
+		Any custom tile conversion functions should take a reference to a chr_def and a pointer to the array of raw byte data. It will return an array of converted byte data.
+
+		The converted byte data should be an array of unsigned values, each as one pixel referencing a value in the output palette.
+	*/
+
+
+	/**
+	 * Returns raw tile data from a 
+	 */
 u8 const *get_chr(chr_def &chrdef, u8 const *data)
 {
 	u8 work_pixel, this_pixel{0}, work_byte{0}, work_bit{0};

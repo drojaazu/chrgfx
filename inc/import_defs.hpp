@@ -1,5 +1,5 @@
-#ifndef IMPORTGFXDEF_H
-#define IMPORTGFXDEF_H
+#ifndef IMPORT_DEFS_H
+#define IMPORT_DEFS_H
 #include <bits/stdc++.h>
 
 #include <array>
@@ -7,9 +7,9 @@
 #include <map>
 #include <sstream>
 
-#include "chrdecode.hpp"
-#include "global.hpp"
-#include "paldecode.hpp"
+#include "chr_conv.hpp"
+#include "pal_conv.hpp"
+#include "types.hpp"
 
 namespace chrgfx
 {
