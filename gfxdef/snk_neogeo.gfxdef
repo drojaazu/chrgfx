@@ -1,10 +1,15 @@
 #### TILE
 # 16x16 4bpp Planar
-# Used by Neo-Geo MVS/AES
+# Used by Neo-Geo MVS/AES, Neo-Geo CD
+# For the ROM based systems (MVS/AES), note that your tile data will need to be
+# interleaved (odd|even|odd|even...) into one file first.
+# see this page: https://wiki.neogeodev.org/index.php?title=Sprite_graphics_format
+# For NeoGeo CD, the SPR files can be processed as-is.
 width 16
 height 16
 bpp 4
 planeoffset 0,8,16,24
+
 xoffset 519, 518, 517, 516, 515, 514, 513, 512, 7, 6, 5, 4, 3, 2, 1, 0
 yoffset 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480
 
@@ -16,7 +21,7 @@ yoffset 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 48
 # so using the subpalette option while rendering is a must!
 entry_datasize 16
 subpal_length 16
-subpal_count 16
+subpal_count 256
 
 big_endian 1
 

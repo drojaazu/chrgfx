@@ -175,8 +175,8 @@ pal_def *get_paldef(std::ifstream &infile)
 	}
 
 	u8 entry_datasize_temp = str_validate_ispos(DEFOPT(PAL_ENTRY_DATASIZE));
-	u8 subpal_length_temp = str_validate_ispos(DEFOPT(PAL_SUBPAL_LENGTH));
-	u8 subpal_count_temp = str_validate_ispos(DEFOPT(PAL_SUBPAL_COUNT));
+	u16 subpal_length_temp = str_validate_ispos(DEFOPT(PAL_SUBPAL_LENGTH));
+	u16 subpal_count_temp = str_validate_ispos(DEFOPT(PAL_SUBPAL_COUNT));
 
 	u8 subpal_datasize_temp =
 			DEFOPT(PAL_SUBPAL_DATASIZE).empty()

@@ -1,6 +1,6 @@
 #### TILE
 # 8x8 2bpp planar
-# Used by Nintendo Famicom, Super Famicom
+# Used by Nintendo Famicom
 width 8
 height 8
 bpp 2

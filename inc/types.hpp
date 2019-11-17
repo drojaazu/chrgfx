@@ -153,8 +153,9 @@ class pal_def
 public:
 	pal_def();
 
-	pal_def(u8 entry_datasize, u8 subpal_length, u8 subpal_count, col_def *coldef,
-					palette *syspal, palette *(*converter)(pal_def &, bptr, s16),
+	pal_def(u8 entry_datasize, u16 subpal_length, u16 subpal_count,
+					col_def *coldef, palette *syspal,
+					palette *(*converter)(pal_def &, bptr, s16),
 					bool is_big_endian = false, u8 subpal_datasize = 0)
 			: entry_datasize(entry_datasize), subpal_length(subpal_length),
 				subpal_count(subpal_count), coldef(coldef), syspal(syspal),
@@ -163,9 +164,9 @@ public:
 
 	u8 get_entry_datasize() { return entry_datasize; }
 
-	u8 get_subpal_length() { return subpal_length; }
+	u16 get_subpal_length() { return subpal_length; }
 
-	u8 get_subpal_count() { return subpal_count; }
+	u16 get_subpal_count() { return subpal_count; }
 
 	u8 get_subpal_datasize() { return subpal_datasize; }
 
@@ -189,12 +190,12 @@ private:
 	/**
 	 * The number entries in a subpalette
 	 */
-	u8 subpal_length;
+	u16 subpal_length;
 
 	/**
 	 * The number of subpalettes in a full palette
 	 */
-	u8 subpal_count;
+	u16 subpal_count;
 
 	u8 subpal_datasize;
 

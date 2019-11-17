@@ -69,7 +69,8 @@ int main(int argc, char **argv)
 			if(cfg.chrdef_name.empty()) {
 				chrdef = get_chrdef(gfxdef_file);
 			}
-			// if paldata is null, don't worry about the paldef
+			// even if paldef is set, if paldata is null, don't worry about
+			// the paldef import
 			if(cfg.paldef_name.empty() & paldata != nullptr) {
 				gfxdef_file.clear();
 				paldef = get_paldef(gfxdef_file);
@@ -104,11 +105,10 @@ int main(int argc, char **argv)
 			}
 		}
 
-		if(paldata == nullptr)
+		if(paldef == nullptr) {
 			// create a generic palette if no palette data supplied
 			workpal = chrgfx::make_pal(false);
-		else {
-			// with the rules above, where there's paldata, there's a a paldef
+		} else {
 			paldata->seekg(0, paldata->end);
 			int length = paldata->tellg();
 			paldata->seekg(0, paldata->beg);

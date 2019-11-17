@@ -1,0 +1,21 @@
+#### TILE
+# Please use the original Gameboy definition for tiles
+
+#### PALETTE/COLORS
+# Nintendo GameBoy Color palette
+# 32 colors, 2 bytes per color; 8 subpalettes, 4 colors per subpal
+entry_datasize 16
+subpal_length 4
+subpal_count 8
+big_endian 0
+
+# Color format
+# 15|               |0
+#   xBBBBBGG GGGRRRRR
+# little endian
+red_shift 0
+red_size 5
+green_shift 5
+green_size 5
+blue_shift 10
+blue_size 5

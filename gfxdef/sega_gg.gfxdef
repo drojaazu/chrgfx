@@ -7,6 +7,8 @@ bpp 4
 planeoffset 0,8,16,24
 xoffset 0, 1, 2, 3, 4, 5, 6, 7
 yoffset 0, 32, 64, 96, 128, 160, 192, 224
+refpal #fffb87,#b1ae4e,#84804e,#4e4e4e
+
 
 #### PALETTE/COLORS
 # Sega Game Gear palette

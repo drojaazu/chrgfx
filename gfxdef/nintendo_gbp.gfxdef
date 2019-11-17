@@ -1,3 +1,6 @@
+#### TILE
+# Please use the original Gameboy gfxdef for the tile definition
+
 #### PALETTE/COLORS
 # Nintendo GameBoy Pocket palette
 # 2 bits per color, 4 colors, packed (1 byte per palette)

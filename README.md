@@ -45,6 +45,8 @@ Specify subpalette index. (Zero indexed)
 ### Usage Example
     cat ../etc/sonic_sprite | ./chrgfx --gfx-def gfxdef/sega_md.gfxdef --pal-data ../etc/sonic1.cram --trns --columns 32 > test.png
 
+**Please see the README file in the gfxdef subdirectory for a list of included formats.**
+
 ## Graphics Definitions (gfxdef files)
 Rather than hardcoding conversion routines for each format, chrgfx uses generalized algorithms which support the great majority of CHR based graphics hardware. The algorithms rely on layout information to interpret data, and such information comes from user-defined *graphics definition* (gfxdef) files.
 
@@ -105,9 +107,11 @@ As a gfxdef, it looks like this:
 
 `planeoffset` - The offset (in bits) of each bitplane. **The number of entries here must match the value of `bpp`.**
 
-xoffset - The offset (in bits) of each pixel column (x axis). **The number of entries here must match the value of `width`.**
+`xoffset` - The offset (in bits) of each pixel column (x axis). **The number of entries here must match the value of `width`.**
 
-yoffset - The offset (in bits) of each pixel row (y axis). **The number of entries here must match the value of `height`.**
+`yoffset` - The offset (in bits) of each pixel row (y axis). **The number of entries here must match the value of `height`.**
+
+`chr_converter` - (Optional) Specifies the internal conversion function to use. **This is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
 
 ### Palette Definitions
 Palette definitions encapsulate formats of both the indexed color list (i.e. the palette) and the colors themselves. They are meant to describe the data as it appears inside the original machine's video RAM, which is simply an array of color definitions. Therefore, we describe a palette by specifying the size of the system palette, the size of a subpalette and the number of subpalettes available. Since the entries in a palette are often multi-byte values, we also need to take into consideration whether the work data is little or big endian.
@@ -160,9 +164,9 @@ To be clear, **you should not use a refpal AND a color definition.** It's one or
 
 `subpal_count` - The number of subpalettes within the system palette
 
-`subpal_datasize` - Manually specify the size of a subpalette (in bits). Used for cases where effective subpalette data is less than 8 bits, but is stored in 2 or more bytes. Optional; default is 0 (unused)
+`subpal_datasize` - (Optional) Manually specify the size of a subpalette (in bits). Used for cases where effective subpalette data is less than 8 bits, but is stored in 2 or more bytes. Default is 0 (automatic).
 
-`big_endian` - Indicates the system is big endian rather than small endian. 1 is true, 0 is false. Optional; default is 0 (little endian)
+`big_endian` - (Optional) Indicates the system is big endian rather than small endian. 1 is true, 0 is false. Default is 0 (little endian).
 
 `refpal` - An array of HTML formatted (e.g. #001E74) colors to simulate output of non-RGB hardware. The entries can be listed with or without the hash symbol (Either 001E74 or #001E74 is acceptable.)
 
@@ -180,16 +184,18 @@ To be clear, **you should not use a refpal AND a color definition.** It's one or
 
 `blue_size` - The number of bits of data making up the blue component.
 
-## Non-standard Formats
-Though the tile/color/palette definitions should work with most systems, some formats may not fit cleanly into the algorithms. For example, the Super Famicom has a 3bpp quasi-format which won't work as a tile definition. Or if we want to import a modern file, such as palette data from TileLayer Pro or Paint Shop Pro, definition files are not sufficient.
+`pal_converter` - (Optional) Specifies the internal conversion function to use. **This is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
 
-In such cases, a solution will have to be hardcoded into the application. If you wish to add such formats, refer to the internal_defs, chr_conv and pal_conv source files for more information. And pull requests to merge in your new format are certainly welcome!
+## Non-Standard Formats & Custom Conversion Functions
+Though the vanilla tile/color/palette definition system should work with most hardware, some formats may not fit cleanly into the algorithms. For example, the Super Famicom has a 3bpp quasi-format which won't work as a tile definition. Or if we want to import a modern file, such as palette data from TileLayer Pro or Paint Shop Pro, the basic palette converter function not sufficient.
+
+In such cases, custom conversion code must be written and compiled into the program to be called referenced by gfxdef files with the `chr_converter` or `pal_converter` options. This is an advanced option that requires knowledge of C++. Please check the `chr_conv` and `pal_conv` source code files for more details on implementing your own code. And pull requests to merge in your new format are certainly welcome!
 
 ## Console graphics primer
 The below is provided for those who are new to tile based graphics or who want clarification on some of the concepts around which chrgfx is designed.
 
 ### Tile (aka CHR)
-Video games are a primarily visual medium, and there are a number of ways they can be displayed. There are vectors, in which elements are drawn based on their geometric properties. There are polygons, the basis for 3D gameplay that is now commonplace. There are LCD screens like the Game & Watch and Tiger handhelds, which have predrawn art that is displayed or cleared by electrical signals. And there are tile based games, popular in arcade and home console hardware from the late 70's through the 90's. It is on the data from these tile based games that chrgfx is intended to operate.
+There are a number of ways that video games end up being displayed. There are vectors, in which elements are drawn based on on the math of their geometry. There are polygons, the basis for 3D gameplay that is now commonplace. There are LCD screens like the Game & Watch and Tiger handhelds, which have predrawn art that is displayed or cleared by electrical signals. And there are tile based games, most commonly used in the 2D arcade and home console hardware from the late 70's through the 90's. It is on the data from these tile based games that chrgfx is intended to operate.
 
 The basic unit of graphics in these games is the tile. Tiles are essentially very small bitmaps, where a bitmap is a 2D plane of dots (pixels) with each dot having one color. These tiles combine much like a jigsaw puzzle to form the larger backgrounds and sprites and, ultimately, full image on the screen. Tiles are generally 8 by 8 pixels in size, though can have any dimension, and in later systems they were 16x16 or larger.
 
@@ -207,18 +213,16 @@ Older game hardware did not have such a large gamut available. The number of col
 Some early consoles generated their colors based on television broadcast signal standards rather than levels of RGB, such as the Atari 2600 and the original Nintendo Famicom. In order to represent these, we have to create "best guess" equivalent RGB colors based on the output signal. Such systems are represented by a hardcoded palette rather than generated colors.
 
 ### Palettes
-What you see on the screen from a video game is ultimately a bitmap: a two-dimensional plane of dots, with each dot representing a single color.
-
 There are two main methods for storing the colors of a bitmap: direct and indexed. In direct color mode, *each pixel specifies its own red, green and blue levels*. This is used almost exclusively in our modern digital world, in photography and video game output, where data size is not so much of a concern.
 
 In indexed color mode, there is a predefined list of RGB colors seperate from the pixels, and *each pixel specifies an entry from that color list*. This color list is known as a color palette. Indexed color images are smaller in data size than direct color since each pixel only needs enough bits to reference one of those palette entries. The tradeoff here is that the color list is small, usually 256 color maximum. This means indexed mode is no good for things like photographs, which need a full range of color to reproduce what we see. But it works great for imagery with a low number of colors, like cartoon artwork and video game pixel graphics.
 
-While the video hardware may be able to generate hundreds or thousands of colors, only a portion of these colors can be displayed on the screen at one time. Hardware like this has a system palette, which is modified by the game code as it runs and acts as the pool of colors available to the graphics on the screen. Using the Sega Mega Drive as an example again, the system palette has space for 64 entries, meaning there can be a maximum of 64 colors on screen at once across the sprites and background planes.
+It's important to understand the distinct between colors *possible* and colors *available.* As we said in the previous section, the Super Famicom has 15bit color, meaning 32,769 colors are *possible.* However, its color palette only has 256 entries, which means only 256 colors are *available* to be displayed at any one time.
 
-Recall that the individual pixels of our indexed mode tiles reference an entry number within a palette. Therefore, *the number of data bits allocated to a pixel determines the number of colors it can reference*. So, if a tile is limited to 2 bits of data per pixel, it can only have four values (00, 01, 10, 11), and can reference only four colors within the system palette. This introduces the concept of subpalettes: a subpalette is a sequential index of colors within the system palette. Mega Drive tile graphics are four bit, which means each pixel can access 16 colors from within the system palette. So, the system palette of 64 colors is neatly broken down into four subpalettes of 16 colors each. Tile graphics can then use any of those four palettes.
+Recall that the individual pixels of our indexed-mode tiles reference an entry number within a palette. Therefore, *the number of data bits allocated to a pixel determines the number of colors it can reference*. So, if a tile is limited to 2 bits of data per pixel, it can only have four values (00, 01, 10, 11), and can reference only four colors within the system palette. This introduces the concept of subpalettes: a subpalette is a sequential array of colors within the system palette. Mega Drive tile graphics are 4bpp (four bits per pixel), which means each pixel can access 16 colors from within the system palette. So, the system palette of 64 colors is neatly broken down into four subpalettes of 16 colors each. Tile graphics can then use any of those four palettes.
 
 ## Graphics Data
-So now that we have explained things at a theoretical level, let's look at how these concepts actually appear in data. It's important to have a basic understanding of how the data is composed when working with format definitions, which are the key to decoding graphics with chrgfx.
+So now that we have explained things at a theoretical level, let's look at how these concepts are implemented in data. It's important to have a basic understanding of how the data is stored and arranged when attempting to create graphics definitions.
 
 ### Tile Data
 Since storage was at a premium during the "16-bit era" and reducing size was the name of the game, as it were, the data itself is straightforward. Since we already know the dimensions of the tile and since the palette data is stored elsewhere, a tile is just an array of pixels without any extra data.
@@ -237,7 +241,7 @@ In packed format, bits 0 to 3 for each pixel are "packed" together, with each pi
 In planar format, the values of bit 0 for all pixels are stored together, followed by the values of bit 1 for all pixels, and so on.
 
     pixel number pix0 pix1 pix2 ... pix0 pix1 pix2 ... pix0 pix1 pix2
-      pixel bit     0    0    0 ...   1    1    1  ...  2    2    2
+       pixel bit    0    0    0 ...   1    1    1  ...  2    2    2
 
 *In packed format, data is grouped by pixels; in planar format, data is grouped by bitplanes.*
 
@@ -265,23 +269,11 @@ It's important to specify if the color data is little or big endian so it can be
 Note that a color data is only for devices which have colors with RGB components. Hardware that uses YIQ or other such non-digital colorspaces will have a pre-defined palette.
 
 ### Palette Data
-Palettes appear as a simple sequential list of colors, where the first color is entry 0, the next is entry 1 and so on. With chrgfx, a palette is the system palette. We specify the size of subpalettes, and those subpalettes can be used to apply color to tiles.
-
-
-
-
-
-
-The code is written to operate on the palette data as it is stored inside the machine's memory during runtime. Often this is stored inside the video RAM along with CHR and mapping data, though in some cases it has it's own discrete memory. In either case, the data needs to be extracted as a raw, binary chunk and stored in a file.
-
-You will likely need to use an emulator that has a debugger capable of dumping memory, or at least viewing memory so bytes can be manually copied by hand. Some emulators store raw memory dumps in savestate files, which may be useful for obtaining palette data. Please see the Format Specific Notes below for information that may be useful to you.
-
-Devices generally have a large 'system palette' which is subdivided into small palettes to be used for different objects and graphics on the screen. For example, the Sega Mega Drive has a 64 color system palette which is divided into four 16 color palettes. Since the Mega Drive CHR graphics are 4bpp, they can address, at most, 16 colors. If a tile uses colors from the third subpalette, that subpalette will need to be specified with the ```--subpalette``` option. Otherwise, it will always use the first subpalette and the colors will be incorrect.
-
-Aside from device specific formats, there are also generic formats. Currently the only one implemented is the TileLayer Pro format. The colors in this palette can be applied to CHR data from any device.
-
-
-
+Palette data is simple in comparison to tile bitplane layouts and color component shifting. A palette is simply an array of all the color values. So a palette of 64 entries of 16 bit colors would be 128 bytes in size, with color 0 at offset 0, color 1 at offset 2, and so on. There are some quirks on some systems (such as the Virtual Boy, which only uses 6 bits for a palette yet is stored in 2 bytes...), but they are rare. Palette data is just an array of the color values we previously discussed.
 
 ## Special Thanks
-Special thanks to Klarth for his venerable `consolegfx.txt`, which was my introduction to the data side of tiled graphics and was instrumental in my early development work in Dumpster and now chrgfx.
+Special thanks to:
+
+- Klarth, for his venerable `consolegfx.txt`, which was my introduction to the data side of tiled graphics and was instrumental in my early development work in Dumpster and now chrgfx
+
+- The MAME Team, for their work in documenting hardware through source code and for inspiring some solutions that are essential to chrgfx

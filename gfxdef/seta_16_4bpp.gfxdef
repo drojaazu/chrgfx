@@ -1,0 +1,26 @@
+#### TILE
+# 16x16 4bpp Packed
+# Used by Seta arcade hardware
+width 16
+height 16
+bpp 4
+planeoffset 4, 0, 12, 8
+
+xoffset 384, 385, 386, 387, 256, 257, 258, 259, 128, 129, 130, 131, 0, 1, 2, 3
+yoffset 0, 16, 32, 48, 64, 80, 96, 112, 512, 528, 544, 560, 576, 592, 608, 624
+
+#### PALETTE/COLORS
+# Seta arcade hardware palette
+# 4 subpalettes of 16 colors each (64 colors total)
+entry_datasize 16
+subpal_length 16
+subpal_count 96
+big_endian 1
+
+# 5bit rgb
+red_shift 10
+red_size 5
+green_shift 5
+green_size 5
+blue_shift 0
+blue_size 5
