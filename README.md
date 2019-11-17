@@ -1,6 +1,14 @@
 # chrgfx
 Converts tile (CHR) based bitmap graphics from retro hardware systems, similar to Tile Layer Pro and such, with the ability to support a large amount of hardware through user-defined graphics definitions.
 
+## Building
+chrgfx requires libpng to be installed and uses CMake for the build system. From the root directory:
+
+    mkdir build && cd build
+    cmake ..
+    make
+    sudo make install
+
 ## Usage
 `--gfx-def`,`-G`
 

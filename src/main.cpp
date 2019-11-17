@@ -91,6 +91,10 @@ int main(int argc, char **argv)
 			}
 		}
 
+		if(chrdef == nullptr) {
+			throw invalid_argument("No chrdef has been specified!");
+		}
+
 		// if paldata is null, we don't even bother with the paldef
 		if(paldata != nullptr && !cfg.paldef_name.empty()) {
 			ifstream paldef_file(cfg.paldef_name);
@@ -180,7 +184,9 @@ int main(int argc, char **argv)
 	}
 
 cleanup:
-	delete chrdata;
+	if(chrdata != &cin) {
+		delete chrdata;
+	}
 	delete paldata;
 
 	delete chrdef;
