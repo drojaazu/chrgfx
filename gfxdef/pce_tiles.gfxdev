@@ -1,0 +1,29 @@
+#### TILE
+# 8x8 4bpp Planar
+width 8
+height 8
+bpp 4
+planeoffset 0,8,128,136
+xoffset 0, 1, 2, 3, 4, 5, 6, 7
+yoffset 0, 16, 32, 48, 64, 80, 96, 112
+
+
+#### PALETTE/COLORS
+# PC Engine palette
+# 16 colors per palette, 2 byte per color
+# 16 subpalettes, 16 colors each
+entry_datasize 16
+subpal_length 16
+subpal_count 1
+big_endian 0
+
+# PC Engine color format
+# 15|               |0
+#   xxxxxxxG GGRRRBBB
+# (little endian)
+red_shift 3
+red_size 3
+green_shift 6
+green_size 3
+blue_shift 0
+blue_size 3
