@@ -1,0 +1,21 @@
+#### TILES
+# The MS uses the same tile format as the Game Gear
+# Please use that definition for converting tiles
+
+#### PALETTE/COLORS
+# Sega Master System/Mark III palette
+# 32 colors per palette, 2 byte per color
+# 2 subpalettes, 16 colors each
+entry_datasize 8
+subpal_length 16
+subpal_count 2
+
+# Sega Master System/Mark III color format
+# 8|      |0
+#  xxBBGGRR
+red_shift 0
+red_size 2
+green_shift 2
+green_size 2
+blue_shift 4
+blue_size 2

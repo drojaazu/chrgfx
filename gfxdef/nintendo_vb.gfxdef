@@ -1,0 +1,38 @@
+#### TILE
+# 8x8 2bpp Packed
+# Used by Nintendo Virtual Boy
+width 8
+height 8
+bpp 2
+planeoffset 0,1
+xoffset 6,4,2,0,14,12,10,8
+yoffset 0, 16, 32, 48, 64, 80, 96, 112
+
+#### PALETTE/COLORS
+# Nintendo Virtual Boy palette
+# 2 bits per color, 3 colors per palette
+# palette data is 1 byte; lowest two bits ignored as padding
+# 8 palettes total
+entry_datasize 2
+subpal_length 4
+subpal_count 8
+big_endian 0
+
+# We manually specify the subpalette data size here since
+# VB subpalettes are actually word length, with the upper
+# byte ignored
+subpal_datasize 16
+
+# VB "colors" are based on four levels of intensity
+# The first level is always black, but the other
+# three are variable and set by the game code
+# Therefore it's impossible to ake a 'standard'
+# reference palette. The values below were sampled
+# from Tetris 3D, which has a nice middle ground
+# (based on output from MAME)
+refpal #000000,#2f0000,#8f0000,#cf0000
+
+# alternatively, here is a reference palette based
+# on the Wario Land VB title screen, which leans a
+# bit brighter
+# refpal #000000,#3f0000,#df0000,#ff0000

@@ -1,0 +1,44 @@
+#### TILE
+# 16x16 4bpp Planar
+# Used by Capcom CPS and CPS 2
+width 16
+height 16
+bpp 4
+#planeoffset 24, 16, 8, 0
+planeoffset 0,8,16,24
+
+xoffset 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39
+yoffset 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960
+
+#### PALETTE/COLORS
+# 192 palettes of 16 colors each (guessing here)
+# color size is 16 bits
+# palette data is stored within gfxram (0x900000 - 0x92ffff)
+# however, the base address for palettes (and all gfxram components) is not constant
+# you'll need to check the palette base address set in CPS-A register #6 (offset 0x0a)
+# (from MAME you'll want to use the memory/:maincpu/0/00800000 view in particular)
+# it's a word size value making up the MSB of the palette base address
+# for example, D&D Tower of Doom has 0x91c0 in the register
+# so the palettes are at 0x91c000
+# length is 0x1800
+entry_datasize 16
+subpal_length 16
+subpal_count 192
+
+# CPS 1/2 color format
+# 15 |                  |0
+#    BrBrBrBrRRRRGGGGBBBB
+# four bits of 'bright' component
+# From MAME:
+# from my understanding of the schematics, when the 'brightness'
+# component is set to 0 it should reduce brightness to 1/3
+# Not sure how to deal with that here yet, so for now we just ignore it...
+# (it seems to be used mostly for fade in/out, and during regular gameplay
+# it's full brightness anyway. Anecdotally, anyway.)
+color_passes 1
+red_shift 8
+red_size 4
+green_shift 4
+green_size 4
+blue_shift 0
+blue_size 4

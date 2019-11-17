@@ -1,0 +1,27 @@
+#### TILE
+# 8x8 4bpp Packed
+# Used by Sega Megadrive, Sharp X68000
+width 8
+height 8
+bpp 4
+planeoffset 3,2,1,0
+xoffset 0,4,8,12,16,20,24,28
+yoffset 0,32,64,96,128,160,192,224
+
+#### PALETTE/COLORS
+# Sega Megadrive palette
+# 4 subpalettes of 16 colors each (64 colors total)
+entry_datasize 16
+subpal_length 16
+subpal_count 4
+big_endian 1
+
+# Sega Megadrive color format
+# 15|               |0
+#   xxxxBBBx GGGxRRRx
+red_shift 1
+red_size 3
+green_shift 5
+green_size 3
+blue_shift 9
+blue_size 3

@@ -1,46 +1,26 @@
 #ifndef GFX_UTILS_H
 #define GFX_UTILS_H
 
-#include "gfx_types.hpp"
+#include "types.hpp"
 
 using namespace png;
 
 namespace chrgfx
 {
-const chr_traits std_8bpp_tile{
-		8,	// 8px width
-		8,	// 8px height
-		8,	// 8bpp
-		64	// 64 bytes
-};
+u32 create_bitmask32(u8 bitcount);
+u16 create_bitmask16(u8 bitcount);
+u8 create_bitmask8(u8 bitcount);
 
-const chr_traits std_4bpp_tile{
-		8,	// 8px width
-		8,	// 8px height
-		4,	// 4bpp
-		32	// 32 bytes
-};
+u8 expand_bits(u8 data, u8 bitcount);
 
-const chr_traits std_2bpp_tile{
-		8,	// 8px width
-		8,	// 8px height
-		2,	// 2bpp
-		16	// 16 bytes
-};
+palette *make_pal(bool blank = false);
 
-const chr_traits std_1bpp_tile{
-		8,	// 8px width
-		8,	// 8px height
-		1,	// 1bpp
-		8		// 8 bytes
-};
+void fill_pal(palette *pal);
 
-// helper functions
-// bank* get_bank(chr_xform* xform, u8* data, size_t count);
-palette* make_pal(bool blank = false);
-palette* get_pal(pal_xform* xform, const u8* data, s16 subpal);
-void fill_pal(palette* pal);
+bool is_system_bigendian();
 
-}	// namespace chrgfx
+const static bool bigend_sys = is_system_bigendian();
+
+} // namespace chrgfx
 
 #endif

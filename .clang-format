@@ -1,10 +1,12 @@
 Language: Cpp
 Standard: Cpp11
-BasedOnStyle: Google
-BreakBeforeBraces: Allman
+BasedOnStyle: LLVM
+BreakBeforeBraces: Linux
 SpaceBeforeParens: Never
 TabWidth: 2
 UseTab: Always
 AlignTrailingComments: true
-AllowShortIfStatementsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
+IndentCaseLabels: true
+
 Cpp11BracedListStyle: true

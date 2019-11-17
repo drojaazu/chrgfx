@@ -1,22 +1,28 @@
+#ifndef MAIN_H
+#define MAIN_H
 #include <getopt.h>
-#include <stdio.h>
 #include <iostream>
-#include <map>
+#include <stdio.h>
 
-#include "1bpp_gfx.hpp"
-#include "capcom_cps_gfx.hpp"
-#include "nintendo_fc_gfx.hpp"
-#include "nintendo_gb_gfx.hpp"
-#include "nintendo_sfc_gfx.hpp"
-#include "nintendo_vb.hpp"
+#include "chr_conv.hpp"
+#include "import_defs.hpp"
+#include "pal_conv.hpp"
 #include "render.hpp"
-#include "sega_8bit_gfx.hpp"
-#include "sega_md_gfx.hpp"
-#include "sega_pzlcnst_gfx.hpp"
-#include "snk_neogeo.hpp"
-#include "snk_ngp_gfx.hpp"
-#include "tlp_palette.hpp"
 
-void process_args(int argc, char** argv);
+struct runtime_config {
+	std::string gfxdef_name{""}, chrdef_name{""}, paldef_name{""};
+
+	std::string chrdata_name{""}, paldata_name{""};
+
+	s16 subpalette;
+	render_traits rendertraits;
+
+	std::string outfile;
+
+	runtime_config() { subpalette = -1; }
+};
+
+void process_args(int argc, char **argv);
 void print_help();
-void free_vectors();
+
+#endif
