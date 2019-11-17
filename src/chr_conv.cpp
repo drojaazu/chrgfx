@@ -4,17 +4,19 @@
 
 namespace chrgfx
 {
-	/*
-		TILE CONVERSION ROUTINES
-		Any custom tile conversion functions should take a reference to a chr_def and a pointer to the array of raw byte data. It will return an array of converted byte data.
+/*
+	TILE CONVERSION ROUTINES
+	Any custom tile conversion functions should take a reference to a chr_def and
+	a pointer to the array of raw byte data. It will return an array of converted
+	byte data.
 
-		The converted byte data should be an array of unsigned values, each as one pixel referencing a value in the output palette.
-	*/
+	The converted byte data should be an array of unsigned values, each as one
+	pixel referencing a value in the output palette.
+*/
 
-
-	/**
-	 * Returns raw tile data from a 
-	 */
+/**
+ * Returns raw tile data from a
+ */
 u8 const *get_chr(chr_def &chrdef, u8 const *data)
 {
 	u8 work_pixel, this_pixel{0}, work_byte{0}, work_bit{0};
@@ -51,8 +53,10 @@ u8 const *get_chr(chr_def &chrdef, u8 const *data)
 				work_byte = data[plane_offset / 8];
 				work_bit = plane_offset % 8;
 
-				work_pixel |= ((work_byte << work_bit) & 0x80) >>
-											((8 - chrdef.get_bitplanes()) + plane_iter);
+				// work_pixel |= ((work_byte << work_bit) & 0x80) >>
+				//							((8 - chrdef.get_bitplanes()) + plane_iter);
+
+				work_pixel |= ((work_byte << work_bit) & 0x80) >> (7 - plane_iter);
 			}
 			out_chr[this_pixel++] = work_pixel;
 		}

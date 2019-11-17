@@ -11,7 +11,7 @@ yoffset 0, 16, 32, 48, 64, 80, 96, 112
 #### PALETTE/COLORS
 # Neo-Geo Pocket (monochrome) palette
 # 6 palettes, 4 colors each, 8 bits per color
-colorsize 8
+entry_datasize 8
 subpal_length 4
 subpal_count 6
 

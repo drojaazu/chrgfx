@@ -16,27 +16,20 @@ kvmap parse_file(std::ifstream &infile)
 	infile.seekg(std::ios::beg);
 
 	// map of all possible definition keys
-	kvmap def_opts = {{defopts::CHR_WIDTH, ""},
-										{defopts::CHR_HEIGHT, ""},
-										{defopts::CHR_BPP, ""},
-										{defopts::CHR_PLANEOFFSET, ""},
-										{defopts::CHR_XOFFSET, ""},
-										{defopts::CHR_YOFFSET, ""},
-										{defopts::PAL_COLORSIZE, ""},
-										{defopts::PAL_COLOR_PASSES, ""},
-										{defopts::PAL_SUBPAL_LENGTH, ""},
-										{defopts::PAL_SUBPAL_COUNT, ""},
-										{defopts::PAL_REFPAL, ""},
-										{defopts::PAL_RED_SHIFT, ""},
-										{defopts::PAL_RED_SIZE, ""},
-										{defopts::PAL_GREEN_SHIFT, ""},
-										{defopts::PAL_GREEN_SIZE, ""},
-										{defopts::PAL_BLUE_SHIFT, ""},
-										{defopts::PAL_BLUE_SIZE, ""},
-										{defopts::PAL_BIG_ENDIAN, ""},
-										{defopts::PAL_SUBPAL_DATASIZE, ""}};
+	kvmap def_opts{
+			{defopts::CHR_WIDTH, ""},				 {defopts::CHR_HEIGHT, ""},
+			{defopts::CHR_BPP, ""},					 {defopts::CHR_PLANEOFFSET, ""},
+			{defopts::CHR_XOFFSET, ""},			 {defopts::CHR_YOFFSET, ""},
+			{defopts::CHR_CONVERTER, ""},		 {defopts::PAL_ENTRY_DATASIZE, ""},
+			{defopts::PAL_COLOR_PASSES, ""}, {defopts::PAL_SUBPAL_LENGTH, ""},
+			{defopts::PAL_SUBPAL_COUNT, ""}, {defopts::PAL_REFPAL, ""},
+			{defopts::PAL_RED_SHIFT, ""},		 {defopts::PAL_RED_SIZE, ""},
+			{defopts::PAL_GREEN_SHIFT, ""},	 {defopts::PAL_GREEN_SIZE, ""},
+			{defopts::PAL_BLUE_SHIFT, ""},	 {defopts::PAL_BLUE_SIZE, ""},
+			{defopts::PAL_BIG_ENDIAN, ""},	 {defopts::PAL_SUBPAL_DATASIZE, ""},
+			{defopts::PAL_CONVERTER, ""}};
 
-	int linenumber = 0;
+	int linenumber{0};
 	std::string this_line, this_key, this_val;
 	std::size_t spacedelim_pos;
 	// const char space = ' ';
@@ -44,7 +37,7 @@ kvmap parse_file(std::ifstream &infile)
 	while(std::getline(infile, this_line)) {
 		std::transform(this_line.begin(), this_line.end(), this_line.begin(),
 									 tolower);
-		linenumber++;
+		++linenumber;
 		if(this_line[0] == '#' || this_line == "") {
 			// ignore comment & empty lines
 			continue;
@@ -84,7 +77,8 @@ chr_def *get_chrdef(std::ifstream &infile)
 	// if there are NO chfdef options set, return null
 	if(DEFOPT(CHR_WIDTH).empty() && DEFOPT(CHR_HEIGHT).empty() &&
 		 DEFOPT(CHR_BPP).empty() && DEFOPT(CHR_PLANEOFFSET).empty() &&
-		 DEFOPT(CHR_XOFFSET).empty() && DEFOPT(CHR_YOFFSET).empty()) {
+		 DEFOPT(CHR_XOFFSET).empty() && DEFOPT(CHR_YOFFSET).empty() &&
+		 DEFOPT(CHR_CONVERTER).empty()) {
 		return nullptr;
 	}
 
@@ -123,9 +117,21 @@ chr_def *get_chrdef(std::ifstream &infile)
 	std::array<u32, MAX_CHR_SIZE> chr_yoffset_temp;
 	std::move(temp.begin(), temp.end(), chr_yoffset_temp.begin());
 
+	chr_cv chr_converter_temp;
+	if(DEFOPT(CHR_CONVERTER).empty()) {
+		// no converter specified, use the default
+		chr_converter_temp = get_chr;
+	} else {
+		if(chr_converters.find(DEFOPT(CHR_CONVERTER)) == chr_converters.end()) {
+			throw std::invalid_argument(
+					"Could not find the specified tile converter");
+		}
+		chr_converter_temp = chr_converters.at(DEFOPT(CHR_CONVERTER));
+	}
+
 	return new chr_def(chr_width_temp, chr_height_temp, chr_bpp_temp,
 										 chr_planeoffset_temp, chr_xoffset_temp, chr_yoffset_temp,
-										 get_chr);
+										 chr_converter_temp);
 }
 
 pal_def *get_paldef(std::ifstream &infile)
@@ -133,7 +139,7 @@ pal_def *get_paldef(std::ifstream &infile)
 	std::map<const std::string, std::string> def_opts = parse_file(infile);
 
 	/*
-	colorsize: greater than 0
+	entr_datasize: greater than 0
 	subpal_length: greater than 0
 	subpal_count: greater than 0
 	refpal: optionally defined, but if not defined, color calc must be set
@@ -143,7 +149,7 @@ pal_def *get_paldef(std::ifstream &infile)
  */
 
 	// if there are NO paldef options set, return null
-	if(DEFOPT(PAL_COLORSIZE).empty() && DEFOPT(PAL_SUBPAL_LENGTH).empty() &&
+	if(DEFOPT(PAL_ENTRY_DATASIZE).empty() && DEFOPT(PAL_SUBPAL_LENGTH).empty() &&
 		 DEFOPT(PAL_SUBPAL_COUNT).empty() && DEFOPT(PAL_RED_SHIFT).empty() &&
 		 DEFOPT(PAL_RED_SIZE).empty() && DEFOPT(PAL_GREEN_SHIFT).empty() &&
 		 DEFOPT(PAL_GREEN_SIZE).empty() && DEFOPT(PAL_BLUE_SHIFT).empty() &&
@@ -151,10 +157,6 @@ pal_def *get_paldef(std::ifstream &infile)
 		return nullptr;
 	}
 
-	// VALIDATE PALDEF HERE
-	// if any coldef options are set, then ALL must be set
-	// if both refpal and coldef are undefined, error
-	// if both refpal and coldef are defined, use refpal
 	bool use_refpal = false;
 
 	if(!DEFOPT(PAL_REFPAL).empty()) {
@@ -162,7 +164,7 @@ pal_def *get_paldef(std::ifstream &infile)
 	}
 
 	// check that all required options have a value
-	if(DEFOPT(PAL_COLORSIZE).empty() || DEFOPT(PAL_SUBPAL_LENGTH).empty() ||
+	if(DEFOPT(PAL_ENTRY_DATASIZE).empty() || DEFOPT(PAL_SUBPAL_LENGTH).empty() ||
 		 DEFOPT(PAL_SUBPAL_COUNT).empty() ||
 		 (!use_refpal &
 			(DEFOPT(PAL_RED_SHIFT).empty() || DEFOPT(PAL_RED_SIZE).empty() ||
@@ -172,7 +174,7 @@ pal_def *get_paldef(std::ifstream &infile)
 				"One or more required options missing in paldef");
 	}
 
-	u8 colorsize_temp = str_validate_ispos(DEFOPT(PAL_COLORSIZE));
+	u8 entry_datasize_temp = str_validate_ispos(DEFOPT(PAL_ENTRY_DATASIZE));
 	u8 subpal_length_temp = str_validate_ispos(DEFOPT(PAL_SUBPAL_LENGTH));
 	u8 subpal_count_temp = str_validate_ispos(DEFOPT(PAL_SUBPAL_COUNT));
 
@@ -221,14 +223,32 @@ pal_def *get_paldef(std::ifstream &infile)
 	bool is_big_endian_temp =
 			DEFOPT(PAL_BIG_ENDIAN).empty() ? true : str_bool(DEFOPT(PAL_BIG_ENDIAN));
 
-	if(use_refpal)
-		return new pal_def(colorsize_temp, subpal_length_temp, subpal_count_temp,
-											 nullptr, refpal_temp, pal_decode_fixed,
-											 is_big_endian_temp, subpal_datasize_temp);
-	else
-		return new pal_def(colorsize_temp, subpal_length_temp, subpal_count_temp,
-											 coldef_temp, nullptr, pal_decode_calc,
-											 is_big_endian_temp, subpal_datasize_temp);
+	pal_cv pal_converter_temp;
+	if(DEFOPT(PAL_CONVERTER).empty()) {
+		// no converter specified, use the default
+		if(use_refpal) {
+			pal_converter_temp = get_pal_refpal;
+		} else {
+			pal_converter_temp = get_pal_coldef;
+		}
+	} else {
+		if(pal_converters.find(DEFOPT(PAL_CONVERTER)) == pal_converters.end()) {
+			throw std::invalid_argument(
+					"Could not find the specified tile converter");
+		}
+		pal_converter_temp = pal_converters.at(DEFOPT(PAL_CONVERTER));
+	}
+
+	if(use_refpal) {
+		return new pal_def(entry_datasize_temp, subpal_length_temp,
+											 subpal_count_temp, nullptr, refpal_temp,
+											 pal_converter_temp, is_big_endian_temp,
+											 subpal_datasize_temp);
+	} else {
+		return new pal_def(
+				entry_datasize_temp, subpal_length_temp, subpal_count_temp, coldef_temp,
+				nullptr, pal_converter_temp, is_big_endian_temp, subpal_datasize_temp);
+	}
 }
 
 inline bool str_bool(std::string value)

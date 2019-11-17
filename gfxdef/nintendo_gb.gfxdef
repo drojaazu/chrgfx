@@ -12,7 +12,7 @@ yoffset 0, 16, 32, 48, 64, 80, 96, 112
 # Nintendo GameBoy palette
 # 2 bits per color, 4 colors, packed (1 byte per palette)
 # 3 palettes (3 bytes, stored at 0xFF47 in memory)
-colorsize 2
+entry_datasize 2
 subpal_length 4
 subpal_count 3
 

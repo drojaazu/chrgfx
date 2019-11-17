@@ -1,7 +1,7 @@
 #### PALETTE/COLORS
 # Neo-Geo Pocket Color palette
 # 16 palettes, 4 colors each, 2bytes per color
-colorsize 16
+entry_datasize 16
 subpal_length 4
 subpal_count 16
 

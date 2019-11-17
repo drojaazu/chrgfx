@@ -24,13 +24,13 @@ template <typename T> using sptr = std::shared_ptr<T>;
  */
 typedef std::map<const std::string, std::string> kvmap;
 
+namespace chrgfx
+{
 /**
  * Pointer to a block of immutable byte data
  */
 typedef uint8_t const *bptr;
 
-namespace chrgfx
-{
 /*
 	Constants for allocation of fixed array sizes
 
@@ -69,7 +69,7 @@ public:
 					std::array<u32, MAX_CHR_PLANES> planeoffset,
 					std::array<u32, MAX_CHR_SIZE> xoffset,
 					std::array<u32, MAX_CHR_SIZE> yoffset,
-					bptr (*converter)(chr_def &chrdef, bptr data))
+					bptr (*converter)(chr_def &, bptr))
 			: width(width), height(height), bitplanes(bitplanes),
 				planeoffset(planeoffset), xoffset(xoffset), yoffset(yoffset),
 				converter(converter), datasize(width * height * bitplanes){};
@@ -154,8 +154,7 @@ public:
 	pal_def();
 
 	pal_def(u8 entry_datasize, u8 subpal_length, u8 subpal_count, col_def *coldef,
-					palette *syspal,
-					palette *(*converter)(pal_def &paldef, bptr data, s16 subpal_idx),
+					palette *syspal, palette *(*converter)(pal_def &, bptr, s16),
 					bool is_big_endian = false, u8 subpal_datasize = 0)
 			: entry_datasize(entry_datasize), subpal_length(subpal_length),
 				subpal_count(subpal_count), coldef(coldef), syspal(syspal),
@@ -212,7 +211,7 @@ private:
 	/**
 	 * Pointer to the decoding method
 	 */
-	palette *(*converter)(pal_def &paldef, bptr data, s16 subpal_idx);
+	palette *(*converter)(pal_def &, bptr, s16);
 
 	/**
 	 * Specify the endianness of the data in the palette
@@ -243,6 +242,9 @@ public:
 	std::vector<bptr> *chrs;
 };
 
+// typedef our ugly function pointers
+typedef bptr (*chr_cv)(chr_def &, bptr);
+typedef palette *(*pal_cv)(pal_def &, bptr, s16);
 } // namespace chrgfx
 
 #endif

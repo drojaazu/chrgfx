@@ -4,7 +4,7 @@
 width 8
 height 8
 bpp 2
-planeoffset 64,0
+planeoffset 0,64
 xoffset 0,1,2,3,4,5,6,7
 yoffset 0,8,16,24,32,40,48,56
 
@@ -12,10 +12,10 @@ yoffset 0,8,16,24,32,40,48,56
 # Nintendo Famicom
 # 32 colors, each color is 1 byte; 8 palettes, 4 colors each (color 0 is always
 # transparent)
-colorsize 8
+entry_datasize 8
 subpal_length 4
 subpal_count 8
-bigendian 0
+big_endian 0
 
 # a 'standard' 2C02 PPU palette, from:
 # https://wiki.nesdev.com/w/index.php/PPU_palettes

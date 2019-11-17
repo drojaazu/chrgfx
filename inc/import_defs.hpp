@@ -29,12 +29,12 @@ static const std::string
 		// offset (in bits) of each pixel in a row
 		CHR_XOFFSET = "xoffset",
 		// offset (in bits) of the start of each row
-		CHR_YOFFSET = "yoffset";
+		CHR_YOFFSET = "yoffset", CHR_CONVERTER = "chr_converter";
 
 /**
  * Defines the strings of the color & palette definition keys
  */
-static const std::string PAL_COLORSIZE = "colorsize",
+static const std::string PAL_ENTRY_DATASIZE = "entry_datasize",
 												 PAL_COLOR_PASSES = "color_passes",
 												 PAL_SUBPAL_LENGTH = "subpal_length",
 												 PAL_SUBPAL_COUNT = "subpal_count",
@@ -44,7 +44,8 @@ static const std::string PAL_COLORSIZE = "colorsize",
 												 PAL_GREEN_SHIFT = "green_shift",
 												 PAL_GREEN_SIZE = "green_size",
 												 PAL_BLUE_SHIFT = "blue_shift",
-												 PAL_BLUE_SIZE = "blue_size";
+												 PAL_BLUE_SIZE = "blue_size",
+												 PAL_CONVERTER = "pal_converter";
 
 } // namespace defopts
 

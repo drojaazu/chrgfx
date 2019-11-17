@@ -4,7 +4,7 @@
 width 16
 height 16
 bpp 4
-planeoffset 24, 16, 8, 0
+planeoffset 0,8,16,24
 xoffset 519, 518, 517, 516, 515, 514, 513, 512, 7, 6, 5, 4, 3, 2, 1, 0
 yoffset 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480
 
@@ -14,7 +14,7 @@ yoffset 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 48
 # which means a total system palette size of 4096 colors!
 # we can only have up to 256 colors in our indexed PNG output
 # so using the subpalette option while rendering is a must!
-colorsize 16
+entry_datasize 16
 subpal_length 16
 subpal_count 16
 

@@ -106,7 +106,7 @@ palette *make_pal(bool blank)
 	} else {
 		// basic 16 color palette based on Xterm colors
 		// repeated 16x for 256 entry 8bpp palette
-		for(uint8_t l = 0; l < 16; l++) {
+		for(u8 subpal = 0; subpal < 16; ++subpal) {
 			outpal->push_back(color(0, 0, 0));
 			outpal->push_back(color(128, 0, 0));
 			outpal->push_back(color(0, 128, 0));
@@ -137,9 +137,9 @@ void fill_pal(palette *pal)
 	if(pal->size() >= 256)
 		return;
 
-	u16 toFill = 256 - pal->size();
+	u16 to_fill = 256 - pal->size();
 
-	for(u16 fillIter = 0; fillIter < toFill; fillIter++)
+	for(u16 fill_iter = 0; fill_iter < to_fill; ++fill_iter)
 		pal->push_back(color(0, 0, 0));
 
 	return;

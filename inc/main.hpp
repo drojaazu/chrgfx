@@ -1,10 +1,11 @@
+#ifndef MAIN_H
+#define MAIN_H
 #include <getopt.h>
 #include <iostream>
 #include <stdio.h>
 
 #include "chr_conv.hpp"
 #include "import_defs.hpp"
-#include "internal_defs.hpp"
 #include "pal_conv.hpp"
 #include "render.hpp"
 
@@ -23,3 +24,5 @@ struct runtime_config {
 
 void process_args(int argc, char **argv);
 void print_help();
+
+#endif

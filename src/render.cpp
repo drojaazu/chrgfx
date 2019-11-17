@@ -27,7 +27,7 @@ image<index_pixel> *render(bank &chr_bank, palette &pal, render_traits &rtraits)
 	// (it's IMPORTANT that we take care of this before calculating final image
 	// sizes)
 	if(chrs_to_pad > 0)
-		for(u16 addchr_iter = 0; addchr_iter < chrs_to_pad; addchr_iter++)
+		for(u16 addchr_iter = 0; addchr_iter < chrs_to_pad; ++addchr_iter)
 			chrs.push_back(new u8[chr_pxlwidth * chr_pxlheight]{0});
 
 	u16
@@ -67,20 +67,20 @@ image<index_pixel> *render(bank &chr_bank, palette &pal, render_traits &rtraits)
 	// top of image, add border if present
 
 	// for each chr row...
-	for(chrrow_iter = 0; chrrow_iter < outimg_rowheight; chrrow_iter++) {
+	for(chrrow_iter = 0; chrrow_iter < outimg_rowheight; ++chrrow_iter) {
 		// for each pixel in that chr row...
 		for(chr_pxlrow_iter = 0; chr_pxlrow_iter < chr_pxlheight;
-				chr_pxlrow_iter++) {
+				++chr_pxlrow_iter) {
 			this_outimg_pxlrow.clear();
 			this_outimg_pxlrow.reserve(outimg_pxlwidth);
 
 			// beginning of imgout pixel row, add border if present
 			// for each chr column in the row...
-			for(chrcol_iter = 0; chrcol_iter < outimg_colwidth; chrcol_iter++) {
+			for(chrcol_iter = 0; chrcol_iter < outimg_colwidth; ++chrcol_iter) {
 				this_chroffset = chrs.at(chr_iter) + (chr_pxlrow_iter * chr_pxlwidth);
 				std::copy(this_chroffset, this_chroffset + chr_pxlwidth,
 									std::back_inserter(this_outimg_pxlrow));
-				chr_iter++;
+				++chr_iter;
 				// end of tile pixels, add border if present
 			}
 

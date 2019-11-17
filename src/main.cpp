@@ -8,9 +8,8 @@ using namespace std;
 using namespace chrgfx;
 
 // application globals
-const static string version = string("1.1");
+const static string version = string("1.0");
 int return_status;
-const static bool bigend_sys = is_system_bigendian();
 
 // option settings
 runtime_config cfg;
@@ -26,24 +25,16 @@ int main(int argc, char **argv)
 
 	palette *workpal{nullptr};
 
-	bool is_internal = true;
-
 	try {
 		process_args(argc, argv);
 
 		// SANITY CHECKING HERE
 		/*
 			chrdata is not required; if not present, use cin
-
-			chrdef not required; if not present, use internal 1bpp mode
-
 			paldata is not required; if not present,use system generated colors
 
+			chrdef always required
 			paldef required if paldata present; if present with no paldata, ignore
-		*/
-
-		/*
-			if gfxdef is set, do not check chrdef or paldef
 		*/
 
 		// check data sanity
@@ -66,71 +57,55 @@ int main(int argc, char **argv)
 		}
 
 		// check def sanity
-		// check for --gfx-def first, then override with --chr-def and --pal-def if
-		// present
+		// check for --gfx-def first, then override with
+		// --chr-def and --pal-def if present
 		if(!cfg.gfxdef_name.empty()) {
 			ifstream gfxdef_file(cfg.gfxdef_name);
-			if(gfxdef_file.good()) {
-				chrdef = get_chrdef(gfxdef_file);
-				gfxdef_file.clear();
-				// if paldata is null, don't worry about the paldef
-				if(paldata != nullptr) {
-					paldef = get_paldef(gfxdef_file);
-				}
-				is_internal = false;
-			} else {
+			if(gfxdef_file.fail()) {
 				throw invalid_argument("Unable to open gfxdef file");
 			}
-		}
-
-		// use individual chrdef/paldef settings or internal settings
-		if(!cfg.chrdef_name.empty()) {
-			ifstream chrdef_file(cfg.chrdef_name);
-			if(chrdef_file.good()) {
-				delete chrdef;
-				chrdef = get_chrdef(chrdef_file);
-				if(chrdef == nullptr) {
-					throw invalid_argument("Invalid chrdef file");
-				}
-				is_internal = false;
-			} else {
-				if(internal_chrdefs.find(cfg.chrdef_name) == internal_chrdefs.end()) {
-					throw invalid_argument(
-							"Invalid chrdef file or internal tile format specified");
-				}
-				chrdef = &internal_chrdefs.at(cfg.chrdef_name);
-				is_internal = true;
+			// only bother importing if chrdef/paldef (which will override gfxdef) are
+			// not defined
+			if(cfg.chrdef_name.empty()) {
+				chrdef = get_chrdef(gfxdef_file);
+			}
+			// if paldata is null, don't worry about the paldef
+			if(cfg.paldef_name.empty() & paldata != nullptr) {
+				gfxdef_file.clear();
+				paldef = get_paldef(gfxdef_file);
 			}
 		}
 
-		// if chrdef is still null at this point then a chrdef hasn't been
-		// specified or was invalid, use the fall back
-		if(chrdef == nullptr) {
-			chrdef = &chrdefs::chr_8x8x1;
+		// use individual chrdef/paldef settings
+		if(!cfg.chrdef_name.empty()) {
+			ifstream chrdef_file(cfg.chrdef_name);
+			if(chrdef_file.fail()) {
+				throw invalid_argument("Unable to open gfxdef file in chr-def option");
+			}
+			// delete chrdef in case it was previously created with gfxdef option
+			delete chrdef;
+			chrdef = get_chrdef(chrdef_file);
+			if(chrdef == nullptr) {
+				throw invalid_argument("Invalid chrdef file");
+			}
 		}
 
 		// if paldata is null, we don't even bother with the paldef
 		if(paldata != nullptr && !cfg.paldef_name.empty()) {
 			ifstream paldef_file(cfg.paldef_name);
-			if(paldef_file.good()) {
-				delete paldef;
-				paldef = get_paldef(paldef_file);
-				if(paldef == nullptr) {
-					throw invalid_argument("Invalid paldef file");
-				}
-				is_internal = false;
-			} else {
-				if(internal_paldefs.find(cfg.paldef_name) == internal_paldefs.end()) {
-					throw invalid_argument(
-							"Invalid paldef file or internal palette format specified");
-				}
-				paldef = &internal_paldefs.at(cfg.paldef_name);
-				is_internal = true;
+			if(paldef_file.fail()) {
+				throw invalid_argument("Unable to open gfxdef file in pal-def option");
+			}
+			// delete paldef in case it was previously created with gfxdef option
+			delete paldef;
+			paldef = get_paldef(paldef_file);
+			if(paldef == nullptr) {
+				throw invalid_argument("Invalid paldef file");
 			}
 		}
 
-		// use system palette if no palette data supplied
 		if(paldata == nullptr)
+			// create a generic palette if no palette data supplied
 			workpal = chrgfx::make_pal(false);
 		else {
 			// with the rules above, where there's paldata, there's a a paldef
@@ -208,15 +183,12 @@ cleanup:
 	delete chrdata;
 	delete paldata;
 
-	if(!is_internal) {
-		delete chrdef;
-		if(paldef != nullptr) {
-			delete paldef->get_coldef();
-			delete paldef->get_syspal();
-		}
-		delete paldef;
+	delete chrdef;
+	if(paldef != nullptr) {
+		delete paldef->get_coldef();
+		delete paldef->get_syspal();
 	}
-
+	delete paldef;
 	delete workpal;
 	return return_status;
 }
@@ -331,9 +303,13 @@ void print_help()
 	cerr << "chrgfx version " << version << endl << endl;
 	cerr << "Valid options:" << endl;
 	cerr << "  --gfx-def, -G   Specify graphics data format" << endl;
-	cerr << "  --chr-def, -C   Specify tile data format" << endl;
+	cerr << "  --chr-def, -C   Specify tile data format (overrides tile format "
+					"in gfx-def)"
+			 << endl;
 	cerr << "  --chr-data, -c     Filename to input tile data" << endl;
-	cerr << "  --pal-def, -P   Specify palette data format" << endl;
+	cerr << "  --pal-def, -P   Specify palette data format (overrides palette "
+					"format in gfx-def)"
+			 << endl;
 	cerr << "  --pal-data, -p     Filename to input palette data" << endl;
 	cerr << "  --output, -o       Specify output PNG image filename" << endl;
 	cerr << "  --trns, -t         Use image transparency" << endl;
@@ -343,8 +319,6 @@ void print_help()
 	cerr << "  --columns, -c      Specify number of columns per row of tiles in "
 					"output image"
 			 << endl;
-	cerr << "  --subpalette, -s   Specify palette entry at which to begin "
-					"(default is 0)"
-			 << endl;
+	cerr << "  --subpalette, -s   Specify subpalette (default is 0)" << endl;
 	cerr << "  --help, -h         Display this text" << endl;
 }

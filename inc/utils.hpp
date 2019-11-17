@@ -19,6 +19,8 @@ void fill_pal(palette *pal);
 
 bool is_system_bigendian();
 
+const static bool bigend_sys = is_system_bigendian();
+
 } // namespace chrgfx
 
 #endif

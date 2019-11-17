@@ -4,14 +4,14 @@
 width 8
 height 8
 bpp 4
-planeoffset 0,1,2,3
+planeoffset 3,2,1,0
 xoffset 0,4,8,12,16,20,24,28
 yoffset 0,32,64,96,128,160,192,224
 
 #### PALETTE/COLORS
 # Sega Megadrive palette
 # 4 subpalettes of 16 colors each (64 colors total)
-colorsize 16
+entry_datasize 16
 subpal_length 16
 subpal_count 4
 big_endian 1
@@ -19,7 +19,6 @@ big_endian 1
 # Sega Megadrive color format
 # 15|               |0
 #   xxxxBBBx GGGxRRRx
-color_passes 1
 red_shift 1
 red_size 3
 green_shift 5

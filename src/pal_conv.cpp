@@ -7,8 +7,8 @@ namespace chrgfx
 /**
  * Returns a standard color palette
  */
-palette *pal_decode(pal_def &paldef, bptr data,
-										color (*get_color)(pal_def &, u32 rawvalue), s16 subpal_idx)
+palette *get_pal(pal_def &paldef, bptr data,
+								 color (*get_color)(pal_def &, u32 rawvalue), s16 subpal_idx)
 {
 	/* abandon hope, all who enter here
 			this algorithm is a ~mess~ right now, as I wedged in support for weird
@@ -27,8 +27,8 @@ palette *pal_decode(pal_def &paldef, bptr data,
 	= 1] get data size of output palette:
 			- using subpalette? size is same as datasize of single subpal
 			- else: size is (subpal_datasize * subpals/fullpal)
-	/ 8 bits per entry = colorsize % 8 bytes per entry = (colorsize / 8) + (bits
-	per entry > 0 ? 1 : 0)
+	/ 8 bits per entry = entry_datasize % 8 bytes per entry = (entry_datasize / 8)
+	+ (bits per entry > 0 ? 1 : 0)
 
 		for(data size of palette)
 			if(bytes per entry == 1 && bits > 0)
@@ -91,7 +91,7 @@ palette *pal_decode(pal_def &paldef, bptr data,
 	palette *out = new palette();
 	u8 *(*copyfunc)(bptr, bptr, u8 *);
 
-	if(is_system_bigendian() == paldef.get_is_big_endian()) {
+	if(bigend_sys == paldef.get_is_big_endian()) {
 		copyfunc = std::copy;
 	} else {
 		copyfunc = std::reverse_copy;
@@ -136,13 +136,9 @@ palette *pal_decode(pal_def &paldef, bptr data,
 	return out;
 };
 
-/**
- * Returns a standard color palette for a pal_def with a fixed palette (i.e.
- * non-RGB hardware)
- */
-palette *pal_decode_fixed(pal_def &paldef, bptr data, s16 subpal_idx)
+palette *get_pal_refpal(pal_def &paldef, bptr data, s16 subpal_idx)
 {
-	return pal_decode(
+	return get_pal(
 			paldef, data,
 			[](pal_def &paldef, u32 rawvalue) -> color {
 				return paldef.get_syspal()->at(rawvalue);
@@ -150,13 +146,9 @@ palette *pal_decode_fixed(pal_def &paldef, bptr data, s16 subpal_idx)
 			subpal_idx);
 }
 
-/**
- * Returns a standard color palette for a pal_def with a col_def (i.e.
- * RGB hardware)
- */
-palette *pal_decode_calc(pal_def &paldef, bptr data, s16 subpal_idx)
+palette *get_pal_coldef(pal_def &paldef, bptr data, s16 subpal_idx)
 {
-	return pal_decode(
+	return get_pal(
 			paldef, data,
 			[](pal_def &paldef, u32 rawvalue) -> color {
 				return calc_color(*paldef.get_coldef(), rawvalue);
@@ -164,42 +156,37 @@ palette *pal_decode_calc(pal_def &paldef, bptr data, s16 subpal_idx)
 			subpal_idx);
 };
 
-/**
- * Returns a standard color palette from TileLayer Pro data
- */
-palette *pal_decode_soft_tlp(pal_def &paldef, bptr data, s16 subpal_idx)
+palette *get_pal_tlp(pal_def &paldef, bptr data, s16 subpal_idx)
 {
 	if(data[0] != 0x54 || data[1] != 0x50 || data[2] != 0x4c)
 		std::cerr << "Warning: Does not appear to be a valid TLP palette"
 							<< std::endl;
 
-	switch(data[3]) {
-		case 0: {
-			// rgb
-			data += 4;
-			// return palette_converter::get_palette_generic(this, data, 3, 256);
-			auto out = new palette();
-			out->reserve(256);
-
-			for(size_t palEntryIter = 0; palEntryIter < 256; palEntryIter++) {
-				out->push_back(color(data[0], data[1], data[2]));
-				data += 3;
-			}
-			return out;
-			break;
-		}
-		case 1: {
-			// famicom
-			throw std::invalid_argument("Type 1 TLP palettes currently unsupported");
-			break;
-		}
-		case 2: {
-			// sfc
-			throw std::invalid_argument("Type 2 TLP palettes currently unsupported");
-			break;
-		}
+	if(data[3] != 0) {
+		throw std::invalid_argument("Unsupported TPL type (only RGB supported)");
 	}
-	throw std::invalid_argument("Invalid TLP palette type value");
+
+	u16 pal_length = paldef.get_subpal_count() * paldef.get_subpal_length();
+
+	// start at the actual data
+	data += 4;
+	if(subpal_idx >= 0) {
+		pal_length = paldef.get_subpal_length();
+		data += (subpal_idx * paldef.get_subpal_length() * 3);
+	}
+
+	if(pal_length > 256) {
+		throw std::invalid_argument("Specified TPL size is invalid (subpal_count * "
+																"subpal_length cannot be greater than 256)");
+	}
+	auto out = new palette();
+	out->reserve(pal_length);
+
+	for(size_t palEntryIter = 0; palEntryIter < pal_length; ++palEntryIter) {
+		out->push_back(color(data[0], data[1], data[2]));
+		data += 3;
+	}
+	return out;
 };
 
 color calc_color(col_def &coldef, u32 data)
@@ -217,7 +204,7 @@ psuedo:
 	u8 red{0}, green{0}, blue{0};
 	u8 red_bitcount{0}, green_bitcount{0}, blue_bitcount{0};
 	u8 bitmask{0};
-	for(u16 pass_iter = 0; pass_iter < coldef.get_color_passes(); pass_iter++) {
+	for(u16 pass_iter = 0; pass_iter < coldef.get_color_passes(); ++pass_iter) {
 		bitmask = create_bitmask8(coldef.get_red_bitcount()[pass_iter]);
 		red |= ((data >> coldef.get_red_shift()[pass_iter]) & bitmask)
 					 << red_bitcount;

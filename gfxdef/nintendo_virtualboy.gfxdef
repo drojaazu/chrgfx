@@ -13,7 +13,7 @@ yoffset 0, 16, 32, 48, 64, 80, 96, 112
 # 2 bits per color, 3 colors per palette
 # palette data is 1 byte; lowest two bits ignored as padding
 # 8 palettes total
-colorsize 2
+entry_datasize 2
 subpal_length 4
 subpal_count 8
 big_endian 0
@@ -28,7 +28,7 @@ subpal_datasize 16
 # three are variable and set by the game code
 # Therefore it's impossible to ake a 'standard'
 # reference palette. The values below were sampled
-# from Tetris 3D, wwhich has a nice middle ground
+# from Tetris 3D, which has a nice middle ground
 # (based on output from MAME)
 refpal #000000,#2f0000,#8f0000,#cf0000
 
