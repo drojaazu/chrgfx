@@ -7,17 +7,20 @@
 #include "chr_conv.hpp"
 #include "import_defs.hpp"
 #include "pal_conv.hpp"
+#include "pngchunk.hpp"
 #include "render.hpp"
 
 struct runtime_config {
 	std::string gfxdef_name{""}, chrdef_name{""}, paldef_name{""};
 
-	std::string chrdata_name{""}, paldata_name{""};
+	std::string chrdata_name{""}, paldata_name{""}, pngdata_name{""};
 
 	s16 subpalette;
 	render_traits rendertraits;
 
 	std::string outfile;
+
+	bool to_chr = false;
 
 	runtime_config() { subpalette = -1; }
 };

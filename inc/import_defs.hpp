@@ -52,12 +52,12 @@ static const std::string PAL_ENTRY_DATASIZE = "entry_datasize",
 /**
  * Returns a chr_def object populated with values from the specified gfxdef file
  */
-chr_def *get_chrdef(std::ifstream &infile);
+chr_def *load_chrdef(std::ifstream &infile);
 
 /**
  * Returns a pal_def object populated with values from the specified gfxdef file
  */
-pal_def *get_paldef(std::ifstream &infile);
+pal_def *load_paldef(std::ifstream &infile);
 
 /**
  * Parse the gfxdef text file into valid key-value pairs

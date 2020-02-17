@@ -70,7 +70,7 @@ kvmap parse_file(std::ifstream &infile)
 	return def_opts;
 }
 
-chr_def *get_chrdef(std::ifstream &infile)
+chr_def *load_chrdef(std::ifstream &infile)
 {
 	std::map<const std::string, std::string> def_opts = parse_file(infile);
 
@@ -134,7 +134,7 @@ chr_def *get_chrdef(std::ifstream &infile)
 										 chr_converter_temp);
 }
 
-pal_def *get_paldef(std::ifstream &infile)
+pal_def *load_paldef(std::ifstream &infile)
 {
 	std::map<const std::string, std::string> def_opts = parse_file(infile);
 

@@ -27,9 +27,9 @@ typedef std::map<const std::string, std::string> kvmap;
 namespace chrgfx
 {
 /**
- * Pointer to a block of immutable byte data
+ * Pointer to a block of byte data
  */
-typedef uint8_t const *bptr;
+typedef uint8_t *bptr;
 
 /*
 	Constants for allocation of fixed array sizes
@@ -74,7 +74,7 @@ public:
 				planeoffset(planeoffset), xoffset(xoffset), yoffset(yoffset),
 				converter(converter), datasize(width * height * bitplanes){};
 
-	u8 const *convert(u8 const *data) { return converter(*this, data); }
+	u8 *convert(u8 *data) { return converter(*this, data); }
 
 	u16 get_width() { return width; }
 
@@ -85,6 +85,9 @@ public:
 	std::array<u32, MAX_CHR_PLANES> get_planeoffset() { return planeoffset; };
 	std::array<u32, MAX_CHR_SIZE> get_xoffset() { return xoffset; };
 	std::array<u32, MAX_CHR_SIZE> get_yoffset() { return yoffset; };
+	u32 get_xoffset_at(size_t pos) { return xoffset[pos]; };
+	u32 get_yoffset_at(size_t pos) { return yoffset[pos]; };
+	u32 get_planeoffset_at(size_t pos) { return planeoffset[pos]; };
 
 	u32 get_datasize() { return datasize; }
 
@@ -176,7 +179,7 @@ public:
 
 	bool get_is_big_endian() { return is_big_endian; }
 
-	palette *convert(u8 const *data, s16 subpal_idx)
+	palette *convert(u8 *data, s16 subpal_idx)
 	{
 		return converter(*this, data, subpal_idx);
 	}

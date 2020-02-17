@@ -8,7 +8,7 @@ using namespace std;
 using namespace chrgfx;
 
 // application globals
-const static string version = string("1.0");
+const static string version = string("1.1");
 int return_status;
 
 // option settings
@@ -20,64 +20,82 @@ int main(int argc, char **argv)
 	// to be deleted from exception
 	istream *chrdata{nullptr};
 	istream *paldata{nullptr};
+	istream *pngdata{nullptr};
+
 	chr_def *chrdef{nullptr};
 	pal_def *paldef{nullptr};
 
 	palette *workpal{nullptr};
 
 	try {
+		// PARSE ARGUMENTS
 		process_args(argc, argv);
 
-		// SANITY CHECKING HERE
-		/*
-			chrdata is not required; if not present, use cin
-			paldata is not required; if not present,use system generated colors
+		// RUNTIME SETUP
+		// we either use a PNG file or a combination of CHR and PAL data
+		// from seperate streams for data input
 
-			chrdef always required
-			paldef required if paldata present; if present with no paldata, ignore
-		*/
-
-		// check data sanity
-		if(cfg.chrdata_name.empty()) {
-			chrdata = &cin;
-		} else {
+		// chrdata is not required; if not present, use cin
+		if(!cfg.chrdata_name.empty()) {
+			// default mode is chr -> png, so if chr-data is present,
+			// ignore the to-chr mode
+			cfg.to_chr = false;
 			chrdata = new ifstream(cfg.chrdata_name);
 			if(chrdata->fail()) {
 				throw invalid_argument("Tile data file could not be opened");
 			}
-		}
-
-		if(cfg.paldata_name.empty()) {
-			paldata = nullptr;
+		} else if(!cfg.pngdata_name.empty()) {
+			// no chrdata, but we have pngdata
+			cfg.to_chr = true;
+			pngdata = new ifstream(cfg.pngdata_name);
+			if(pngdata->fail()) {
+				throw invalid_argument("PNG file could not be opened");
+			}
 		} else {
-			paldata = new ifstream(cfg.paldata_name);
-			if(paldata->fail()) {
-				throw invalid_argument("Palette data file could not be opened");
+			// neither chrdata or pngdata were specified
+			// use cin as input for either chr or png, depening on switch
+			if(cfg.to_chr) {
+				pngdata = &cin;
+			} else {
+				chrdata = &cin;
 			}
 		}
 
-		// check def sanity
-		// check for --gfx-def first, then override with
-		// --chr-def and --pal-def if present
+		// paldata is not required; if not present, use system generated colors
+		// (and skip entirely if we're doing png -> chr)
+		if(!cfg.to_chr) {
+			if(cfg.paldata_name.empty()) {
+				paldata = nullptr;
+			} else {
+				paldata = new ifstream(cfg.paldata_name);
+				if(paldata->fail()) {
+					throw invalid_argument("Palette data file could not be opened");
+				}
+			}
+		}
+
+		// a chrdef is always required
+		// check for --gfx-def first
 		if(!cfg.gfxdef_name.empty()) {
 			ifstream gfxdef_file(cfg.gfxdef_name);
 			if(gfxdef_file.fail()) {
 				throw invalid_argument("Unable to open gfxdef file");
 			}
-			// only bother importing if chrdef/paldef (which will override gfxdef) are
-			// not defined
+			// only bother importing if chrdef/paldef are not defined (since they
+			// which will override gfxdef in the next section)
 			if(cfg.chrdef_name.empty()) {
-				chrdef = get_chrdef(gfxdef_file);
+				chrdef = load_chrdef(gfxdef_file);
 			}
 			// even if paldef is set, if paldata is null, don't worry about
 			// the paldef import
 			if(cfg.paldef_name.empty() & paldata != nullptr) {
 				gfxdef_file.clear();
-				paldef = get_paldef(gfxdef_file);
+				paldef = load_paldef(gfxdef_file);
 			}
 		}
 
-		// use individual chrdef/paldef settings
+		// use individual chrdef/paldef settings, which will override
+		// anything in the gfxdef
 		if(!cfg.chrdef_name.empty()) {
 			ifstream chrdef_file(cfg.chrdef_name);
 			if(chrdef_file.fail()) {
@@ -85,7 +103,7 @@ int main(int argc, char **argv)
 			}
 			// delete chrdef in case it was previously created with gfxdef option
 			delete chrdef;
-			chrdef = get_chrdef(chrdef_file);
+			chrdef = load_chrdef(chrdef_file);
 			if(chrdef == nullptr) {
 				throw invalid_argument("Invalid chrdef file");
 			}
@@ -103,7 +121,7 @@ int main(int argc, char **argv)
 			}
 			// delete paldef in case it was previously created with gfxdef option
 			delete paldef;
-			paldef = get_paldef(paldef_file);
+			paldef = load_paldef(paldef_file);
 			if(paldef == nullptr) {
 				throw invalid_argument("Invalid paldef file");
 			}
@@ -121,7 +139,14 @@ int main(int argc, char **argv)
 			paldata->read(palbuffer, length);
 			workpal = paldef->convert((u8 *)palbuffer, cfg.subpalette);
 		}
+	} catch(const exception &e) {
+		// failure in argument parsing/runtime config
+		cerr << e.what() << endl;
+		return -1;
+	}
 
+	if(!cfg.to_chr) {
+		// --------- CHR to PNG
 #ifdef DEBUG
 		std::chrono::high_resolution_clock::time_point t1 =
 				std::chrono::high_resolution_clock::now();
@@ -175,27 +200,47 @@ int main(int argc, char **argv)
 		}
 		return_status = 0;
 		goto cleanup;
+
+	cleanup:
+		if(chrdata != &cin) {
+			delete chrdata;
+		}
+		delete paldata;
+
+		delete chrdef;
+		if(paldef != nullptr) {
+			delete paldef->get_coldef();
+			delete paldef->get_syspal();
+		}
+		delete paldef;
+		delete workpal;
+	} else {
+		// ------- PNG to CHR
+		try {
+			png::image<png::index_pixel> in_img(
+					cfg.pngdata_name, png::require_color_space<png::index_pixel>());
+			bank *png_chrs = pngchunk(in_img, *chrdef);
+			ostream *out(nullptr);
+			if(cfg.outfile.empty())
+				out = &cout;
+			else {
+				out = new ofstream(cfg.outfile);
+			}
+
+			for(size_t i = 0; i < png_chrs->chrs->size(); ++i) {
+				bptr chrdata = to_chr(*chrdef, png_chrs->chrs->at(i));
+				out->write((char *)chrdata, chrdef->get_datasize() / 8);
+				delete chrdata;
+			}
+			out->flush();
+			delete png_chrs;
+
+		} catch(const png::error &e) {
+			cerr << "PNG error: " << e.what() << endl;
+			return -10;
+		}
 	}
 
-	catch(const exception &e) {
-		cerr << "Fatal error: " << e.what() << endl;
-		return_status = -1;
-		goto cleanup;
-	}
-
-cleanup:
-	if(chrdata != &cin) {
-		delete chrdata;
-	}
-	delete paldata;
-
-	delete chrdef;
-	if(paldef != nullptr) {
-		delete paldef->get_coldef();
-		delete paldef->get_syspal();
-	}
-	delete paldef;
-	delete workpal;
 	return return_status;
 }
 
@@ -207,11 +252,13 @@ void process_args(int argc, char **argv)
 														 {"pal-def", required_argument, nullptr, 'P'},
 														 {"chr-data", required_argument, nullptr, 'c'},
 														 {"pal-data", required_argument, nullptr, 'p'},
+														 {"png-data", required_argument, nullptr, 'N'},
 														 {"output", required_argument, nullptr, 'o'},
 														 {"trns", no_argument, nullptr, 't'},
 														 {"trns-index", required_argument, nullptr, 'i'},
 														 {"columns", required_argument, nullptr, 'd'},
 														 {"subpalette", required_argument, nullptr, 's'},
+														 {"to-chr", no_argument, nullptr, 'M'},
 														 {"help", no_argument, nullptr, 'h'},
 														 {nullptr, 0, nullptr, 0}};
 
@@ -284,6 +331,13 @@ void process_args(int argc, char **argv)
 					throw invalid_argument("Invalid subpalette index");
 				}
 				break;
+			case 'N':
+				cfg.pngdata_name = optarg;
+				break;
+			case 'M':
+				cfg.to_chr = true;
+				break;
+
 			// help
 			case 'h':
 				print_help();

@@ -4,7 +4,8 @@
 
 namespace chrgfx
 {
-u8 const *get_chr(chr_def &chrdef, u8 const *data);
+bptr to_chr(chr_def &chrdef, bptr data);
+u8 *get_chr(chr_def &chrdef, u8 *data);
 
 static const std::map<const std::string, chr_cv> chr_converters{
 		{std::string("get_chr"), get_chr}};
