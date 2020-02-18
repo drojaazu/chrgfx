@@ -31,9 +31,9 @@ defchr get_defchr(chr_def &chrdef, rawchr data)
 		---if bit is zero, no need to do anything
 		---output data |= (input_bit << bit position mod)
 	*/
-	u8 work_pixel, work_bit, workbyte, workbit;
 	s16 line_iter{0}, pixel_iter{0}, plane_iter{0};
-	u16 bitpos_y{0}, bitpos_x{0}, bitpos{0}, this_pixel{0};
+	u16 curr_pixel{0}, curr_bit{0}, bitpos_y{0}, bitpos_x{0}, bitpos{0},
+			pixel_count{0};
 
 	defchr out = new u8[chrdef.get_datasize() / 8]{0};
 
@@ -43,17 +43,22 @@ defchr get_defchr(chr_def &chrdef, rawchr data)
 
 		// for every pixel...
 		for(pixel_iter = 0; pixel_iter < chrdef.get_width(); ++pixel_iter) {
-			bitpos_x = chrdef.get_xoffset_at(pixel_iter);
-			// work_pixel = data[(line_iter * chrdef.get_width()) + pixel_iter];
-			// work_pixel = data[this_pixel++];
+			curr_pixel = data[pixel_count++];
 
+			// if all the bit planes are unset (i.e. the value is zero)
+			// we can skip the bitplane shenanigans altogether
+			if(curr_pixel == 0)
+				continue;
+
+			bitpos_x = chrdef.get_xoffset_at(pixel_iter);
 			// for every bit plane...
 			for(plane_iter = 0; plane_iter < chrdef.get_bitplanes(); ++plane_iter) {
-				// work_bit = (work_pixel & (1 << plane_iter));
-				// if the value is zero, we don't need to bother setting a bit on our
-				// output data (since the data is already init'd to 0)
-				// if(work_bit == 0)
-				//	continue;
+				// extract the bit from the current bitplane
+				curr_bit = (curr_pixel & (1 << plane_iter));
+				// if the bit is unset, then do not set the equivalent bit in the output
+				if(curr_bit == 0)
+					continue;
+
 				// get the position in the output data for this bit
 				bitpos = bitpos_y + bitpos_x + chrdef.get_planeoffset_at(plane_iter);
 				out[bitpos / 8] |= 0x80 >> (bitpos % 8);
@@ -69,11 +74,11 @@ defchr get_defchr(chr_def &chrdef, rawchr data)
  */
 rawchr get_rawchr(chr_def &chrdef, defchr data)
 {
-	u8 work_pixel, work_byte{0}, work_bit{0};
 	s16 line_iter{0}, pixel_iter{0}, plane_iter{0};
-	u16 bitpos_y{0}, bitpos_x{0}, bitpos{0}, this_pixel{0};
+	u16 curr_pixel, work_byte{0}, work_bit{0}, bitpos_y{0}, bitpos_x{0},
+			bitpos{0}, this_pixel{0};
 
-	rawchr out = new u8[chrdef.get_width() * chrdef.get_height()];
+	rawchr out = new u8[chrdef.get_width() * chrdef.get_height()]{0};
 
 	/*
 	#ifdef DEBUG
@@ -94,7 +99,7 @@ rawchr get_rawchr(chr_def &chrdef, defchr data)
 		// for every pixel in the line...
 		for(pixel_iter = 0; pixel_iter < chrdef.get_width(); ++pixel_iter) {
 			bitpos_x = chrdef.get_xoffset_at(pixel_iter);
-			work_pixel = 0;
+			curr_pixel = 0;
 
 			// for every bit plane...
 			for(plane_iter = 0; plane_iter < chrdef.get_bitplanes(); ++plane_iter) {
@@ -102,14 +107,18 @@ rawchr get_rawchr(chr_def &chrdef, defchr data)
 				bitpos = bitpos_y + bitpos_x + chrdef.get_planeoffset_at(plane_iter);
 
 				work_byte = data[bitpos / 8];
+				// if work_byte is 0, no bits are set, so no bits will be set in the
+				// output, so let's move to the next byte
+				if(work_byte == 0)
+					continue;
 				work_bit = bitpos % 8;
 
-				// work_pixel |= ((work_byte << work_bit) & 0x80) >>
+				// curr_pixel |= ((work_byte << curr_bit) & 0x80) >>
 				//							((8 - chrdef.get_bitplanes()) + plane_iter);
-				// work_pixel |= (work_byte & (0x80 >> work_bit)) >> (7 - plane_iter);
-				work_pixel |= ((work_byte << work_bit) & 0x80) >> (7 - plane_iter);
+				// curr_pixel |= (work_byte & (0x80 >> curr_bit)) >> (7 - plane_iter);
+				curr_pixel |= ((work_byte << work_bit) & 0x80) >> (7 - plane_iter);
 			}
-			out[this_pixel++] = work_pixel;
+			out[this_pixel++] = curr_pixel;
 		}
 	}
 
