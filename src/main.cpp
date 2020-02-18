@@ -228,7 +228,7 @@ int main(int argc, char **argv)
 			}
 
 			for(size_t i = 0; i < png_chrs->chrs->size(); ++i) {
-				bptr chrdata = to_chr(*chrdef, png_chrs->chrs->at(i));
+				defchr chrdata = get_defchr(*chrdef, png_chrs->chrs->at(i));
 				out->write((char *)chrdata, chrdef->get_datasize() / 8);
 				delete chrdata;
 			}

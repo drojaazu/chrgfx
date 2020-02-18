@@ -11,7 +11,7 @@ image<index_pixel> *render(bank &chr_bank, palette &pal, render_traits &rtraits)
 		throw std::length_error("Tile vector is empty, nothing to render");
 
 	// just a shortcut so don't have to go through chr_bank all over the place...
-	std::vector<bptr> &chrs = *chr_bank.chrs;
+	std::vector<defchr> &chrs = *chr_bank.chrs;
 
 	u16
 			// chr dimensions
@@ -60,7 +60,7 @@ image<index_pixel> *render(bank &chr_bank, palette &pal, render_traits &rtraits)
 			outimg_pxlrow_idx{0};
 	auto this_outimg_pxlrow{std::vector<index_pixel>()},
 			this_chr_pxlrow{std::vector<index_pixel>()};
-	bptr this_chroffset;
+	defchr this_chroffset;
 
 	// pixel buffer to be sent to the final image
 	auto imgbuffer{pixel_buffer<index_pixel>(outimg_pxlwidth, outimg_pxlheight)};

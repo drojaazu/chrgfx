@@ -7,7 +7,7 @@ namespace chrgfx
 /**
  * Returns a standard color palette
  */
-palette *get_pal(pal_def &paldef, bptr data,
+palette *get_pal(pal_def &paldef, chunk data,
 								 color (*get_color)(pal_def &, u32 rawvalue), s16 subpal_idx)
 {
 	/* abandon hope, all who enter here
@@ -89,7 +89,7 @@ palette *get_pal(pal_def &paldef, bptr data,
 	u32 bitmask = create_bitmask32(paldef.get_entry_datasize());
 
 	palette *out = new palette();
-	u8 *(*copyfunc)(bptr, bptr, u8 *);
+	u8 *(*copyfunc)(chunk, chunk, u8 *);
 
 	if(bigend_sys == paldef.get_is_big_endian()) {
 		copyfunc = std::copy;
@@ -136,7 +136,7 @@ palette *get_pal(pal_def &paldef, bptr data,
 	return out;
 };
 
-palette *get_pal_refpal(pal_def &paldef, bptr data, s16 subpal_idx)
+palette *get_pal_refpal(pal_def &paldef, chunk data, s16 subpal_idx)
 {
 	return get_pal(
 			paldef, data,
@@ -146,7 +146,7 @@ palette *get_pal_refpal(pal_def &paldef, bptr data, s16 subpal_idx)
 			subpal_idx);
 }
 
-palette *get_pal_coldef(pal_def &paldef, bptr data, s16 subpal_idx)
+palette *get_pal_coldef(pal_def &paldef, chunk data, s16 subpal_idx)
 {
 	return get_pal(
 			paldef, data,
@@ -156,7 +156,7 @@ palette *get_pal_coldef(pal_def &paldef, bptr data, s16 subpal_idx)
 			subpal_idx);
 };
 
-palette *get_pal_tlp(pal_def &paldef, bptr data, s16 subpal_idx)
+palette *get_pal_tlp(pal_def &paldef, chunk data, s16 subpal_idx)
 {
 	if(data[0] != 0x54 || data[1] != 0x50 || data[2] != 0x4c)
 		std::cerr << "Warning: Does not appear to be a valid TLP palette"

@@ -29,7 +29,17 @@ namespace chrgfx
 /**
  * Pointer to a block of byte data
  */
-typedef uint8_t *bptr;
+typedef uint8_t *chunk;
+
+/*
+	typedef chunk so we know, semantically, what kind of
+	data we're working with
+*/
+
+// a chunk of native (8bit packed pixel) chr data
+typedef chunk rawchr;
+// a chunk of any non-native chr data (requires a chrdef)
+typedef chunk defchr;
 
 /*
 	Constants for allocation of fixed array sizes
@@ -69,7 +79,7 @@ public:
 					std::array<u32, MAX_CHR_PLANES> planeoffset,
 					std::array<u32, MAX_CHR_SIZE> xoffset,
 					std::array<u32, MAX_CHR_SIZE> yoffset,
-					bptr (*converter)(chr_def &, bptr))
+					chunk (*converter)(chr_def &, chunk))
 			: width(width), height(height), bitplanes(bitplanes),
 				planeoffset(planeoffset), xoffset(xoffset), yoffset(yoffset),
 				converter(converter), datasize(width * height * bitplanes){};
@@ -98,7 +108,7 @@ private:
 	std::array<u32, MAX_CHR_PLANES> planeoffset;
 	std::array<u32, MAX_CHR_SIZE> xoffset;
 	std::array<u32, MAX_CHR_SIZE> yoffset;
-	bptr (*converter)(chr_def &, bptr);
+	chunk (*converter)(chr_def &, chunk);
 
 	u32 datasize; // size of one chr in bits
 };
@@ -158,7 +168,7 @@ public:
 
 	pal_def(u8 entry_datasize, u16 subpal_length, u16 subpal_count,
 					col_def *coldef, palette *syspal,
-					palette *(*converter)(pal_def &, bptr, s16),
+					palette *(*converter)(pal_def &, chunk, s16),
 					bool is_big_endian = false, u8 subpal_datasize = 0)
 			: entry_datasize(entry_datasize), subpal_length(subpal_length),
 				subpal_count(subpal_count), coldef(coldef), syspal(syspal),
@@ -215,7 +225,7 @@ private:
 	/**
 	 * Pointer to the decoding method
 	 */
-	palette *(*converter)(pal_def &, bptr, s16);
+	palette *(*converter)(pal_def &, chunk, s16);
 
 	/**
 	 * Specify the endianness of the data in the palette
@@ -232,23 +242,23 @@ public:
 	bank(chr_def chrdef) : chrdef(chrdef)
 	{
 		// the tile vector might get big, so let's keep it on the heap
-		this->chrs = new std::vector<bptr>();
+		this->chrs = new std::vector<chunk>();
 	};
 
 	~bank()
 	{
-		for(bptr this_chr : *(this->chrs))
+		for(chunk this_chr : *(this->chrs))
 			delete[] this_chr;
 		delete this->chrs;
 	};
 
 	chr_def chrdef;
-	std::vector<bptr> *chrs;
+	std::vector<chunk> *chrs;
 };
 
 // typedef our ugly function pointers
-typedef bptr (*chr_cv)(chr_def &, bptr);
-typedef palette *(*pal_cv)(pal_def &, bptr, s16);
+typedef chunk (*chr_cv)(chr_def &, chunk);
+typedef palette *(*pal_cv)(pal_def &, chunk, s16);
 } // namespace chrgfx
 
 #endif

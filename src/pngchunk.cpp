@@ -37,7 +37,7 @@ bank *pngchunk(image<index_pixel> &bitmap, chr_def &chrdef)
 	bank *outbank = new bank(chrdef);
 
 	// temp vector to hold the chrs for the current row
-	auto this_chrrow = std::vector<bptr>();
+	auto this_chrrow = std::vector<chunk>();
 	this_chrrow.reserve(chr_cols);
 	// temp vector holding the pixels from the current bmp row
 	auto this_bmprow = std::vector<index_pixel>();

@@ -4,11 +4,11 @@
 
 namespace chrgfx
 {
-bptr to_chr(chr_def &chrdef, bptr data);
-u8 *get_chr(chr_def &chrdef, u8 *data);
+defchr get_defchr(chr_def &chrdef, rawchr data);
+rawchr get_rawchr(chr_def &chrdef, defchr data);
 
 static const std::map<const std::string, chr_cv> chr_converters{
-		{std::string("get_chr"), get_chr}};
+		{std::string("get_chr"), get_rawchr}};
 } // namespace chrgfx
 
 #endif

@@ -120,7 +120,7 @@ chr_def *load_chrdef(std::ifstream &infile)
 	chr_cv chr_converter_temp;
 	if(DEFOPT(CHR_CONVERTER).empty()) {
 		// no converter specified, use the default
-		chr_converter_temp = get_chr;
+		chr_converter_temp = get_rawchr;
 	} else {
 		if(chr_converters.find(DEFOPT(CHR_CONVERTER)) == chr_converters.end()) {
 			throw std::invalid_argument(

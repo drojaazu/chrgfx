@@ -5,23 +5,23 @@
 namespace chrgfx
 {
 
-palette *get_pal(pal_def &paldef, bptr data, color (*get_color)(pal_def &, u32),
-								 s16 subpal_idx);
+palette *get_pal(pal_def &paldef, chunk data,
+								 color (*get_color)(pal_def &, u32), s16 subpal_idx);
 
 /**
  * Returns a palette using color definitions
  */
-palette *get_pal_coldef(pal_def &paldef, bptr data, s16 subpal_idx);
+palette *get_pal_coldef(pal_def &paldef, chunk data, s16 subpal_idx);
 
 /**
  * Returns a palette using a reference palette
  */
-palette *get_pal_refpal(pal_def &paldef, bptr data, s16 subpal_idx);
+palette *get_pal_refpal(pal_def &paldef, chunk data, s16 subpal_idx);
 
 /**
  * Returns a palette based on TileLayer Pro palette data
  */
-palette *get_pal_tlp(pal_def &paldef, bptr data, s16 subpal_idx);
+palette *get_pal_tlp(pal_def &paldef, chunk data, s16 subpal_idx);
 
 color calc_color(col_def &coldef, u32 data);
 
