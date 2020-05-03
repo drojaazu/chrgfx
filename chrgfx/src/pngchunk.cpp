@@ -1,5 +1,6 @@
-#include "pngchunk.hpp"
+//#include "pngchunk.hpp"
 //#include "types.hpp"
+#include "utils.hpp"
 #include <algorithm>
 
 namespace chrgfx

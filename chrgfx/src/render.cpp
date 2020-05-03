@@ -1,10 +1,12 @@
-#include "render.hpp"
+#include "types.hpp"
+#include "utils.hpp"
 #include <algorithm>
 #include <stdio.h>
 
 using namespace png;
-using namespace chrgfx;
 
+namespace chrgfx
+{
 image<index_pixel> *render(bank &chr_bank, palette &pal, render_traits &rtraits)
 {
 	if(chr_bank.chrs->size() < 1)
@@ -119,3 +121,4 @@ image<index_pixel> *render(bank &chr_bank, palette &pal, render_traits &rtraits)
 
 	return outimg;
 }
+} // namespace chrgfx

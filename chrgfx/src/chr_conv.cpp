@@ -1,9 +1,11 @@
-#include "chr_conv.hpp"
-
+//#include "chr_conv.hpp"
+#include "gfxdef.hpp"
+#include "types.hpp"
 #include <iomanip>
 
 namespace chrgfx
 {
+
 /*
 	TILE CONVERSION ROUTINES
 	Any custom tile conversion functions should take a reference to a chr_def and
@@ -14,10 +16,13 @@ namespace chrgfx
 	pixel referencing a value in the output palette.
 */
 
-/**
- * Returns a CHR from given raw tile bitmap
+/*
+ * DECLARATIONS
  */
-defchr get_defchr(chr_def &chrdef, rawchr data)
+// defchr to_defchr(chr_def &chrdef, rawchr data);
+// rawchr to_rawchr(chr_def &chrdef, defchr data);
+
+defchr to_defchr(chr_def &chrdef, rawchr data)
 {
 	/*
 		-for every line...
@@ -39,7 +44,7 @@ defchr get_defchr(chr_def &chrdef, rawchr data)
 
 	// for every line...
 	for(line_iter = 0; line_iter < chrdef.get_height(); ++line_iter) {
-		bitpos_y = chrdef.get_yoffset_at(line_iter);
+		bitpos_y = chrdef.get_rowoffset_at(line_iter);
 
 		// for every pixel...
 		for(pixel_iter = 0; pixel_iter < chrdef.get_width(); ++pixel_iter) {
@@ -50,7 +55,7 @@ defchr get_defchr(chr_def &chrdef, rawchr data)
 			if(curr_pixel == 0)
 				continue;
 
-			bitpos_x = chrdef.get_xoffset_at(pixel_iter);
+			bitpos_x = chrdef.get_pixeloffset_at(pixel_iter);
 			// for every bit plane...
 			for(plane_iter = 0; plane_iter < chrdef.get_bitplanes(); ++plane_iter) {
 				// extract the bit from the current bitplane
@@ -69,10 +74,7 @@ defchr get_defchr(chr_def &chrdef, rawchr data)
 	return out;
 }
 
-/**
- * Returns raw tile bitmap (packed) from a CHR
- */
-rawchr get_rawchr(chr_def &chrdef, defchr data)
+rawchr to_rawchr(chr_def &chrdef, defchr data)
 {
 	s16 line_iter{0}, pixel_iter{0}, plane_iter{0};
 	u16 curr_pixel, work_byte{0}, work_bit{0}, bitpos_y{0}, bitpos_x{0},
@@ -94,14 +96,14 @@ rawchr get_rawchr(chr_def &chrdef, defchr data)
 
 	// for every line...
 	for(line_iter = 0; line_iter < chrdef.get_height(); ++line_iter) {
-		bitpos_y = chrdef.get_yoffset_at(line_iter);
+		bitpos_y = chrdef.get_rowoffset_at(line_iter);
 
 		// for every pixel in the line...
 		for(pixel_iter = 0; pixel_iter < chrdef.get_width(); ++pixel_iter) {
-			bitpos_x = chrdef.get_xoffset_at(pixel_iter);
+			bitpos_x = chrdef.get_pixeloffset_at(pixel_iter);
 			curr_pixel = 0;
 
-			// for every bit plane...
+			// for every bit planee
 			for(plane_iter = 0; plane_iter < chrdef.get_bitplanes(); ++plane_iter) {
 
 				bitpos = bitpos_y + bitpos_x + chrdef.get_planeoffset_at(plane_iter);

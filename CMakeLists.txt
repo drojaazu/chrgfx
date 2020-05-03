@@ -9,29 +9,18 @@ set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
+# chrgfx library
+add_subdirectory(chrgfx)
+# conversion executables
+add_subdirectory(chr2png)
+#add_subdirectory(png2chr)
+
 if (NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
   if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
   endif()
 endif()
 
-# define target
-aux_source_directory(${PROJECT_SOURCE_DIR}/src CPPFILES)
-add_executable(chrgfx ${CPPFILES}) 
 
-find_library(PNG_LIB png)
-if(NOT PNG_LIB)
-  message(FATAL_ERROR "libpng not found")
-endif()
-
-check_include_files("png++/png.hpp" PNGPP_H)
-if(NOT PNGPP_H)
-  message(FATAL_ERROR "png++ not found")
-endif()
-
-target_include_directories(chrgfx PUBLIC "${PROJECT_SOURCE_DIR}/inc")
-target_compile_features(chrgfx PUBLIC cxx_std_11)
-target_link_libraries(chrgfx png)
-
-install(TARGETS chrgfx
+install(TARGETS chr2png
         RUNTIME DESTINATION bin)

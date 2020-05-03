@@ -1,4 +1,3 @@
-#include "pal_conv.hpp"
 #include "utils.hpp"
 #include <algorithm>
 
@@ -7,8 +6,12 @@ namespace chrgfx
 /**
  * Returns a standard color palette
  */
+/*
 palette *get_pal(pal_def &paldef, chunk data,
 								 color (*get_color)(pal_def &, u32 rawvalue), s16 subpal_idx)
+*/
+png::palette to_rawpal(pal_def &paldef, col_def &coldef, chunk data,
+											 s16 subpal_idx)
 {
 	/* abandon hope, all who enter here
 			this algorithm is a ~mess~ right now, as I wedged in support for weird
@@ -88,10 +91,10 @@ palette *get_pal(pal_def &paldef, chunk data,
 
 	u32 bitmask = create_bitmask32(paldef.get_entry_datasize());
 
-	palette *out = new palette();
+	palette out;
 	u8 *(*copyfunc)(chunk, chunk, u8 *);
 
-	if(bigend_sys == paldef.get_is_big_endian()) {
+	if(bigend_sys == coldef.get_is_big_endian()) {
 		copyfunc = std::copy;
 	} else {
 		copyfunc = std::reverse_copy;
@@ -103,6 +106,17 @@ palette *get_pal(pal_def &paldef, chunk data,
 		data_inc = temp;
 	} else {
 		data_inc = workentry_bytesize;
+	}
+
+	// set up get color method
+	png::color (*get_color)(col_def &, u32);
+
+	if(coldef.use_refpal) {
+		get_color = [](col_def &coldef, u32 idx) -> color {
+			return coldef.get_pal_idx(idx);
+		};
+	} else {
+		get_color = calc_color;
 	}
 
 	for(u16 data_iter{0}; data_iter < fullpal_datasize; data_iter += data_inc) {
@@ -119,7 +133,7 @@ palette *get_pal(pal_def &paldef, chunk data,
 			}
 			for(u8 shift_iter{0}; shift_iter < (8 / workentry_bitsize);
 					++shift_iter) {
-				out->push_back(paldef.get_syspal()->at(
+				out.push_back(coldef.get_pal_idx(
 						(dataval >> (workentry_bitsize * shift_iter)) & bitmask));
 			}
 		} else {
@@ -130,30 +144,10 @@ palette *get_pal(pal_def &paldef, chunk data,
 
 			u32 rawcolor{*reinterpret_cast<u32 *>(temparr)};
 			rawcolor &= bitmask;
-			out->push_back(get_color(paldef, rawcolor));
+			out.push_back(get_color(coldef, rawcolor));
 		}
 	}
 	return out;
-};
-
-palette *get_pal_refpal(pal_def &paldef, chunk data, s16 subpal_idx)
-{
-	return get_pal(
-			paldef, data,
-			[](pal_def &paldef, u32 rawvalue) -> color {
-				return paldef.get_syspal()->at(rawvalue);
-			},
-			subpal_idx);
-}
-
-palette *get_pal_coldef(pal_def &paldef, chunk data, s16 subpal_idx)
-{
-	return get_pal(
-			paldef, data,
-			[](pal_def &paldef, u32 rawvalue) -> color {
-				return calc_color(*paldef.get_coldef(), rawvalue);
-			},
-			subpal_idx);
 };
 
 palette *get_pal_tlp(pal_def &paldef, chunk data, s16 subpal_idx)
@@ -189,7 +183,7 @@ palette *get_pal_tlp(pal_def &paldef, chunk data, s16 subpal_idx)
 	return out;
 };
 
-color calc_color(col_def &coldef, u32 data)
+png::color calc_color(col_def &coldef, u32 data)
 {
 	/*
 psuedo:
@@ -204,21 +198,19 @@ psuedo:
 	u8 red{0}, green{0}, blue{0};
 	u8 red_bitcount{0}, green_bitcount{0}, blue_bitcount{0};
 	u8 bitmask{0};
-	for(u16 pass_iter = 0; pass_iter < coldef.get_color_passes(); ++pass_iter) {
-		bitmask = create_bitmask8(coldef.get_red_bitcount()[pass_iter]);
-		red |= ((data >> coldef.get_red_shift()[pass_iter]) & bitmask)
-					 << red_bitcount;
-		red_bitcount += coldef.get_red_bitcount()[pass_iter];
+	for(rgb_layout &const this_pass : coldef.get_rgb_layout()) {
+		bitmask = create_bitmask8(this_pass.get_red_count());
+		red |= ((data >> this_pass.get_red_shift()) & bitmask) << red_bitcount;
+		red_bitcount += this_pass.get_red_count();
 
-		bitmask = create_bitmask8(coldef.get_green_bitcount()[pass_iter]);
-		green |= ((data >> coldef.get_green_shift()[pass_iter]) & bitmask)
+		bitmask = create_bitmask8(this_pass.get_green_count());
+		green |= ((data >> this_pass.get_green_shift()) & bitmask)
 						 << green_bitcount;
-		green_bitcount += coldef.get_green_bitcount()[pass_iter];
+		green_bitcount += this_pass.get_green_count();
 
-		bitmask = create_bitmask8(coldef.get_blue_bitcount()[pass_iter]);
-		blue |= ((data >> coldef.get_blue_shift()[pass_iter]) & bitmask)
-						<< blue_bitcount;
-		blue_bitcount += coldef.get_blue_bitcount()[pass_iter];
+		bitmask = create_bitmask8(this_pass.get_blue_count());
+		blue |= ((data >> this_pass.get_blue_shift()) & bitmask) << blue_bitcount;
+		blue_bitcount += this_pass.get_blue_count();
 	}
 
 	red = expand_bits(red, red_bitcount);

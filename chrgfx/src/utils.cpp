@@ -96,36 +96,36 @@ u8 create_bitmask8(u8 bitcount)
 	return bitmask;
 }
 
-palette *make_pal(bool blank)
+png::palette make_pal(bool blank)
 {
-	auto outpal = new palette();
-	outpal->reserve(256);
+	png::palette outpal;
+	outpal.reserve(256);
 
 	if(blank) {
-		outpal->insert(outpal->begin(), 256, color(0, 0, 0));
+		outpal.insert(outpal.begin(), 256, color(0, 0, 0));
 	} else {
 		// basic 16 color palette based on Xterm colors
 		// repeated 16x for 256 entry 8bpp palette
 		for(u8 subpal = 0; subpal < 16; ++subpal) {
-			outpal->push_back(color(0, 0, 0));
-			outpal->push_back(color(128, 0, 0));
-			outpal->push_back(color(0, 128, 0));
-			outpal->push_back(color(128, 128, 0));
+			outpal.push_back(color(0, 0, 0));
+			outpal.push_back(color(128, 0, 0));
+			outpal.push_back(color(0, 128, 0));
+			outpal.push_back(color(128, 128, 0));
 
-			outpal->push_back(color(0, 0, 128));
-			outpal->push_back(color(128, 0, 128));
-			outpal->push_back(color(0, 128, 128));
-			outpal->push_back(color(192, 192, 192));
+			outpal.push_back(color(0, 0, 128));
+			outpal.push_back(color(128, 0, 128));
+			outpal.push_back(color(0, 128, 128));
+			outpal.push_back(color(192, 192, 192));
 
-			outpal->push_back(color(128, 128, 128));
-			outpal->push_back(color(255, 0, 0));
-			outpal->push_back(color(0, 255, 0));
-			outpal->push_back(color(255, 255, 0));
+			outpal.push_back(color(128, 128, 128));
+			outpal.push_back(color(255, 0, 0));
+			outpal.push_back(color(0, 255, 0));
+			outpal.push_back(color(255, 255, 0));
 
-			outpal->push_back(color(0, 0, 255));
-			outpal->push_back(color(255, 0, 255));
-			outpal->push_back(color(0, 255, 255));
-			outpal->push_back(color(255, 255, 255));
+			outpal.push_back(color(0, 0, 255));
+			outpal.push_back(color(255, 0, 255));
+			outpal.push_back(color(0, 255, 255));
+			outpal.push_back(color(255, 255, 255));
 		}
 	}
 	return outpal;
