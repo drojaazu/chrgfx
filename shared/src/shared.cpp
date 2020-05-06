@@ -1,33 +1,16 @@
 #include "shared.hpp"
+#include "chrgfx.hpp"
+#include <getopt.h>
 #include <iostream>
+#include <string>
 #include <vector>
 
-class gfxprofile : public chrgfx::gfx_def
-{
-public:
-	gfxprofile(std::string const &id, std::string const &chrdef_id,
-						 std::string const &coldef_id, std::string const &paldef_id)
-			: chrgfx::gfx_def(std::move(id)), chrdef_id(std::move(chrdef_id)),
-				coldef_id(std::move(coldef_id)), paldef_id(std::move(paldef_id)){};
-
-	std::string get_chrdef_id() { return chrdef_id; }
-	std::string get_coldef_id() { return coldef_id; }
-	std::string get_paldef_id() { return paldef_id; }
-
-private:
-	std::string chrdef_id;
-	std::string coldef_id;
-	std::string paldef_id;
-};
-
-std::string default_short_opts{":G:C:P:o:s:h"};
+std::string default_short_opts{":G:P:o:s:h"};
 
 std::vector<option> default_long_opts{
 		{"gfx-def", required_argument, nullptr, 'G'},
-		{"chr-def", required_argument, nullptr, 'C'},
-		{"pal-def", required_argument, nullptr, 'P'},
+		{"profile", required_argument, nullptr, 'P'},
 
-		//{"png-data", required_argument, nullptr, 'N'},
 		{"output", required_argument, nullptr, 'o'},
 		{"subpalette", required_argument, nullptr, 's'},
 		{"help", no_argument, nullptr, 'h'}};
@@ -46,17 +29,11 @@ bool process_default_args(runtime_config &cfg, int argc, char **argv)
 		switch(this_opt) {
 			// gfx-def
 			case 'G':
-				cfg.gfxdef_name = optarg;
+				cfg.gfxdef = optarg;
 				break;
 
-			// chr-def
-			case 'C':
-				cfg.chrdef_name = optarg;
-				break;
-
-			// pal-def
 			case 'P':
-				cfg.paldef_name = optarg;
+				cfg.profile = optarg;
 				break;
 
 			// output

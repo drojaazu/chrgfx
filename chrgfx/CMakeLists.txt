@@ -1,5 +1,9 @@
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCFILES)
-add_library(libchrgfx ${SRCFILES})
+add_library(chrgfx SHARED ${SRCFILES})
+
+set_target_properties(chrgfx PROPERTIES SOVERSION 1)
+
+set_target_properties(chrgfx PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/inc/chrgfx.hpp)
 
 find_library(PNG_LIB png)
 if(NOT PNG_LIB)
@@ -11,8 +15,13 @@ if(NOT PNGPP_H)
   message(FATAL_ERROR "png++ not found")
 endif()
 
-target_include_directories(libchrgfx PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/inc")
-target_compile_features(libchrgfx PUBLIC cxx_std_11)
-target_link_libraries(libchrgfx png)
+#target_include_directories(chrgfx PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/inc")
+target_compile_features(chrgfx PUBLIC cxx_std_11)
+target_link_libraries(chrgfx png)
 
-target_include_directories(libchrgfx PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+include(GNUInstallDirs)
+
+install(TARGETS chrgfx
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+

@@ -33,81 +33,84 @@ int main(int argc, char **argv)
 
 	// Runtime State Setup
 	process_args(argc, argv);
+	/*
+		map<string, chr_def> chrdefs{load_gfxdefs("temp")};
 
-	map<string, chr_def> chrdefs{load_chrdefs("temp")};
+		// a chrdef is always required
+		// check for --gfx-def first
+		if(!cfg.gfxdef_name.empty()) {
+			ifstream gfxdef_file(cfg.gfxdef_name);
+			if(gfxdef_file.fail()) {
+				throw invalid_argument("Unable to open gfxdef file");
+			}
+			// only bother importing if chrdef/paldef are not defined (since they
+			// which will override gfxdef in the next section)
+			if(cfg.chrdef_name.empty()) {
+				chrdef = load_chrdef(gfxdef_file);
+			}
+			// even if paldef is set, if paldata is null, don't worry about
+			// the paldef import
+			if(cfg.paldef_name.empty() & paldata != nullptr) {
+				gfxdef_file.clear();
+				paldef = load_paldef(gfxdef_file);
+			}
+		}
 
-	// a chrdef is always required
-	// check for --gfx-def first
-	if(!cfg.gfxdef_name.empty()) {
-		ifstream gfxdef_file(cfg.gfxdef_name);
-		if(gfxdef_file.fail()) {
-			throw invalid_argument("Unable to open gfxdef file");
+		// use individual chrdef/paldef settings, which will override
+		// anything in the gfxdef
+		if(!cfg.chrdef_name.empty()) {
+			ifstream chrdef_file(cfg.chrdef_name);
+			if(chrdef_file.fail()) {
+				throw invalid_argument("Unable to open gfxdef file in chr-def option");
+			}
+			// delete chrdef in case it was previously created with gfxdef option
+			delete chrdef;
+			chrdef = load_chrdef(chrdef_file);
+			if(chrdef == nullptr) {
+				throw invalid_argument("Invalid chrdef file");
+			}
 		}
-		// only bother importing if chrdef/paldef are not defined (since they
-		// which will override gfxdef in the next section)
-		if(cfg.chrdef_name.empty()) {
-			chrdef = load_chrdef(gfxdef_file);
-		}
-		// even if paldef is set, if paldata is null, don't worry about
-		// the paldef import
-		if(cfg.paldef_name.empty() & paldata != nullptr) {
-			gfxdef_file.clear();
-			paldef = load_paldef(gfxdef_file);
-		}
-	}
 
-	// use individual chrdef/paldef settings, which will override
-	// anything in the gfxdef
-	if(!cfg.chrdef_name.empty()) {
-		ifstream chrdef_file(cfg.chrdef_name);
-		if(chrdef_file.fail()) {
-			throw invalid_argument("Unable to open gfxdef file in chr-def option");
-		}
-		// delete chrdef in case it was previously created with gfxdef option
-		delete chrdef;
-		chrdef = load_chrdef(chrdef_file);
 		if(chrdef == nullptr) {
-			throw invalid_argument("Invalid chrdef file");
-		}
-	}
-
-	if(chrdef == nullptr) {
-		throw invalid_argument("No chrdef has been specified!");
-	}
-
-	if(!cfg.pngdata_name.empty()) {
-		pngdata = new ifstream(cfg.pngdata_name);
-		if(pngdata->fail()) {
-			throw invalid_argument("PNG file could not be opened");
-		}
-	} else {
-		// use cin as input
-		pngdata = &cin;
-	}
-
-	try {
-		png::image<png::index_pixel> in_img(
-				cfg.pngdata_name, png::require_color_space<png::index_pixel>());
-		bank *png_chrs = pngchunk(in_img, *chrdef);
-		ostream *out(nullptr);
-		if(cfg.outfile.empty())
-			out = &cout;
-		else {
-			out = new ofstream(cfg.outfile);
+			throw invalid_argument("No chrdef has been specified!");
 		}
 
-		for(size_t i = 0; i < png_chrs->chrs->size(); ++i) {
-			defchr chrdata = chrgfx::to_defchr(*chrdef, png_chrs->chrs->at(i));
-			out->write((char *)chrdata, chrdef->get_datasize() / 8);
-			delete chrdata;
+		if(!cfg.pngdata_name.empty()) {
+			pngdata = new ifstream(cfg.pngdata_name);
+			if(pngdata->fail()) {
+				throw invalid_argument("PNG file could not be opened");
+			}
+		} else {
+			// use cin as input
+			pngdata = &cin;
 		}
-		out->flush();
-		delete png_chrs;
 
-	} catch(const png::error &e) {
-		cerr << "PNG error: " << e.what() << endl;
-		return -10;
-	}
+		try {
+			png::image<png::index_pixel> in_img(
+					cfg.pngdata_name, png::require_color_space<png::index_pixel>());
+			bank *png_chrs = pngchunk(in_img, *chrdef);
+			ostream *out(nullptr);
+			if(cfg.outfile.empty())
+				out = &cout;
+			else {
+				out = new ofstream(cfg.outfile);
+			}
+
+			for(size_t i = 0; i < png_chrs->chrs->size(); ++i) {
+				defchr chrdata = chrgfx::to_defchr(*chrdef, png_chrs->chrs->at(i));
+				out->write((char *)chrdata, chrdef->get_datasize() / 8);
+				delete chrdata;
+			}
+			out->flush();
+			delete png_chrs;
+
+		} catch(const png::error &e) {
+			cerr << "PNG error: " << e.what() << endl;
+			return -10;
+		}
+
+		*/
+	return 0;
 }
 
 void process_args(int argc, char **argv)
@@ -143,7 +146,7 @@ void process_args(int argc, char **argv)
 
 void print_help()
 {
-	cerr << "chrgfx version " << version << endl << endl;
+	// cerr << "chrgfx version " << version << endl << endl;
 	cerr << "Valid options:" << endl;
 	cerr << "  --gfx-def, -G   Specify graphics data format" << endl;
 	cerr << "  --chr-def, -C   Specify tile data format (overrides tile format "

@@ -1,6 +1,7 @@
 #include "utils.hpp"
 
-using namespace png;
+using png::color;
+using png::palette;
 
 namespace chrgfx
 {
@@ -128,6 +129,28 @@ png::palette make_pal(bool blank)
 			outpal.push_back(color(255, 255, 255));
 		}
 	}
+	return outpal;
+}
+
+palette make_pal_random()
+{
+	palette outpal;
+	outpal.reserve(256);
+
+	for(u8 paliter = 0; paliter < 256;) {
+		color temp_col{(png::byte)(rand() % 255), (png::byte)(rand() % 255),
+									 (png::byte)(rand() % 255)};
+		// todo: apparently png::color does not implement operator== so we'll need
+		// to extend it someday...
+		/*
+		if(std::find(outpal.begin(), outpal.end(), temp_col) == outpal.end()) {
+			outpal.push_back(temp_col);
+			++paliter;
+		}
+		*/
+		outpal.push_back(temp_col);
+	}
+
 	return outpal;
 }
 

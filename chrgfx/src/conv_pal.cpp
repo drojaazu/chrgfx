@@ -1,8 +1,45 @@
-#include "utils.hpp"
-#include <algorithm>
+#include "conv_pal.hpp"
 
 namespace chrgfx
 {
+
+png::color calc_color(col_def const &coldef, u32 data)
+{
+	/*
+psuedo:
+-ptr to u32 data
+-for each pass
+	-shift red, apply mask, OR with R var
+	-shift green, apply mask, OR with G var
+	-shift blue, apply mask, OR with B var
+-expand R, G, B
+
+ */
+	u8 red{0}, green{0}, blue{0};
+	u8 red_bitcount{0}, green_bitcount{0}, blue_bitcount{0};
+	u8 bitmask{0};
+	for(rgb_layout const &this_pass : coldef.get_rgb_layout()) {
+		bitmask = create_bitmask8(this_pass.get_red_count());
+		red |= ((data >> this_pass.get_red_shift()) & bitmask) << red_bitcount;
+		red_bitcount += this_pass.get_red_count();
+
+		bitmask = create_bitmask8(this_pass.get_green_count());
+		green |= ((data >> this_pass.get_green_shift()) & bitmask)
+						 << green_bitcount;
+		green_bitcount += this_pass.get_green_count();
+
+		bitmask = create_bitmask8(this_pass.get_blue_count());
+		blue |= ((data >> this_pass.get_blue_shift()) & bitmask) << blue_bitcount;
+		blue_bitcount += this_pass.get_blue_count();
+	}
+
+	red = expand_bits(red, red_bitcount);
+	green = expand_bits(green, green_bitcount);
+	blue = expand_bits(blue, blue_bitcount);
+
+	return color(red, green, blue);
+};
+
 /**
  * Returns a standard color palette
  */
@@ -10,7 +47,7 @@ namespace chrgfx
 palette *get_pal(pal_def &paldef, chunk data,
 								 color (*get_color)(pal_def &, u32 rawvalue), s16 subpal_idx)
 */
-png::palette to_rawpal(pal_def &paldef, col_def &coldef, chunk data,
+png::palette to_rawpal(pal_def const &paldef, col_def const &coldef, u8 *data,
 											 s16 subpal_idx)
 {
 	/* abandon hope, all who enter here
@@ -92,7 +129,7 @@ png::palette to_rawpal(pal_def &paldef, col_def &coldef, chunk data,
 	u32 bitmask = create_bitmask32(paldef.get_entry_datasize());
 
 	palette out;
-	u8 *(*copyfunc)(chunk, chunk, u8 *);
+	u8 *(*copyfunc)(u8 *, u8 *, u8 *);
 
 	if(bigend_sys == coldef.get_is_big_endian()) {
 		copyfunc = std::copy;
@@ -109,10 +146,10 @@ png::palette to_rawpal(pal_def &paldef, col_def &coldef, chunk data,
 	}
 
 	// set up get color method
-	png::color (*get_color)(col_def &, u32);
+	png::color (*get_color)(col_def const &, u32);
 
-	if(coldef.use_refpal) {
-		get_color = [](col_def &coldef, u32 idx) -> color {
+	if(coldef.use_refpal()) {
+		get_color = [](col_def const &coldef, u32 idx) -> color {
 			return coldef.get_pal_idx(idx);
 		};
 	} else {
@@ -150,7 +187,7 @@ png::palette to_rawpal(pal_def &paldef, col_def &coldef, chunk data,
 	return out;
 };
 
-palette *get_pal_tlp(pal_def &paldef, chunk data, s16 subpal_idx)
+palette *get_pal_tlp(pal_def const &paldef, u8 *data, s16 subpal_idx)
 {
 	if(data[0] != 0x54 || data[1] != 0x50 || data[2] != 0x4c)
 		std::cerr << "Warning: Does not appear to be a valid TLP palette"
@@ -181,43 +218,6 @@ palette *get_pal_tlp(pal_def &paldef, chunk data, s16 subpal_idx)
 		data += 3;
 	}
 	return out;
-};
-
-png::color calc_color(col_def &coldef, u32 data)
-{
-	/*
-psuedo:
--ptr to u32 data
--for each pass
-	-shift red, apply mask, OR with R var
-	-shift green, apply mask, OR with G var
-	-shift blue, apply mask, OR with B var
--expand R, G, B
-
- */
-	u8 red{0}, green{0}, blue{0};
-	u8 red_bitcount{0}, green_bitcount{0}, blue_bitcount{0};
-	u8 bitmask{0};
-	for(rgb_layout &const this_pass : coldef.get_rgb_layout()) {
-		bitmask = create_bitmask8(this_pass.get_red_count());
-		red |= ((data >> this_pass.get_red_shift()) & bitmask) << red_bitcount;
-		red_bitcount += this_pass.get_red_count();
-
-		bitmask = create_bitmask8(this_pass.get_green_count());
-		green |= ((data >> this_pass.get_green_shift()) & bitmask)
-						 << green_bitcount;
-		green_bitcount += this_pass.get_green_count();
-
-		bitmask = create_bitmask8(this_pass.get_blue_count());
-		blue |= ((data >> this_pass.get_blue_shift()) & bitmask) << blue_bitcount;
-		blue_bitcount += this_pass.get_blue_count();
-	}
-
-	red = expand_bits(red, red_bitcount);
-	green = expand_bits(green, green_bitcount);
-	blue = expand_bits(blue, blue_bitcount);
-
-	return color(red, green, blue);
 };
 
 } // namespace chrgfx

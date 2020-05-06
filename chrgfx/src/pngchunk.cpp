@@ -1,7 +1,6 @@
-//#include "pngchunk.hpp"
-//#include "types.hpp"
-#include "utils.hpp"
-#include <algorithm>
+#include "pngchunk.hpp"
+
+using namespace png;
 
 namespace chrgfx
 {
@@ -19,10 +18,10 @@ namespace chrgfx
 // ---- read curr pixel row 8 pixels, store into temp array for each tile
 // -- dump temp array into total chr vector
 
-bank *pngchunk(image<index_pixel> &bitmap, chr_def &chrdef)
+bank pngchunk(png::image<png::index_pixel> &bitmap, chr_def const &chrdef)
 {
 	// store the chr dimensions locally
-	u16 const chrw = chrdef.get_width(), chrh = chrdef.get_height();
+	u16 chrw{(chrdef.get_width())}, chrh{chrdef.get_height()};
 
 	// get image dimensions in tile size & final tile count
 	u32 const chr_cols = bitmap.get_width() / chrw;
@@ -35,10 +34,10 @@ bank *pngchunk(image<index_pixel> &bitmap, chr_def &chrdef)
 	// u32 bmpw = chr_rows * chrw;
 	// bitmap->resize(bmpw, bmph);
 
-	bank *outbank = new bank(chrdef);
+	bank outbank{chrdef};
 
 	// temp vector to hold the chrs for the current row
-	auto this_chrrow = std::vector<chunk>();
+	std::vector<u8 *> this_chrrow;
 	this_chrrow.reserve(chr_cols);
 	// temp vector holding the pixels from the current bmp row
 	auto this_bmprow = std::vector<index_pixel>();
@@ -67,7 +66,7 @@ bank *pngchunk(image<index_pixel> &bitmap, chr_def &chrdef)
 		// std::copy_n(this_chrrow.begin(), this_chrrow.end(),
 		// std::back_inserter(t));
 		for(size_t t = 0; t < this_chrrow.size(); t++) {
-			outbank->chrs->push_back(this_chrrow.at(t));
+			outbank.push_back(this_chrrow.at(t));
 		}
 		this_chrrow.clear();
 	}
@@ -75,4 +74,5 @@ bank *pngchunk(image<index_pixel> &bitmap, chr_def &chrdef)
 
 	return outbank;
 }
+
 } // namespace chrgfx

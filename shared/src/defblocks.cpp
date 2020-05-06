@@ -20,49 +20,32 @@ static constexpr char BLOCK_OPENER = '{';
 static constexpr char BLOCK_CLOSER = '}';
 static constexpr char KV_DELIM = ' ';
 
-map<string const, defblock const> load_defblocks(string const &file)
+std::string ltrim(std::string const &s)
 {
-	std::ifstream in{file};
-	if(!in.good()) {
-		throw std::ios_base::failure(std::strerror(errno));
+	size_t start = s.find_first_not_of(' ');
+	return (start == std::string::npos) ? "" : s.substr(start);
+}
+
+std::string rtrim(std::string const &s)
+{
+	size_t end = s.find_last_not_of(' ');
+	return (end == std::string::npos) ? "" : s.substr(0, end + 1);
+}
+
+std::string trim(std::string const &s) { return rtrim(ltrim(s)); }
+
+// assumes the string passed in has already had any whitespace trimmed
+std::pair<std::string, std::string> kvsplit(std::string const &line)
+{
+	std::size_t spacedelim_pos;
+	spacedelim_pos = line.find(KV_DELIM);
+	if(spacedelim_pos == std::string::npos) {
+		throw std::invalid_argument(
+				"Could not find specified delimiter in given string");
 	}
-
-	in.seekg(std::ios::beg);
-
-	string this_line, work_line, cached_line, this_def_name, this_block;
-
-	bool inblock{false}, blocksearch{false}, inerror{false};
-
-	map<string const, defblock> out;
-
-	while(std::getline(in, this_line)) {
-		work_line = ltrim(this_line);
-
-		// blank line or a comment; move on
-		if(work_line == "" || work_line[0] == COMMENT_MARKER) {
-			continue;
-		}
-
-		// block delimiters cannot be used in declaration name
-		// (or syntax error in the file)
-		if(work_line.find(BLOCK_OPENER) != string::npos ||
-			 work_line.find(BLOCK_CLOSER) != string::npos) {
-			std::cerr << "Encountered block delimiter before block declaration"
-								<< std::endl;
-			continue;
-		}
-
-		// assume any text we've found is a block declaration
-		this_def_name = rtrim(work_line);
-		// stream pointer should now be ready at the next line
-		try {
-			defblock this_defblock = parse_defblock(in);
-			out.insert({this_def_name, this_defblock});
-		} catch(string const &e) {
-			std::cerr << e << std::endl;
-			continue;
-		}
-	}
+	return std::pair<std::string, std::string>{
+			line.substr(0, spacedelim_pos),
+			line.substr(spacedelim_pos + 1, std::string::npos)};
 }
 
 defblock parse_defblock(std::istream &in)
@@ -108,30 +91,46 @@ defblock parse_defblock(std::istream &in)
 	return out;
 }
 
-std::string ltrim(const std::string &s)
+map<string const, defblock const> load_defblocks(string const &file)
 {
-	size_t start = s.find_first_not_of(' ');
-	return (start == std::string::npos) ? "" : s.substr(start);
-}
-
-std::string rtrim(const std::string &s)
-{
-	size_t end = s.find_last_not_of(' ');
-	return (end == std::string::npos) ? "" : s.substr(0, end + 1);
-}
-
-std::string trim(const std::string &s) { return rtrim(ltrim(s)); }
-
-// assumes the string passed in has already had any whitespace trimmed
-std::pair<std::string, std::string> kvsplit(std::string const &line)
-{
-	std::size_t spacedelim_pos;
-	spacedelim_pos = line.find(KV_DELIM);
-	if(spacedelim_pos == std::string::npos) {
-		throw std::invalid_argument(
-				"Could not find specified delimiter in given string");
+	std::ifstream in{file};
+	if(!in.good()) {
+		throw std::ios_base::failure(std::strerror(errno));
 	}
-	return std::pair<std::string, std::string>{
-			line.substr(0, spacedelim_pos),
-			line.substr(spacedelim_pos + 1, std::string::npos)};
+
+	in.seekg(std::ios::beg);
+
+	string this_line, work_line, cached_line, this_def_name, this_block;
+
+	map<string const, defblock const> out;
+
+	while(std::getline(in, this_line)) {
+		work_line = ltrim(this_line);
+
+		// blank line or a comment; move on
+		if(work_line == "" || work_line[0] == COMMENT_MARKER) {
+			continue;
+		}
+
+		// block delimiters cannot be used in declaration name
+		// (or syntax error in the file)
+		if(work_line.find(BLOCK_OPENER) != string::npos ||
+			 work_line.find(BLOCK_CLOSER) != string::npos) {
+			std::cerr << "Encountered block delimiter before block declaration"
+								<< std::endl;
+			continue;
+		}
+
+		// assume any text we've found is a block declaration
+		this_def_name = rtrim(work_line);
+		// stream pointer should now be ready at the next line
+		try {
+			defblock this_defblock = parse_defblock(in);
+			out.insert({this_def_name, this_defblock});
+		} catch(string const &e) {
+			std::cerr << e << std::endl;
+			continue;
+		}
+	}
+	return out;
 }

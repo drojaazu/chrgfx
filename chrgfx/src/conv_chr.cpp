@@ -1,4 +1,5 @@
-//#include "chr_conv.hpp"
+#include "conv_chr.hpp"
+
 #include "gfxdef.hpp"
 #include "types.hpp"
 #include <iomanip>
@@ -22,7 +23,7 @@ namespace chrgfx
 // defchr to_defchr(chr_def &chrdef, rawchr data);
 // rawchr to_rawchr(chr_def &chrdef, defchr data);
 
-defchr to_defchr(chr_def &chrdef, rawchr data)
+u8 *to_defchr(chr_def const &chrdef, u8 *data)
 {
 	/*
 		-for every line...
@@ -40,7 +41,7 @@ defchr to_defchr(chr_def &chrdef, rawchr data)
 	u16 curr_pixel{0}, curr_bit{0}, bitpos_y{0}, bitpos_x{0}, bitpos{0},
 			pixel_count{0};
 
-	defchr out = new u8[chrdef.get_datasize() / 8]{0};
+	u8 *out = new u8[chrdef.get_datasize() / 8]{0};
 
 	// for every line...
 	for(line_iter = 0; line_iter < chrdef.get_height(); ++line_iter) {
@@ -74,13 +75,13 @@ defchr to_defchr(chr_def &chrdef, rawchr data)
 	return out;
 }
 
-rawchr to_rawchr(chr_def &chrdef, defchr data)
+u8 *to_rawchr(chr_def const &chrdef, u8 *data)
 {
 	s16 line_iter{0}, pixel_iter{0}, plane_iter{0};
 	u16 curr_pixel, work_byte{0}, work_bit{0}, bitpos_y{0}, bitpos_x{0},
 			bitpos{0}, this_pixel{0};
 
-	rawchr out = new u8[chrdef.get_width() * chrdef.get_height()]{0};
+	u8 *out = new u8[chrdef.get_width() * chrdef.get_height()]{0};
 
 	/*
 	#ifdef DEBUG
