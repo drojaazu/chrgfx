@@ -29,7 +29,7 @@ public:
 class gfx_def
 {
 public:
-	const string &get_id() const;
+	string get_id() const;
 
 protected:
 	gfx_def(std::string const &id);

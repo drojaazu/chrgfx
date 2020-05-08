@@ -57,9 +57,9 @@ public:
 	u16 get_height() const;
 	u8 get_bitplanes() const;
 
-	u32 *get_planeoffset() const;
-	u32 *get_pixeloffset() const;
-	u32 *get_rowoffset() const;
+	u32 const *get_planeoffset() const;
+	u32 const *get_pixeloffset() const;
+	u32 const *get_rowoffset() const;
 	u32 get_pixeloffset_at(size_t pos) const;
 	u32 get_rowoffset_at(size_t pos) const;
 	u32 get_planeoffset_at(size_t pos) const;
@@ -72,13 +72,13 @@ private:
 	u8 bitplanes;
 
 	std::vector<u32> planeoffset;
-	u32 *planeoffset_data;
+	u32 const *planeoffset_data;
 
 	std::vector<u32> pixeloffset;
-	u32 *pixeloffset_data;
+	u32 const *pixeloffset_data;
 
 	std::vector<u32> rowoffset;
-	u32 *rowoffset_data;
+	u32 const *rowoffset_data;
 
 	u32 datasize; // size of one chr in bits
 };

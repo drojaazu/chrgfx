@@ -137,7 +137,7 @@ palette make_pal_random()
 	palette outpal;
 	outpal.reserve(256);
 
-	for(u8 paliter = 0; paliter < 256;) {
+	for(size_t paliter = 0; paliter < 256;) {
 		color temp_col{(png::byte)(rand() % 255), (png::byte)(rand() % 255),
 									 (png::byte)(rand() % 255)};
 		// todo: apparently png::color does not implement operator== so we'll need
@@ -148,6 +148,7 @@ palette make_pal_random()
 			++paliter;
 		}
 		*/
+		++paliter;
 		outpal.push_back(temp_col);
 	}
 

@@ -106,7 +106,6 @@ u8 *to_rawchr(chr_def const &chrdef, u8 *data)
 
 			// for every bit planee
 			for(plane_iter = 0; plane_iter < chrdef.get_bitplanes(); ++plane_iter) {
-
 				bitpos = bitpos_y + bitpos_x + chrdef.get_planeoffset_at(plane_iter);
 
 				work_byte = data[bitpos / 8];

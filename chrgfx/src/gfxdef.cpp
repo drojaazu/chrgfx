@@ -5,7 +5,13 @@ namespace chrgfx
 
 gfx_def::gfx_def(string const &id) : id(id){};
 
-string gfx_def::get_id() const { return id; };
+string gfx_def::get_id() const
+{
+#ifdef DEBUG
+	std::cerr << "New gfxdef: " << id << std::endl;
+#endif
+	return id;
+};
 
 rgb_layout::rgb_layout(std::pair<s8, u8> red, std::pair<s8, u8> green,
 											 std::pair<s8, u8> blue)
@@ -24,28 +30,25 @@ chr_def::chr_def(std::string const &id, u16 const width, u16 const height,
 								 std::vector<u32> const &rowoffset)
 		: gfx_def(std::move(id)), width(std::move(width)),
 			height(std::move(height)), bitplanes(std::move(bitplanes)),
-			planeoffset(std::move(planeoffset)), pixeloffset(pixeloffset),
-			rowoffset(std::move(rowoffset)),
-			datasize(std::move(width * height * bitplanes)),
-			planeoffset_data(std::move(this->planeoffset.data())),
-			pixeloffset_data(std::move(this->pixeloffset.data())),
-			rowoffset_data(std::move(this->rowoffset.data())){};
+			planeoffset(std::move(planeoffset)), pixeloffset(std::move(pixeloffset)),
+			rowoffset(std::move(rowoffset)), datasize(width * height * bitplanes)
+{
+	// putting these here instead of the initializer list
+	// to guarantee they point to the right place after any moves
+	planeoffset_data = this->planeoffset.data();
+	pixeloffset_data = this->pixeloffset.data();
+	rowoffset_data = this->rowoffset.data();
+}
 
 u16 chr_def::get_width() const { return width; }
 u16 chr_def::get_height() const { return height; }
 u8 chr_def::get_bitplanes() const { return bitplanes; }
-u32 *chr_def::get_planeoffset() const { return planeoffset_data; };
-u32 *chr_def::get_pixeloffset() const { return pixeloffset_data; };
-u32 *chr_def::get_rowoffset() const { return rowoffset_data; };
-u32 chr_def::get_pixeloffset_at(size_t pos) const
-{
-	return pixeloffset_data[pos];
-};
-u32 chr_def::get_rowoffset_at(size_t pos) const { return rowoffset_data[pos]; };
-u32 chr_def::get_planeoffset_at(size_t pos) const
-{
-	return planeoffset_data[pos];
-};
+u32 const *chr_def::get_planeoffset() const { return planeoffset.data(); };
+u32 const *chr_def::get_pixeloffset() const { return pixeloffset.data(); };
+u32 const *chr_def::get_rowoffset() const { return rowoffset.data(); };
+u32 chr_def::get_pixeloffset_at(size_t pos) const { return pixeloffset[pos]; };
+u32 chr_def::get_rowoffset_at(size_t pos) const { return rowoffset[pos]; };
+u32 chr_def::get_planeoffset_at(size_t pos) const { return planeoffset[pos]; };
 u32 chr_def::get_datasize() const { return datasize; }
 
 col_def::col_def(const std::string id, const std::vector<rgb_layout> layout,

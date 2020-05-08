@@ -1,17 +1,5 @@
-#include <array>
-#include <bits/stdc++.h>
-#include <cerrno>
-#include <fstream>
-#include <map>
-#include <sstream>
-#include <string>
-#include <tuple>
 
-#include "chrgfx.hpp"
-#include "defblocks.hpp"
 #include "import_defs.hpp"
-#include "shared.hpp"
-#include "vd.hpp"
 
 using namespace chrgfx;
 using std::map;
@@ -156,7 +144,6 @@ chr_def validate_chrdef_block(defblock const &def_block)
 	if(temp_rowoffset.size() != temp_height) {
 		throw "rowoffset must have number of entries equal to height";
 	}
-
 	return chr_def{temp_id,					 temp_width,			 temp_height,		temp_bpp,
 								 temp_planeoffset, temp_pixeloffset, temp_rowoffset};
 }
@@ -344,10 +331,10 @@ pal_def validate_paldef_block(defblock const &def_block)
 	// SETTING: subpal_datasize
 	// RULES: optional, u8
 	mapiter = def_block.find(defkeys::PAL_SUBPAL_DATASIZE);
-	if(mapiter == def_block.end()) {
-		throw "Could not find required key " + string(defkeys::PAL_SUBPAL_DATASIZE);
+	u8 temp_subpal_datasize{0};
+	if(mapiter != def_block.end()) {
+		temp_subpal_datasize = vd_int_pos<u8>(mapiter->second);
 	}
-	auto temp_subpal_datasize{vd_int_pos<u8>(mapiter->second)};
 
 	return pal_def{temp_id, temp_entry_datasize, temp_subpal_length,
 								 temp_subpal_count, temp_subpal_datasize};
@@ -358,45 +345,47 @@ std::tuple<map<string const, chr_def const>, map<string const, col_def const>,
 					 map<string const, gfxprofile const>>
 load_gfxdefs(string const &def_file)
 {
-	map<string const, defblock const> blocks{load_defblocks(def_file)};
-	map<string const, defblock const>::iterator block_iter;
-
+	std::multimap<string const, defblock const> blocks{load_defblocks(def_file)};
+	// std::multimap<string const, defblock const>::iterator block_iter;
+	auto block_iter = blocks.equal_range("chrdef");
 	map<string const, chr_def const> chrdefs;
-	block_iter = blocks.find("chrdef");
-	while(block_iter != blocks.end()) {
-		chr_def temp_def{validate_chrdef_block(block_iter->second)};
+
+	for(auto it = block_iter.first; it != block_iter.second; ++it) {
+		chr_def temp_def = validate_chrdef_block(it->second);
 		chrdefs.insert({temp_def.get_id(), std::move(temp_def)});
-		++block_iter;
 	}
 	// add library builtin def
 	chrdefs.insert({defs::basic_8x8_1bpp.get_id(), defs::basic_8x8_1bpp});
 
 	map<string const, col_def const> coldefs;
-	block_iter = blocks.find("coldef");
-	while(block_iter != blocks.end()) {
-		col_def temp_def{validate_coldef_block(block_iter->second)};
+	// block_iter = blocks.find("coldef");
+	block_iter = blocks.equal_range("coldef");
+	for(auto it = block_iter.first; it != block_iter.second; ++it) {
+		col_def temp_def{validate_coldef_block(it->second)};
 		coldefs.insert({temp_def.get_id(), std::move(temp_def)});
-		++block_iter;
+		// block_iter++;
 	}
 
 	coldefs.insert({defs::basic_8bit_random.get_id(), defs::basic_8bit_random});
 
 	map<string const, pal_def const> paldefs;
-	block_iter = blocks.find("paldef");
-	while(block_iter != blocks.end()) {
-		pal_def temp_def{validate_paldef_block(block_iter->second)};
+	// block_iter = blocks.find("paldef");
+	block_iter = blocks.equal_range("paldef");
+	for(auto it = block_iter.first; it != block_iter.second; ++it) {
+		pal_def temp_def{validate_paldef_block(it->second)};
 		paldefs.insert({temp_def.get_id(), std::move(temp_def)});
-		++block_iter;
+		// block_iter++;
 	}
 
 	paldefs.insert({defs::basic_256color.get_id(), defs::basic_256color});
 
 	map<string const, gfxprofile const> profiles;
-	block_iter = blocks.find("profile");
-	while(block_iter != blocks.end()) {
-		gfxprofile temp_def{validate_profile_block(block_iter->second)};
+	// block_iter = blocks.find("profile");
+	block_iter = blocks.equal_range("profile");
+	for(auto it = block_iter.first; it != block_iter.second; ++it) {
+		gfxprofile temp_def{validate_profile_block(it->second)};
 		profiles.insert({temp_def.get_id(), temp_def});
-		++block_iter;
+		//++block_iter;
 	}
 
 	return std::make_tuple(chrdefs, coldefs, paldefs, profiles);

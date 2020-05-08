@@ -18,8 +18,8 @@ namespace vd
 template <typename T> T sto(string const &val)
 {
 	long temp = std::stol(val);
-	if(temp > std::numeric_limits<T>::min() ||
-		 temp < std::numeric_limits<T>::max()) {
+	if(temp < std::numeric_limits<T>::min() ||
+		 temp > std::numeric_limits<T>::max()) {
 		throw std::out_of_range("Invalid string value");
 	}
 	return (T)temp;

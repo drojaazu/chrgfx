@@ -1,12 +1,5 @@
 
-#include <algorithm>
-#include <bits/stdc++.h>
-#include <cerrno>
-#include <fstream>
-#include <map>
-#include <sstream>
-#include <string>
-#include <vector>
+#include "defblocks.hpp"
 
 using std::map;
 using std::pair;
@@ -57,6 +50,7 @@ defblock parse_defblock(std::istream &in)
 
 	string opener_check;
 	std::getline(in, opener_check);
+	std::replace(opener_check.begin(), opener_check.end(), '\t', ' ');
 	opener_check = trim(opener_check);
 	if(opener_check[0] != BLOCK_OPENER || opener_check.size() != 1) {
 		throw "Block opening delimiter not found or junk data found on opener line";
@@ -67,6 +61,7 @@ defblock parse_defblock(std::istream &in)
 	defblock out;
 
 	while(std::getline(in, this_line)) {
+		std::replace(this_line.begin(), this_line.end(), '\t', ' ');
 		this_line = trim(this_line);
 		if(this_line == "" || this_line[0] == COMMENT_MARKER) {
 			// ignore comment & empty lines
@@ -91,9 +86,10 @@ defblock parse_defblock(std::istream &in)
 	return out;
 }
 
-map<string const, defblock const> load_defblocks(string const &file)
+std::multimap<string const, defblock const> load_defblocks(string const &file)
 {
 	std::ifstream in{file};
+	std::cout << "test: " << file << std::endl;
 	if(!in.good()) {
 		throw std::ios_base::failure(std::strerror(errno));
 	}
@@ -102,9 +98,11 @@ map<string const, defblock const> load_defblocks(string const &file)
 
 	string this_line, work_line, cached_line, this_def_name, this_block;
 
-	map<string const, defblock const> out;
+	std::multimap<string const, defblock const> out;
 
 	while(std::getline(in, this_line)) {
+		work_line = this_line;
+		std::replace(work_line.begin(), work_line.end(), '\t', ' ');
 		work_line = ltrim(this_line);
 
 		// blank line or a comment; move on
