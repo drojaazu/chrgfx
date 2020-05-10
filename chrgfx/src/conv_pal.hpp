@@ -9,10 +9,10 @@
 namespace chrgfx
 {
 
-png::color calc_color(col_def const &coldef, u32 data);
+png::color calc_color(class coldef const &coldef, u32 const data);
 
-png::palette to_rawpal(pal_def const &paldef, col_def const &coldef, u8 *data,
-											 s16 subpal_idx);
+png::palette from_pal(paldef const &from_paldef, coldef const &from_coldef,
+											u8 *data, s16 const subpal_idx);
 
 } // namespace chrgfx
 

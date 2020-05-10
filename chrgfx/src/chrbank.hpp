@@ -10,17 +10,17 @@ using std::vector;
 
 namespace chrgfx
 {
-class bank : public vector<u8 *>
+class chrbank : public vector<u8 *>
 {
 public:
-	bank(chr_def const &chrdef);
+	chrbank(class chrdef const &chrdef);
 
-	~bank();
+	~chrbank();
 
-	chr_def get_chrdef();
+	chrdef get_chrdef();
 
 private:
-	chr_def chrdef;
+	chrdef def;
 };
 
 } // namespace chrgfx

@@ -1,8 +1,5 @@
 #include "utils.hpp"
 
-using png::color;
-using png::palette;
-
 namespace chrgfx
 {
 /**
@@ -97,41 +94,6 @@ u8 create_bitmask8(u8 bitcount)
 	return bitmask;
 }
 
-png::palette make_pal(bool blank)
-{
-	png::palette outpal;
-	outpal.reserve(256);
-
-	if(blank) {
-		outpal.insert(outpal.begin(), 256, color(0, 0, 0));
-	} else {
-		// basic 16 color palette based on Xterm colors
-		// repeated 16x for 256 entry 8bpp palette
-		for(u8 subpal = 0; subpal < 16; ++subpal) {
-			outpal.push_back(color(0, 0, 0));
-			outpal.push_back(color(128, 0, 0));
-			outpal.push_back(color(0, 128, 0));
-			outpal.push_back(color(128, 128, 0));
-
-			outpal.push_back(color(0, 0, 128));
-			outpal.push_back(color(128, 0, 128));
-			outpal.push_back(color(0, 128, 128));
-			outpal.push_back(color(192, 192, 192));
-
-			outpal.push_back(color(128, 128, 128));
-			outpal.push_back(color(255, 0, 0));
-			outpal.push_back(color(0, 255, 0));
-			outpal.push_back(color(255, 255, 0));
-
-			outpal.push_back(color(0, 0, 255));
-			outpal.push_back(color(255, 0, 255));
-			outpal.push_back(color(0, 255, 255));
-			outpal.push_back(color(255, 255, 255));
-		}
-	}
-	return outpal;
-}
-
 palette make_pal_random()
 {
 	palette outpal;
@@ -155,20 +117,6 @@ palette make_pal_random()
 	return outpal;
 }
 
-// fill in any blank entries in a palette to bring it up to 256
-void fill_pal(palette *pal)
-{
-	if(pal->size() >= 256)
-		return;
-
-	u16 to_fill = 256 - pal->size();
-
-	for(u16 fill_iter = 0; fill_iter < to_fill; ++fill_iter)
-		pal->push_back(color(0, 0, 0));
-
-	return;
-}
-
 /**
  * Determines the endianness of the local system
  */
@@ -182,5 +130,7 @@ bool is_system_bigendian()
 			static_cast<const unsigned char *>(address);
 	return (*least_significant_address == 0x01) ? false : true;
 }
+
+const bool bigend_sys = is_system_bigendian();
 
 } // namespace chrgfx

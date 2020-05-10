@@ -23,17 +23,17 @@ using std::map;
 using std::string;
 using namespace chrgfx;
 
-std::tuple<map<string const, chr_def const>, map<string const, col_def const>,
-					 map<string const, pal_def const>,
+std::tuple<map<string const, chrdef const>, map<string const, coldef const>,
+					 map<string const, paldef const>,
 					 map<string const, gfxprofile const>>
 load_gfxdefs(string const &def_file);
 
-chr_def validate_chrdef_block(defblock const &def_block);
+chrdef validate_chrdef_block(defblock const &def_block);
 palette create_palette(std::string const &pal);
 
-col_def validate_coldef_block(defblock const &def_block);
+coldef validate_coldef_block(defblock const &def_block);
 
-pal_def validate_paldef_block(defblock const &def_block);
+paldef validate_paldef_block(defblock const &def_block);
 
 gfxprofile validate_profile_block(defblock const &def_block);
 

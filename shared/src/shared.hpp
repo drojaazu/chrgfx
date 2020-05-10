@@ -17,12 +17,12 @@ struct runtime_config {
 	runtime_config() { subpalette = -1; }
 };
 
-class gfxprofile : public chrgfx::gfx_def
+class gfxprofile : public chrgfx::gfxdef
 {
 public:
 	gfxprofile(std::string const &id, std::string const &chrdef_id,
 						 std::string const &coldef_id, std::string const &paldef_id)
-			: chrgfx::gfx_def(std::move(id)), chrdef_id(std::move(chrdef_id)),
+			: chrgfx::gfxdef(std::move(id)), chrdef_id(std::move(chrdef_id)),
 				coldef_id(std::move(coldef_id)), paldef_id(std::move(paldef_id)){};
 
 	std::string get_chrdef_id() const { return chrdef_id; }

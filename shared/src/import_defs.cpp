@@ -66,7 +66,7 @@ gfxprofile validate_profile_block(defblock const &def_block)
 	return gfxprofile{id, chrdef, coldef, paldef};
 }
 
-chr_def validate_chrdef_block(defblock const &def_block)
+chrdef validate_chrdef_block(defblock const &def_block)
 {
 	// instead of looping over the pairs, we'll go down each setting of the def
 	// if the setting is present in the pair stack, validate the value
@@ -144,8 +144,8 @@ chr_def validate_chrdef_block(defblock const &def_block)
 	if(temp_rowoffset.size() != temp_height) {
 		throw "rowoffset must have number of entries equal to height";
 	}
-	return chr_def{temp_id,					 temp_width,			 temp_height,		temp_bpp,
-								 temp_planeoffset, temp_pixeloffset, temp_rowoffset};
+	return chrdef{temp_id,					temp_width,				temp_height,	 temp_bpp,
+								temp_planeoffset, temp_pixeloffset, temp_rowoffset};
 }
 
 palette create_palette(std::string const &pal)
@@ -180,7 +180,7 @@ palette create_palette(std::string const &pal)
 	return out;
 }
 
-col_def validate_coldef_block(defblock const &def_block)
+coldef validate_coldef_block(defblock const &def_block)
 {
 
 	defblock::const_iterator mapiter;
@@ -206,8 +206,7 @@ col_def validate_coldef_block(defblock const &def_block)
 	if(mapiter != def_block.end()) {
 
 		// we have a ref pal, parse it out
-		return col_def(temp_id, create_palette(mapiter->second),
-									 temp_is_big_endian);
+		return coldef(temp_id, create_palette(mapiter->second), temp_is_big_endian);
 	} else {
 
 		// SETTING: color_passes
@@ -288,11 +287,11 @@ col_def validate_coldef_block(defblock const &def_block)
 										 {temp_blue_shift[pass_iter], temp_blue_size[pass_iter]}});
 		}
 
-		return col_def{temp_id, passes, temp_is_big_endian};
+		return coldef{temp_id, passes, temp_is_big_endian};
 	}
 }
 
-pal_def validate_paldef_block(defblock const &def_block)
+paldef validate_paldef_block(defblock const &def_block)
 {
 	defblock::const_iterator mapiter;
 
@@ -336,43 +335,42 @@ pal_def validate_paldef_block(defblock const &def_block)
 		temp_subpal_datasize = vd_int_pos<u8>(mapiter->second);
 	}
 
-	return pal_def{temp_id, temp_entry_datasize, temp_subpal_length,
-								 temp_subpal_count, temp_subpal_datasize};
+	return paldef{temp_id, temp_entry_datasize, temp_subpal_length,
+								temp_subpal_count, temp_subpal_datasize};
 }
 
-std::tuple<map<string const, chr_def const>, map<string const, col_def const>,
-					 map<string const, pal_def const>,
-					 map<string const, gfxprofile const>>
+std::tuple<map<string const, chrdef const>, map<string const, coldef const>,
+					 map<string const, paldef const>, map<string const, gfxprofile const>>
 load_gfxdefs(string const &def_file)
 {
 	std::multimap<string const, defblock const> blocks{load_defblocks(def_file)};
 	// std::multimap<string const, defblock const>::iterator block_iter;
 	auto block_iter = blocks.equal_range("chrdef");
-	map<string const, chr_def const> chrdefs;
+	map<string const, chrdef const> chrdefs;
 
 	for(auto it = block_iter.first; it != block_iter.second; ++it) {
-		chr_def temp_def = validate_chrdef_block(it->second);
+		chrdef temp_def = validate_chrdef_block(it->second);
 		chrdefs.insert({temp_def.get_id(), std::move(temp_def)});
 	}
 	// add library builtin def
 	chrdefs.insert({defs::basic_8x8_1bpp.get_id(), defs::basic_8x8_1bpp});
 
-	map<string const, col_def const> coldefs;
+	map<string const, coldef const> coldefs;
 	// block_iter = blocks.find("coldef");
 	block_iter = blocks.equal_range("coldef");
 	for(auto it = block_iter.first; it != block_iter.second; ++it) {
-		col_def temp_def{validate_coldef_block(it->second)};
+		coldef temp_def = validate_coldef_block(it->second);
 		coldefs.insert({temp_def.get_id(), std::move(temp_def)});
 		// block_iter++;
 	}
 
 	coldefs.insert({defs::basic_8bit_random.get_id(), defs::basic_8bit_random});
 
-	map<string const, pal_def const> paldefs;
+	map<string const, paldef const> paldefs;
 	// block_iter = blocks.find("paldef");
 	block_iter = blocks.equal_range("paldef");
 	for(auto it = block_iter.first; it != block_iter.second; ++it) {
-		pal_def temp_def{validate_paldef_block(it->second)};
+		paldef temp_def = validate_paldef_block(it->second);
 		paldefs.insert({temp_def.get_id(), std::move(temp_def)});
 		// block_iter++;
 	}

@@ -1,7 +1,7 @@
 #ifndef CHRGFX__RENDER_H
 #define CHRGFX__RENDER_H
 
-#include "bank.hpp"
+#include "chrbank.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 #include <algorithm>
@@ -18,8 +18,8 @@ struct render_traits {
 	u8 trns_entry = 0;
 };
 
-png::image<png::index_pixel> render(bank &chr_bank, palette &pal,
-																		render_traits &rtraits);
+png::image<png::index_pixel> render(chrbank &chr_bank, palette const &pal,
+																		render_traits const &rtraits);
 
 } // namespace chrgfx
 

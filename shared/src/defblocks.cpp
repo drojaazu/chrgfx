@@ -89,7 +89,6 @@ defblock parse_defblock(std::istream &in)
 std::multimap<string const, defblock const> load_defblocks(string const &file)
 {
 	std::ifstream in{file};
-	std::cout << "test: " << file << std::endl;
 	if(!in.good()) {
 		throw std::ios_base::failure(std::strerror(errno));
 	}

@@ -1,9 +1,5 @@
 #include "conv_chr.hpp"
 
-#include "gfxdef.hpp"
-#include "types.hpp"
-#include <iomanip>
-
 namespace chrgfx
 {
 
@@ -17,13 +13,7 @@ namespace chrgfx
 	pixel referencing a value in the output palette.
 */
 
-/*
- * DECLARATIONS
- */
-// defchr to_defchr(chr_def &chrdef, rawchr data);
-// rawchr to_rawchr(chr_def &chrdef, defchr data);
-
-u8 *to_defchr(chr_def const &chrdef, u8 *data)
+u8 *to_chr(chrdef const &to_def, u8 const *data)
 {
 	/*
 		-for every line...
@@ -41,14 +31,14 @@ u8 *to_defchr(chr_def const &chrdef, u8 *data)
 	u16 curr_pixel{0}, curr_bit{0}, bitpos_y{0}, bitpos_x{0}, bitpos{0},
 			pixel_count{0};
 
-	u8 *out = new u8[chrdef.get_datasize() / 8]{0};
+	u8 *out = new u8[to_def.get_datasize() / 8]{0};
 
 	// for every line...
-	for(line_iter = 0; line_iter < chrdef.get_height(); ++line_iter) {
-		bitpos_y = chrdef.get_rowoffset_at(line_iter);
+	for(line_iter = 0; line_iter < to_def.get_height(); ++line_iter) {
+		bitpos_y = to_def.get_rowoffset_at(line_iter);
 
 		// for every pixel...
-		for(pixel_iter = 0; pixel_iter < chrdef.get_width(); ++pixel_iter) {
+		for(pixel_iter = 0; pixel_iter < to_def.get_width(); ++pixel_iter) {
 			curr_pixel = data[pixel_count++];
 
 			// if all the bit planes are unset (i.e. the value is zero)
@@ -56,9 +46,9 @@ u8 *to_defchr(chr_def const &chrdef, u8 *data)
 			if(curr_pixel == 0)
 				continue;
 
-			bitpos_x = chrdef.get_pixeloffset_at(pixel_iter);
+			bitpos_x = to_def.get_pixeloffset_at(pixel_iter);
 			// for every bit plane...
-			for(plane_iter = 0; plane_iter < chrdef.get_bitplanes(); ++plane_iter) {
+			for(plane_iter = 0; plane_iter < to_def.get_bitplanes(); ++plane_iter) {
 				// extract the bit from the current bitplane
 				curr_bit = (curr_pixel & (1 << plane_iter));
 				// if the bit is unset, then do not set the equivalent bit in the output
@@ -66,7 +56,7 @@ u8 *to_defchr(chr_def const &chrdef, u8 *data)
 					continue;
 
 				// get the position in the output data for this bit
-				bitpos = bitpos_y + bitpos_x + chrdef.get_planeoffset_at(plane_iter);
+				bitpos = bitpos_y + bitpos_x + to_def.get_planeoffset_at(plane_iter);
 				out[bitpos / 8] |= 0x80 >> (bitpos % 8);
 			}
 		}
@@ -75,13 +65,13 @@ u8 *to_defchr(chr_def const &chrdef, u8 *data)
 	return out;
 }
 
-u8 *to_rawchr(chr_def const &chrdef, u8 *data)
+u8 *from_chr(chrdef const &from_def, u8 const *data)
 {
 	s16 line_iter{0}, pixel_iter{0}, plane_iter{0};
 	u16 curr_pixel, work_byte{0}, work_bit{0}, bitpos_y{0}, bitpos_x{0},
 			bitpos{0}, this_pixel{0};
 
-	u8 *out = new u8[chrdef.get_width() * chrdef.get_height()]{0};
+	u8 *out = new u8[from_def.get_width() * from_def.get_height()]{0};
 
 	/*
 	#ifdef DEBUG
@@ -96,17 +86,17 @@ u8 *to_rawchr(chr_def const &chrdef, u8 *data)
 	*/
 
 	// for every line...
-	for(line_iter = 0; line_iter < chrdef.get_height(); ++line_iter) {
-		bitpos_y = chrdef.get_rowoffset_at(line_iter);
+	for(line_iter = 0; line_iter < from_def.get_height(); ++line_iter) {
+		bitpos_y = from_def.get_rowoffset_at(line_iter);
 
 		// for every pixel in the line...
-		for(pixel_iter = 0; pixel_iter < chrdef.get_width(); ++pixel_iter) {
-			bitpos_x = chrdef.get_pixeloffset_at(pixel_iter);
+		for(pixel_iter = 0; pixel_iter < from_def.get_width(); ++pixel_iter) {
+			bitpos_x = from_def.get_pixeloffset_at(pixel_iter);
 			curr_pixel = 0;
 
 			// for every bit planee
-			for(plane_iter = 0; plane_iter < chrdef.get_bitplanes(); ++plane_iter) {
-				bitpos = bitpos_y + bitpos_x + chrdef.get_planeoffset_at(plane_iter);
+			for(plane_iter = 0; plane_iter < from_def.get_bitplanes(); ++plane_iter) {
+				bitpos = bitpos_y + bitpos_x + from_def.get_planeoffset_at(plane_iter);
 
 				work_byte = data[bitpos / 8];
 				// if work_byte is 0, no bits are set, so no bits will be set in the

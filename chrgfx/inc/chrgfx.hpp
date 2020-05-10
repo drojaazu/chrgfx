@@ -1,10 +1,10 @@
-#ifndef CHRGFX_H
-#define CHRGFX_H
+#ifndef CHRGFX__PUBLIC_H
+#define CHRGFX__PUBLIC_H
 
 #include <png++/png.hpp>
 
-#include "bank.hpp"
 #include "builtin_defs.hpp"
+#include "chrbank.hpp"
 #include "conv_chr.hpp"
 #include "conv_pal.hpp"
 #include "gfxdef.hpp"

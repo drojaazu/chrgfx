@@ -3,14 +3,14 @@
 
 #include "gfxdef.hpp"
 #include "types.hpp"
-
+#include <iomanip>
 
 namespace chrgfx
 {
 
-u8 *to_defchr(chr_def const &chrdef, u8 *data);
+u8 *to_chr(chrdef const &to_def, u8 const *data);
 
-u8 *to_rawchr(chr_def const &chrdef, u8 *data);
+u8 *from_chr(chrdef const &from_def, u8 const *data);
 
 } // namespace chrgfx
 

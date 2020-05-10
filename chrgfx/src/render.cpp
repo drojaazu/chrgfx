@@ -5,8 +5,8 @@ using namespace png;
 namespace chrgfx
 {
 
-png::image<png::index_pixel> render(bank &chr_bank, palette &pal,
-																		render_traits &rtraits)
+png::image<png::index_pixel> render(chrbank &chr_bank, palette const &pal,
+																		render_traits const &rtraits)
 {
 	if(chr_bank.size() < 1)
 		throw std::length_error("Tile vector is empty, nothing to render");

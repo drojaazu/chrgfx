@@ -3,7 +3,7 @@
 namespace chrgfx
 {
 
-png::color calc_color(col_def const &coldef, u32 data)
+png::color calc_color(class coldef const &coldef, u32 const data)
 {
 	/*
 psuedo:
@@ -47,8 +47,8 @@ psuedo:
 palette *get_pal(pal_def &paldef, chunk data,
 								 color (*get_color)(pal_def &, u32 rawvalue), s16 subpal_idx)
 */
-png::palette to_rawpal(pal_def const &paldef, col_def const &coldef, u8 *data,
-											 s16 subpal_idx)
+png::palette from_pal(paldef const &paldef, coldef const &coldef, u8 *data,
+											s16 const subpal_idx)
 {
 	/* abandon hope, all who enter here
 			this algorithm is a ~mess~ right now, as I wedged in support for weird
@@ -146,10 +146,10 @@ png::palette to_rawpal(pal_def const &paldef, col_def const &coldef, u8 *data,
 	}
 
 	// set up get color method
-	png::color (*get_color)(col_def const &, u32);
+	png::color (*get_color)(class coldef const &, u32);
 
 	if(coldef.use_refpal()) {
-		get_color = [](col_def const &coldef, u32 idx) -> color {
+		get_color = [](class coldef const &coldef, u32 idx) -> color {
 			return coldef.get_pal_idx(idx);
 		};
 	} else {
@@ -187,7 +187,7 @@ png::palette to_rawpal(pal_def const &paldef, col_def const &coldef, u8 *data,
 	return out;
 };
 
-palette *get_pal_tlp(pal_def const &paldef, u8 *data, s16 subpal_idx)
+palette *get_pal_tlp(paldef const &paldef, u8 *data, s16 subpal_idx)
 {
 	if(data[0] != 0x54 || data[1] != 0x50 || data[2] != 0x4c)
 		std::cerr << "Warning: Does not appear to be a valid TLP palette"

@@ -1,16 +1,18 @@
-#ifndef PNGCHUNK_H
-#define PNGCHUNK_H
+#ifndef CHRGFX__PNGCHUNK_H
+#define CHRGFX__PNGCHUNK_H
 
-#include "bank.hpp"
+#include "chrbank.hpp"
 #include "gfxdef.hpp"
+#include "types.hpp"
+#include "utils.hpp"
+#include <algorithm>
 #include <png++/png.hpp>
-#include <vector>
 
 namespace chrgfx
 {
 
-bank pngchunk(png::image<png::index_pixel> &bitmap, chr_def const &chrdef);
+chrbank pngchunk(png::image<png::index_pixel> &bitmap, chrdef const &chrdef);
 
-} // namespace chrgfx
+}
 
 #endif

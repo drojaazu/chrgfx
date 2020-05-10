@@ -3,6 +3,7 @@
 
 #include "types.hpp"
 #include <algorithm>
+#include <png++/png.hpp>
 
 using png::color;
 using png::palette;
@@ -17,15 +18,11 @@ u16 create_bitmask16(u8 bitcount);
 
 u8 create_bitmask8(u8 bitcount);
 
-png::palette make_pal(bool blank);
-
 palette make_pal_random();
-
-void fill_pal(palette *pal);
 
 bool is_system_bigendian();
 
-const static bool bigend_sys = is_system_bigendian();
+extern bool const bigend_sys;
 } // namespace chrgfx
 
 #endif

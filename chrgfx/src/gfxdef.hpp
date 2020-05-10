@@ -2,23 +2,23 @@
 #define CHRGFX__GFXDEF_H
 
 #include "types.hpp"
-//#include <map>
 #include <png++/png.hpp>
 #include <string>
+#include <vector>
 
 using png::color;
 using png::palette;
+using std::pair;
 using std::string;
+using std::vector;
 
 namespace chrgfx
 {
 
 class rgb_layout
 {
-
 public:
-	rgb_layout(std::pair<s8, u8> red, std::pair<s8, u8> green,
-						 std::pair<s8, u8> blue);
+	rgb_layout(pair<s8, u8> red, pair<s8, u8> green, pair<s8, u8> blue);
 
 	s8 get_red_shift() const;
 	u8 get_red_count() const;
@@ -28,30 +28,29 @@ public:
 	u8 get_blue_count() const;
 
 private:
-	std::pair<s8, u8> red;
-	std::pair<s8, u8> green;
-	std::pair<s8, u8> blue;
+	pair<s8, u8> red;
+	pair<s8, u8> green;
+	pair<s8, u8> blue;
 };
 
-class gfx_def
+class gfxdef
 {
 public:
 	string get_id() const;
 
 protected:
-	gfx_def(string const &id);
+	gfxdef(string const &id);
 
 private:
 	string id;
 };
 
-class chr_def : public gfx_def
+class chrdef : public gfxdef
 {
 public:
-	chr_def(std::string const &id, u16 const width, u16 const height,
-					u8 const bitplanes, std::vector<u32> const &planeoffset,
-					std::vector<u32> const &pixeloffset,
-					std::vector<u32> const &rowoffset);
+	chrdef(string const &id, u16 const width, u16 const height,
+				 u8 const bitplanes, vector<u32> const &planeoffset,
+				 vector<u32> const &pixeloffset, vector<u32> const &rowoffset);
 
 	u16 get_width() const;
 	u16 get_height() const;
@@ -71,13 +70,13 @@ private:
 	u16 height;
 	u8 bitplanes;
 
-	std::vector<u32> planeoffset;
+	vector<u32> planeoffset;
 	u32 const *planeoffset_data;
 
-	std::vector<u32> pixeloffset;
+	vector<u32> pixeloffset;
 	u32 const *pixeloffset_data;
 
-	std::vector<u32> rowoffset;
+	vector<u32> rowoffset;
 	u32 const *rowoffset_data;
 
 	u32 datasize; // size of one chr in bits
@@ -87,18 +86,17 @@ private:
  * Describes color data by specifying the offset and data size of each
  * component (red, green, blue) within the data
  */
-class col_def : public gfx_def
+class coldef : public gfxdef
 {
 public:
-	col_def(const std::string id, const std::vector<rgb_layout> layout,
-					bool is_big_endian = false);
+	coldef(const string id, const vector<rgb_layout> layout,
+				 bool is_big_endian = false);
 
-	col_def(const std::string id, const palette &refpal,
-					bool is_big_endian = false);
+	coldef(const string id, const palette &refpal, bool is_big_endian = false);
 
 	rgb_layout get_rgb_pass(size_t pass) const;
 
-	std::vector<rgb_layout> get_rgb_layout() const;
+	vector<rgb_layout> get_rgb_layout() const;
 
 	color get_pal_idx(size_t index) const;
 
@@ -106,7 +104,7 @@ public:
 	bool get_is_big_endian() const;
 
 private:
-	std::vector<rgb_layout> layout;
+	vector<rgb_layout> layout;
 	palette refpal;
 	const bool is_refpal;
 
@@ -120,12 +118,11 @@ private:
  * Defines the format of a color palette by specifying the size and count of
  * subpalettes, as well as either a color definition or pre-defined color set
  */
-class pal_def : public gfx_def
+class paldef : public gfxdef
 {
 public:
-	pal_def(std::string const &id, u8 const entry_datasize,
-					u16 const subpal_length, u16 const subpal_count,
-					u8 const subpal_datasize = 0);
+	paldef(string const &id, u8 const entry_datasize, u16 const subpal_length,
+				 u16 const subpal_count, u8 const subpal_datasize = 0);
 
 	u8 get_entry_datasize() const;
 

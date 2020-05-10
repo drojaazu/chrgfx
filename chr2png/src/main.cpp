@@ -1,4 +1,3 @@
-//#include "main.hpp"
 #include "chrgfx.hpp"
 #include "import_defs.hpp"
 #include "shared.hpp"
@@ -55,9 +54,9 @@ int main(int argc, char **argv)
 
 	auto defs = load_gfxdefs(cfg.gfxdef);
 
-	map<string const, chr_def const> chrdefs{std::get<0>(defs)};
-	map<string const, col_def const> coldefs{std::get<1>(defs)};
-	map<string const, pal_def const> paldefs{std::get<2>(defs)};
+	map<string const, chrdef const> chrdefs{std::get<0>(defs)};
+	map<string const, coldef const> coldefs{std::get<1>(defs)};
+	map<string const, paldef const> paldefs{std::get<2>(defs)};
 	map<string const, gfxprofile const> profiles{std::get<3>(defs)};
 
 	auto profile_iter{profiles.find(cfg.profile)};
@@ -72,28 +71,28 @@ int main(int argc, char **argv)
 		throw "Could not find specified chrdef";
 	}
 
-	chr_def chrdef{chrdef_iter->second};
+	chrdef chrdef{chrdef_iter->second};
 
 	auto coldef_iter{coldefs.find(profile.get_coldef_id())};
 	if(coldef_iter == coldefs.end()) {
 		throw "Could not find specified coldef";
 	}
 
-	col_def coldef{coldef_iter->second};
+	coldef coldef{coldef_iter->second};
 
 	auto paldef_iter{paldefs.find(profile.get_paldef_id())};
 	if(paldef_iter == paldefs.end()) {
 		throw "Could not find specified paldef";
 	}
 
-	pal_def paldef{paldef_iter->second};
+	paldef paldef{paldef_iter->second};
 
 #ifdef DEBUG
 	std::chrono::high_resolution_clock::time_point t1 =
 			std::chrono::high_resolution_clock::now();
 #endif
 
-	bank workbank = bank(chrdef);
+	chrbank workbank = chrbank(chrdef);
 	// read the file in chunks, convert each chunk and store it in a vector
 
 	auto chunksize = (chrdef.get_datasize() / 8);
@@ -105,7 +104,7 @@ int main(int argc, char **argv)
 		if(chrdata.eof())
 			break;
 
-		workbank.push_back(chrgfx::to_rawchr(chrdef, (u8 *)chunkbuffer));
+		workbank.push_back(chrgfx::from_chr(chrdef, (u8 *)chunkbuffer));
 	}
 
 	palette workpal;
@@ -122,7 +121,7 @@ int main(int argc, char **argv)
 
 		char palbuffer[length];
 		paldata.read(palbuffer, length);
-		workpal = to_rawpal(paldef, coldef, (u8 *)palbuffer, cfg.subpalette);
+		workpal = from_pal(paldef, coldef, (u8 *)palbuffer, cfg.subpalette);
 
 	} else {
 		workpal = make_pal_random();

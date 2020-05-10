@@ -1,8 +1,7 @@
-#ifndef LIBCHRGFX_TYPEDEFS_H
-#define LIBCHRGFX_TYPEDEFS_H
+#ifndef CHRGFX__TYPES_H
+#define CHRGFX__TYPES_H
 
 #include <memory>
-#include <png++/png.hpp>
 #include <stdint.h>
 
 typedef uint8_t u8;

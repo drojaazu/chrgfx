@@ -1,20 +1,16 @@
-#ifndef CHR_CONV_H
-#define CHR_CONV_H
+#ifndef CHRGFX__CONV_CHR_H
+#define CHRGFX__CONV_CHR_H
 
 #include "gfxdef.hpp"
 #include "types.hpp"
+#include <iomanip>
+
 namespace chrgfx
 {
 
-/**
- * Returns a CHR from raw packed pixel data
- */
-u8 *to_defchr(chr_def const &chrdef, u8 *data);
+u8 *to_chr(chrdef const &to_def, u8 const *data);
 
-/**
- * Returns raw packed pixel data from a CHR
- */
-u8 *to_rawchr(chr_def const &chrdef, u8 *data);
+u8 *from_chr(chrdef const &from_def, u8 const *data);
 
 } // namespace chrgfx
 
