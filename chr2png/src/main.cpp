@@ -17,9 +17,6 @@ using namespace chrgfx;
 #include <chrono>
 #endif
 
-using namespace std;
-using namespace chrgfx;
-
 void process_args(int argc, char **argv);
 void print_help();
 
@@ -27,8 +24,9 @@ void print_help();
 const static string version = string("1.1");
 
 struct runtime_config_chr2png : runtime_config {
-	std::string chrdata_name{""}, paldata_name{""};
+	string chrdata_name{""}, paldata_name{""};
 	chrgfx::render_traits rendertraits;
+	string outfile{""};
 };
 
 // option settings
@@ -39,13 +37,13 @@ int main(int argc, char **argv)
 	try {
 		// Runtime State Setup
 		process_args(argc, argv);
-	} catch(exception const &e) {
+	} catch(std::exception const &e) {
 		// failure in argument parsing/runtime config
-		cerr << e.what() << endl;
+		std::cerr << e.what() << std::endl;
 		return -1;
 	}
 
-	ifstream chrdata{cfg.chrdata_name};
+	std::ifstream chrdata{cfg.chrdata_name};
 	if(!chrdata.good()) {
 		throw std::ios_base::failure(std::strerror(errno));
 	}
@@ -92,11 +90,8 @@ int main(int argc, char **argv)
 			std::chrono::high_resolution_clock::now();
 #endif
 
-	chrbank workbank = chrbank(chrdef);
-	// read the file in chunks, convert each chunk and store it in a vector
-
+	chrbank workbank{chrdef};
 	auto chunksize = (chrdef.get_datasize() / 8);
-
 	char chunkbuffer[chunksize];
 
 	while(1) {
@@ -109,7 +104,7 @@ int main(int argc, char **argv)
 
 	palette workpal;
 	if(cfg.paldata_name != "") {
-		ifstream paldata{cfg.paldata_name};
+		std::ifstream paldata{cfg.paldata_name};
 		if(!paldata.good()) {
 			throw std::ios_base::failure("Could not open palette data file - " +
 																	 (string)std::strerror(errno));
@@ -133,7 +128,7 @@ int main(int argc, char **argv)
 	auto duration =
 			std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-	cerr << "Tile conversion: " << duration << " ticks" << endl;
+	std::cerr << "Tile conversion: " << duration << "ms" << std::endl;
 
 	t1 = std::chrono::high_resolution_clock::now();
 #endif
@@ -144,11 +139,11 @@ int main(int argc, char **argv)
 	t2 = std::chrono::high_resolution_clock::now();
 	duration =
 			std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-	cerr << "Rendering: " << duration << " ticks" << endl;
+	std::cerr << "Rendering: " << duration << "ms" << std::endl;
 #endif
 
 	if(cfg.outfile.empty()) {
-		outimg.write_stream(cout);
+		outimg.write_stream(std::cout);
 	} else {
 		outimg.write(cfg.outfile);
 	}
@@ -163,7 +158,8 @@ void process_args(int argc, char **argv)
 	default_long_opts.push_back({"columns", required_argument, nullptr, 'd'});
 	default_long_opts.push_back({"chr-data", required_argument, nullptr, 'c'});
 	default_long_opts.push_back({"pal-data", required_argument, nullptr, 'p'});
-	default_short_opts.append("ti:d:c:p:");
+	default_long_opts.push_back({"output", required_argument, nullptr, 'o'});
+	default_short_opts.append("ti:d:c:p:o:");
 
 	bool default_processed = process_default_args(cfg, argc, argv);
 
@@ -211,31 +207,43 @@ void process_args(int argc, char **argv)
 					throw std::invalid_argument("Invalid columns value");
 				}
 				break;
+
+			// output
+			case 'o':
+				cfg.outfile = optarg;
+				break;
 		}
 	}
 }
 
 void print_help()
 {
-	cerr << "chrgfx version " << version << endl << endl;
-	cerr << "Valid options:" << endl;
-	cerr << "  --gfx-def, -G   Specify graphics data format" << endl;
-	cerr << "  --chr-def, -C   Specify tile data format (overrides tile format "
-					"in gfx-def)"
-			 << endl;
-	cerr << "  --chr-data, -c     Filename to input tile data" << endl;
-	cerr << "  --pal-def, -P   Specify palette data format (overrides palette "
-					"format in gfx-def)"
-			 << endl;
-	cerr << "  --pal-data, -p     Filename to input palette data" << endl;
-	cerr << "  --output, -o       Specify output PNG image filename" << endl;
-	cerr << "  --trns, -t         Use image transparency" << endl;
-	cerr << "  --trns-index, -i   Specify palette entry to use as transparency "
-					"(default is 0)"
-			 << endl;
-	cerr << "  --columns, -c      Specify number of columns per row of tiles in "
-					"output image"
-			 << endl;
-	cerr << "  --subpalette, -s   Specify subpalette (default is 0)" << endl;
-	cerr << "  --help, -h         Display this text" << endl;
+	std::cerr << "chrgfx version " << version << std::endl << std::endl;
+	std::cerr << "Valid options:" << std::endl;
+	std::cerr << "  --gfx-def, -G   Specify graphics data format" << std::endl;
+	std::cerr
+			<< "  --chr-def, -C   Specify tile data format (overrides tile format "
+				 "in gfx-def)"
+			<< std::endl;
+	std::cerr << "  --chr-data, -c     Filename to input tile data" << std::endl;
+	std::cerr
+			<< "  --pal-def, -P   Specify palette data format (overrides palette "
+				 "format in gfx-def)"
+			<< std::endl;
+	std::cerr << "  --pal-data, -p     Filename to input palette data"
+						<< std::endl;
+	std::cerr << "  --output, -o       Specify output PNG image filename"
+						<< std::endl;
+	std::cerr << "  --trns, -t         Use image transparency" << std::endl;
+	std::cerr
+			<< "  --trns-index, -i   Specify palette entry to use as transparency "
+				 "(default is 0)"
+			<< std::endl;
+	std::cerr
+			<< "  --columns, -c      Specify number of columns per row of tiles in "
+				 "output image"
+			<< std::endl;
+	std::cerr << "  --subpalette, -s   Specify subpalette (default is 0)"
+						<< std::endl;
+	std::cerr << "  --help, -h         Display this text" << std::endl;
 }

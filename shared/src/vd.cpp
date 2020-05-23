@@ -1,14 +1,4 @@
 #include "vd.hpp"
-#include "shared.hpp"
-#include <algorithm>
-#include <istream>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
-using std::string;
-using std::vector;
 
 namespace vd
 {

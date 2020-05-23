@@ -43,8 +43,6 @@ template <typename T> T vd_int_nonneg(string const &val)
 	return out;
 }
 
-bool vd_bool(std::string const &val);
-
 // converts comma seperated list of values into array
 template <typename T> vector<T> vd_int_array(string const &val)
 {
@@ -58,6 +56,8 @@ template <typename T> vector<T> vd_int_array(string const &val)
 	}
 	return out;
 }
+
+bool vd_bool(std::string const &val);
 
 } // namespace vd
 

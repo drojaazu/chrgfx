@@ -1,44 +1,36 @@
 
 #include "defblocks.hpp"
 
-using std::map;
-using std::pair;
-using std::string;
-using std::vector;
-
-typedef map<string const, string const> defblock;
-
 static constexpr char COMMENT_MARKER = '#';
 static constexpr char BLOCK_OPENER = '{';
 static constexpr char BLOCK_CLOSER = '}';
 static constexpr char KV_DELIM = ' ';
 
-std::string ltrim(std::string const &s)
+string ltrim(string const &s)
 {
 	size_t start = s.find_first_not_of(' ');
-	return (start == std::string::npos) ? "" : s.substr(start);
+	return (start == string::npos) ? "" : s.substr(start);
 }
 
-std::string rtrim(std::string const &s)
+string rtrim(string const &s)
 {
 	size_t end = s.find_last_not_of(' ');
-	return (end == std::string::npos) ? "" : s.substr(0, end + 1);
+	return (end == string::npos) ? "" : s.substr(0, end + 1);
 }
 
-std::string trim(std::string const &s) { return rtrim(ltrim(s)); }
+string trim(string const &s) { return rtrim(ltrim(s)); }
 
 // assumes the string passed in has already had any whitespace trimmed
-std::pair<std::string, std::string> kvsplit(std::string const &line)
+pair<string, string> kvsplit(string const &line)
 {
 	std::size_t spacedelim_pos;
 	spacedelim_pos = line.find(KV_DELIM);
-	if(spacedelim_pos == std::string::npos) {
+	if(spacedelim_pos == string::npos) {
 		throw std::invalid_argument(
 				"Could not find specified delimiter in given string");
 	}
-	return std::pair<std::string, std::string>{
-			line.substr(0, spacedelim_pos),
-			line.substr(spacedelim_pos + 1, std::string::npos)};
+	return pair<string, string>{line.substr(0, spacedelim_pos),
+															line.substr(spacedelim_pos + 1, string::npos)};
 }
 
 defblock parse_defblock(std::istream &in)

@@ -1,17 +1,10 @@
 #include "shared.hpp"
-#include "chrgfx.hpp"
-#include <getopt.h>
-#include <iostream>
-#include <string>
-#include <vector>
 
-std::string default_short_opts{":G:P:o:s:h"};
+string default_short_opts{":G:P:s:h"};
 
 std::vector<option> default_long_opts{
 		{"gfx-def", required_argument, nullptr, 'G'},
 		{"profile", required_argument, nullptr, 'P'},
-
-		{"output", required_argument, nullptr, 'o'},
 		{"subpalette", required_argument, nullptr, 's'},
 		{"help", no_argument, nullptr, 'h'}};
 
@@ -36,11 +29,6 @@ bool process_default_args(runtime_config &cfg, int argc, char **argv)
 				cfg.profile = optarg;
 				break;
 
-			// output
-			case 'o':
-				cfg.outfile = optarg;
-				break;
-
 			// subpalette
 			case 's':
 				try {
@@ -49,9 +37,6 @@ bool process_default_args(runtime_config &cfg, int argc, char **argv)
 					throw std::invalid_argument("Invalid subpalette index");
 				}
 				break;
-			// case 'N':
-			//	cfg.pngdata_name = optarg;
-			//	break;
 
 			// help
 			case 'h':

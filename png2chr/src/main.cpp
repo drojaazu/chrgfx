@@ -3,6 +3,7 @@
 #include "import_defs.hpp"
 #include "shared.hpp"
 
+#include <cerrno>
 #include <getopt.h>
 #include <iostream>
 #include <stdio.h>
@@ -11,14 +12,17 @@
 #include <chrono>
 #endif
 
-using namespace std;
+using std::string;
+using std::vector;
 using namespace chrgfx;
 
 void process_args(int argc, char **argv);
 void print_help();
 
 struct runtime_config_png2chr : runtime_config {
-	std::string pngdata_name{""};
+	string pngdata_name{""};
+	string chr_outfile{""};
+	string pal_outfile{""};
 };
 
 // option settings
@@ -26,90 +30,95 @@ runtime_config_png2chr cfg;
 
 int main(int argc, char **argv)
 {
-	istream *pngdata{nullptr};
+	try {
+		// Runtime State Setup
+		process_args(argc, argv);
+	} catch(std::exception const &e) {
+		std::cerr << e.what() << std::endl;
+		return -1;
+	}
 
-	chr_def *chrdef{nullptr};
-	pal_def *paldef{nullptr};
+	std::ifstream pngdata{cfg.pngdata_name};
+	if(!pngdata.good()) {
+		throw std::ios_base::failure(std::strerror(errno));
+	}
 
-	// Runtime State Setup
-	process_args(argc, argv);
-	/*
-		map<string, chr_def> chrdefs{load_gfxdefs("temp")};
+	/////////// setup definitions
 
-		// a chrdef is always required
-		// check for --gfx-def first
-		if(!cfg.gfxdef_name.empty()) {
-			ifstream gfxdef_file(cfg.gfxdef_name);
-			if(gfxdef_file.fail()) {
-				throw invalid_argument("Unable to open gfxdef file");
-			}
-			// only bother importing if chrdef/paldef are not defined (since they
-			// which will override gfxdef in the next section)
-			if(cfg.chrdef_name.empty()) {
-				chrdef = load_chrdef(gfxdef_file);
-			}
-			// even if paldef is set, if paldata is null, don't worry about
-			// the paldef import
-			if(cfg.paldef_name.empty() & paldata != nullptr) {
-				gfxdef_file.clear();
-				paldef = load_paldef(gfxdef_file);
-			}
+	auto defs = load_gfxdefs(cfg.gfxdef);
+
+	map<string const, chrdef const> chrdefs{std::get<0>(defs)};
+	map<string const, coldef const> coldefs{std::get<1>(defs)};
+	map<string const, paldef const> paldefs{std::get<2>(defs)};
+	map<string const, gfxprofile const> profiles{std::get<3>(defs)};
+
+	auto profile_iter{profiles.find(cfg.profile)};
+	if(profile_iter == profiles.end()) {
+		throw "Could not find specified gfxprofile";
+	}
+
+	gfxprofile profile{profile_iter->second};
+
+	auto chrdef_iter{chrdefs.find(profile.get_chrdef_id())};
+	if(chrdef_iter == chrdefs.end()) {
+		throw "Could not find specified chrdef";
+	}
+
+	chrdef chrdef{chrdef_iter->second};
+
+	auto coldef_iter{coldefs.find(profile.get_coldef_id())};
+	if(coldef_iter == coldefs.end()) {
+		throw "Could not find specified coldef";
+	}
+
+	coldef coldef{coldef_iter->second};
+
+	auto paldef_iter{paldefs.find(profile.get_paldef_id())};
+	if(paldef_iter == paldefs.end()) {
+		throw "Could not find specified paldef";
+	}
+
+	paldef paldef{paldef_iter->second};
+
+	try {
+		png::image<png::index_pixel> in_img(
+				cfg.pngdata_name, png::require_color_space<png::index_pixel>());
+
+#ifdef DEBUG
+		std::chrono::high_resolution_clock::time_point t1 =
+				std::chrono::high_resolution_clock::now();
+#endif
+
+		chrbank png_chrbank{chrgfx::pngchunk(chrdef, in_img.get_pixbuf())};
+
+#ifdef DEBUG
+		std::chrono::high_resolution_clock::time_point t2 =
+				std::chrono::high_resolution_clock::now();
+		auto duration =
+				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+		std::cerr << "Tile conversion: " << duration << "ms" << std::endl;
+
+#endif
+
+		std::ofstream chr_outfile{cfg.chr_outfile};
+		if(!chr_outfile.good()) {
+			throw std::ios_base::failure(std::strerror(errno));
 		}
 
-		// use individual chrdef/paldef settings, which will override
-		// anything in the gfxdef
-		if(!cfg.chrdef_name.empty()) {
-			ifstream chrdef_file(cfg.chrdef_name);
-			if(chrdef_file.fail()) {
-				throw invalid_argument("Unable to open gfxdef file in chr-def option");
-			}
-			// delete chrdef in case it was previously created with gfxdef option
-			delete chrdef;
-			chrdef = load_chrdef(chrdef_file);
-			if(chrdef == nullptr) {
-				throw invalid_argument("Invalid chrdef file");
-			}
+		size_t chunksize{chrdef.get_datasize() / 8};
+
+		for(const auto &chr : png_chrbank) {
+			std::copy(chr, chr + chunksize, std::ostream_iterator<u8>(chr_outfile));
 		}
 
-		if(chrdef == nullptr) {
-			throw invalid_argument("No chrdef has been specified!");
-		}
+		// BIG TODO: to non-raw palette routine
 
-		if(!cfg.pngdata_name.empty()) {
-			pngdata = new ifstream(cfg.pngdata_name);
-			if(pngdata->fail()) {
-				throw invalid_argument("PNG file could not be opened");
-			}
-		} else {
-			// use cin as input
-			pngdata = &cin;
-		}
+	} catch(const png::error &e) {
+		std::cerr << "PNG error: " << e.what() << std::endl;
+		return -10;
+	}
 
-		try {
-			png::image<png::index_pixel> in_img(
-					cfg.pngdata_name, png::require_color_space<png::index_pixel>());
-			bank *png_chrs = pngchunk(in_img, *chrdef);
-			ostream *out(nullptr);
-			if(cfg.outfile.empty())
-				out = &cout;
-			else {
-				out = new ofstream(cfg.outfile);
-			}
-
-			for(size_t i = 0; i < png_chrs->chrs->size(); ++i) {
-				defchr chrdata = chrgfx::to_defchr(*chrdef, png_chrs->chrs->at(i));
-				out->write((char *)chrdata, chrdef->get_datasize() / 8);
-				delete chrdata;
-			}
-			out->flush();
-			delete png_chrs;
-
-		} catch(const png::error &e) {
-			cerr << "PNG error: " << e.what() << endl;
-			return -10;
-		}
-
-		*/
 	return 0;
 }
 
@@ -146,25 +155,32 @@ void process_args(int argc, char **argv)
 
 void print_help()
 {
-	// cerr << "chrgfx version " << version << endl << endl;
-	cerr << "Valid options:" << endl;
-	cerr << "  --gfx-def, -G   Specify graphics data format" << endl;
-	cerr << "  --chr-def, -C   Specify tile data format (overrides tile format "
-					"in gfx-def)"
-			 << endl;
-	cerr << "  --chr-data, -c     Filename to input tile data" << endl;
-	cerr << "  --pal-def, -P   Specify palette data format (overrides palette "
-					"format in gfx-def)"
-			 << endl;
-	cerr << "  --pal-data, -p     Filename to input palette data" << endl;
-	cerr << "  --output, -o       Specify output PNG image filename" << endl;
-	cerr << "  --trns, -t         Use image transparency" << endl;
-	cerr << "  --trns-index, -i   Specify palette entry to use as transparency "
-					"(default is 0)"
-			 << endl;
-	cerr << "  --columns, -c      Specify number of columns per row of tiles in "
-					"output image"
-			 << endl;
-	cerr << "  --subpalette, -s   Specify subpalette (default is 0)" << endl;
-	cerr << "  --help, -h         Display this text" << endl;
+	// std::cerr << "chrgfx version " << version << std::endl << std::endl;
+	std::cerr << "Valid options:" << std::endl;
+	std::cerr << "  --gfx-def, -G   Specify graphics data format" << std::endl;
+	std::cerr
+			<< "  --chr-def, -C   Specify tile data format (overrides tile format "
+				 "in gfx-def)"
+			<< std::endl;
+	std::cerr << "  --chr-data, -c     Filename to input tile data" << std::endl;
+	std::cerr
+			<< "  --pal-def, -P   Specify palette data format (overrides palette "
+				 "format in gfx-def)"
+			<< std::endl;
+	std::cerr << "  --pal-data, -p     Filename to input palette data"
+						<< std::endl;
+	std::cerr << "  --output, -o       Specify output PNG image filename"
+						<< std::endl;
+	std::cerr << "  --trns, -t         Use image transparency" << std::endl;
+	std::cerr
+			<< "  --trns-index, -i   Specify palette entry to use as transparency "
+				 "(default is 0)"
+			<< std::endl;
+	std::cerr
+			<< "  --columns, -c      Specify number of columns per row of tiles in "
+				 "output image"
+			<< std::endl;
+	std::cerr << "  --subpalette, -s   Specify subpalette (default is 0)"
+						<< std::endl;
+	std::cerr << "  --help, -h         Display this text" << std::endl;
 }

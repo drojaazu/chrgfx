@@ -18,7 +18,8 @@ namespace chrgfx
 // ---- read curr pixel row 8 pixels, store into temp array for each tile
 // -- dump temp array into total chr vector
 
-chrbank pngchunk(png::image<png::index_pixel> &bitmap, chrdef const &chrdef)
+chrbank pngchunk(chrdef const &chrdef,
+								 png::pixel_buffer<png::index_pixel> &bitmap)
 {
 	// store the chr dimensions locally
 	u16 chrw{(chrdef.get_width())}, chrh{chrdef.get_height()};

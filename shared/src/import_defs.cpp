@@ -1,14 +1,6 @@
 
 #include "import_defs.hpp"
 
-using namespace chrgfx;
-using std::map;
-using std::pair;
-using std::string;
-using std::tuple;
-using std::vector;
-using namespace vd;
-
 namespace defkeys
 {
 
@@ -277,7 +269,7 @@ coldef validate_coldef_block(defblock const &def_block)
 			throw "blue_size must have number of entries equal to color_passes";
 		}
 
-		std::vector<rgb_layout> passes;
+		vector<rgb_layout> passes;
 		passes.reserve(temp_color_passes);
 
 		for(int pass_iter = 0; pass_iter < temp_color_passes; ++pass_iter) {

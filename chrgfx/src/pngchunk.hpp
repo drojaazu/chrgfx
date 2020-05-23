@@ -11,7 +11,8 @@
 namespace chrgfx
 {
 
-chrbank pngchunk(png::image<png::index_pixel> &bitmap, chrdef const &chrdef);
+chrbank pngchunk(chrdef const &chrdef,
+								 png::pixel_buffer<png::index_pixel> &bitmap);
 
 }
 

@@ -19,13 +19,16 @@
 #include "shared.hpp"
 #include "vd.hpp"
 
-using std::map;
-using std::string;
 using namespace chrgfx;
+using std::map;
+using std::pair;
+using std::string;
+using std::tuple;
+using std::vector;
+using namespace vd;
 
 std::tuple<map<string const, chrdef const>, map<string const, coldef const>,
-					 map<string const, paldef const>,
-					 map<string const, gfxprofile const>>
+					 map<string const, paldef const>, map<string const, gfxprofile const>>
 load_gfxdefs(string const &def_file);
 
 chrdef validate_chrdef_block(defblock const &def_block);

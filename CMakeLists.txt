@@ -13,7 +13,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 add_subdirectory(chrgfx)
 # conversion executables
 add_subdirectory(chr2png)
-#add_subdirectory(png2chr)
+add_subdirectory(png2chr)
 
 if (NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
   if (NOT CMAKE_BUILD_TYPE)

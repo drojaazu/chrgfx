@@ -7,13 +7,17 @@
 #include <string>
 #include <vector>
 
-typedef std::map<std::string const, std::string const> defblock;
+using std::map;
+using std::pair;
+using std::string;
+using std::vector;
 
-std::string ltrim(std::string const &s);
-std::string rtrim(std::string const &s);
-std::string trim(std::string const &s);
+typedef map<string const, string const> defblock;
 
-std::multimap<std::string const, defblock const>
-load_defblocks(std::string const &file);
+string ltrim(string const &s);
+string rtrim(string const &s);
+string trim(string const &s);
+
+std::multimap<string const, defblock const> load_defblocks(string const &file);
 
 #endif
