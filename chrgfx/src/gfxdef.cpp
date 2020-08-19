@@ -52,7 +52,21 @@ rgb_layout coldef::get_rgb_pass(size_t pass) const { return layout.at(pass); }
 
 vector<rgb_layout> coldef::get_rgb_layout() const { return layout; }
 
-color coldef::get_pal_idx(size_t index) const { return refpal.at(index); }
+color coldef::get_refpal_entry(size_t index) const { return refpal.at(index); }
+
+size_t coldef::get_refpal_idx(color rgb) const
+{
+	u16 idx{0};
+	for(auto this_color : refpal) {
+		if(this_color.red == rgb.red && this_color.green == rgb.green &&
+			 this_color.blue == rgb.blue) {
+			return idx;
+		}
+		++idx;
+	}
+
+	throw "Could not find specified color in refpal";
+};
 
 bool coldef::use_refpal() const { return is_refpal; }
 bool coldef::get_is_big_endian() const { return is_big_endian; }

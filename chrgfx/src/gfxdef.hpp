@@ -63,6 +63,9 @@ public:
 	u32 get_rowoffset_at(size_t pos) const;
 	u32 get_planeoffset_at(size_t pos) const;
 
+	/**
+	 * Returns the size in bits of a single tile
+	 */
 	u32 get_datasize() const;
 
 private:
@@ -98,7 +101,9 @@ public:
 
 	vector<rgb_layout> get_rgb_layout() const;
 
-	color get_pal_idx(size_t index) const;
+	color get_refpal_entry(size_t index) const;
+
+	size_t get_refpal_idx(color rgb) const;
 
 	bool use_refpal() const;
 	bool get_is_big_endian() const;
@@ -124,12 +129,25 @@ public:
 	paldef(string const &id, u8 const entry_datasize, u16 const subpal_length,
 				 u16 const subpal_count, u8 const subpal_datasize = 0);
 
+	/**
+	 * Returns the size in bits of a single color entry
+	 * (shouldn't this be in coldef....?)
+	 */
 	u8 get_entry_datasize() const;
 
+	/**
+	 * Returns the number of entries in a subpalette
+	 */
 	u16 get_subpal_length() const;
 
+	/**
+	 * Returns the number of subpalettes in a system palette
+	 */
 	u16 get_subpal_count() const;
 
+	/**
+	 * Returns the size in bits of a subpalette
+	 */
 	u8 get_subpal_datasize() const;
 
 private:

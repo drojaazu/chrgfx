@@ -1,3 +1,7 @@
+/********************************
+ * pngchunk
+ * Converts a bitmap into an array of tiles
+ ********************************/
 #include "pngchunk.hpp"
 
 using namespace png;

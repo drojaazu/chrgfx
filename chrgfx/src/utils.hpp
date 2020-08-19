@@ -10,6 +10,8 @@ using png::palette;
 
 namespace chrgfx
 {
+u8 dither_bits(u8 data, u8 bitcount);
+
 u8 expand_bits(u8 data, u8 bitcount);
 
 u32 create_bitmask32(u8 bitcount);

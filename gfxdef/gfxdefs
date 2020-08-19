@@ -1,112 +1,598 @@
 profile
 {
-	id sega_md
-	chrdef packed_4bpp_8x8
-	paldef sega_md_pal
-	coldef sega_md_col
+  id snk_neogeocd
+  comment SNK NeoGeo CD
+  chrdef chr_snk_neogeocd
+  paldef pal_snk_neogeo
+  coldef col_snk_neogeo
+}
+
+
+profile
+{
+  id snk_neogeo
+  comment SNK NeoGeo
+  chrdef chr_snk_neogeo
+  paldef pal_snk_neogeo
+  coldef col_snk_neogeo
 }
 
 profile
 {
-	id capcom_cps
-	chrdef capcom_cps_chr
-	paldef capcom_cps_pal
-	coldef capcom_cps_col
+  id capcom_cps
+  comment Capcom CPS 1/2
+  chrdef chr_capcom_cps
+  paldef pal_capcom_cps
+  coldef col_capcom_cps
+}
+
+profile
+{
+  id sega_ms
+  comment Sega Master System
+  chrdef chr_sega_gg
+  paldef pal_sega_ms
+  coldef col_sega_ms
+}
+
+profile
+{
+  id sega_gg
+  comment Sega Game Gear
+  chrdef chr_sega_gg
+  paldef pal_sega_gg
+  coldef col_sega_gg
+}
+
+profile
+{
+  id nintendo_sfc
+  comment Nintendo Super Famicom
+  chrdef chr_nintendo_sfc
+  paldef pal_nintendo_sfc
+  coldef col_nintendo_sfc
+}
+
+profile
+{
+  id nintendo_vb
+  comment Nintendo Virtual Boy
+  chrdef chr_nintendo_vb
+  paldef pal_nintendo_vb
+  coldef col_nintendo_vb
+}
+
+profile
+{
+  id nintendo_fc
+  comment Nintendo Famicom
+  chrdef chr_nintendo_fc
+  paldef pal_nintendo_fc
+  coldef col_nintendo_fc
+}
+
+profile
+{
+  id nintendo_gb
+  comment Nintendo Game Boy
+  chrdef chr_nintendo_gb
+  paldef pal_nintendo_gb
+  coldef col_nintendo_gb
+}
+
+profile
+{
+  id nintendo_gb_pocket
+  comment Nintendo Game Boy Pocket
+  chrdef chr_nintendo_gb
+  paldef pal_nintendo_gb
+  coldef col_nintendo_gb_pocket
+}
+
+profile
+{
+  id sega_md
+  comment Sega Megadrive
+  chrdef chr_4bpp_8x8_packed
+  paldef pal_sega_md
+  coldef col_sega_md
+}
+
+profile
+{
+  id capcom_cps
+  comment Capcom CPS / CPS 2
+  chrdef capcom_cps_chr
+  paldef capcom_cps_pal
+  coldef capcom_cps_col
+}
+
+#################################
+##
+## P A L D E F S
+##
+#################################
+
+paldef
+{
+  id pal_snk_neogeo
+  comment SNK NeoGeo
+
+  # Neo-Geo has 256 palettes of 16 colors each
+  # which means a total system palette size of 4096 colors!
+  # we can only have up to 256 colors in our indexed PNG output
+  # so using the subpalette option while rendering is a must!
+  entry_datasize 16
+  subpal_length 16
+  subpal_count 256
 }
 
 paldef
 {
-	# Sega Megadrive palette
-	# 4 subpalettes of 16 colors each (64 colors total)
-	id sega_md_pal
-	comment Sega Megadrive palette
-	entry_datasize 16
-	subpal_length 16
-	subpal_count 4
+  id pal_capcom_cps
+  comment Capcom CPS
+
+  # 192 palettes of 16 colors each (guessing here)
+  # color size is 16 bits
+  # palette data is stored within gfxram (0x900000 - 0x92ffff)
+  # however, the base address for palettes (and all gfxram components) is not constant
+  # you'll need to check the palette base address set in CPS-A register #6 (offset 0x0a)
+  # (from MAME you'll want to use the memory/:maincpu/0/00800000 view in particular)
+  # it's a word size value making up the MSB of the palette base address
+  # for example, D&D Tower of Doom has 0x91c0 in the register
+  # so the palettes are at 0x91c000
+  # length is 0x1800
+  entry_datasize 16
+  subpal_length 16
+  subpal_count 192
 }
 
 paldef
 {
-	# 192 palettes of 16 colors each (guessing here)
-	# color size is 16 bits
-	# palette data is stored within gfxram (0x900000 - 0x92ffff)
-	# however, the base address for palettes (and all gfxram components) is not constant
-	# you'll need to check the palette base address set in CPS-A register #6 (offset 0x0a)
-	# (from MAME you'll want to use the memory/:maincpu/0/00800000 view in particular)
-	# it's a word size value making up the MSB of the palette base address
-	# for example, D&D Tower of Doom has 0x91c0 in the register
-	# so the palettes are at 0x91c000
-	# length is 0x1800
-	id capcom_cps_pal
-	entry_datasize 16
-	subpal_length 16
-	subpal_count 192
+  id pal_sega_ms
+  comment Sega Master System
+
+  # 32 colors per palette, 1 byte per color
+  # 2 subpalettes, 16 colors each
+  entry_datasize 8
+  subpal_length 16
+  subpal_count 2
+}
+
+paldef
+{
+  id pal_sega_gg
+  comment Sega Game Gear
+
+  # 32 colors per palette, 2 byte per color
+  # 2 subpalettes, 16 colors each
+  entry_datasize 16
+  subpal_length 16
+  subpal_count 2
+}
+
+paldef
+{
+  id pal_nintendo_sfc
+  comment Nintendo Super Famicom
+
+  # 256 colors total
+  # Subpalette length varies by video mode
+  # Default is 16 palettes of 16 colors each,
+  # so that's what we're using here
+  # If you modify the subpal_length to match
+  # a graphics mode, make sure to update
+  # subpal_count as well so length * count = 256!
+  entry_datasize 16
+  subpal_length 16
+  subpal_count 16
+}
+
+paldef
+{
+  id pal_nintendo_vb
+  comment Nintendo Virtual Boy
+  # 2 bits per color, 3 colors per palette
+  # palette data is 1 byte; lowest two bits ignored as padding
+  # 8 palettes total
+  entry_datasize 2
+  subpal_length 4
+  subpal_count 8
+
+  # We manually specify the subpalette data size here since
+  # VB subpalettes are actually word length, with the upper
+  # byte ignored
+  subpal_datasize 16
+}
+
+paldef
+{
+  id pal_nintendo_fc
+  comment Nintendo Famicom
+
+  # 32 colors, each color is 1 byte; 8 palettes, 4 colors each
+  # (color 0 is always transparent)
+
+  entry_datasize 8
+  subpal_length 4
+  subpal_count 8
+}
+
+paldef
+{
+  id pal_nintendo_gb
+  comment Nintendo Game Boy
+
+  # 2 bits per color, 4 colors, packed (1 byte per palette)
+  # 3 palettes (3 bytes, stored at 0xFF47 in memory)
+  entry_datasize 2
+  subpal_length 4
+  subpal_count 3
+}
+
+paldef
+{
+  id pal_sega_md
+  comment Sega Megadrive
+
+  # 4 subpalettes of 16 colors each (64 colors total)
+  
+  entry_datasize 16
+  subpal_length 16
+  subpal_count 4
+}
+
+paldef
+{
+  id pal_capcom_cps
+  comment Capcom CPS / CPS 2
+
+  # 192 palettes of 16 colors each (guessing here)
+  # color size is 16 bits
+  # palette data is stored within gfxram (0x900000 - 0x92ffff)
+  # however, the base address for palettes (and all gfxram components) is not constant
+  # you'll need to check the palette base address set in CPS-A register #6 (offset 0x0a)
+  # (from MAME you'll want to use the memory/:maincpu/0/00800000 view in particular)
+  # it's a word size value making up the MSB of the palette base address
+  # for example, D&D Tower of Doom has 0x91c0 in the register
+  # so the palettes are at 0x91c000
+  # length is 0x1800
+  
+  entry_datasize 16
+  subpal_length 16
+  subpal_count 192
+}
+
+#################################
+##
+## C H R D E F S
+##
+#################################
+
+chrdef
+{
+  id chr_snk_neogeocd
+  comment SNK NeoGeo CD
+
+  # 16x16 4bpp Planar
+  # basically the same as normal NeoGeo but the 8x8
+  # "subtiles" are ordered differently
+  # https://wiki.neogeodev.org/index.php?title=Sprite_graphics_format
+  width 16
+  height 16
+  bpp 4
+  planeoffset 8,0,24,16
+
+  pixeloffset 519, 518, 517, 516, 515, 514, 513, 512, 7, 6, 5, 4, 3, 2, 1, 0
+  rowoffset 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480
 }
 
 chrdef
 {
-	id packed_4bpp_8x8
-	comment Used by Sega Megadrive, Sharp X68000
-	width 8
-	height 8
-	bpp 4
-	planeoffset 3,2,1,0
-	pixeloffset 0,4,8,12,16,20,24,28
-	rowoffset 0,32,64,96,128,160,192,224
-}
+  id chr_snk_neogeo
+  comment SNK NeoGeo
 
+  # 16x16 4bpp Planar
+  # note that your tile data will need to be
+  # interleaved (odd|even|odd|even...) into one file first.
+  # see this page: https://wiki.neogeodev.org/index.php?title=Sprite_graphics_format
+  width 16
+  height 16
+  bpp 4
+  planeoffset 0,8,16,24
+
+  pixeloffset 519, 518, 517, 516, 515, 514, 513, 512, 7, 6, 5, 4, 3, 2, 1, 0
+  rowoffset 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480
+
+}
 
 chrdef
 {
-	# 16x16 4bpp Planar
-	# Used by Capcom CPS and CPS 2
-	id capcom_cps_chr
-	width 16
-	height 16
-	bpp 4
-	#planeoffset 24, 16, 8, 0
-	planeoffset 0,8,16,24
+  id chr_capcom_cps
+  comment Capcom CPS 1/2
 
-	pixeloffset 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39
-	rowoffset 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960
+  # 16x16 4bpp Planar
+  width 16
+  height 16
+  bpp 4
+  #planeoffset 24, 16, 8, 0
+  planeoffset 0,8,16,24
+
+  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39
+  rowoffset 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960
+}
+
+chrdef
+{
+  id chr_sega_gg
+  comment Sega Game Gear, Sega Mark III, Bandai Wonderswan
+
+  # 8x8 4bpp Planar
+  width 8
+  height 8
+  bpp 4
+  planeoffset 0,8,16,24
+  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
+  rowoffset 0, 32, 64, 96, 128, 160, 192, 224
+}
+
+chrdef
+{
+  id chr_nintendo_sfc
+  comment Nintendo Super Famicom, NEC PC Engine
+  # 8x8 4bpp planar
+  width 8
+  height 8
+  bpp 4
+  planeoffset 0,8,128,136
+  pixeloffset 0,1,2,3,4,5,6,7
+  rowoffset 0,16,32,48,64,80,96,112
+}
+
+chrdef
+{
+  id chr_nintendo_vb
+  comment Nintendo Virtual Boy
+
+  # 8x8 2bpp Packed
+  width 8
+  height 8
+  bpp 2
+  planeoffset 0,1
+  pixeloffset 6,4,2,0,14,12,10,8
+  rowoffset 0,16,32,48,64,80,96,112
+}
+
+chrdef
+{
+  id chr_nintendo_fc
+  comment Nintendo Famicom
+
+  # 8x8 2bpp planar
+  width 8
+  height 8
+  bpp 2
+  planeoffset 0,64
+  pixeloffset 0,1,2,3,4,5,6,7
+  rowoffset 0,8,16,24,32,40,48,56
+}
+
+chrdef
+{
+  id chr_nintendo_gb
+  comment Nintendo Game Boy, Game Boy Color, Super Famicom
+
+  # 8x8 2bpp Planar
+  width 8
+  height 8
+  bpp 2
+  planeoffset 8,0
+  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
+  rowoffset 0, 16, 32, 48, 64, 80, 96, 112
+}
+
+chrdef
+{
+  id chr_4bpp_8x8_packed
+  comment Sega Megadrive, Sharp X68000
+  width 8
+  height 8
+  bpp 4
+  planeoffset 3,2,1,0
+  pixeloffset 0,4,8,12,16,20,24,28
+  rowoffset 0,32,64,96,128,160,192,224
+}
+
+chrdef
+{
+  id chr_capcom_cps
+  comment Capcom CPS / CPS 2
+
+  # 16x16 4bpp Planar
+  width 16
+  height 16
+  bpp 4
+  #planeoffset 24, 16, 8, 0
+  planeoffset 0,8,16,24
+
+  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39
+  rowoffset 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960
+}
+
+#################################
+##
+## C O L D E F S
+##
+#################################
+
+coldef
+{
+  id col_snk_neogeo
+  comment SNK NeoGeo
+
+  # 15 |                               |0
+  #    DDR0G0B0R4R3R2R1 G4G3G2G1B4B3B2B1
+  # D = "dark bit", acts as shared LSB for all color components
+  bitdepth 6
+  color_passes 3
+  red_shift 15,14,8
+  red_size 1,1,4
+  green_shift 15,13,4
+  green_size 1,1,4
+  blue_shift 15,12,0
+  blue_size 1,1,4
+  big_endian 1
 }
 
 coldef
 {
-	# Sega Megadrive color format
-	# 15|               |0
-	#   xxxxBBBx GGGxRRRx
-	id sega_md_col
-	comment Sega Megadrive color format
-	red_shift 1
-	red_size 3
-	green_shift 5
-	green_size 3
-	blue_shift 9
-	blue_size 3
-	big_endian 1
+  id col_capcom_cps
+  comment Capcom CPS 1/2
+
+  # CPS 1/2 color format 
+  # 15 |                  |0
+  #    BrBrBrBrRRRRGGGGBBBB
+  # four bits of 'bright' component
+  # From MAME:
+  # from my understanding of the schematics, when the 'brightness'
+  # component is set to 0 it should reduce brightness to 1/3
+  # Not sure how to deal with that here yet, so for now we just ignore it...
+  # (it seems to be used mostly for fade in/out, and during regular gameplay
+  # it's full brightness anyway. Anecdotally, anyway.)
+  bitdepth 4
+  color_passes 1
+  red_shift 8
+  red_size 4
+  green_shift 4
+  green_size 4
+  blue_shift 0
+  blue_size 4
+
+  big_endian 1
 }
 
 coldef
 {
-	# CPS 1/2 color format
-# 15 |                  |0
-#    BrBrBrBrRRRRGGGGBBBB
-# four bits of 'bright' component
-# From MAME:
-# from my understanding of the schematics, when the 'brightness'
-# component is set to 0 it should reduce brightness to 1/3
-# Not sure how to deal with that here yet, so for now we just ignore it...
-# (it seems to be used mostly for fade in/out, and during regular gameplay
-# it's full brightness anyway. Anecdotally, anyway.)
-id capcom_cps_col
-color_passes 1
-red_shift 8
-red_size 4
-green_shift 4
-green_size 4
-blue_shift 0
-blue_size 4
-big_endian 1
+  id col_sega_ms
+  comment Sega Master System
 
+  # 8|      |0
+  #  xxBBGGRR
+  bitdepth 2
+  red_shift 0
+  red_size 2
+  green_shift 2
+  green_size 2
+  blue_shift 4
+  blue_size 2
+}
+
+coldef
+{
+  id col_sega_gg
+  comment Sega Game Gear
+
+  # 15|               |0
+  #   xxxxBBBB GGGGRRRR
+  # (little endian)
+  bitdepth 4
+  red_shift 0
+  red_size 4
+  green_shift 4
+  green_size 4
+  blue_shift 8
+  blue_size 4
+
+  big_endian 0
+}
+
+coldef
+{
+  id col_nintendo_sfc
+  comment Nintendo Super Famicom
+
+  # 15|               |0
+  #   xBBBBBGG GGGRRRRR
+  bitdepth 5
+  color_passes 1
+  red_shift 0
+  red_size 5
+  green_shift 5
+  green_size 5
+  blue_shift 10
+  blue_size 5
+
+  big_endian 0
+}
+
+coldef
+{
+  id col_nintendo_vb
+  comment Nintendo Virtual Boy
+
+  # VB "colors" are based on four levels of intensity
+  # The first level is always black, but the other
+  # three are variable and set by the game code
+  # Therefore it's impossible to make a 'standard'
+  # reference palette. The values below were sampled
+  # from Tetris 3D, which has a nice middle ground
+  # (based on output from MAME)
+  refpal #000000,#2f0000,#8f0000,#cf0000
+
+  # alternatively, here is a reference palette based
+  # on the Wario Land VB title screen, which leans a
+  # bit brighter
+  # refpal #000000,#3f0000,#df0000,#ff0000
+}
+
+coldef
+{
+  id col_nintendo_fc
+  comment Nintendo Famicom
+
+  big_endian 0
+
+  # a 'standard' 2C02 PPU palette, from:
+  # https://wiki.nesdev.com/w/index.php/PPU_palettes
+  refpal #545454,#001E74,#08102C,#300088,#440064,#5C0030,#540400,#3C1800,#202A00,#083A00,#004000,#003C00,#00323C,#000000,#000000,#000000,#989698,#084CC4,#3032EC,#5C1EE4,#8814B0,#A01464,#982220,#783C00,#545A00,#287200,#087C00,#007628,#006678,#000000,#000000,#000000,#ECEEEC,#4C9AEC,#787CEC,#B062EC,#E454EC,#EC58B4,#EC6A64,#D48820,#A0AA00,#74C400,#4CD020,#38CC6C,#38B4CC,#3C3C3C,#000000,#000000,#ECEEEC,#A8CCEC,#BCBCEC,#D4B2EC,#ECAEEC,#ECAED4,#ECB4B0,#E4C490,#CCD278,#B4DE78,#A8E290,#98E2B4,#A0D6E4,#A0A2A0,#000000,#000000
+
+  # Some other palette examples: http://emulation.gametechwiki.com/index.php/Famicom_Color_Palette
+}
+
+coldef
+{
+  id col_nintendo_gb
+  comment Nintendo Game Boy
+
+  # black & white "colors" are based on luminance only
+  # so we need an RGB equivalent palette
+  # this is based on the yellow-green tint on the original system
+  refpal #fffb87,#b1ae4e,#84804e,#4e4e4e
+}
+
+coldef
+{
+  id col_nintendo_gb_pocket
+  comment Nintendo Game Boy Pocket
+
+  # this is based on the light gray/black tint of the GB Pocket screen
+  refpal #c4cfa1,#8b956d,#6b7353,#414141
+}
+
+coldef
+{
+  id col_sega_md
+  comment Sega Megadrive
+
+  # 3 bit BGR
+  # 15|               |0
+  #   xxxxBBBx GGGxRRRx
+  bitdepth 3
+  red_shift 1
+  red_size 3
+  green_shift 5
+  green_size 3
+  blue_shift 9
+  blue_size 3
+  big_endian 1
 }

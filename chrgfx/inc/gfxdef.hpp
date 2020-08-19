@@ -98,7 +98,9 @@ public:
 
 	vector<rgb_layout> get_rgb_layout() const;
 
-	color get_pal_idx(size_t index) const;
+	color get_refpal_entry(size_t index) const;
+
+	size_t get_refpal_idx(color rgb) const;
 
 	bool use_refpal() const;
 	bool get_is_big_endian() const;

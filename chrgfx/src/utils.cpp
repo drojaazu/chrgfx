@@ -2,6 +2,16 @@
 
 namespace chrgfx
 {
+
+u8 dither_bits(u8 data, u8 bitcount)
+{
+	// convert color bit depths algo:
+	// (bitdepth_a_value * bitdepth_b_max) / bitdepth_a_max = bitdepth_b_value
+	// (we make max + 1 below, to give it greater range and more accurate
+	// translation)
+	return (data * (create_bitmask8(bitcount) + 1)) / 256;
+}
+
 /**
  * Expands bits to fill out a full byte.
  */
@@ -92,6 +102,12 @@ u8 create_bitmask8(u8 bitcount)
 		bitmask |= (bitmask << 1) | 1;
 	}
 	return bitmask;
+}
+
+u32 reverse_32(u32 value)
+{
+	return ((value & 0x000000ff) << 24) | ((value & 0x0000ff00) << 16) |
+				 ((value & 0x00ff0000) << 8) | ((value & 0x000000ff) << 0);
 }
 
 palette make_pal_random()

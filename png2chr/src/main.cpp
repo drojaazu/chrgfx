@@ -90,6 +90,21 @@ int main(int argc, char **argv)
 #endif
 
 		chrbank png_chrbank{chrgfx::pngchunk(chrdef, in_img.get_pixbuf())};
+		if(cfg.pal_outfile != "") {
+			u8 *t = to_pal(paldef, coldef, in_img.get_palette(), cfg.subpalette);
+			std::ofstream pal_outfile{cfg.pal_outfile};
+			if(!pal_outfile.good()) {
+				throw std::ios_base::failure(std::strerror(errno));
+			}
+			size_t filesize =
+					paldef.get_subpal_datasize() == 0
+							? ((paldef.get_entry_datasize() / 8) *
+								 paldef.get_subpal_length()) *
+										paldef.get_subpal_count()
+							: (paldef.get_subpal_datasize() / 8) * paldef.get_subpal_count();
+
+			pal_outfile.write((char *)t, filesize);
+		}
 
 #ifdef DEBUG
 		std::chrono::high_resolution_clock::time_point t2 =
@@ -109,7 +124,9 @@ int main(int argc, char **argv)
 		size_t chunksize{chrdef.get_datasize() / 8};
 
 		for(const auto &chr : png_chrbank) {
-			std::copy(chr, chr + chunksize, std::ostream_iterator<u8>(chr_outfile));
+			u8 *temp_chr{chrgfx::to_chr(chrdef, chr)};
+			std::copy(temp_chr, temp_chr + chunksize,
+								std::ostream_iterator<u8>(chr_outfile));
 		}
 
 		// BIG TODO: to non-raw palette routine
@@ -124,12 +141,10 @@ int main(int argc, char **argv)
 
 void process_args(int argc, char **argv)
 {
-	default_long_opts.push_back({"trns", no_argument, nullptr, 't'});
-	default_long_opts.push_back({"trns-index", required_argument, nullptr, 'i'});
-	default_long_opts.push_back({"columns", required_argument, nullptr, 'd'});
-	default_long_opts.push_back({"chr-data", required_argument, nullptr, 'c'});
-	default_long_opts.push_back({"pal-data", required_argument, nullptr, 'p'});
-	default_short_opts.append("ti:d:c:p:");
+	default_long_opts.push_back({"chr-output", required_argument, nullptr, 'c'});
+	default_long_opts.push_back({"pal-output", required_argument, nullptr, 'p'});
+	default_long_opts.push_back({"png-data", required_argument, nullptr, 'b'});
+	default_short_opts.append("c:p:b:");
 
 	bool default_processed = process_default_args(cfg, argc, argv);
 
@@ -145,8 +160,18 @@ void process_args(int argc, char **argv)
 			break;
 
 		switch(this_opt) {
-				// chr-data
+			// chr-output
+			case 'c':
+				cfg.chr_outfile = optarg;
+				break;
+
+			// pal-output
 			case 'p':
+				cfg.pal_outfile = optarg;
+				break;
+
+			// png-data
+			case 'b':
 				cfg.pngdata_name = optarg;
 				break;
 		}
