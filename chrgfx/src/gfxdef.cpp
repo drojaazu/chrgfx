@@ -21,19 +21,11 @@ chrdef::chrdef(string const &id, u16 const width, u16 const height,
 			pixeloffset(std::move(pixeloffset)), rowoffset(std::move(rowoffset))
 
 {
-	// putting these here instead of the initializer list
-	// to guarantee they point to the right place after any moves
-	planeoffset_data = this->planeoffset.data();
-	pixeloffset_data = this->pixeloffset.data();
-	rowoffset_data = this->rowoffset.data();
 }
 
 u16 chrdef::get_width() const { return width; }
 u16 chrdef::get_height() const { return height; }
 u8 chrdef::get_bitplanes() const { return bitplanes; }
-u32 const *chrdef::get_planeoffset() const { return planeoffset.data(); };
-u32 const *chrdef::get_pixeloffset() const { return pixeloffset.data(); };
-u32 const *chrdef::get_rowoffset() const { return rowoffset.data(); };
 u32 chrdef::get_pixeloffset_at(size_t pos) const { return pixeloffset[pos]; };
 u32 chrdef::get_rowoffset_at(size_t pos) const { return rowoffset[pos]; };
 u32 chrdef::get_planeoffset_at(size_t pos) const { return planeoffset[pos]; };
@@ -48,15 +40,15 @@ coldef::coldef(const string id, const palette &refpal, bool is_big_endian)
 		: gfxdef(std::move(id)), refpal(std::move(refpal)),
 			is_big_endian(std::move(is_big_endian)), is_refpal(true){};
 
-rgb_layout coldef::get_rgb_pass(size_t pass) const { return layout.at(pass); }
+rgb_layout coldef::get_rgb_pass(size_t pass) const { return layout[pass]; }
 
 vector<rgb_layout> coldef::get_rgb_layout() const { return layout; }
 
-color coldef::get_refpal_entry(size_t index) const { return refpal.at(index); }
+color coldef::get_refpal_entry(size_t index) const { return refpal[index]; }
 
 size_t coldef::get_refpal_idx(color rgb) const
 {
-	u16 idx{0};
+	size_t idx{0};
 	for(auto this_color : refpal) {
 		if(this_color.red == rgb.red && this_color.green == rgb.green &&
 			 this_color.blue == rgb.blue) {
@@ -65,7 +57,28 @@ size_t coldef::get_refpal_idx(color rgb) const
 		++idx;
 	}
 
-	throw "Could not find specified color in refpal";
+	// this could certainly use some tuning, but it mostly works
+	std::vector<std::tuple<int, int>> distances;
+	distances.reserve(this->refpal.size());
+	int pal_color_iter{0};
+	for(const auto &this_color : this->refpal) {
+		int this_distance = (abs(this_color.red - rgb.red)) +
+												(abs(this_color.green - rgb.green)) +
+												(abs(this_color.blue - rgb.blue));
+		distances.push_back(std::tuple<int, int>(pal_color_iter, this_distance));
+		++pal_color_iter;
+	}
+
+	int dist_check{std::get<1>(distances[0])};
+	idx = 0;
+	for(const auto &this_entry : distances) {
+		if(std::get<1>(this_entry) < dist_check) {
+			dist_check = std::get<1>(this_entry);
+			idx = std::get<0>(this_entry);
+		}
+	}
+
+	return idx;
 };
 
 bool coldef::use_refpal() const { return is_refpal; }

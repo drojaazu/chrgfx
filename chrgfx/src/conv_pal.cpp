@@ -138,16 +138,6 @@ png::color from_color(coldef const &from_coldef, u32 const data)
 u32 to_color(coldef const &to_coldef, png::color const data)
 {
 	if(to_coldef.use_refpal()) {
-		// if we're using the refpal as intended
-		// (a system palette)
-		// each entry should be unique
-		// so...
-
-		// TODO: this is not going to work
-		// need to find nearest color in refpal
-		// see https://en.wikipedia.org/wiki/Color_difference
-		// use formula to compare against each color in palette, find the one
-		// closest
 		return to_coldef.get_refpal_idx(data);
 	} else {
 		/*
