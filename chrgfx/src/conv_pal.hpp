@@ -10,15 +10,27 @@
 namespace chrgfx
 {
 
-png::color from_color(coldef const &coldef, u32 const data);
-
+/**
+ * Returns a coldef color from standard color data
+ */
 u32 to_color(coldef const &to_coldef, png::color const data);
 
-png::palette from_pal(paldef const &from_paldef, coldef const &from_coldef,
-											u8 const *data, s16 const subpal_idx);
+/**
+ * Returns a standard color from coldef color data
+ */
+png::color from_color(coldef const &coldef, u32 const data);
 
+/**
+ * Returns a paldef palette from standard palette data
+ */
 u8 *to_pal(paldef const &to_paldef, coldef const &to_coldef, png::palette data,
 					 s16 const subpal_idx);
+
+/**
+ * Returns a standard palette from paldef palette data
+ */
+png::palette from_pal(paldef const &from_paldef, coldef const &from_coldef,
+											u8 const *data, s16 const subpal_idx);
 
 } // namespace chrgfx
 

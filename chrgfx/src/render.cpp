@@ -35,7 +35,7 @@ png::image<png::index_pixel> render(chrbank &chr_bank, palette const &pal,
 	// sizes)
 	if(chrs_to_pad > 0)
 		for(u16 addchr_iter = 0; addchr_iter < chrs_to_pad; ++addchr_iter)
-			chr_bank.push_back(new u8[chr_pxlwidth * chr_pxlheight]{0});
+			chr_bank.push_back(uptr<u8>(new u8[chr_pxlwidth * chr_pxlheight]{0}));
 
 	u16
 			// final image dimensions (in chrs)
@@ -78,7 +78,7 @@ png::image<png::index_pixel> render(chrbank &chr_bank, palette const &pal,
 			// for each chr column in the row...
 			for(chrcol_iter = 0; chrcol_iter < outimg_colwidth; ++chrcol_iter) {
 				this_chroffset =
-						chr_bank.at(chr_iter) + (chr_pxlrow_iter * chr_pxlwidth);
+						chr_bank[chr_iter].get() + (chr_pxlrow_iter * chr_pxlwidth);
 				std::copy(this_chroffset, this_chroffset + chr_pxlwidth,
 									std::back_inserter(this_outimg_pxlrow));
 				++chr_iter;

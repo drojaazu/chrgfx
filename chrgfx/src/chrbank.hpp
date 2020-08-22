@@ -10,12 +10,10 @@ using std::vector;
 
 namespace chrgfx
 {
-class chrbank : public vector<u8 *>
+class chrbank : public vector<uptr<u8>>
 {
 public:
 	chrbank(class chrdef const &chrdef);
-
-	~chrbank();
 
 	chrdef get_chrdef();
 

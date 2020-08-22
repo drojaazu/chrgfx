@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 		size_t chunksize{chrdef.get_datasize() / 8};
 
 		for(const auto &chr : png_chrbank) {
-			u8 *temp_chr{chrgfx::to_chr(chrdef, chr)};
+			u8 *temp_chr{chrgfx::to_chr(chrdef, chr.get())};
 			std::copy(temp_chr, temp_chr + chunksize,
 								std::ostream_iterator<u8>(chr_outfile));
 		}

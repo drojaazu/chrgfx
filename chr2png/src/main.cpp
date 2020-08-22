@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 		if(chrdata.eof())
 			break;
 
-		workbank.push_back(chrgfx::from_chr(chrdef, (u8 *)chunkbuffer));
+		workbank.push_back(uptr<u8>(chrgfx::from_chr(chrdef, (u8 *)chunkbuffer)));
 	}
 
 	palette workpal;

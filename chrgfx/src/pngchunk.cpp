@@ -15,12 +15,10 @@ namespace chrgfx
 // - chrw * chrh = total tile count, provision vector<chr>
 // - src image pixel row counter = 0
 // - for each chr row
-// -- provision temp array of chr for number of columns
 // -- for each pixel row (8 pixel rows)
 // --- curr pixel row = get_row(src image pixel row counter ++)
 // --- for each chr column
-// ---- read curr pixel row 8 pixels, store into temp array for each tile
-// -- dump temp array into total chr vector
+// ---- read curr pixel row 8 pixels, store into output vector of chrs
 
 chrbank pngchunk(chrdef const &chrdef,
 								 png::pixel_buffer<png::index_pixel> &bitmap)
@@ -29,53 +27,49 @@ chrbank pngchunk(chrdef const &chrdef,
 	u16 chrw{(chrdef.get_width())}, chrh{chrdef.get_height()};
 
 	// get image dimensions in tile size & final tile count
-	u32 const chr_cols = bitmap.get_width() / chrw;
-	u32 const chr_rows = bitmap.get_height() / chrh;
-	u32 const chr_count = chr_cols * chr_rows;
-
-	// set new bitmap dimensions (pixels)
-	// is resizing necessary? probably not
-	// u32 bmph = chr_cols * chrh;
-	// u32 bmpw = chr_rows * chrw;
-	// bitmap->resize(bmpw, bmph);
+	u32 const img_row_chr{bitmap.get_width() / chrw};
+	u32 const img_col_chr{bitmap.get_height() / chrh};
+	u32 const chr_count{img_row_chr * img_col_chr};
 
 	chrbank outbank{chrdef};
+	outbank.reserve(chr_count);
+	// std::fill(outbank.begin(), outbank.end(), uptr<u8>(new u8[chrw * chrh]));
+	for(size_t make_outchr_iter{0}; make_outchr_iter < chr_count;
+			++make_outchr_iter)
+		outbank.push_back(uptr<u8>(new u8[chrw * chrh]));
 
-	// temp vector to hold the chrs for the current row
-	std::vector<u8 *> this_chrrow;
-	this_chrrow.reserve(chr_cols);
+	chrbank::iterator out_chr_iter{outbank.begin()};
+	chrbank::iterator out_chr_iter_cache{outbank.begin()};
+
 	// temp vector holding the pixels from the current bmp row
 	auto this_bmprow = std::vector<index_pixel>();
+	std::vector<png::index_pixel>::iterator this_bmprow_ptr{0};
 
 	// iters and counters
-	size_t bmprow_idx = 0, // tracks the current pixel row in the source bitmap
-			chrrow_iter, pxlrow_iter, chrcolpxl_iter, chrcol_iter;
+	size_t img_col_pxl{0}, // tracks the current pixel row in the source bitmap
+			chrrow_iter{0}, pxlrow_iter{0}, col_chr_iter{0}, chrcol_iter{0};
 
 	// for each chr row
-	for(chrrow_iter = 0; chrrow_iter < chr_rows; chrrow_iter++) {
-		for(int temp = 0; temp < chr_cols; ++temp)
-			this_chrrow.push_back(new u8[chrw * chrh]);
+	for(chrrow_iter = 0; chrrow_iter < img_col_chr; ++chrrow_iter) {
+		// point the out iter to the beginning of the current chr row
+		out_chr_iter_cache = outbank.begin();
+		out_chr_iter_cache += (chrrow_iter * img_row_chr);
+
 		// for each pxl row in the current chr row
-		for(pxlrow_iter = 0; pxlrow_iter < chrh; pxlrow_iter++) {
-			this_bmprow = bitmap.get_row(bmprow_idx++);
+		for(pxlrow_iter = 0; pxlrow_iter < chrh; ++pxlrow_iter) {
+			// reset the out iter to the beginning of the row
+			out_chr_iter = out_chr_iter_cache;
+			// point to the next pixel row in the source image
+			this_bmprow_ptr = bitmap.get_row(img_col_pxl++).begin();
+
 			// for every (chr width) pixels in the pixel row
-			// chrcol_iter = 0;
-			for(chrcolpxl_iter = 0; chrcolpxl_iter < chr_cols; chrcolpxl_iter++) {
-				std::copy_n(this_bmprow.begin() + (chrcolpxl_iter * chrw), chrw,
-										this_chrrow.at(chrcolpxl_iter) + (pxlrow_iter * chrw));
-				// chrcol_iter++;
+			for(col_chr_iter = 0; col_chr_iter < img_row_chr; ++col_chr_iter) {
+				std::copy_n(this_bmprow_ptr + (col_chr_iter * chrw), chrw,
+										out_chr_iter->get() + (pxlrow_iter * chrw));
+				out_chr_iter++;
 			}
 		}
-		// dump temp vector into outbank
-		// auto t = outbank->data();
-		// std::copy_n(this_chrrow.begin(), this_chrrow.end(),
-		// std::back_inserter(t));
-		for(size_t t = 0; t < this_chrrow.size(); t++) {
-			outbank.push_back(this_chrrow.at(t));
-		}
-		this_chrrow.clear();
 	}
-	// delete[] this_chrrow;
 
 	return outbank;
 }

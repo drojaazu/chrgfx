@@ -4,15 +4,6 @@
 namespace chrgfx
 {
 
-/**
- * This namespace should be used for any built-in gfxdefs.
- * The ones defined by default are very simple and are useful for quickly
- * "previewing" output: for example, if palette data/definition is not yet
- * available but we want to see the tile output.
- *
- * You can add your own built-in definitions here to create a customized library
- * for specific applications.
- */
 namespace defs
 {
 

@@ -62,7 +62,7 @@ png::palette from_pal(paldef const &from_paldef, coldef const &from_coldef,
 	u32 this_entry{0};
 
 	// loop for each color entry in the output palette
-	for(u16 pal_entry; pal_entry < pal_length; ++pal_entry) {
+	for(u16 pal_entry{0}; pal_entry < pal_length; ++pal_entry) {
 		byte_offset = bit_align_ptr / 8;
 		bit_offset = bit_align_ptr % 8;
 
