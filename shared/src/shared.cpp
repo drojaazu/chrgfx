@@ -1,5 +1,13 @@
 #include "shared.hpp"
 
+/*
+	I spent a fair amount of time looking for a 'best practices' way of finding
+	the user lib path, but couldn't find anything useful. So we have it hardcoded
+	here. This is only used for convenience for a default gfxdef file, so it's not
+	critical, but if anyone knows a better way to do this, a PR is appreciated.
+*/
+string const DEFAULT_LIB_PATH{"/usr/local/lib/chrgfx"};
+
 string default_short_opts{":G:P:s:h"};
 
 std::vector<option> default_long_opts{

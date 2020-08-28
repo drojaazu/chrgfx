@@ -1,200 +1,93 @@
 # chrgfx
-Converts tile (CHR) based bitmap graphics from retro hardware systems, similar to Tile Layer Pro and such, with the ability to support a large amount of hardware through user-defined graphics definitions.
+A library for converting tile (aka CHR) bitmap graphics used in retro video games to and from PNG, with support for a wide range of hardware via external graphics definitions.
+
+The library itself, libchrgfx, can be integrated into any C++ application. There are also two support utilities included, `chr2png` and `png2chr`. The former will convert raw tile and/or palette data to a PNG image, while the latter will take a sufficiently compatible PNG and return raw tile/palette data.
 
 ## Building
-chrgfx requires libpng to be installed and uses CMake for the build system. From the root directory:
+chrgfx requires png++ to be installed and uses CMake for the build system. From the root directory:
 
     mkdir build && cd build
     cmake ..
     make
     sudo make install
 
-## Usage
+## chr2png - Usage
 `--gfx-def`,`-G`
 
-Path to gfxdef file (i.e. the graphics format) to use for tile and palette data.
+Path to gfxdef file; if not specified, defaults to `/usr/local/lib/chrgfx/gfxdefs`
 
-`--chr-def`,`-C`
+`--profile`,`-P` (required)
 
-Path to gfxdef file or name of internal definition to use for tile data. Has precedence over `--gfx-def` option.
+Specify which graphics profile to use
 
-`--pal-def`,`-P`
+`--chr-data`,`-c` (required)
 
-Path to gfxdef file or name of internal definition to use for palette data. Has precedence over `--gfx-def` option.
-
-`--chr-data`,`-c`
-
-Path to tile data. If not specified, data will be read input from stdin.
+Filepath of the raw tile (CHR) data
 
 `--pal-data`,`-p`
 
-Path to palette data.
+Filepath of the raw palette data; if not specified, random colors will be chosen to form an 8-bit color palette
 
-`--output`,`-o`
+`--output`,`-o` 
 
-Path to output PNG file. If not specified, image will be written to stdout.
-
-`--trns`,`-t`
-
-Enable palette transparency. Default transparent index is 0.
-
-`--trns-index`,`-i`
-
-Specify palette index to use as transparency. (Zero indexed)
+Specify output PNG filepath; if not specifed, will output to stdout
 
 `--columns`,`-d`
 
-Number of tile columns (i.e. tile width) to render for output image.
+Specify the number of tile columns to render in the output image
 
 `--subpalette`,`-s`
 
-Specify subpalette index. (Zero indexed)
+Specify the subpalette index to use in the output image; if not specified, the full palette will be used
 
-### Usage Example
-    cat ../etc/sonic_sprite | ./chrgfx --gfx-def gfxdef/sega_md.gfxdef --pal-data ../etc/sonic1.cram --trns --columns 32 > test.png
+`--trns`,`-t`
 
-**Please see the README file in the gfxdef subdirectory for a list of included formats.**
+Enable transparency in output PNG image
 
-## Graphics Definitions (gfxdef files)
-Rather than hardcoding conversion routines for each format, chrgfx uses generalized algorithms which support the great majority of CHR based graphics hardware. The algorithms rely on layout information to interpret data, and such information comes from user-defined *graphics definition* (gfxdef) files.
+`--trans-index`,`-i`
 
-There are a number of pre-created gfxdef files included with the project, and you can extend chrgfx to support practically any system by creating your own definitions. You should have a solid understanding binary, bit-level data, and endianness when working to create your own definition files.
+Specify palette index to use for transparency; if not specified, index 0 will be used
 
-In some cases, a format may not be compatible with the generalized algorithms (such as Super Famicom 3bpp, or palette data from PC applications like TileLayer Pro). To accomodate these "non-standard" formats, a custom conversion function must be written. We'll discuss those further down.
+`--help`,`-h`
 
-### Definition File Format
-A gfxdef is a plaintext file made up of key-value pairs, one per line. Keys are one word, while values are either a single or comma-delimited list of numbers. Comments can be added with a # prefix. For example:
+Display built in help
 
-    # Sega Mega Drive definitions
-    # tile format
-    width 8
-    height 8
-    bpp 4
-    planeoffset 0,1,2,3
-    xoffset 0,4,8,12,16,20,24,28
+### Example
+    chr2png --profile sega_md --chr-daya sonic1_sprite.chr --pal-data sonic1.cram --trns --columns 32 > sonic1_sprite.png
 
-Settings for tiles and palettes/colors are all uniquely named, so a single gfxdef file can contain both types. Only one definition set per type is allowed, however, due the the simple nature of the definition file format. The types can be mixed and matched via the `--chr-def` and `--pal-def` options to use only those types from two definition files.
+## png2chr - Usage
+`--gfx-def`,`-G`
 
-### Tile Definitions
-Tile definitions are based on the GfxLayout structure from MAME. The format is described by specifying the bit-level offset of bitplanes and pixels on the x and y axes.
+Path to gfxdef file; if not specified, defaults to `/usr/local/lib/chrgfx/gfxdefs`
 
-Jumping right in to a relatively simple example: Sega Mega Drive tiles are 8x8 4bpp packed pixel format. Since it is packed, the bit data for each pixel is stored sequentially; therefore, the offset for bitplanes 0 to 3 is 0,1,2,3. Since each pixel is four bits and the pixels are stored sequentially, the offset for each pixel moving horizontally (i.e. each pixel in a row) is 0,4,8,12,16,20,24,28. Since each row is 8 pixels * 4bpp, each row is 32 bits in size. Thus, the data offset for each row moving vertially is 0,32,64,96,128,160,192,224.
+`--profile`,`-P` (required)
 
-Note that the number of entries in the bitplane offset list must match the number of bitplanes. In the above example, there are four bitplanes (4bpp), so there are four entries in the bitplane offset list. Similarly, the number of entries in the X offset must match the pixel width, and the Y offset count must match the height.
+Specify which graphics profile to use
 
-Our Mega Drive tile definition ends up looking like this:
+`--png-data`,`-b` (required)
 
-    width 8
-    height 8
-    bpp 4
-    planeoffset 0,1,2,3
-    xoffset 0,4,8,12,16,20,24,28
-    yoffset 0,32,64,96,128,160,192,224
+Specify the input PNG image
 
-Nintendo Super Famicom tiles are a bit more complex. They are 8x8 4bpp planar format, with bitplanes 0 and 1 grouped together followed by bitplanes 2 and 3. Each byte (8 bits) represents a bitplane for the row. The first 16 bytes make up bitplanes 0 and 1 of each row, while the last 16 bytes make up bitplanes 2 and 3. This layout from Klarth's consolegfx document helps visualize the data:
+`--chr-output`,`-c`
 
-    [r0, bp0], [r0, bp1], [r1, bp0], [r1, bp1], [r2, bp0], [r2, bp1], [r3, bp0], [r3, bp1]
-    [r4, bp0], [r4, bp1], [r5, bp0], [r5, bp1], [r6, bp0], [r6, bp1], [r7, bp0], [r7, bp1]
-    [r0, bp2], [r0, bp3], [r1, bp2], [r1, bp3], [r2, bp2], [r2, bp3], [r3, bp2], [r3, bp3]
-    [r4, bp2], [r4, bp3], [r5, bp2], [r5, bp3], [r6, bp2], [r6, bp3], [r7, bp2], [r7, bp3]
+Specify filepath of output tile data; if not specified, `--pal-output` must be set
 
-As a gfxdef, it looks like this:
+`--pal-output`,`-p` 
 
-    width 8
-    height 8
-    bpp 4
-    planeoffset 136,128,8,0
-    xoffset 0,1,2,3,4,5,6,7
-    yoffset 0,16,32,48,64,80,96,112
+Specify filepath of output palette data; if not specified, `--chr-output` must be set
 
-### Tile Definition Settings Reference
+`--subpalette`,`-s`
 
-`width`, `height` - The pixel dimensions of a single tile
+Specify the subpalette index to use in the output image; if not specified, the full palette will be used
 
-`bpp` - The number of bits per pixel
+`--help`,`-h`
 
-`planeoffset` - The offset (in bits) of each bitplane. **The number of entries here must match the value of `bpp`.**
+Display built in help
 
-`xoffset` - The offset (in bits) of each pixel column (x axis). **The number of entries here must match the value of `width`.**
+## Graphics Definitions (gfxdef file)
+See the readme in the gfxdef directory.
 
-`yoffset` - The offset (in bits) of each pixel row (y axis). **The number of entries here must match the value of `height`.**
-
-`chr_converter` - (Optional) Specifies the internal conversion function to use. **This is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
-
-### Palette Definitions
-Palette definitions encapsulate formats of both the indexed color list (i.e. the palette) and the colors themselves. They are meant to describe the data as it appears inside the original machine's video RAM, which is simply an array of color definitions. Therefore, we describe a palette by specifying the size of the system palette, the size of a subpalette and the number of subpalettes available. Since the entries in a palette are often multi-byte values, we also need to take into consideration whether the work data is little or big endian.
-
-The colors are generated either by specifying RGB levels or by providing a preset palette of colors for systems that do not use RGB natively. For example, the original Nintendo Famicom uses the YIQ colorspace and encoded the output as a TV signal, so we do not have an exact representation of the color components. Instead, we provide a list of preset RGB colors, called a reference palette, that will be used to approximate the output:
-
-    refpal #545454,#001E74,#08102C,...
-
-Most hardware from the late 80's on used RGB colors, however. In this case, we specify the number of bits of data each color component (red, green, blue) has and where that bit level data is within the whole color value.
-
-Color decoding works by shifting each color component into the LSB and ANDing out the color bits. For example, Super Nintendo 5 bit colors are laid out like this:
-
-    15|               |0
-      xBBBBBGG GGGRRRRR
-
-So green needs to be shifted 5 bits, blue 10 bits and red 0 bits. We also specify the size of each component; in this case, all three are 5 bits in size. The color definition looks like this:
-
-    red_shift 0
-    red_size 5
-    green_shift 5
-    green_size 5
-    blue_shift 10
-    blue_size 5
-
-This works fine for systems where the color components are sequential (which is most of them), but in cases where they are be split up, we'll need to make multiple passes. For example, Neo-Geo colors are more complicated:
-
-    15 |                               |0
-       DDR0G0B0R4R3R2R1 G4G3G2G1B4B3B2B1
-    D = "dark bit", acts as LSB for all color components
-
-(The "dark bit" here is a shared LSB for all color components; we're going to pretend it doesn't exist for this example so it's not any further complicated. Please refer to the included NeoGeo gfxdef file if you need a format reference.)
-
-In this case, bit 0 of each component is in the upper byte. So on our first pass, we need to grab bit 0, then on the second pass grab the rest of the data. The color def ends up looking like this:
-
-    color_passes 2
-    red_shift 14,8
-    red_size 5
-    green_shift 13,4
-    green_size 5
-    blue_shift 12,0
-    blue_size 5
-
-To be clear, **you should not use a refpal AND a color definition.** It's one or the other. If for some reason both are specified, the refpal takes precedence.
-
-### Palette Definition Settings Reference
-
-`entry_datasize` - The size (in bits) of one entry in the color palette
-
-`subpal_length` - The number of entries in a single subpalette
-
-`subpal_count` - The number of subpalettes within the system palette
-
-`subpal_datasize` - (Optional) Manually specify the size of a subpalette (in bits). Used for cases where effective subpalette data is less than 8 bits, but is stored in 2 or more bytes. Default is 0 (automatic).
-
-`big_endian` - (Optional) Indicates the system is big endian rather than small endian. 1 is true, 0 is false. Default is 0 (little endian).
-
-`refpal` - An array of HTML formatted (e.g. #001E74) colors to simulate output of non-RGB hardware. The entries can be listed with or without the hash symbol (Either 001E74 or #001E74 is acceptable.)
-
-`color_passes` - Specifies the number of times the shift/extra process will be performed on color data. Optional; default is 1. **Note that if this value is higher than 1, then EACH of below shift/size settings MUST have a number of entries equal to color_passes.**
-
-`red_shift` - The number of bit places to shift the red component data into the LSB.
-
-`green_shift` - The number of bit places to shift the green component data into the LSB.
-
-`blue_shift` - The number of bit places to shift the blue component data into the LSB.
-
-`red_size` - The number of bits of data making up the red component.
-
-`green_size` - The number of bits of data making up the green component.
-
-`blue_size` - The number of bits of data making up the blue component.
-
-`pal_converter` - (Optional) Specifies the internal conversion function to use. **This is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
-
-## Non-Standard Formats & Custom Conversion Functions
+## Non-gfxdef Formats / Custom Conversion Functions
 Though the vanilla tile/color/palette definition system should work with most hardware, some formats may not fit cleanly into the algorithms. For example, the Super Famicom has a 3bpp quasi-format which won't work as a tile definition. Or if we want to import a modern file, such as palette data from TileLayer Pro or Paint Shop Pro, the basic palette converter function not sufficient.
 
 In such cases, custom conversion code must be written and compiled into the program to be called referenced by gfxdef files with the `chr_converter` or `pal_converter` options. This is an advanced option that requires knowledge of C++. Please check the `chr_conv` and `pal_conv` source code files for more details on implementing your own code. And pull requests to merge in your new format are certainly welcome!

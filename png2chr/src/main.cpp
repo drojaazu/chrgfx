@@ -52,6 +52,10 @@ int main(int argc, char **argv)
 	map<string const, paldef const> paldefs{std::get<2>(defs)};
 	map<string const, gfxprofile const> profiles{std::get<3>(defs)};
 
+	if(cfg.chr_outfile == "" && cfg.pal_outfile == "") {
+		throw std::invalid_argument("No tile or palette output; nothing to do!");
+	}
+
 	auto profile_iter{profiles.find(cfg.profile)};
 	if(profile_iter == profiles.end()) {
 		throw "Could not find specified gfxprofile";
@@ -84,14 +88,46 @@ int main(int argc, char **argv)
 		png::image<png::index_pixel> in_img(
 				cfg.pngdata_name, png::require_color_space<png::index_pixel>());
 
+		// deal with the palette next
+		if(cfg.chr_outfile != "") {
 #ifdef DEBUG
-		std::chrono::high_resolution_clock::time_point t1 =
-				std::chrono::high_resolution_clock::now();
+			std::chrono::high_resolution_clock::time_point t1 =
+					std::chrono::high_resolution_clock::now();
 #endif
 
-		chrbank png_chrbank{chrgfx::pngchunk(chrdef, in_img.get_pixbuf())};
+			// deal with tiles first
+			chrbank png_chrbank{chrgfx::png_chunk(chrdef, in_img.get_pixbuf())};
+
+#ifdef DEBUG
+			std::chrono::high_resolution_clock::time_point t2 =
+					std::chrono::high_resolution_clock::now();
+			auto duration =
+					std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
+							.count();
+
+			std::cerr << "PNG chunk/tile conversion: " << duration << "ms"
+								<< std::endl;
+
+#endif
+
+			std::ofstream chr_outfile{cfg.chr_outfile};
+			if(!chr_outfile.good()) {
+				throw std::ios_base::failure(std::strerror(errno));
+			}
+
+			size_t chunksize{chrdef.get_datasize() / 8};
+
+			for(const auto &chr : png_chrbank) {
+				u8 *temp_chr{conv_chr::to_chrdef_chr(chrdef, chr.get())};
+				std::copy(temp_chr, temp_chr + chunksize,
+									std::ostream_iterator<u8>(chr_outfile));
+			}
+		}
+
+		// deal with the palette next
 		if(cfg.pal_outfile != "") {
-			u8 *t = to_pal(paldef, coldef, in_img.get_palette(), cfg.subpalette);
+			u8 *t = conv_pal::to_paldef_palette(paldef, coldef, in_img.get_palette(),
+																					cfg.subpalette);
 			std::ofstream pal_outfile{cfg.pal_outfile};
 			if(!pal_outfile.good()) {
 				throw std::ios_base::failure(std::strerror(errno));
@@ -105,31 +141,6 @@ int main(int argc, char **argv)
 
 			pal_outfile.write((char *)t, filesize);
 		}
-
-#ifdef DEBUG
-		std::chrono::high_resolution_clock::time_point t2 =
-				std::chrono::high_resolution_clock::now();
-		auto duration =
-				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-
-		std::cerr << "Tile conversion: " << duration << "ms" << std::endl;
-
-#endif
-
-		std::ofstream chr_outfile{cfg.chr_outfile};
-		if(!chr_outfile.good()) {
-			throw std::ios_base::failure(std::strerror(errno));
-		}
-
-		size_t chunksize{chrdef.get_datasize() / 8};
-
-		for(const auto &chr : png_chrbank) {
-			u8 *temp_chr{chrgfx::to_chr(chrdef, chr.get())};
-			std::copy(temp_chr, temp_chr + chunksize,
-								std::ostream_iterator<u8>(chr_outfile));
-		}
-
-		// BIG TODO: to non-raw palette routine
 
 	} catch(const png::error &e) {
 		std::cerr << "PNG error: " << e.what() << std::endl;

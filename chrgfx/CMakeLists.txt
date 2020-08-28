@@ -2,8 +2,21 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRCFILES)
 add_library(chrgfx SHARED ${SRCFILES})
 
 set_target_properties(chrgfx PROPERTIES SOVERSION 1)
-
-set_target_properties(chrgfx PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/inc/chrgfx.hpp)
+set(HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/chrgfx.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/builtin_defs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/chrbank.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/conv_chr.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/conv_col.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/conv_pal.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/gfxdef.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/png_chunk.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/png_render.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/types.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/utils.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/gfxdef/gfxdefs
+)
+set_target_properties(chrgfx PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 find_library(PNG_LIB png)
 if(NOT PNG_LIB)
@@ -23,5 +36,5 @@ include(GNUInstallDirs)
 
 install(TARGETS chrgfx
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chrgfx)
 

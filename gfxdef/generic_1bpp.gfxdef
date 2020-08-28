@@ -1,9 +1,0 @@
-#### TILE
-# 8x8 1bpp
-# This is a generic 1bpp format
-width 8
-height 8
-bpp 1
-planeoffset 0
-xoffset 0,1,2,3,4,5,6,7
-yoffset 0,8,16,24,32,40,48,56

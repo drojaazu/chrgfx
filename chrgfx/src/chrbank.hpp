@@ -13,9 +13,9 @@ namespace chrgfx
 class chrbank : public vector<uptr<u8>>
 {
 public:
-	chrbank(class chrdef const &chrdef);
+	chrbank(chrdef chrdef);
 
-	chrdef get_chrdef();
+	chrdef get_chrdef() const;
 
 private:
 	chrdef def;

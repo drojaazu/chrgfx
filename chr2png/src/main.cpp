@@ -21,7 +21,13 @@ void process_args(int argc, char **argv);
 void print_help();
 
 // application globals
-const static string version = string("1.1");
+static unsigned int const VERSION_MAJOR{1};
+static unsigned int const VERSION_MINOR{0};
+static unsigned int const VERSION_FIX{0};
+static std::string const VERSION{std::to_string(VERSION_MAJOR) + "." +
+																 std::to_string(VERSION_MINOR) + "." +
+																 std::to_string(VERSION_FIX)};
+static std::string const APP_NAME{"chr2png"};
 
 struct runtime_config_chr2png : runtime_config {
 	string chrdata_name{""}, paldata_name{""};
@@ -99,7 +105,8 @@ int main(int argc, char **argv)
 		if(chrdata.eof())
 			break;
 
-		workbank.push_back(uptr<u8>(chrgfx::from_chr(chrdef, (u8 *)chunkbuffer)));
+		workbank.push_back(
+				uptr<u8>(conv_chr::from_chrdef_chr(chrdef, (u8 *)chunkbuffer)));
 	}
 
 	palette workpal;
@@ -116,7 +123,8 @@ int main(int argc, char **argv)
 
 		char palbuffer[length];
 		paldata.read(palbuffer, length);
-		workpal = from_pal(paldef, coldef, (u8 *)palbuffer, cfg.subpalette);
+		workpal = conv_pal::from_paldef_palette(paldef, coldef, (u8 *)palbuffer,
+																						cfg.subpalette);
 
 	} else {
 		workpal = make_pal_random();
@@ -133,7 +141,7 @@ int main(int argc, char **argv)
 	t1 = std::chrono::high_resolution_clock::now();
 #endif
 	png::image<png::index_pixel> outimg{
-			render(workbank, workpal, cfg.rendertraits)};
+			png_render(workbank, workpal, cfg.rendertraits)};
 
 #ifdef DEBUG
 	t2 = std::chrono::high_resolution_clock::now();
@@ -218,32 +226,32 @@ void process_args(int argc, char **argv)
 
 void print_help()
 {
-	std::cerr << "chrgfx version " << version << std::endl << std::endl;
-	std::cerr << "Valid options:" << std::endl;
-	std::cerr << "  --gfx-def, -G   Specify graphics data format" << std::endl;
-	std::cerr
+	std::cout << APP_NAME << " - ver " << VERSION << std::endl << std::endl;
+	std::cout << "Valid options:" << std::endl;
+	std::cout << "  --gfx-def, -G   Specify graphics data format" << std::endl;
+	std::cout
 			<< "  --chr-def, -C   Specify tile data format (overrides tile format "
 				 "in gfx-def)"
 			<< std::endl;
-	std::cerr << "  --chr-data, -c     Filename to input tile data" << std::endl;
-	std::cerr
+	std::cout << "  --chr-data, -c     Filename to input tile data" << std::endl;
+	std::cout
 			<< "  --pal-def, -P   Specify palette data format (overrides palette "
 				 "format in gfx-def)"
 			<< std::endl;
-	std::cerr << "  --pal-data, -p     Filename to input palette data"
+	std::cout << "  --pal-data, -p     Filename to input palette data"
 						<< std::endl;
-	std::cerr << "  --output, -o       Specify output PNG image filename"
+	std::cout << "  --output, -o       Specify output PNG image filename"
 						<< std::endl;
-	std::cerr << "  --trns, -t         Use image transparency" << std::endl;
-	std::cerr
+	std::cout << "  --trns, -t         Use image transparency" << std::endl;
+	std::cout
 			<< "  --trns-index, -i   Specify palette entry to use as transparency "
 				 "(default is 0)"
 			<< std::endl;
-	std::cerr
+	std::cout
 			<< "  --columns, -c      Specify number of columns per row of tiles in "
 				 "output image"
 			<< std::endl;
-	std::cerr << "  --subpalette, -s   Specify subpalette (default is 0)"
+	std::cout << "  --subpalette, -s   Specify subpalette (default is 0)"
 						<< std::endl;
-	std::cerr << "  --help, -h         Display this text" << std::endl;
+	std::cout << "  --help, -h         Display this text" << std::endl;
 }

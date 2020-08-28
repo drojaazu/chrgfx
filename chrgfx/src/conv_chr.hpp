@@ -7,7 +7,8 @@
 
 namespace chrgfx
 {
-
+namespace conv_chr
+{
 /*
 TILE CONVERSION ROUTINES
 Any custom tile conversion functions should take a reference to a chr_def and
@@ -21,13 +22,14 @@ pixel referencing a value in the output palette.
 /**
  * Returns a chrdef tile from standard tile data
  */
-u8 *to_chr(chrdef const &to_def, u8 const *data);
+u8 *to_chrdef_chr(chrdef const &to_def, u8 const *data);
 
 /**
  * Returns a standard tile from chrdef tile data
  */
-u8 *from_chr(chrdef const &from_def, u8 const *data);
+u8 *from_chrdef_chr(chrdef const &from_def, u8 const *data);
 
+} // namespace conv_chr
 } // namespace chrgfx
 
 #endif

@@ -22,7 +22,8 @@ static constexpr char COL_COLOR_PASSES[] = "color_passes",
 											COL_GREEN_SHIFT[] = "green_shift",
 											COL_GREEN_SIZE[] = "green_size",
 											COL_BLUE_SHIFT[] = "blue_shift",
-											COL_BLUE_SIZE[] = "blue_size", COL_REFPAL[] = "refpal",
+											COL_BLUE_SIZE[] = "blue_size",
+											COL_BITDEPTH[] = "bitdepth", COL_REFPAL[] = "refpal",
 											COL_BIG_ENDIAN[] = "big_endian";
 
 } // namespace defkeys
@@ -193,6 +194,14 @@ coldef validate_coldef_block(defblock const &def_block)
 		temp_is_big_endian = vd_bool(mapiter->second);
 	}
 
+	// SETTING: bitdepth
+	// RULES: required, positive
+	mapiter = def_block.find(defkeys::COL_BITDEPTH);
+	if(mapiter == def_block.end()) {
+		throw "Could not find required key " + string(defkeys::COL_BITDEPTH);
+	}
+	auto temp_bitdepth{vd_int_pos<u8>(mapiter->second)};
+
 	// SETTING: refpal
 	mapiter = def_block.find(defkeys::COL_REFPAL);
 	if(mapiter != def_block.end()) {
@@ -279,7 +288,7 @@ coldef validate_coldef_block(defblock const &def_block)
 										 {temp_blue_shift[pass_iter], temp_blue_size[pass_iter]}});
 		}
 
-		return coldef{temp_id, passes, temp_is_big_endian};
+		return coldef{temp_id, temp_bitdepth, passes, temp_is_big_endian};
 	}
 }
 

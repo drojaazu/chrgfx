@@ -2,8 +2,8 @@
 
 namespace chrgfx
 {
-chrbank::chrbank(chrdef const &def) : def(std::move(def)){};
+chrbank::chrbank(chrdef def) : def(std::move(def)){};
 
-chrdef chrbank::get_chrdef() { return this->def; }
+chrdef chrbank::get_chrdef() const { return this->def; }
 
 } // namespace chrgfx

@@ -62,9 +62,9 @@ private:
 class chrdef : public gfxdef
 {
 public:
-	chrdef(string const &id, u16 const width, u16 const height,
-				 u8 const bitplanes, vector<u32> const &planeoffset,
-				 vector<u32> const &pixeloffset, vector<u32> const &rowoffset);
+	chrdef(string id, u16 width, u16 height, u8 bitplanes,
+				 vector<u32> planeoffset, vector<u32> pixeloffset,
+				 vector<u32> rowoffset);
 
 	/**
 	 * Returns the width of the tile, in pixels
@@ -131,13 +131,13 @@ public:
 	/**
 	 * Constructor for an rgblayout based coldef
 	 */
-	coldef(const string id, const vector<rgb_layout> layout,
+	coldef(string id, u8 bitdepth, vector<rgb_layout> layout,
 				 bool is_big_endian = false);
 
 	/**
 	 * Constructor for a refpal based coldef
 	 */
-	coldef(const string id, const palette &refpal, bool is_big_endian = false);
+	coldef(string id, palette refpal, bool is_big_endian = false);
 
 	/**
 	 * Returns true if this coldef is refpal based
@@ -153,6 +153,11 @@ public:
 	 * Returns the RGB bit layout for the given pass (rgblayout based)
 	 */
 	rgb_layout get_rgb_pass(size_t pass) const;
+
+	/**
+	 * Returns the bitdepth of the color channels
+	 */
+	u8 get_bitdepth() const;
 
 	/**
 	 * Returns the color from the reference palette for the given index (refpal
@@ -189,8 +194,8 @@ private:
 class paldef : public gfxdef
 {
 public:
-	paldef(string const &id, u8 const entry_datasize, u16 const subpal_length,
-				 u16 const subpal_count, u8 const subpal_datasize = 0);
+	paldef(string id, u8 entry_datasize, u16 subpal_length, u16 subpal_count,
+				 u8 subpal_datasize = 0);
 
 	u8 get_entry_datasize() const;
 

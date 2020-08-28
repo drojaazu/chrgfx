@@ -2,8 +2,10 @@
 
 namespace chrgfx
 {
+namespace conv_chr
+{
 
-u8 *to_chr(chrdef const &to_def, u8 const *data)
+u8 *to_chrdef_chr(chrdef const &to_def, u8 const *data)
 {
 	/*
 		-for every line...
@@ -55,7 +57,7 @@ u8 *to_chr(chrdef const &to_def, u8 const *data)
 	return out;
 }
 
-u8 *from_chr(chrdef const &from_def, u8 const *data)
+u8 *from_chrdef_chr(chrdef const &from_def, u8 const *data)
 {
 	s16 line_iter{0}, pixel_iter{0}, plane_iter{0};
 	u16 curr_pixel, work_byte{0}, work_bit{0}, bitpos_y{0}, bitpos_x{0},
@@ -107,4 +109,5 @@ u8 *from_chr(chrdef const &from_def, u8 const *data)
 	return out;
 }
 
+} // namespace conv_chr
 } // namespace chrgfx

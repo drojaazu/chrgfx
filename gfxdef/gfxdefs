@@ -20,7 +20,7 @@ profile
 profile
 {
   id capcom_cps
-  comment Capcom CPS 1/2
+  comment Capcom CPS / CPS 2
   chrdef chr_capcom_cps
   paldef pal_capcom_cps
   coldef col_capcom_cps
@@ -98,14 +98,7 @@ profile
   coldef col_sega_md
 }
 
-profile
-{
-  id capcom_cps
-  comment Capcom CPS / CPS 2
-  chrdef capcom_cps_chr
-  paldef capcom_cps_pal
-  coldef capcom_cps_col
-}
+
 
 #################################
 ##
