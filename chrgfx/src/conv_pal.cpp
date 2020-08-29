@@ -6,12 +6,18 @@
 
 namespace chrgfx
 {
-namespace conv_pal
+namespace conv_palette
 {
+std::map<string const, png::palette (*)(paldef const &, coldef const &,
+																				u8 const *, signed int const)>
+		converters_to{{"default", palconv_to}};
 
-png::palette from_paldef_palette(paldef const &from_paldef,
-																 coldef const &from_coldef, u8 const *data,
-																 signed int const subpal_idx)
+std::map<string const, u8 *(*)(paldef const &, coldef const &,
+															 png::palette const &, signed int const)>
+		converters_from{{"default", palconv_from}};
+
+png::palette palconv_to(paldef const &from_paldef, coldef const &from_coldef,
+												u8 const *data, signed int const subpal_idx)
 {
 	u16 const subpal_count{from_paldef.get_subpal_count()};
 	if(subpal_idx >= subpal_count) {
@@ -83,7 +89,7 @@ png::palette from_paldef_palette(paldef const &from_paldef,
 		this_entry >>= bit_offset;
 		this_entry &= inpal_entry_mask;
 
-		out.push_back(conv_col::from_coldef_color(from_coldef, this_entry));
+		out.push_back(conv_color::colconv_to(from_coldef, this_entry));
 
 		bit_align_ptr += inpal_entry_datasize;
 
@@ -99,8 +105,8 @@ png::palette from_paldef_palette(paldef const &from_paldef,
 	return out;
 }
 
-u8 *to_paldef_palette(paldef const &to_paldef, coldef const &to_coldef,
-											png::palette const data, signed int const subpal_idx)
+u8 *palconv_from(paldef const &to_paldef, coldef const &to_coldef,
+								 png::palette const &data, signed int const subpal_idx)
 {
 	u16 const subpal_count{to_paldef.get_subpal_count()};
 	if(subpal_idx >= subpal_count) {
@@ -156,7 +162,7 @@ u8 *to_paldef_palette(paldef const &to_paldef, coldef const &to_coldef,
 
 		// color data stored in lsb
 		u32 this_color =
-				(conv_col::to_coldef_color(to_coldef, data.at(inpal_entry)) &
+				(conv_color::colconv_from(to_coldef, data.at(inpal_entry)) &
 				 outpal_entry_mask);
 
 		// if bit gender does not match host system, reverse the value
@@ -225,5 +231,5 @@ palette get_pal_tlp(paldef const &paldef, u8 *data, s16 subpal_idx)
 	return out;
 };
 
-} // namespace conv_pal
+} // namespace conv_palette
 } // namespace chrgfx

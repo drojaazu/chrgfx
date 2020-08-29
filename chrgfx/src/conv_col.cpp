@@ -2,13 +2,25 @@
 
 namespace chrgfx
 {
-namespace conv_col
+namespace conv_color
 {
 
-png::color from_coldef_color(coldef const &from_coldef, u32 const data)
+/**
+ * Reference of all functions to convert colors to basic encoding
+ */
+std::map<string const, png::color (*)(coldef const &, u32 const)> converters_to{
+		{"default", colconv_to}};
+
+/**
+ * Reference of all functions to convert colors to secondary encoding
+ */
+std::map<string const, u32 (*)(coldef const &, png::color const)>
+		converters_from{{"default", colconv_from}};
+
+png::color colconv_to(coldef const &from_coldef, u32 const data)
 {
-	if(from_coldef.use_refpal()) {
-		return from_coldef.get_refpal_entry(data);
+	if(from_coldef.use_reftab()) {
+		return from_coldef.get_reftab_entry(data);
 	} else {
 
 		/*
@@ -47,10 +59,10 @@ png::color from_coldef_color(coldef const &from_coldef, u32 const data)
 	}
 };
 
-u32 to_coldef_color(coldef const &to_coldef, png::color const data)
+u32 colconv_from(coldef const &to_coldef, png::color const data)
 {
-	if(to_coldef.use_refpal()) {
-		return to_coldef.get_refpal_idx(data);
+	if(to_coldef.use_reftab()) {
+		return to_coldef.get_reftab_idx(data);
 	} else {
 		/*
 			seperate r g b from color
@@ -103,5 +115,5 @@ u32 to_coldef_color(coldef const &to_coldef, png::color const data)
 	}
 }
 
-} // namespace conv_col
+} // namespace conv_color
 } // namespace chrgfx

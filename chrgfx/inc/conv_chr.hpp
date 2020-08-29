@@ -4,6 +4,7 @@
 #include "gfxdef.hpp"
 #include "types.hpp"
 #include <iomanip>
+#include <map>
 
 namespace chrgfx
 {
@@ -21,14 +22,26 @@ pixel referencing a value in the output palette.
 */
 
 /**
- * Returns a chrdef tile from standard tile data
+ * Returns a chrdef-encoded tile from standard tile data
  */
-u8 *to_chrdef_chr(chrdef const &to_def, u8 const *data);
+u8 *chrconv_from(chrdef const &to_def, u8 const *data);
 
 /**
- * Returns a standard tile from chrdef tile data
+ * Returns a standard tile from chrdef-encoded tile data
  */
-u8 *from_chrdef_chr(chrdef const &from_def, u8 const *data);
+u8 *chrconv_to(chrdef const &from_def, u8 const *data);
+
+/**
+ * Reference of all functions to convert tiles to secondary encoding
+ */
+extern std::map<string const, u8 *(*)(chrdef const &, u8 const *)>
+		converters_to;
+
+/**
+ * Reference of all functions to convert tiles to basic encoding
+ */
+extern std::map<string const, u8 *(*)(chrdef const &, u8 const *)>
+		converters_from;
 
 } // namespace conv_chr
 } // namespace chrgfx

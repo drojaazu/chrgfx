@@ -122,7 +122,7 @@ private:
  *   - Specifying offsets and width of each RGB color channel within the data
  *     (rgblayout based)
  *   - Specifying a table of RGB values that approximately correspond to the
- *     output of the hardware (refpal based)
+ *     output of the hardware (reftab based)
  */
 class coldef : public gfxdef
 {
@@ -134,14 +134,14 @@ public:
 				 bool is_big_endian = false);
 
 	/**
-	 * Constructor for a refpal based coldef
+	 * Constructor for a reftab based coldef
 	 */
-	coldef(string id, palette refpal, bool is_big_endian = false);
+	coldef(string id, palette reftab, bool is_big_endian = false);
 
 	/**
-	 * Returns true if this coldef is refpal based
+	 * Returns true if this coldef is reftab based
 	 */
-	bool use_refpal() const;
+	bool use_reftab() const;
 
 	/**
 	 * Returns the vector of RGB layouts (rgblayout based)
@@ -159,26 +159,26 @@ public:
 	u8 get_bitdepth() const;
 
 	/**
-	 * Returns the color from the reference palette for the given index (refpal
+	 * Returns the color from the reference palette for the given index (reftab
 	 * based)
 	 */
-	color get_refpal_entry(size_t index) const;
+	color get_reftab_entry(size_t index) const;
 
 	/**
 	 * Returns the index to the color matching the RGB value provided, or its
-	 * nearest color (refpal based)
+	 * nearest color (reftab based)
 	 */
-	size_t get_refpal_idx(color rgb) const;
+	size_t get_reftab_idx(color rgb) const;
 
 	/**
-	 * Returns true if the original harware is big endian (refpal based)
+	 * Returns true if the original harware is big endian (reftab based)
 	 */
 	bool get_is_big_endian() const;
 
 private:
 	vector<rgb_layout> layout;
-	palette refpal;
-	const bool is_refpal;
+	palette reftab;
+	const bool is_reftab;
 	u8 bitdepth;
 	const bool is_big_endian;
 };

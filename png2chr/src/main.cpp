@@ -38,13 +38,19 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	// see if we even have good input before moving on
 	std::ifstream pngdata{cfg.pngdata_name};
 	if(!pngdata.good()) {
 		throw std::ios_base::failure(std::strerror(errno));
 	}
 
-	/////////// setup definitions
+	// converter function pointers
+	u8 *(*chr_from_converter)(chrdef const &, u8 const *);
+	u32 (*col_from_converter)(coldef const &, png::color const);
+	u8 *(*pal_from_converter)(paldef const &, coldef const &,
+														png::palette const &, signed int const);
 
+	// load definitions
 	auto defs = load_gfxdefs(cfg.gfxdef);
 
 	map<string const, chrdef const> chrdefs{std::get<0>(defs)};
@@ -118,7 +124,7 @@ int main(int argc, char **argv)
 			size_t chunksize{chrdef.get_datasize() / 8};
 
 			for(const auto &chr : png_chrbank) {
-				u8 *temp_chr{conv_chr::to_chrdef_chr(chrdef, chr.get())};
+				u8 *temp_chr{conv_chr::chrconv_from(chrdef, chr.get())};
 				std::copy(temp_chr, temp_chr + chunksize,
 									std::ostream_iterator<u8>(chr_outfile));
 			}
@@ -126,8 +132,8 @@ int main(int argc, char **argv)
 
 		// deal with the palette next
 		if(cfg.pal_outfile != "") {
-			u8 *t = conv_pal::to_paldef_palette(paldef, coldef, in_img.get_palette(),
-																					cfg.subpalette);
+			u8 *t = conv_palette::palconv_from(paldef, coldef, in_img.get_palette(),
+																				 cfg.subpalette);
 			std::ofstream pal_outfile{cfg.pal_outfile};
 			if(!pal_outfile.good()) {
 				throw std::ios_base::failure(std::strerror(errno));

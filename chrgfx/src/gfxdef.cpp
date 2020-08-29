@@ -30,11 +30,11 @@ u32 chrdef::get_datasize() const { return datasize; }
 coldef::coldef(string id, u8 bitdepth, vector<rgb_layout> layout,
 							 bool is_big_endian)
 		: gfxdef(std::move(id)), bitdepth(bitdepth), layout(std::move(layout)),
-			is_big_endian(is_big_endian), is_refpal(false){};
+			is_big_endian(is_big_endian), is_reftab(false){};
 
-coldef::coldef(string id, palette refpal, bool is_big_endian)
-		: gfxdef(std::move(id)), refpal(std::move(refpal)),
-			is_big_endian(is_big_endian), is_refpal(true){};
+coldef::coldef(string id, palette reftab, bool is_big_endian)
+		: gfxdef(std::move(id)), reftab(std::move(reftab)),
+			is_big_endian(is_big_endian), is_reftab(true){};
 
 rgb_layout coldef::get_rgb_pass(size_t pass) const { return layout[pass]; }
 
@@ -42,12 +42,12 @@ u8 coldef::get_bitdepth() const { return bitdepth; };
 
 vector<rgb_layout> coldef::get_rgb_layout() const { return layout; }
 
-color coldef::get_refpal_entry(size_t index) const { return refpal[index]; }
+color coldef::get_reftab_entry(size_t index) const { return reftab[index]; }
 
-size_t coldef::get_refpal_idx(color rgb) const
+size_t coldef::get_reftab_idx(color rgb) const
 {
 	size_t idx{0};
-	for(auto &this_color : refpal) {
+	for(auto &this_color : reftab) {
 		if(this_color.red == rgb.red && this_color.green == rgb.green &&
 			 this_color.blue == rgb.blue) {
 			return idx;
@@ -57,9 +57,9 @@ size_t coldef::get_refpal_idx(color rgb) const
 
 	// this could certainly use some tuning, but it mostly works
 	std::vector<std::pair<int, int>> distances;
-	distances.reserve(this->refpal.size());
+	distances.reserve(this->reftab.size());
 	int pal_color_iter{0};
-	for(const auto &this_color : this->refpal) {
+	for(const auto &this_color : this->reftab) {
 		int this_distance = (abs(this_color.red - rgb.red)) +
 												(abs(this_color.green - rgb.green)) +
 												(abs(this_color.blue - rgb.blue));
@@ -79,7 +79,7 @@ size_t coldef::get_refpal_idx(color rgb) const
 	return idx;
 };
 
-bool coldef::use_refpal() const { return is_refpal; }
+bool coldef::use_reftab() const { return is_reftab; }
 bool coldef::get_is_big_endian() const { return is_big_endian; }
 
 paldef::paldef(string id, u8 entry_datasize, u16 subpal_length,

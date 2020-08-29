@@ -530,12 +530,12 @@ coldef
   # reference palette. The values below were sampled
   # from Tetris 3D, which has a nice middle ground
   # (based on output from MAME)
-  refpal #000000,#2f0000,#8f0000,#cf0000
+  reftab #000000,#2f0000,#8f0000,#cf0000
 
   # alternatively, here is a reference palette based
   # on the Wario Land VB title screen, which leans a
   # bit brighter
-  # refpal #000000,#3f0000,#df0000,#ff0000
+  # reftab #000000,#3f0000,#df0000,#ff0000
 }
 
 coldef
@@ -547,7 +547,7 @@ coldef
 
   # a 'standard' 2C02 PPU palette, from:
   # https://wiki.nesdev.com/w/index.php/PPU_palettes
-  refpal #545454,#001E74,#08102C,#300088,#440064,#5C0030,#540400,#3C1800,#202A00,#083A00,#004000,#003C00,#00323C,#000000,#000000,#000000,#989698,#084CC4,#3032EC,#5C1EE4,#8814B0,#A01464,#982220,#783C00,#545A00,#287200,#087C00,#007628,#006678,#000000,#000000,#000000,#ECEEEC,#4C9AEC,#787CEC,#B062EC,#E454EC,#EC58B4,#EC6A64,#D48820,#A0AA00,#74C400,#4CD020,#38CC6C,#38B4CC,#3C3C3C,#000000,#000000,#ECEEEC,#A8CCEC,#BCBCEC,#D4B2EC,#ECAEEC,#ECAED4,#ECB4B0,#E4C490,#CCD278,#B4DE78,#A8E290,#98E2B4,#A0D6E4,#A0A2A0,#000000,#000000
+  reftab #545454,#001E74,#08102C,#300088,#440064,#5C0030,#540400,#3C1800,#202A00,#083A00,#004000,#003C00,#00323C,#000000,#000000,#000000,#989698,#084CC4,#3032EC,#5C1EE4,#8814B0,#A01464,#982220,#783C00,#545A00,#287200,#087C00,#007628,#006678,#000000,#000000,#000000,#ECEEEC,#4C9AEC,#787CEC,#B062EC,#E454EC,#EC58B4,#EC6A64,#D48820,#A0AA00,#74C400,#4CD020,#38CC6C,#38B4CC,#3C3C3C,#000000,#000000,#ECEEEC,#A8CCEC,#BCBCEC,#D4B2EC,#ECAEEC,#ECAED4,#ECB4B0,#E4C490,#CCD278,#B4DE78,#A8E290,#98E2B4,#A0D6E4,#A0A2A0,#000000,#000000
 
   # Some other palette examples: http://emulation.gametechwiki.com/index.php/Famicom_Color_Palette
 }
@@ -560,7 +560,7 @@ coldef
   # black & white "colors" are based on luminance only
   # so we need an RGB equivalent palette
   # this is based on the yellow-green tint on the original system
-  refpal #fffb87,#b1ae4e,#84804e,#4e4e4e
+  reftab #fffb87,#b1ae4e,#84804e,#4e4e4e
 }
 
 coldef
@@ -569,7 +569,7 @@ coldef
   comment Nintendo Game Boy Pocket
 
   # this is based on the light gray/black tint of the GB Pocket screen
-  refpal #c4cfa1,#8b956d,#6b7353,#414141
+  reftab #c4cfa1,#8b956d,#6b7353,#414141
 }
 
 coldef

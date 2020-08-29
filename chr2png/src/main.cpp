@@ -49,19 +49,34 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	// see if we even have good input before moving on
 	std::ifstream chrdata{cfg.chrdata_name};
 	if(!chrdata.good()) {
 		throw std::ios_base::failure(std::strerror(errno));
 	}
 
-	/////////// setup definitions
+	// converter function pointers
+	u8 *(*chr_to_converter)(chrdef const &, u8 const *);
+	png::color (*col_to_converter)(coldef const &, u32 const);
+	png::palette (*pal_to_converter)(paldef const &, coldef const &, u8 const *,
+																	 signed int const);
 
+	// load definitions
 	auto defs = load_gfxdefs(cfg.gfxdef);
 
 	map<string const, chrdef const> chrdefs{std::get<0>(defs)};
 	map<string const, coldef const> coldefs{std::get<1>(defs)};
 	map<string const, paldef const> paldefs{std::get<2>(defs)};
 	map<string const, gfxprofile const> profiles{std::get<3>(defs)};
+
+	chrdefs.insert(
+			{chrgfx::defs::basic_8x8_1bpp.get_id(), chrgfx::defs::basic_8x8_1bpp});
+
+	coldefs.insert({chrgfx::defs::basic_8bit_random.get_id(),
+									chrgfx::defs::basic_8bit_random});
+
+	paldefs.insert(
+			{chrgfx::defs::basic_256color.get_id(), chrgfx::defs::basic_256color});
 
 	auto profile_iter{profiles.find(cfg.profile)};
 	if(profile_iter == profiles.end()) {
@@ -91,6 +106,11 @@ int main(int argc, char **argv)
 
 	paldef paldef{paldef_iter->second};
 
+	// TODO - temporary, need to load specified conveter
+	chr_to_converter = conv_chr::converters_to.at("default");
+	pal_to_converter = conv_palette::converters_to.at("default");
+	col_to_converter = conv_color::converters_to.at("default");
+
 #ifdef DEBUG
 	std::chrono::high_resolution_clock::time_point t1 =
 			std::chrono::high_resolution_clock::now();
@@ -105,8 +125,8 @@ int main(int argc, char **argv)
 		if(chrdata.eof())
 			break;
 
-		workbank.push_back(
-				uptr<u8>(conv_chr::from_chrdef_chr(chrdef, (u8 *)chunkbuffer)));
+		workbank.push_back(uptr<u8>(chr_to_converter(chrdef, (u8 *)chunkbuffer)));
+		// uptr<u8>(conv_chr::from_chrdef_chr(chrdef, (u8 *)chunkbuffer)));
 	}
 
 	palette workpal;
@@ -123,8 +143,7 @@ int main(int argc, char **argv)
 
 		char palbuffer[length];
 		paldata.read(palbuffer, length);
-		workpal = conv_pal::from_paldef_palette(paldef, coldef, (u8 *)palbuffer,
-																						cfg.subpalette);
+		workpal = pal_to_converter(paldef, coldef, (u8 *)palbuffer, cfg.subpalette);
 
 	} else {
 		workpal = make_pal_random();

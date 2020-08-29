@@ -23,7 +23,7 @@ static constexpr char COL_COLOR_PASSES[] = "color_passes",
 											COL_GREEN_SIZE[] = "green_size",
 											COL_BLUE_SHIFT[] = "blue_shift",
 											COL_BLUE_SIZE[] = "blue_size",
-											COL_BITDEPTH[] = "bitdepth", COL_REFPAL[] = "refpal",
+											COL_BITDEPTH[] = "bitdepth", COL_REFTAB[] = "reftab",
 											COL_BIG_ENDIAN[] = "big_endian";
 
 } // namespace defkeys
@@ -158,7 +158,7 @@ palette create_palette(std::string const &pal)
 			if(this_value[0] == '#')
 				this_value.erase(this_value.begin(), this_value.begin() + 1);
 			if(this_value.length() != 6)
-				throw std::invalid_argument("Invalid hex color in refpal definition");
+				throw std::invalid_argument("Invalid hex color in reftab definition");
 
 			red = std::stoi(this_value.substr(0, 2), nullptr, 16);
 			green = std::stoi(this_value.substr(2, 2), nullptr, 16);
@@ -194,21 +194,20 @@ coldef validate_coldef_block(defblock const &def_block)
 		temp_is_big_endian = vd_bool(mapiter->second);
 	}
 
-	// SETTING: bitdepth
-	// RULES: required, positive
-	mapiter = def_block.find(defkeys::COL_BITDEPTH);
-	if(mapiter == def_block.end()) {
-		throw "Could not find required key " + string(defkeys::COL_BITDEPTH);
-	}
-	auto temp_bitdepth{vd_int_pos<u8>(mapiter->second)};
-
-	// SETTING: refpal
-	mapiter = def_block.find(defkeys::COL_REFPAL);
+	// SETTING: reftab
+	mapiter = def_block.find(defkeys::COL_REFTAB);
 	if(mapiter != def_block.end()) {
 
 		// we have a ref pal, parse it out
 		return coldef(temp_id, create_palette(mapiter->second), temp_is_big_endian);
 	} else {
+		// SETTING: bitdepth
+		// RULES: required, positive
+		mapiter = def_block.find(defkeys::COL_BITDEPTH);
+		if(mapiter == def_block.end()) {
+			throw "Could not find required key " + string(defkeys::COL_BITDEPTH);
+		}
+		auto temp_bitdepth{vd_int_pos<u8>(mapiter->second)};
 
 		// SETTING: color_passes
 		// RULES: optional; defaults to 1; if set, must be > 0

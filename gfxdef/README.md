@@ -9,19 +9,29 @@ Included with chrgfx is a collection of definitions for many well-known systems,
 The following hardware is included in the file. Use the `--profile` option to specify the hardware.
 
 `nintendo_fc` - Nintendo Famicom / NES
+
 `nintendo_sfc` - Nintendo Super Famicom / Super Nintendo (SNES)
+
 `nintendo_vb` - Nintendo Virtual Boy
+
 `nintendo_gb` - Nintendo Game Boy
+
 `nintendo_gb_pocket` - Nintendo Game Boy Pocket
+
 `sega_gg` - Sega Game Gear
+
 `sega_ms` - Sega Master System / Mark III
+
 `sega_md` - Sega Mega Drive / Genesis
+
 `capcom_cps` - Capcom CPS-1/2
+
 `snk_neogeo` - SNK Neo-Geo AES/MVS
+
 `snk_neogeocd` - SNK Neo-Geo CD
 
 ## Relationship Between gfxdefs File and libchrgfx
-As a point of clarification, the gfxdefs file is used only by the two frontend utilities. It is an abstraction of the chrdef, paldef and coldef classes used internally in libchrgfx. As such, while the rest of this document explains the details of these concepts and is useful for developers, it is explained in the context of an external file loaded at runtime. All of the key names here match the names of the members of each class in the code.
+As a point of clarification, the gfxdefs file is used only by the two frontend utilities. It is an abstraction of the chrdef, paldef and coldef classes used internally in libchrgfx. As such, while the rest of this document delves into these concepts and is useful for developers, it is explained in the context of an external file loaded at runtime.
 
 Those wishing to integrate libchrgfx should refer to the [Using the Library]() section of the main readme as well as the comments in the source code.
 
@@ -105,13 +115,13 @@ As a chrdef, it looks like this:
 `chr_converter` - (Optional) Specifies the internal conversion function to use; **this is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
 
 ### Palette Definitions (paldef)
-When we think of a palette, we generally envision a structure that contains a list of colors. This is still the case, but in chrgfx we split up the concept of palette structure and color data. If you imagine a carton of a dozen colorful Easter eggs, the eggs are the colors (coldef) while the carton holding them is the palette (paldef).
+When we think of a palette, we generally envision a structure that contains a list of colors. This is still the case, but in chrgfx we split up the concept of palette structure and color data. If you imagine a carton of a dozen colorful Easter eggs, the eggs are the colors (coldef) while the carton holding them is the palette (paldef). This ,splitting of color data and palette structure gives us more flexibility and less redundancy, which we'll see later when we talk about profiles.
 
-Generally, the graphics hardware holds a finite number of colors from which the tiles on the screen may select a subset to use. We call the total group of colors the "system palette" or "full palette" while the subset is called a "subpalette" or "palette line."
+Generally, the graphics hardware holds a finite number of colors from which the tiles on the screen may select a linear subset for use. We call the total group of colors the "system palette" or "full palette" while the subset is called a "subpalette" or "palette line."
 
-Returning to the Sega Mega Drive again as a simple example: its hardware has a system palette of 64 colors, while each subpalette is 16 colors. This means there are 4 subpalettes within the full system palette, and the tile graphics can use any one of those four subpalettes.
+Returning to the Sega Mega Drive again as a simple example: its hardware has a system palette of 64 colors, while each subpalette is 16 colors. This means there are 4 subpalettes within the full system palette, and the tile graphics, which are 4 bits per pixel and can thus address a maximum of 16 colors, can use any one of those four subpalettes.
 
-Something to note, however, is that the indexed PNGs (i.e. PNGs using a palette) such as those output from `chr2png` have a maximum of 256 colors. This is not a problem for most systems, though some may have a full palette with more than 256 entries. (For example, the Neo-Geo hardware, with 256 4bit subpalettes, a whopping 4,096 colors!) In such cases, the palette is cut off at the 256 color mark. Instead of a full palette, though, you can specify any subpalette to apply a palette line for entries past the cutoff.
+Something to note, however, is that the indexed PNGs (i.e. PNGs using a palette instead of 24bit color) such as those output from `chr2png` have a maximum of 256 colors. This is not a problem for most systems, though there are a few that have a full palette with more than 256 entries (for example, the Neo-Geo hardware, with 256 subpalettes of 16 colors each, making a whopping 4,096 colors!). In such cases, the palette is cut off at the 256 color mark. Instead of a full palette, though, you can specify any subpalette to apply a palette line for entries past the cutoff.
 
 ### paldef reference
 
@@ -119,156 +129,112 @@ Something to note, however, is that the indexed PNGs (i.e. PNGs using a palette)
 
 `subpal_count` - The number of subpalettes in the system palette
 
-`entry_datasize` - The size of a single entry within a palette
+`entry_datasize` - The size of a single entry within a palette, in bits
 
-`subpal_datasize` - (Optional) The size 
+`subpal_datasize` - (Optional) The size of a single subpalette, in bits. This should only be needed in very rare circumstances where the size of a subpalette is greater than the sum of the color data. An example of this is the Nintendo Virtual Boy.
 
-Palette definitions encapsulate formats of both the indexed color list (i.e. the palette) and the colors themselves. They are meant to describe the data as it appears inside the original machine's video RAM, which is simply an array of color definitions. Therefore, we describe a palette by specifying the size of the system palette, the size of a subpalette and the number of subpalettes available. Since the entries in a palette are often multi-byte values, we also need to take into consideration whether the work data is little or big endian.
+### Color Definitions (coldef)
+Colors are derived in one of two ways. The first method calculates a color using RGB values specified by the size and position of each color channel within the data. This works for hardware that natively uses RGB colorspace. For hardware which does not, the second method is used. This involves mapping all possible color values to approximate RGB values in a reference table.
 
-The colors are generated either by specifying RGB levels or by providing a preset palette of colors for systems that do not use RGB natively. For example, the original Nintendo Famicom uses the YIQ colorspace and encoded the output as a TV signal, so we do not have an exact representation of the color components. Instead, we provide a list of preset RGB colors, called a reference palette, that will be used to approximate the output:
+Here is an example of an RGB definition using the Super Famicom:
 
-    refpal #545454,#001E74,#08102C,...
+    coldef
+    {
+      id col_nintendo_sfc
+      comment Nintendo Super Famicom
+    
+      # 15|               |0
+      #   xBBBBBGG GGGRRRRR
+      bitdepth 5
+      color_passes 1
+      red_shift 0
+      red_size 5
+      green_shift 5
+      green_size 5
+      blue_shift 10
+      blue_size 5
+    
+      big_endian 0
+    }
 
-Most hardware from the late 80's on used RGB colors, however. In this case, we specify the number of bits of data each color component (red, green, blue) has and where that bit level data is within the whole color value.
+The basic algorithm works by shifting and masking the component data. Therefore we specify the size of the data for each component and its position relative to the least significant bit. You can visualize this with the bit layout in the comments above. There are five bits of red, which are natually positioned at the LSB, so the shift is 0. There are five bits of green, which need to be shifted 5 bits to the right to arrive at the LSB. Finally, blue is 5 bits as well, shifted 10 bits to the right.
 
-Color decoding works by shifting each color component into the LSB and ANDing out the color bits. For example, Super Nintendo 5 bit colors are laid out like this:
+This is fine for simple layouts with single blocks of sequential data, like the Super Famicom, but let's look at the definition for the Neo-Geo next:
 
-    15|               |0
-      xBBBBBGG GGGRRRRR
+    coldef
+    {
+      id col_snk_neogeo
+      comment SNK NeoGeo
+    
+      # 15 |                                   |0
+      #    D R0 G0 B0 R4R3R2R1 G4G3G2G1 B4B3B2B1
+      # D = "dark bit", acts as shared LSB for all color components
+      bitdepth 6
+      color_passes 3
+      red_shift 15,14,8
+      red_size 1,1,4
+      green_shift 15,13,4
+      green_size 1,1,4
+      blue_shift 15,12,0
+      blue_size 1,1,4
+      big_endian 1
+    }
 
-So green needs to be shifted 5 bits, blue 10 bits and red 0 bits. We also specify the size of each component; in this case, all three are 5 bits in size. The color definition looks like this:
+Here we introduce the concept of passes. Each pass will process the whole data, and the bits extracted each time are combined from the LSB upwards to form the final color information. In this example with Neo-Geo color, we see that the channels are not entirely packed together: there is an extra bit for each channel in the upper part of the word. Moreover, there is a so-called "dark bit" which acts as the shared least significant bit for each channel.
 
-    red_shift 0
-    red_size 5
-    green_shift 5
-    green_size 5
-    blue_shift 10
-    blue_size 5
+To parse data in this format, we need to make three passes: first for the "dark bit" acting as the lowest bit for each channel, then the single bit in the upper byte, and finally the packed data making up the rest of the color information. We thus indicate the sizes and shifts for each of these passes in sequential order for each color channel. The dark bit ends up in bit 0, the dangling low bit ends up in bit 1, and the remaining data ends up in bits 2 to 5, forming our complete 6 bit channel data.
 
-This works fine for systems where the color components are sequential (which is most of them), but in cases where they are be split up, we'll need to make multiple passes. For example, Neo-Geo colors are more complicated:
+It is imperative that each color channel size/shift specifiers have a number of entries matching the amount of color passes. Also, if the color data is more than one byte in size, the endianness of the hardware should be specified to ensure compatibility.
 
-    15 |                               |0
-       DDR0G0B0R4R3R2R1 G4G3G2G1B4B3B2B1
-    D = "dark bit", acts as LSB for all color components
+Reference tables are much easier to understand and define. As an example, the original Nintendo Famicom uses the YIQ color space and encodes the colors directly into the TV signal. With 64 colors available, we need to provide an RGB value that approximates the original perceived color for each of those entries.
 
-(The "dark bit" here is a shared LSB for all color components; we're going to pretend it doesn't exist for this example so it's not any further complicated. Please refer to the included NeoGeo gfxdef file if you need a format reference.)
 
-In this case, bit 0 of each component is in the upper byte. So on our first pass, we need to grab bit 0, then on the second pass grab the rest of the data. The color def ends up looking like this:
+    coldef
+    {
+      id col_nintendo_fc
+      comment Nintendo Famicom
+    
+      big_endian 0
 
-    color_passes 2
-    red_shift 14,8
-    red_size 5
-    green_shift 13,4
-    green_size 5
-    blue_shift 12,0
-    blue_size 5
+      # a 'standard' 2C02 PPU palette, from:
+      # https://wiki.nesdev.com/w/index.php/PPU_palettes
+      reftab #545454,#001E74,#08102C,#300088,#440064,#5C0030,#540400,...
+    }
 
-To be clear, **you should not use a refpal AND a color definition.** It's one or the other. If for some reason both are specified, the refpal takes precedence.
+(The full list of 64 colors was abridged here for readability.)
 
-### Palette Definition Settings Reference
+The first entry will correspond to value 0, the next to value 1, and so on.
 
-`entry_datasize` - The size (in bits) of one entry in the color palette
+To be clear, **you should not use a reftab AND a color definition.** It's one or the other. If for some reason both are specified, the reftab takes precedence.
 
-`subpal_length` - The number of entries in a single subpalette
+### coldef reference
 
-`subpal_count` - The number of subpalettes within the system palette
+big_endian - (Optional) Indicates the original hardware is big endian; if not specified, default is 0 (false). The value should be either 1 (true, big endian) or 0 (false, little endian). This should be specified for hardware where color data is greater than 8 bits in size.
 
-`subpal_datasize` - (Optional) Manually specify the size of a subpalette (in bits). Used for cases where effective subpalette data is less than 8 bits, but is stored in 2 or more bytes. Default is 0 (automatic).
+For RGB based hardware:
 
-`big_endian` - (Optional) Indicates the system is big endian rather than small endian. 1 is true, 0 is false. Default is 0 (little endian).
+`bitdepth` - The size of each color component, in bits
 
-`refpal` - An array of HTML formatted (e.g. #001E74) colors to simulate output of non-RGB hardware. The entries can be listed with or without the hash symbol (Either 001E74 or #001E74 is acceptable.)
+`color_passes` - (Optional) Indicates the number of times the value will be passed; if not specified, the value will be 1. **If the value is greater than 1, each of the `*_shift` and `*_size` entries below must have a comma delimited list with a count of entries that match this setting.**
 
-`color_passes` - Specifies the number of times the shift/extra process will be performed on color data. Optional; default is 1. **Note that if this value is higher than 1, then EACH of below shift/size settings MUST have a number of entries equal to color_passes.**
+`red_shift` - Specifies the number of spaces to shift the red component data to the right, into the LSB
 
-`red_shift` - The number of bit places to shift the red component data into the LSB.
+`green_shift` - As above, for green component data
 
-`green_shift` - The number of bit places to shift the green component data into the LSB.
+`blue_shift` - As above, for blue component data
 
-`blue_shift` - The number of bit places to shift the blue component data into the LSB.
+`red_size` - The size of the red component data, in bits
 
-`red_size` - The number of bits of data making up the red component.
+`green_size` - As above, for green component data
 
-`green_size` - The number of bits of data making up the green component.
+`blue_size` - As anove, for blue component data
 
-`blue_size` - The number of bits of data making up the blue component.
+For non-RGB based hardware:
 
-`pal_converter` - (Optional) Specifies the internal conversion function to use. **This is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
+`reftab` - A comma delimited list of HTML style RGB colors to represent each possible non-RGB color on the original hardware
 
 
 
-Second, *some formats are supported by multiple systems.* For example, the Super Famicom 4bpp format is also used by the NEC PC Engine. The command line options for chrgfx are long enough, and we don't want to make it more ugly by naming the gfxdef files with every system they support (nintendo_sfc_nec_pcengine.gfxdef would be pretty awful). If you don't see a system you want to work with, check this readme first or grep through the files for a keyword to see which files match.
-
-Filenames are listed without the .gfxdef extension.
-
-## Standard formats
-`capcom_cps_16`
-
-Hardware: Capcom CPS and CPS-2 (arcade)
-This is for 16x16 tiles.
-
-`generic_1bpp` *(chrdef ONLY)*
-
-Hardware: any
-This is a generic format that is probably not actually used by any systems, but is provided as a theoretical possibility. 1bpp tiles would mean each pixel is one bit, meaning two colors only.
-
-`nintendo_fc`
-
-Hardware: Nintendo Famicom / NES
-
-`nintendo_gb`
-
-Hardware: Nintendo Gameboy, Gameboy Color (tiles only), Super Famicom / SNES (tiles only)
-
-`nintendo_gbc` *(paldef ONLY)*
-
-Hardware: Nintendo Gameboy Color
-
-`nintendo_gbp` *(paldef ONLY)*
-
-Hardware: Gameboy Pocket
-Actually has the same palette format as the original Gameboy, but with a different refpal for the different screen tint.
-
-`nintendo_sfc`
-
-Hardware: Nintendo Super Famicom / SNES, NEC PC Engine (tiles only)
-
-`nintendo_vb`
-
-Hardware: Nintendo Virtual Boy
-
-`sega_gg`
-
-Hardware: Sega Game Gear, Sega Master System / Mark III (tiles only), Bandai Wonderswan (tiles only)
-
-`sega_md`
-
-Hardware: Sega Mega Drive, Sharp X68000 (tiles only)
-
-`sega_ms` *(paldef ONLY)*
-
-Hardware: Sega Master System / Mark III
-
-`seta_16_4bpp`
-
-Hardware: Seta arcade hardware
-This is for 16x16 4bpp BG layer tiles.
-
-`snk_neogeo`
-
-Hardware: SNK Neo-Geo, SNK Neo-Geo CD (tiles only)
-
-`snk_neogeocd` *(chrdef ONLY)*
-
-Hardware: SNK Neo-Geo CD
-
-`snk_neogeopocket`
-
-Hardware: SNK Neo-Geo Pocket, Neo-Geo Pocket Color (tiles only)
-
-`snk_neogeopocketcolor` *(paldef ONLY)*
-
-Hardware: SNK Neo-Geo Pocket Color
 
 ## Non-standard formats
 These are formats that use custom conversion functions. The list is small right now, but more are planned.
