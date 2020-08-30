@@ -81,7 +81,7 @@ chrdef validate_chrdef_block(defblock const &def_block)
 	if(mapiter == def_block.end()) {
 		throw "Could not find required key " + string(defkeys::CHR_WIDTH);
 	}
-	auto temp_width{vd_int_pos<u8>(mapiter->second)};
+	auto temp_width{vd_int_pos<uint>(mapiter->second)};
 
 	// SETTING: height
 	// RULES: required, integer, non-negative, max value 255
@@ -89,7 +89,7 @@ chrdef validate_chrdef_block(defblock const &def_block)
 	if(mapiter == def_block.end()) {
 		throw "Could not find required key " + string(defkeys::CHR_HEIGHT);
 	}
-	auto temp_height{vd_int_pos<u8>(mapiter->second)};
+	auto temp_height{vd_int_pos<uint>(mapiter->second)};
 
 	// SETTING: bpp
 	// RULES: required, integer, non-negative, max value 8
@@ -97,7 +97,7 @@ chrdef validate_chrdef_block(defblock const &def_block)
 	if(mapiter == def_block.end()) {
 		throw "Could not find required key " + string(defkeys::CHR_BPP);
 	}
-	auto temp_bpp{vd_int_pos<u8>(mapiter->second)};
+	auto temp_bpp{vd_int_pos<uint>(mapiter->second)};
 	if(temp_bpp > 8) {
 		throw "Value cannot be greater than 8";
 	}
@@ -109,7 +109,7 @@ chrdef validate_chrdef_block(defblock const &def_block)
 	if(mapiter == def_block.end()) {
 		throw "Could not find required key " + string(defkeys::CHR_PLANEOFFSET);
 	}
-	auto temp_planeoffset{vd_int_array<u32>(mapiter->second)};
+	auto temp_planeoffset{vd_int_array<uint>(mapiter->second)};
 	if(temp_planeoffset.size() != temp_bpp) {
 		throw "planeoffset must have number of entries equal to bpp";
 	}
@@ -121,7 +121,7 @@ chrdef validate_chrdef_block(defblock const &def_block)
 	if(mapiter == def_block.end()) {
 		throw "Could not find required key " + string(defkeys::CHR_PIXELOFFSET);
 	}
-	auto temp_pixeloffset{vd_int_array<u32>(mapiter->second)};
+	auto temp_pixeloffset{vd_int_array<uint>(mapiter->second)};
 	if(temp_pixeloffset.size() != temp_width) {
 		throw "pixeloffset must have number of entries equal to width";
 	}
@@ -133,7 +133,7 @@ chrdef validate_chrdef_block(defblock const &def_block)
 	if(mapiter == def_block.end()) {
 		throw "Could not find required key " + string(defkeys::CHR_ROWOFFSET);
 	}
-	auto temp_rowoffset{vd_int_array<u32>(mapiter->second)};
+	auto temp_rowoffset{vd_int_array<uint>(mapiter->second)};
 	if(temp_rowoffset.size() != temp_height) {
 		throw "rowoffset must have number of entries equal to height";
 	}
@@ -151,7 +151,7 @@ palette create_palette(std::string const &pal)
 	std::stringstream ss(value);
 	//, hex_conv;
 	std::string this_value;
-	u8 red = 0, green = 0, blue = 0;
+	u8 red{0}, green{0}, blue{0};
 	palette out;
 	try {
 		while(std::getline(ss, this_value, ',')) {
@@ -198,7 +198,7 @@ coldef validate_coldef_block(defblock const &def_block)
 	mapiter = def_block.find(defkeys::COL_REFTAB);
 	if(mapiter != def_block.end()) {
 
-		// we have a ref pal, parse it out
+		// we have a ref table, parse it out
 		return coldef(temp_id, create_palette(mapiter->second), temp_is_big_endian);
 	} else {
 		// SETTING: bitdepth
@@ -207,14 +207,14 @@ coldef validate_coldef_block(defblock const &def_block)
 		if(mapiter == def_block.end()) {
 			throw "Could not find required key " + string(defkeys::COL_BITDEPTH);
 		}
-		auto temp_bitdepth{vd_int_pos<u8>(mapiter->second)};
+		auto temp_bitdepth{vd_int_pos<uint>(mapiter->second)};
 
 		// SETTING: color_passes
 		// RULES: optional; defaults to 1; if set, must be > 0
-		u8 temp_color_passes{1};
+		uint temp_color_passes{1};
 		mapiter = def_block.find(defkeys::COL_COLOR_PASSES);
 		if(mapiter != def_block.end()) {
-			temp_color_passes = vd_int_pos<u8>(mapiter->second);
+			temp_color_passes = vd_int_pos<uint>(mapiter->second);
 		}
 
 		// SETTING: red_shift
@@ -222,7 +222,7 @@ coldef validate_coldef_block(defblock const &def_block)
 		if(mapiter == def_block.end()) {
 			throw "Could not find required key " + string(defkeys::COL_RED_SHIFT);
 		}
-		auto temp_red_shift{vd_int_array<s8>(mapiter->second)};
+		auto temp_red_shift{vd_int_array<int>(mapiter->second)};
 		if(temp_red_shift.size() != temp_color_passes) {
 			throw "red_shift must have number of entries equal to color_passes";
 		}
@@ -232,7 +232,7 @@ coldef validate_coldef_block(defblock const &def_block)
 		if(mapiter == def_block.end()) {
 			throw "Could not find required key " + string(defkeys::COL_RED_SIZE);
 		}
-		auto temp_red_size{vd_int_array<u8>(mapiter->second)};
+		auto temp_red_size{vd_int_array<uint>(mapiter->second)};
 		if(temp_red_size.size() != temp_color_passes) {
 			throw "red_size must have number of entries equal to color_passes";
 		}
@@ -242,7 +242,7 @@ coldef validate_coldef_block(defblock const &def_block)
 		if(mapiter == def_block.end()) {
 			throw "Could not find required key " + string(defkeys::COL_GREEN_SHIFT);
 		}
-		auto temp_green_shift{vd_int_array<s8>(mapiter->second)};
+		auto temp_green_shift{vd_int_array<int>(mapiter->second)};
 		if(temp_green_shift.size() != temp_color_passes) {
 			throw "green_shift must have number of entries equal to color_passes";
 		}
@@ -252,7 +252,7 @@ coldef validate_coldef_block(defblock const &def_block)
 		if(mapiter == def_block.end()) {
 			throw "Could not find required key " + string(defkeys::COL_GREEN_SIZE);
 		}
-		auto temp_green_size{vd_int_array<u8>(mapiter->second)};
+		auto temp_green_size{vd_int_array<uint>(mapiter->second)};
 		if(temp_green_size.size() != temp_color_passes) {
 			throw "green_size must have number of entries equal to color_passes";
 		}
@@ -262,7 +262,7 @@ coldef validate_coldef_block(defblock const &def_block)
 		if(mapiter == def_block.end()) {
 			throw "Could not find required key " + string(defkeys::COL_BLUE_SHIFT);
 		}
-		auto temp_blue_shift{vd_int_array<s8>(mapiter->second)};
+		auto temp_blue_shift{vd_int_array<int>(mapiter->second)};
 		if(temp_blue_shift.size() != temp_color_passes) {
 			throw "blue_shift must have number of entries equal to color_passes";
 		}
@@ -272,7 +272,7 @@ coldef validate_coldef_block(defblock const &def_block)
 		if(mapiter == def_block.end()) {
 			throw "Could not find required key " + string(defkeys::COL_BLUE_SIZE);
 		}
-		auto temp_blue_size{vd_int_array<u8>(mapiter->second)};
+		auto temp_blue_size{vd_int_array<uint>(mapiter->second)};
 		if(temp_blue_size.size() != temp_color_passes) {
 			throw "blue_size must have number of entries equal to color_passes";
 		}
@@ -304,35 +304,35 @@ paldef validate_paldef_block(defblock const &def_block)
 	string temp_id{mapiter->second};
 
 	// SETTING: entry_datasize
-	// RULES: required, u8
+	// RULES: required
 	mapiter = def_block.find(defkeys::PAL_ENTRY_DATASIZE);
 	if(mapiter == def_block.end()) {
 		throw "Could not find required key " + string(defkeys::PAL_ENTRY_DATASIZE);
 	}
-	auto temp_entry_datasize{vd_int_pos<u8>(mapiter->second)};
+	auto temp_entry_datasize{vd_int_pos<uint>(mapiter->second)};
 
 	// SETTING: subpal_length
-	// RULES: required,  u16
+	// RULES: required
 	mapiter = def_block.find(defkeys::PAL_SUBPAL_LENGTH);
 	if(mapiter == def_block.end()) {
 		throw "Could not find required key " + string(defkeys::PAL_SUBPAL_LENGTH);
 	}
-	auto temp_subpal_length{vd_int_pos<u16>(mapiter->second)};
+	auto temp_subpal_length{vd_int_pos<uint>(mapiter->second)};
 
 	// SETTING: subpal_count
-	// RULES: required, u16
+	// RULES: required
 	mapiter = def_block.find(defkeys::PAL_SUBPAL_COUNT);
 	if(mapiter == def_block.end()) {
 		throw "Could not find required key " + string(defkeys::PAL_SUBPAL_COUNT);
 	}
-	auto temp_subpal_count{vd_int_pos<u16>(mapiter->second)};
+	auto temp_subpal_count{vd_int_pos<uint>(mapiter->second)};
 
 	// SETTING: subpal_datasize
-	// RULES: optional, u8
+	// RULES: optional
 	mapiter = def_block.find(defkeys::PAL_SUBPAL_DATASIZE);
-	u8 temp_subpal_datasize{0};
+	std::optional<uint> temp_subpal_datasize{std::nullopt};
 	if(mapiter != def_block.end()) {
-		temp_subpal_datasize = vd_int_pos<u8>(mapiter->second);
+		temp_subpal_datasize = vd_int_pos<uint>(mapiter->second);
 	}
 
 	return paldef{temp_id, temp_entry_datasize, temp_subpal_length,

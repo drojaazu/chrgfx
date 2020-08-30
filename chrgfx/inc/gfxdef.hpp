@@ -2,6 +2,7 @@
 #define CHRGFX__GFXDEF_H
 
 #include "types.hpp"
+#include <optional>
 #include <png++/png.hpp>
 #include <string>
 #include <vector>
@@ -22,19 +23,19 @@ namespace chrgfx
 class rgb_layout
 {
 public:
-	rgb_layout(pair<s8, u8> red, pair<s8, u8> green, pair<s8, u8> blue);
+	rgb_layout(pair<int, uint> red, pair<int, uint> green, pair<int, uint> blue);
 
-	s8 get_red_shift() const;
-	u8 get_red_count() const;
-	s8 get_green_shift() const;
-	u8 get_green_count() const;
-	s8 get_blue_shift() const;
-	u8 get_blue_count() const;
+	int get_red_shift() const;
+	uint get_red_count() const;
+	int get_green_shift() const;
+	uint get_green_count() const;
+	int get_blue_shift() const;
+	uint get_blue_count() const;
 
 private:
-	pair<s8, u8> red;
-	pair<s8, u8> green;
-	pair<s8, u8> blue;
+	pair<int, uint> red;
+	pair<int, uint> green;
+	pair<int, uint> blue;
 };
 
 /**
@@ -56,66 +57,65 @@ private:
 };
 
 /**
- * Defines the pixel layout of a graphics tile by specifying the offset of
- * pixels and bitplanes
+ * Defines the pixel layout of a graphics tile
  */
 class chrdef : public gfxdef
 {
 public:
-	chrdef(string id, u16 width, u16 height, u8 bitplanes,
-				 vector<u32> planeoffset, vector<u32> pixeloffset,
-				 vector<u32> rowoffset);
+	chrdef(string id, uint width, uint height, uint bitplanes,
+				 vector<uint> planeoffset, vector<uint> pixeloffset,
+				 vector<uint> rowoffset);
 
 	/**
 	 * Returns the width of the tile, in pixels
 	 */
-	u16 get_width() const;
+	uint get_width() const;
 
 	/**
 	 * Returns the height of the tile, in pixels
 	 */
-	u16 get_height() const;
+	uint get_height() const;
 
 	/**
 	 * Returns the bit depth of the tile
 	 */
-	u8 get_bitplanes() const;
+	uint get_bitplanes() const;
 
 	/**
 	 * Returns the offset to a given bitplane in a row, in bits
 	 */
-	u32 get_planeoffset_at(size_t pos) const;
+	uint get_planeoffset_at(uint pos) const;
 
 	/**
 	 * Returns the offset to a given pixel in a row, in bits
 	 */
-	u32 get_pixeloffset_at(size_t pos) const;
+	uint get_pixeloffset_at(uint pos) const;
 
 	/**
 	 * Returns the offset to a given row in the tile, in bits
 	 */
-	u32 get_rowoffset_at(size_t pos) const;
+	uint get_rowoffset_at(uint pos) const;
 
 	/**
 	 * Returns the size of a single tile, in bits
 	 */
-	u32 get_datasize() const;
+	uint get_datasize() const;
 
 private:
-	u16 width;
-	u16 height;
-	u8 bitplanes;
+	uint width;
+	uint height;
+	uint bitplanes;
 
-	vector<u32> planeoffset;
-	u32 const *planeoffset_data;
+	vector<uint> planeoffset;
+	uint const *planeoffset_data;
 
-	vector<u32> pixeloffset;
-	u32 const *pixeloffset_data;
+	vector<uint> pixeloffset;
+	uint const *pixeloffset_data;
 
-	vector<u32> rowoffset;
-	u32 const *rowoffset_data;
+	vector<uint> rowoffset;
+	uint const *rowoffset_data;
 
-	u32 datasize; // size of one chr in bits
+	uint datasize; // size of one chr in bits
 };
 
 /**
@@ -131,7 +131,7 @@ public:
 	/**
 	 * Constructor for an rgblayout based coldef
 	 */
-	coldef(string id, u8 bitdepth, vector<rgb_layout> layout,
+	coldef(string id, uint bitdepth, vector<rgb_layout> layout,
 				 bool is_big_endian = false);
 
 	/**
@@ -152,24 +152,24 @@ public:
 	/**
 	 * Returns the RGB bit layout for the given pass (rgblayout based)
 	 */
-	rgb_layout get_rgb_pass(size_t pass) const;
+	rgb_layout get_rgb_pass(uint pass) const;
 
 	/**
 	 * Returns the bitdepth of the color channels
 	 */
-	u8 get_bitdepth() const;
+	uint get_bitdepth() const;
 
 	/**
 	 * Returns the color from the reference palette for the given index (reftab
 	 * based)
 	 */
-	color get_reftab_entry(size_t index) const;
+	color get_reftab_entry(uint index) const;
 
 	/**
 	 * Returns the index to the color matching the RGB value provided, or its
 	 * nearest color (reftab based)
 	 */
-	size_t get_reftab_idx(color rgb) const;
+	uint get_reftab_idx(color rgb) const;
 
 	/**
 	 * Returns true if the original harware is big endian (reftab based)
@@ -180,36 +180,65 @@ private:
 	vector<rgb_layout> layout;
 	palette reftab;
 	const bool is_reftab;
-
-	/**
-	 * Specify the endianness of the color data
-	 */
+	uint bitdepth;
 	const bool is_big_endian;
 };
 
 /**
- * Defines the format of a color palette by specifying the size and count of
- * subpalettes
+ * Defines the structure of a system palette
  */
 class paldef : public gfxdef
 {
 public:
-	paldef(string id, u8 entry_datasize, u16 subpal_length, u16 subpal_count,
-				 u8 subpal_datasize = 0);
+	paldef(string id, uint entry_datasize, uint subpal_length, uint subpal_count,
+				 std::optional<uint> subpal_datasize = std::nullopt);
 
-	u8 get_entry_datasize() const;
+	/**
+	 * Returns the size in bits of a single color entry
+	 * (shouldn't this be in coldef....?)
+	 */
+	uint get_entry_datasize() const;
 
-	u16 get_subpal_length() const;
+	/**
+	 * Returns the number of entries in the full palette
+	 */
+	uint get_palette_length() const;
 
-	u16 get_subpal_count() const;
+	/**
+	 * Returns the number of entries in a subpalette
+	 */
+	uint get_subpal_length() const;
 
-	u8 get_subpal_datasize() const;
+	/**
+	 * Returns the number of subpalettes in the full palette
+	 */
+	uint get_subpal_count() const;
+
+	/**
+	 * Returns the data size of the full palette, in bits
+	 */
+	uint get_palette_datasize() const;
+
+	/**
+	 * Returns the data size of the full palette, in bytes
+	 */
+	uint get_palette_datasize_bytes() const;
+
+	/**
+	 * Returns the data size of a subpalette (in bits)
+	 */
+	uint get_subpal_datasize() const;
+
+	/**
+	 * Returns the data size of a subpalette (in bytes)
+	 */
+	uint get_subpal_datasize_bytes() const;
 
 private:
-	u8 entry_datasize;
-	u16 subpal_length;
-	u16 subpal_count;
-	u8 subpal_datasize;
+	uint entry_datasize;
+	uint subpal_length;
+	uint subpal_count;
+	uint subpal_datasize;
 };
 
 } // namespace chrgfx

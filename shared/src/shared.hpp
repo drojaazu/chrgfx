@@ -4,6 +4,7 @@
 #include "chrgfx.hpp"
 #include <getopt.h>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -12,9 +13,9 @@ using std::string;
 struct runtime_config {
 	string profile{""};
 	string gfxdef{""};
-	s16 subpalette;
+	std::optional<unsigned int> subpalette;
 
-	runtime_config() { subpalette = -1; }
+	runtime_config() { subpalette = std::nullopt; }
 };
 
 class gfxprofile : public chrgfx::gfxdef

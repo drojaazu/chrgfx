@@ -8,21 +8,16 @@ namespace chrgfx
 {
 namespace conv_palette
 {
-std::map<string const, png::palette (*)(paldef const &, coldef const &,
-																				u8 const *, signed int const)>
-		converters_to{{"default", palconv_to}};
+std::map<string const, palconv_to_t> converters_to{{"default", palconv_to}};
 
-std::map<string const, u8 *(*)(paldef const &, coldef const &,
-															 png::palette const &, signed int const)>
-		converters_from{{"default", palconv_from}};
+std::map<string const, palconv_from_t> converters_from{
+		{"default", palconv_from}};
 
 png::palette palconv_to(paldef const &from_paldef, coldef const &from_coldef,
-												u8 const *data, signed int const subpal_idx)
+												u8 const *data,
+												std::optional<unsigned int const> subpal_idx)
 {
-	u16 const subpal_count{from_paldef.get_subpal_count()};
-	if(subpal_idx >= subpal_count) {
-		throw std::invalid_argument("Specified subpalette index is invalid");
-	}
+	uint const subpal_count{from_paldef.get_subpal_count()};
 
 	unsigned int const
 			// size of one entry in the paldef palette (in bits)
@@ -30,22 +25,25 @@ png::palette palconv_to(paldef const &from_paldef, coldef const &from_coldef,
 			// number of entries in a subpalette
 			subpal_length{from_paldef.get_subpal_length()},
 			// total size of a paldef subpalette (in bits)
-			subpal_datasize{from_paldef.get_subpal_datasize() == 0
-													? (inpal_entry_datasize * subpal_length)
-													: from_paldef.get_subpal_datasize()};
+			subpal_datasize{from_paldef.get_subpal_datasize()};
 
 	unsigned int outpal_length{0};
 
 	u32 const inpal_entry_mask = create_bitmask32(inpal_entry_datasize);
 
 	// points to the start of the palette data (for use with subpalettes)
-	u8 const *inpal_data_ptr;
+	u8 const *inpal_data_ptr{nullptr};
 
 	// calculate the number of entries in our output palette
-	if(subpal_idx >= 0) {
+	if(subpal_idx) {
+		if(subpal_idx.value() >= subpal_count) {
+			throw std::invalid_argument("Specified subpalette index is invalid");
+		}
+
 		// if we're using a subpalette
-		outpal_length = from_paldef.get_subpal_length();
-		inpal_data_ptr = data + ((subpal_datasize * subpal_idx) / 8);
+		outpal_length = subpal_length;
+		inpal_data_ptr = data + ((subpal_datasize * subpal_idx.value()) / 8);
+
 	} else {
 		// if we're using the full palette
 		// limit the total number of entries in the final palette to 256
@@ -76,7 +74,8 @@ png::palette palconv_to(paldef const &from_paldef, coldef const &from_coldef,
 	u32 this_entry{0};
 
 	// loop for each color entry in the output palette
-	for(u16 pal_entry{0}; pal_entry < outpal_length; ++pal_entry) {
+	for(u16 this_inpal_entry{0}; this_inpal_entry < outpal_length;
+			++this_inpal_entry) {
 		byte_offset = bit_align_ptr / 8;
 		bit_offset = bit_align_ptr % 8;
 
@@ -96,7 +95,8 @@ png::palette palconv_to(paldef const &from_paldef, coldef const &from_coldef,
 		// for special cases where the data size of the subpalette
 		// is larger than the sum of the datasize of the colors
 		// position the data ptr to the next actual subpalette
-		if(pal_entry > 0 && pal_entry % from_paldef.get_subpal_length() == 0) {
+		if(this_inpal_entry > 0 &&
+			 this_inpal_entry % from_paldef.get_subpal_length() == 0) {
 			bit_align_ptr += subpal_datasize -
 											 (inpal_entry_datasize * from_paldef.get_subpal_length());
 		}
@@ -106,43 +106,57 @@ png::palette palconv_to(paldef const &from_paldef, coldef const &from_coldef,
 }
 
 u8 *palconv_from(paldef const &to_paldef, coldef const &to_coldef,
-								 png::palette const &data, signed int const subpal_idx)
+								 png::palette const &data,
+								 std::optional<unsigned int const> subpal_idx)
 {
-	u16 const subpal_count{to_paldef.get_subpal_count()};
-	if(subpal_idx >= subpal_count) {
-		throw std::invalid_argument("Specified subpalette index is invalid");
-	}
-	unsigned int const entry_datasize{to_paldef.get_entry_datasize()},
-			entry_datasize_bytes{(u16)(to_paldef.get_entry_datasize() / 8)},
+	unsigned int const
+			// total number of subpalettes in the system palette
+			subpal_count{to_paldef.get_subpal_count()},
+			// size of a single color within a palette, in bits
+			entry_datasize{to_paldef.get_entry_datasize()},
+			// as above, in bytes
+			entry_datasize_bytes{entry_datasize / 8},
+			// total number of entries in a single subpalette
 			subpal_length{to_paldef.get_subpal_length()},
-			subpal_datasize{to_paldef.get_subpal_datasize() == 0
-													? entry_datasize * subpal_length
-													: to_paldef.get_subpal_datasize()};
+			// total size of a single subpalette, in bits
+			subpal_datasize{to_paldef.get_subpal_datasize()};
 
-	unsigned int outpal_length{0};
+	unsigned int
+			// the first entry to read from
+			start_entry{0},
+			// the last entry to read from
+			end_entry{0},
+			// the number of entries in the final palette
+			outpal_length{0};
 
 	u32 const outpal_entry_mask{create_bitmask32(entry_datasize)};
 
-	// calculate the number of entries in our output palette
-	if(subpal_idx >= 0) {
+	// calculate the ranges we'll be working with
+	if(subpal_idx) {
 		// if we're using a subpalette
+		if(subpal_idx.value() >= subpal_count) {
+			throw std::invalid_argument("Specified subpalette index is invalid");
+		}
 		outpal_length = subpal_length;
+		start_entry = subpal_idx.value() * subpal_length;
+		end_entry = start_entry + subpal_length;
+
 	} else {
 		// if we're using the full palette
 		// limit the total number of entries in the final palette to 256
-		outpal_length =
-				(((subpal_count * subpal_length) > 256) ? 256
-																								: subpal_count * subpal_length);
+		outpal_length = (((to_paldef.get_palette_length()) > 256)
+												 ? 256
+												 : subpal_count * subpal_length);
+		end_entry = outpal_length;
 	}
 
-	unsigned int out_datasize{outpal_length * (entry_datasize / 8)};
+	unsigned int out_datasize{outpal_length * entry_datasize_bytes};
 	u8 *out{new u8[out_datasize]};
 	std::fill(out, out + out_datasize, 0);
 
 	size_t bit_align_ptr{0}, byte_offset{0}, bit_offset{0};
 
 	u8 entry_temp[entry_datasize_bytes];
-	u8 *test_ptr;
 
 	u8 *(*copyfunc)(u8 *, u8 *, u8 *);
 	if(bigend_sys == to_coldef.get_is_big_endian()) {
@@ -156,16 +170,18 @@ u8 *palconv_from(paldef const &to_paldef, coldef const &to_coldef,
 	// mask away the extra bits
 	// if entry size does not align to bytes, pack entries ***
 	// resize to subpal data size if necessary ***
-	for(u16 inpal_entry{0}; inpal_entry < outpal_length; ++inpal_entry) {
+	for(unsigned int this_inpal_entry{start_entry}; this_inpal_entry < end_entry;
+			++this_inpal_entry) {
 		byte_offset = bit_align_ptr / 8;
 		bit_offset = bit_align_ptr % 8;
 
 		// color data stored in lsb
 		u32 this_color =
-				(conv_color::colconv_from(to_coldef, data.at(inpal_entry)) &
+				(conv_color::colconv_from(to_coldef, data.at(this_inpal_entry)) &
 				 outpal_entry_mask);
 
 		// if bit gender does not match host system, reverse the value
+		/*
 		if(bigend_sys != to_coldef.get_is_big_endian()) {
 			if(entry_datasize_bytes == 2) {
 				// 2 bytes
@@ -178,6 +194,7 @@ u8 *palconv_from(paldef const &to_paldef, coldef const &to_coldef,
 										 ((this_color << 24) & 0xff000000); // byte 0 to byte 3
 			}
 		}
+		*/
 
 		if(entry_datasize < 8) {
 			// crazy cases here

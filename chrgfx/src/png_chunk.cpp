@@ -24,12 +24,12 @@ chrbank png_chunk(chrdef const &chrdef,
 									png::pixel_buffer<png::index_pixel> const &bitmap)
 {
 	// store the chr dimensions locally
-	u16 chr_pxlwidth{(chrdef.get_width())}, chr_pxlheight{chrdef.get_height()};
+	uint chr_pxlwidth{(chrdef.get_width())}, chr_pxlheight{chrdef.get_height()};
 
 	// get image dimensions in tile size & final tile count
-	u32 const img_row_chr{bitmap.get_width() / chr_pxlwidth};
-	u32 const img_col_chr{bitmap.get_height() / chr_pxlheight};
-	u32 const chr_count{img_row_chr * img_col_chr};
+	uint const img_row_chr{bitmap.get_width() / chr_pxlwidth};
+	uint const img_col_chr{bitmap.get_height() / chr_pxlheight};
+	uint const chr_count{img_row_chr * img_col_chr};
 
 	chrbank outbank{chrdef};
 	outbank.reserve(chr_count);

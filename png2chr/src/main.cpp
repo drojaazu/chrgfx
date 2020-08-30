@@ -138,12 +138,12 @@ int main(int argc, char **argv)
 			if(!pal_outfile.good()) {
 				throw std::ios_base::failure(std::strerror(errno));
 			}
-			size_t filesize =
-					paldef.get_subpal_datasize() == 0
-							? ((paldef.get_entry_datasize() / 8) *
-								 paldef.get_subpal_length()) *
-										paldef.get_subpal_count()
-							: (paldef.get_subpal_datasize() / 8) * paldef.get_subpal_count();
+			size_t filesize{
+					(cfg.subpalette
+							 ? paldef.get_subpal_datasize_bytes()
+							 : (paldef.get_palette_length() > 256
+											? (size_t)(256 * (paldef.get_entry_datasize() / 8))
+											: paldef.get_palette_datasize_bytes()))};
 
 			pal_outfile.write((char *)t, filesize);
 		}

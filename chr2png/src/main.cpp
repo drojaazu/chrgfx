@@ -58,8 +58,7 @@ int main(int argc, char **argv)
 	// converter function pointers
 	u8 *(*chr_to_converter)(chrdef const &, u8 const *);
 	png::color (*col_to_converter)(coldef const &, u32 const);
-	png::palette (*pal_to_converter)(paldef const &, coldef const &, u8 const *,
-																	 signed int const);
+	conv_palette::palconv_to_t pal_to_converter;
 
 	// load definitions
 	auto defs = load_gfxdefs(cfg.gfxdef);

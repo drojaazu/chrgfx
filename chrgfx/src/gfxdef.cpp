@@ -12,22 +12,22 @@ gfxdef::gfxdef(string const &id) : id(id)
 
 string gfxdef::get_id() const { return id; };
 
-chrdef::chrdef(string id, u16 width, u16 height, u8 bitplanes,
-							 vector<u32> planeoffset, vector<u32> pixeloffset,
-							 vector<u32> rowoffset)
+chrdef::chrdef(string id, uint width, uint height, uint bitplanes,
+							 vector<uint> planeoffset, vector<uint> pixeloffset,
+							 vector<uint> rowoffset)
 		: gfxdef(std::move(id)), datasize(width * height * bitplanes), width(width),
 			height(height), bitplanes(bitplanes), planeoffset(std::move(planeoffset)),
 			pixeloffset(std::move(pixeloffset)), rowoffset(std::move(rowoffset)){};
 
-u16 chrdef::get_width() const { return width; }
-u16 chrdef::get_height() const { return height; }
-u8 chrdef::get_bitplanes() const { return bitplanes; }
-u32 chrdef::get_pixeloffset_at(size_t pos) const { return pixeloffset[pos]; };
-u32 chrdef::get_rowoffset_at(size_t pos) const { return rowoffset[pos]; };
-u32 chrdef::get_planeoffset_at(size_t pos) const { return planeoffset[pos]; };
-u32 chrdef::get_datasize() const { return datasize; }
+uint chrdef::get_width() const { return width; }
+uint chrdef::get_height() const { return height; }
+uint chrdef::get_bitplanes() const { return bitplanes; }
+uint chrdef::get_pixeloffset_at(uint pos) const { return pixeloffset[pos]; };
+uint chrdef::get_rowoffset_at(uint pos) const { return rowoffset[pos]; };
+uint chrdef::get_planeoffset_at(uint pos) const { return planeoffset[pos]; };
+uint chrdef::get_datasize() const { return datasize; }
 
-coldef::coldef(string id, u8 bitdepth, vector<rgb_layout> layout,
+coldef::coldef(string id, uint bitdepth, vector<rgb_layout> layout,
 							 bool is_big_endian)
 		: gfxdef(std::move(id)), bitdepth(bitdepth), layout(std::move(layout)),
 			is_big_endian(is_big_endian), is_reftab(false){};
@@ -36,15 +36,15 @@ coldef::coldef(string id, palette reftab, bool is_big_endian)
 		: gfxdef(std::move(id)), reftab(std::move(reftab)),
 			is_big_endian(is_big_endian), is_reftab(true){};
 
-rgb_layout coldef::get_rgb_pass(size_t pass) const { return layout[pass]; }
+rgb_layout coldef::get_rgb_pass(uint pass) const { return layout[pass]; }
 
-u8 coldef::get_bitdepth() const { return bitdepth; };
+uint coldef::get_bitdepth() const { return bitdepth; };
 
 vector<rgb_layout> coldef::get_rgb_layout() const { return layout; }
 
-color coldef::get_reftab_entry(size_t index) const { return reftab[index]; }
+color coldef::get_reftab_entry(uint index) const { return reftab[index]; }
 
-size_t coldef::get_reftab_idx(color rgb) const
+uint coldef::get_reftab_idx(color rgb) const
 {
 	size_t idx{0};
 	for(auto &this_color : reftab) {
@@ -82,27 +82,46 @@ size_t coldef::get_reftab_idx(color rgb) const
 bool coldef::use_reftab() const { return is_reftab; }
 bool coldef::get_is_big_endian() const { return is_big_endian; }
 
-paldef::paldef(string id, u8 entry_datasize, u16 subpal_length,
-							 u16 subpal_count, u8 subpal_datasize)
+paldef::paldef(string id, uint entry_datasize, uint subpal_length,
+							 uint subpal_count, std::optional<uint> subpal_datasize)
 		: gfxdef(std::move(id)), entry_datasize(entry_datasize),
 			subpal_length(subpal_length), subpal_count(subpal_count),
-			subpal_datasize(subpal_datasize){};
+			subpal_datasize(subpal_datasize ? subpal_datasize.value()
+																			: entry_datasize * subpal_length){};
 
-u8 paldef::get_entry_datasize() const { return entry_datasize; }
+uint paldef::get_entry_datasize() const { return entry_datasize; }
 
-u16 paldef::get_subpal_length() const { return subpal_length; }
+uint paldef::get_palette_length() const
+{
+	return subpal_length * subpal_count;
+};
 
-u16 paldef::get_subpal_count() const { return subpal_count; }
+uint paldef::get_subpal_length() const { return subpal_length; }
 
-u8 paldef::get_subpal_datasize() const { return subpal_datasize; }
+uint paldef::get_subpal_count() const { return subpal_count; }
 
-rgb_layout::rgb_layout(pair<s8, u8> red, pair<s8, u8> green, pair<s8, u8> blue)
+uint paldef::get_palette_datasize() const
+{
+	return subpal_datasize * subpal_count;
+}
+
+uint paldef::get_palette_datasize_bytes() const
+{
+	return (subpal_datasize * subpal_count) / 8;
+}
+
+uint paldef::get_subpal_datasize() const { return subpal_datasize; }
+
+uint paldef::get_subpal_datasize_bytes() const { return subpal_datasize / 8; };
+
+rgb_layout::rgb_layout(pair<int, uint> red, pair<int, uint> green,
+											 pair<int, uint> blue)
 		: red(std::move(red)), green(std::move(green)), blue(std::move(blue)){};
 
-s8 rgb_layout::get_red_shift() const { return red.first; }
-u8 rgb_layout::get_red_count() const { return red.second; }
-s8 rgb_layout::get_green_shift() const { return green.first; }
-u8 rgb_layout::get_green_count() const { return green.second; }
-s8 rgb_layout::get_blue_shift() const { return blue.first; }
-u8 rgb_layout::get_blue_count() const { return blue.second; }
+int rgb_layout::get_red_shift() const { return red.first; }
+uint rgb_layout::get_red_count() const { return red.second; }
+int rgb_layout::get_green_shift() const { return green.first; }
+uint rgb_layout::get_green_count() const { return green.second; }
+int rgb_layout::get_blue_shift() const { return blue.first; }
+uint rgb_layout::get_blue_count() const { return blue.second; }
 } // namespace chrgfx
