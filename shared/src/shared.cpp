@@ -1,20 +1,16 @@
 #include "shared.hpp"
 
-/*
-	I spent a fair amount of time looking for a 'best practices' way of finding
-	the user lib path, but couldn't find anything useful. So we have it hardcoded
-	here. This is only used for convenience for a default gfxdef file, so it's not
-	critical, but if anyone knows a better way to do this, a PR is appreciated.
-*/
-string const DEFAULT_LIB_PATH{"/usr/local/lib/chrgfx"};
+using std::string;
 
 string default_short_opts{":G:P:s:h"};
 
 std::vector<option> default_long_opts{
 		{"gfx-def", required_argument, nullptr, 'G'},
+		{"chr-def", required_argument, nullptr, 'T'},
+		{"col-def", required_argument, nullptr, 'C'},
+		{"pal-def", required_argument, nullptr, 'L'},
 		{"profile", required_argument, nullptr, 'P'},
-		{"subpalette", required_argument, nullptr, 's'},
-		{"help", no_argument, nullptr, 'h'}};
+		{"subpalette", required_argument, nullptr, 's'}};
 
 bool process_default_args(runtime_config &cfg, int argc, char **argv)
 {
@@ -33,6 +29,18 @@ bool process_default_args(runtime_config &cfg, int argc, char **argv)
 				cfg.gfxdef = optarg;
 				break;
 
+			case 'T':
+				cfg.chrdef = optarg;
+				break;
+
+			case 'C':
+				cfg.coldef = optarg;
+				break;
+
+			case 'L':
+				cfg.paldef = optarg;
+				break;
+
 			case 'P':
 				cfg.profile = optarg;
 				break;
@@ -46,10 +54,6 @@ bool process_default_args(runtime_config &cfg, int argc, char **argv)
 				}
 				break;
 
-			// help
-			case 'h':
-				// print_help();
-				return false;
 			case ':':
 				std::cerr << "Missing arg for option: " << (char)optopt << std::endl;
 				return false;
@@ -59,6 +63,7 @@ bool process_default_args(runtime_config &cfg, int argc, char **argv)
 				return false;
 		}
 	}
+
 	// reset the getopt index for the next scan
 	optind = 0;
 	return true;

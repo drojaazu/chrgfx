@@ -140,11 +140,11 @@ bool is_system_bigendian()
 {
 	// shamelessly stolen from stack overflow
 	// https://stackoverflow.com/questions/1001307/detecting-endianness-programmatically-in-a-c-program/56191401#56191401
-	const int value{0x01};
-	const void *address = static_cast<const void *>(&value);
-	const unsigned char *least_significant_address =
+	int const value{0x01};
+	void const *address = static_cast<const void *>(&value);
+	unsigned char const *least_significant_address =
 			static_cast<const unsigned char *>(address);
-	return (*least_significant_address == 0x01) ? false : true;
+	return !(*least_significant_address == 0x01);
 }
 
 const bool bigend_sys = is_system_bigendian();

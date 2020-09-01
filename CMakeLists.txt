@@ -21,6 +21,5 @@ if (NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
   endif()
 endif()
 
-
-install(TARGETS chr2png
-        RUNTIME DESTINATION bin)
+install(TARGETS chr2png png2chr
+        RUNTIME DESTINATION /usr/bin)

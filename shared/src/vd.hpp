@@ -9,42 +9,41 @@
 #include <string>
 #include <vector>
 
-using std::string;
-using std::vector;
-
 namespace vd
 {
 
-template <typename T> T sto(string const &val)
+template <typename T> T sto(std::string const &val, int base = 10)
 {
-	long temp = std::stol(val);
+	signed long temp{std::stol(val, nullptr, base)};
 	if(temp < std::numeric_limits<T>::min() ||
 		 temp > std::numeric_limits<T>::max()) {
-		throw std::out_of_range("Invalid string value");
+		throw std::out_of_range("Value does not fit in specified type");
 	}
 	return (T)temp;
 }
 
-template <typename T> T vd_int_pos(string const &val)
+template <typename T> T vd_int_pos(std::string const &val)
 {
 	T out{sto<T>(val)};
 	if(out <= 0) {
-		throw "Value must be greater than zero";
+		throw std::out_of_range("Value must be greater than zero");
 	}
 	return out;
 }
 
-template <typename T> T vd_int_nonneg(string const &val)
+template <typename T> T vd_int_nonneg(std::string const &val)
 {
 	T out{sto<T>(val)};
 	if(out < 0) {
-		throw "Value must be non-negative";
+		throw std::out_of_range("Value must be non-negative");
 	}
 	return out;
 }
 
-// converts comma seperated list of values into array
-template <typename T> vector<T> vd_int_array(string const &val)
+/**
+ * Converts a comma delimited list of integer values into a vector
+ */
+template <typename T> std::vector<T> vd_int_array(std::string const &val)
 {
 	std::vector<T> out;
 

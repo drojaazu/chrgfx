@@ -1,47 +1,49 @@
 #ifndef CHRGFX__CONV_CHR_H
 #define CHRGFX__CONV_CHR_H
 
-#include "gfxdef.hpp"
 #include "types.hpp"
 #include <iomanip>
 #include <map>
+#include <string>
 
 namespace chrgfx
 {
+// forward declaration of gfxdef types
+class chrdef;
+class coldef;
+class paldef;
+
 namespace conv_chr
 {
-
-/*
-TILE CONVERSION ROUTINES
-Any custom tile conversion functions should take a reference to a chr_def and
-a pointer to the array of raw byte data. It will return an array of converted
-byte data.
-
-The converted byte data should be an array of unsigned values, each as one
-pixel referencing a value in the output palette.
-*/
+/**
+ * Represents a function to convert a tile to a given encoding
+ */
+typedef u8 *(*chrconv_to_t)(chrdef const &, u8 const *);
 
 /**
- * Returns a chrdef-encoded tile from standard tile data
+ * Represents a function to convert a tile from a given encoding
  */
-u8 *chrconv_from(chrdef const &to_def, u8 const *data);
+typedef u8 *(*chrconv_from_t)(chrdef const &, u8 const *);
 
 /**
- * Returns a standard tile from chrdef-encoded tile data
+ * Reference of all functions for converting a tile to a given encoding
  */
-u8 *chrconv_to(chrdef const &from_def, u8 const *data);
+extern std::map<std::string const, chrconv_to_t> const converters_to;
 
 /**
- * Reference of all functions to convert tiles to secondary encoding
+ * Reference of all functions for converting a tile from a given encoding
  */
-extern std::map<string const, u8 *(*)(chrdef const &, u8 const *)>
-		converters_to;
+extern std::map<std::string const, chrconv_from_t> const converters_from;
 
 /**
- * Reference of all functions to convert tiles to basic encoding
+ * Convert a tile to the specified encoding
  */
-extern std::map<string const, u8 *(*)(chrdef const &, u8 const *)>
-		converters_from;
+u8 *chrconv_to(chrdef const &to_def, u8 const *data);
+
+/**
+ * Convert a tile from the specified encoding
+ */
+u8 *chrconv_from(chrdef const &from_def, u8 const *data);
 
 } // namespace conv_chr
 } // namespace chrgfx

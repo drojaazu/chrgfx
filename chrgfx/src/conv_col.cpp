@@ -1,23 +1,19 @@
 #include "conv_col.hpp"
+#include "gfxdef.hpp"
 
 namespace chrgfx
 {
 namespace conv_color
 {
 
-/**
- * Reference of all functions to convert colors to basic encoding
- */
-std::map<string const, png::color (*)(coldef const &, u32 const)> converters_to{
+// converter maps
+ std::map<string const, colconv_to_t> const converters_to{
 		{"default", colconv_to}};
 
-/**
- * Reference of all functions to convert colors to secondary encoding
- */
-std::map<string const, u32 (*)(coldef const &, png::color const)>
-		converters_from{{"default", colconv_from}};
+ std::map<string const, colconv_from_t> const converters_from{
+		{"default", colconv_from}};
 
-png::color colconv_to(coldef const &from_coldef, u32 const data)
+png::color colconv_from(coldef const &from_coldef, u32 const data)
 {
 	if(from_coldef.use_reftab()) {
 		return from_coldef.get_reftab_entry(data);
@@ -59,7 +55,7 @@ png::color colconv_to(coldef const &from_coldef, u32 const data)
 	}
 };
 
-u32 colconv_from(coldef const &to_coldef, png::color const data)
+u32 colconv_to(coldef const &to_coldef, png::color const data)
 {
 	if(to_coldef.use_reftab()) {
 		return to_coldef.get_reftab_idx(data);

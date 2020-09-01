@@ -256,6 +256,18 @@ paldef
   subpal_count 192
 }
 
+paldef
+{
+  id tilelayerpro_standard
+  comment TileLayer Pro TPL file
+
+
+  entry_datasize 24
+  subpal_length 256
+  subpal_count 1
+  
+}
+
 #################################
 ##
 ## C H R D E F S

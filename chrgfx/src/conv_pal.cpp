@@ -3,20 +3,30 @@
  * Convert palette formats
  ********************************/
 #include "conv_pal.hpp"
+#include "gfxdef.hpp"
 
 namespace chrgfx
 {
 namespace conv_palette
 {
-std::map<string const, palconv_to_t> converters_to{{"default", palconv_to}};
 
-std::map<string const, palconv_from_t> converters_from{
-		{"default", palconv_from}};
+// converter maps
+std::map<string const, palconv_from_t> const converters_from{
+		{"default", palconv_from}, {"tilelayerpro", palconv_tilelayerpro_to}};
 
-png::palette palconv_to(paldef const &from_paldef, coldef const &from_coldef,
-												u8 const *data,
-												std::optional<unsigned int const> subpal_idx)
+std::map<string const, palconv_to_t> const converters_to{
+		{"default", palconv_to}};
+
+png::palette
+palconv_from(paldef const &from_paldef, coldef const &from_coldef,
+						 u8 const *data,
+						 std::optional<unsigned int const> const &subpal_idx,
+						 std::optional<conv_color::colconv_from_t> const &color_conv)
 {
+
+	conv_color::colconv_from_t convert_color{
+			color_conv.value_or(conv_color::colconv_from)};
+
 	uint const subpal_count{from_paldef.get_subpal_count()};
 
 	unsigned int const
@@ -88,7 +98,7 @@ png::palette palconv_to(paldef const &from_paldef, coldef const &from_coldef,
 		this_entry >>= bit_offset;
 		this_entry &= inpal_entry_mask;
 
-		out.push_back(conv_color::colconv_to(from_coldef, this_entry));
+		out.push_back(convert_color(from_coldef, this_entry));
 
 		bit_align_ptr += inpal_entry_datasize;
 
@@ -105,10 +115,14 @@ png::palette palconv_to(paldef const &from_paldef, coldef const &from_coldef,
 	return out;
 }
 
-u8 *palconv_from(paldef const &to_paldef, coldef const &to_coldef,
-								 png::palette const &data,
-								 std::optional<unsigned int const> subpal_idx)
+u8 *palconv_to(paldef const &to_paldef, coldef const &to_coldef,
+							 png::palette const &data,
+							 std::optional<unsigned int const> const &subpal_idx,
+							 std::optional<conv_color::colconv_to_t> const &color_conv)
 {
+	conv_color::colconv_to_t convert_color{
+			color_conv.value_or(conv_color::colconv_to)};
+
 	unsigned int const
 			// total number of subpalettes in the system palette
 			subpal_count{to_paldef.get_subpal_count()},
@@ -176,25 +190,8 @@ u8 *palconv_from(paldef const &to_paldef, coldef const &to_coldef,
 		bit_offset = bit_align_ptr % 8;
 
 		// color data stored in lsb
-		u32 this_color =
-				(conv_color::colconv_from(to_coldef, data.at(this_inpal_entry)) &
-				 outpal_entry_mask);
-
-		// if bit gender does not match host system, reverse the value
-		/*
-		if(bigend_sys != to_coldef.get_is_big_endian()) {
-			if(entry_datasize_bytes == 2) {
-				// 2 bytes
-				this_color = (this_color >> 8) | (this_color << 8);
-			} else if(entry_datasize_bytes > 2) {
-				// more than 2 bytes, use 32 bit
-				this_color = ((this_color >> 24) & 0xff) |			// move byte 3 to byte 0
-										 ((this_color << 8) & 0xff0000) |		// move byte 1 to byte 2
-										 ((this_color >> 8) & 0xff00) |			// move byte 2 to byte 1
-										 ((this_color << 24) & 0xff000000); // byte 0 to byte 3
-			}
-		}
-		*/
+		u32 this_color = (convert_color(to_coldef, data.at(this_inpal_entry)) &
+											outpal_entry_mask);
 
 		if(entry_datasize < 8) {
 			// crazy cases here
@@ -214,7 +211,10 @@ u8 *palconv_from(paldef const &to_paldef, coldef const &to_coldef,
 	return out;
 }
 
-palette get_pal_tlp(paldef const &paldef, u8 *data, s16 subpal_idx)
+png::palette palconv_tilelayerpro_to(
+		paldef const &from_paldef, coldef const &from_coldef, u8 const *data,
+		std::optional<unsigned int const> const &subpal_idx,
+		std::optional<conv_color::colconv_from_t> const &color_conv)
 {
 	if(data[0] != 0x54 || data[1] != 0x50 || data[2] != 0x4c)
 		std::cerr << "Warning: Does not appear to be a valid TLP palette"
@@ -225,23 +225,29 @@ palette get_pal_tlp(paldef const &paldef, u8 *data, s16 subpal_idx)
 				"Unsupported TPL file (only RGB mode supported)");
 	}
 
-	u16 pal_length = paldef.get_subpal_count() * paldef.get_subpal_length();
+	uint pal_length = from_paldef.get_palette_length();
+
+	// these are the only valid lengths
+	if(pal_length != 16 | pal_length != 32 | pal_length != 64 |
+		 pal_length != 128 | pal_length != 256) {
+		throw std::invalid_argument("Invalid TPL palette length");
+	}
 
 	// start at the actual data
 	data += 4;
-	if(subpal_idx >= 0) {
-		pal_length = paldef.get_subpal_length();
-		data += (subpal_idx * paldef.get_subpal_length() * 3);
+	if(subpal_idx) {
+		pal_length = from_paldef.get_subpal_length();
+		data += (subpal_idx.value() * from_paldef.get_subpal_length() * 3);
 	}
 
-	if(pal_length > 256) {
-		throw std::invalid_argument("Specified TPL size is invalid (subpal_count * "
-																"subpal_length cannot be greater than 256)");
-	}
+	if(pal_length > 256)
+		pal_length = 256;
+
 	auto out{palette()};
 	out.reserve(pal_length);
 
-	for(size_t palEntryIter = 0; palEntryIter < pal_length; ++palEntryIter) {
+	for(size_t this_pal_entry = 0; this_pal_entry < pal_length;
+			++this_pal_entry) {
 		out.push_back(color(data[0], data[1], data[2]));
 		data += 3;
 	}

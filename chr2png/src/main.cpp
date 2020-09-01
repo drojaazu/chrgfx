@@ -9,6 +9,7 @@
 #include <map>
 #include <stdio.h>
 
+using std::map;
 using std::string;
 using std::vector;
 using namespace chrgfx;
@@ -21,12 +22,12 @@ void process_args(int argc, char **argv);
 void print_help();
 
 // application globals
-static unsigned int const VERSION_MAJOR{1};
-static unsigned int const VERSION_MINOR{0};
-static unsigned int const VERSION_FIX{0};
-static std::string const VERSION{std::to_string(VERSION_MAJOR) + "." +
-																 std::to_string(VERSION_MINOR) + "." +
-																 std::to_string(VERSION_FIX)};
+static unsigned int const APP_VERSION_MAJOR{1};
+static unsigned int const APP_VERSION_MINOR{0};
+static unsigned int const APP_VERSION_FIX{0};
+static std::string const APP_VERSION{std::to_string(APP_VERSION_MAJOR) + "." +
+																		 std::to_string(APP_VERSION_MINOR) + "." +
+																		 std::to_string(APP_VERSION_FIX)};
 static std::string const APP_NAME{"chr2png"};
 
 struct runtime_config_chr2png : runtime_config {
@@ -41,140 +42,157 @@ runtime_config_chr2png cfg;
 int main(int argc, char **argv)
 {
 	try {
-		// Runtime State Setup
-		process_args(argc, argv);
-	} catch(std::exception const &e) {
-		// failure in argument parsing/runtime config
-		std::cerr << e.what() << std::endl;
-		return -1;
-	}
-
-	// see if we even have good input before moving on
-	std::ifstream chrdata{cfg.chrdata_name};
-	if(!chrdata.good()) {
-		throw std::ios_base::failure(std::strerror(errno));
-	}
-
-	// converter function pointers
-	u8 *(*chr_to_converter)(chrdef const &, u8 const *);
-	png::color (*col_to_converter)(coldef const &, u32 const);
-	conv_palette::palconv_to_t pal_to_converter;
-
-	// load definitions
-	auto defs = load_gfxdefs(cfg.gfxdef);
-
-	map<string const, chrdef const> chrdefs{std::get<0>(defs)};
-	map<string const, coldef const> coldefs{std::get<1>(defs)};
-	map<string const, paldef const> paldefs{std::get<2>(defs)};
-	map<string const, gfxprofile const> profiles{std::get<3>(defs)};
-
-	chrdefs.insert(
-			{chrgfx::defs::basic_8x8_1bpp.get_id(), chrgfx::defs::basic_8x8_1bpp});
-
-	coldefs.insert({chrgfx::defs::basic_8bit_random.get_id(),
-									chrgfx::defs::basic_8bit_random});
-
-	paldefs.insert(
-			{chrgfx::defs::basic_256color.get_id(), chrgfx::defs::basic_256color});
-
-	auto profile_iter{profiles.find(cfg.profile)};
-	if(profile_iter == profiles.end()) {
-		throw "Could not find specified gfxprofile";
-	}
-
-	gfxprofile profile{profile_iter->second};
-
-	auto chrdef_iter{chrdefs.find(profile.get_chrdef_id())};
-	if(chrdef_iter == chrdefs.end()) {
-		throw "Could not find specified chrdef";
-	}
-
-	chrdef chrdef{chrdef_iter->second};
-
-	auto coldef_iter{coldefs.find(profile.get_coldef_id())};
-	if(coldef_iter == coldefs.end()) {
-		throw "Could not find specified coldef";
-	}
-
-	coldef coldef{coldef_iter->second};
-
-	auto paldef_iter{paldefs.find(profile.get_paldef_id())};
-	if(paldef_iter == paldefs.end()) {
-		throw "Could not find specified paldef";
-	}
-
-	paldef paldef{paldef_iter->second};
-
-	// TODO - temporary, need to load specified conveter
-	chr_to_converter = conv_chr::converters_to.at("default");
-	pal_to_converter = conv_palette::converters_to.at("default");
-	col_to_converter = conv_color::converters_to.at("default");
-
-#ifdef DEBUG
-	std::chrono::high_resolution_clock::time_point t1 =
-			std::chrono::high_resolution_clock::now();
-#endif
-
-	chrbank workbank{chrdef};
-	auto chunksize = (chrdef.get_datasize() / 8);
-	char chunkbuffer[chunksize];
-
-	while(1) {
-		chrdata.read(chunkbuffer, chunksize);
-		if(chrdata.eof())
-			break;
-
-		workbank.push_back(uptr<u8>(chr_to_converter(chrdef, (u8 *)chunkbuffer)));
-		// uptr<u8>(conv_chr::from_chrdef_chr(chrdef, (u8 *)chunkbuffer)));
-	}
-
-	palette workpal;
-	if(cfg.paldata_name != "") {
-		std::ifstream paldata{cfg.paldata_name};
-		if(!paldata.good()) {
-			throw std::ios_base::failure("Could not open palette data file - " +
-																	 (string)std::strerror(errno));
+		try {
+			// Runtime State Setup
+			process_args(argc, argv);
+		} catch(std::exception const &e) {
+			// failure in argument parsing/runtime config
+			std::cerr << e.what() << std::endl;
+			return -5;
 		}
 
-		paldata.seekg(0, paldata.end);
-		int length = paldata.tellg();
-		paldata.seekg(0, paldata.beg);
+		// see if we even have good input before moving on
+		std::ifstream chrdata{cfg.chrdata_name};
+		if(!chrdata.good()) {
+			std::cerr << "chr-data error: " << std::strerror(errno) << std::endl;
+			return -6;
+		}
 
-		char palbuffer[length];
-		paldata.read(palbuffer, length);
-		workpal = pal_to_converter(paldef, coldef, (u8 *)palbuffer, cfg.subpalette);
+		// converter function pointers
+		conv_chr::chrconv_from_t chr_from_converter;
+		conv_color::colconv_from_t col_from_converter;
+		conv_palette::palconv_from_t pal_from_converter;
 
-	} else {
-		workpal = make_pal_random();
-	}
+		// load definitions
+		std::tuple<map<string const, chrdef const>, map<string const, coldef const>,
+							 map<string const, paldef const>,
+							 map<string const, gfxprofile const>>
+				defs;
+
+		try {
+			defs = load_gfxdefs(cfg.gfxdef);
+		} catch(std::ios_base::failure const &e) {
+			std::cerr << "gfx-def error: " << std::strerror(errno) << std::endl;
+			return -7;
+		}
+
+		map<string const, chrdef const> chrdefs{std::get<0>(defs)};
+		map<string const, coldef const> coldefs{std::get<1>(defs)};
+		map<string const, paldef const> paldefs{std::get<2>(defs)};
+		map<string const, gfxprofile const> profiles{std::get<3>(defs)};
+
+		auto profile_iter{profiles.find(cfg.profile)};
+		if(profile_iter == profiles.end()) {
+			std::cerr << "Could not find specified profile" << std::endl;
+			return -8;
+		}
+
+		gfxprofile profile{profile_iter->second};
+
+		auto chrdef_iter{chrdefs.find(cfg.chrdef.empty() ? profile.get_chrdef_id()
+																										 : cfg.chrdef)};
+		if(chrdef_iter == chrdefs.end()) {
+			std::cerr << "Could not find specified chrdef" << std::endl;
+			return -9;
+		}
+
+		chrdef chrdef{chrdef_iter->second};
+
+		auto coldef_iter{coldefs.find(cfg.coldef.empty() ? profile.get_coldef_id()
+																										 : cfg.coldef)};
+		if(coldef_iter == coldefs.end()) {
+			std::cerr << "Could not find specified coldef" << std::endl;
+			return -10;
+		}
+
+		coldef coldef{coldef_iter->second};
+
+		auto paldef_iter{paldefs.find(cfg.paldef.empty() ? profile.get_paldef_id()
+																										 : cfg.paldef)};
+		if(paldef_iter == paldefs.end()) {
+			std::cerr << "Could not find specified paldef" << std::endl;
+			return -11;
+		}
+
+		paldef paldef{paldef_iter->second};
+
+		// TODO - temporary, need to load specified conveter
+		chr_from_converter = conv_chr::converters_from.at("default");
+		pal_from_converter = conv_palette::converters_from.at("default");
+		col_from_converter = conv_color::converters_from.at("default");
 
 #ifdef DEBUG
-	std::chrono::high_resolution_clock::time_point t2 =
-			std::chrono::high_resolution_clock::now();
-	auto duration =
-			std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-
-	std::cerr << "Tile conversion: " << duration << "ms" << std::endl;
-
-	t1 = std::chrono::high_resolution_clock::now();
+		std::chrono::high_resolution_clock::time_point t1 =
+				std::chrono::high_resolution_clock::now();
 #endif
-	png::image<png::index_pixel> outimg{
-			png_render(workbank, workpal, cfg.rendertraits)};
+
+		// tiles first
+		chrbank workbank{chrdef};
+		auto chunksize = (chrdef.get_datasize() / 8);
+		char chunkbuffer[chunksize];
+
+		while(1) {
+			chrdata.read(chunkbuffer, chunksize);
+			if(chrdata.eof())
+				break;
+
+			workbank.push_back(
+					uptr<u8>(chr_from_converter(chrdef, (u8 *)chunkbuffer)));
+		}
+
+		// then the palette
+		palette workpal;
+		if(cfg.paldata_name != "") {
+			std::ifstream paldata{cfg.paldata_name};
+			if(!paldata.good()) {
+				std::cerr << "pal-data error: " << std::strerror(errno) << std::endl;
+				return -12;
+			}
+
+			paldata.seekg(0, paldata.end);
+			int length = paldata.tellg();
+			paldata.seekg(0, paldata.beg);
+
+			char palbuffer[length];
+			paldata.read(palbuffer, length);
+			workpal = pal_from_converter(paldef, coldef, (u8 *)palbuffer,
+																	 cfg.subpalette, col_from_converter);
+
+		} else {
+			workpal = make_pal_random();
+		}
 
 #ifdef DEBUG
-	t2 = std::chrono::high_resolution_clock::now();
-	duration =
-			std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-	std::cerr << "Rendering: " << duration << "ms" << std::endl;
+		std::chrono::high_resolution_clock::time_point t2 =
+				std::chrono::high_resolution_clock::now();
+		auto duration =
+				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+		std::cerr << "Tile conversion: " << duration << "ms" << std::endl;
+
+		t1 = std::chrono::high_resolution_clock::now();
+#endif
+		png::image<png::index_pixel> outimg{
+				png_render(workbank, workpal, cfg.rendertraits)};
+
+#ifdef DEBUG
+		t2 = std::chrono::high_resolution_clock::now();
+		duration =
+				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+		std::cerr << "Rendering: " << duration << "ms" << std::endl;
 #endif
 
-	if(cfg.outfile.empty()) {
-		outimg.write_stream(std::cout);
-	} else {
-		outimg.write(cfg.outfile);
-	}
+		if(cfg.outfile.empty()) {
+			outimg.write_stream(std::cout);
+		} else {
+			outimg.write(cfg.outfile);
+		}
 
-	return 0;
+		return 0;
+	} catch(std::exception const &e) {
+		std::cerr << "FATAL EXCEPTION: " << e.what() << std::endl;
+		return -1;
+	}
 }
 
 void process_args(int argc, char **argv)
@@ -244,7 +262,7 @@ void process_args(int argc, char **argv)
 
 void print_help()
 {
-	std::cout << APP_NAME << " - ver " << VERSION << std::endl << std::endl;
+	std::cout << APP_NAME << " - ver " << APP_VERSION << std::endl << std::endl;
 	std::cout << "Valid options:" << std::endl;
 	std::cout << "  --gfx-def, -G   Specify graphics data format" << std::endl;
 	std::cout

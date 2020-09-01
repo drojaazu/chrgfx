@@ -1,6 +1,9 @@
 #ifndef CHRGFX__GFXDEF_H
 #define CHRGFX__GFXDEF_H
 
+#include "conv_chr.hpp"
+#include "conv_col.hpp"
+#include "conv_pal.hpp"
 #include "types.hpp"
 #include <optional>
 #include <png++/png.hpp>
@@ -15,7 +18,6 @@ using std::vector;
 
 namespace chrgfx
 {
-
 /**
  * Defines the bit positions of RGB channels
  * Positive shift values shift right; negative values shift left
@@ -64,7 +66,9 @@ class chrdef : public gfxdef
 public:
 	chrdef(string id, uint width, uint height, uint bitplanes,
 				 vector<uint> planeoffset, vector<uint> pixeloffset,
-				 vector<uint> rowoffset);
+				 vector<uint> rowoffset,
+				 conv_chr::chrconv_to_t converter_to = conv_chr::chrconv_to,
+				 conv_chr::chrconv_from_t converter_from = conv_chr::chrconv_from);
 
 	/**
 	 * Returns the width of the tile, in pixels
@@ -116,6 +120,9 @@ private:
 	uint const *rowoffset_data;
 
 	uint datasize; // size of one chr in bits
+
+	conv_chr::chrconv_from_t converter_from;
+	conv_chr::chrconv_to_t converter_to;
 };
 
 /**
@@ -132,12 +139,16 @@ public:
 	 * Constructor for an rgblayout based coldef
 	 */
 	coldef(string id, uint bitdepth, vector<rgb_layout> layout,
-				 bool is_big_endian = false);
+				 bool is_big_endian = false,
+				 conv_color::colconv_to_t converter_to = conv_color::colconv_to,
+				 conv_color::colconv_from_t converter_from = conv_color::colconv_from);
 
 	/**
 	 * Constructor for a reftab based coldef
 	 */
-	coldef(string id, palette reftab, bool is_big_endian = false);
+	coldef(string id, palette reftab, bool is_big_endian = false,
+				 conv_color::colconv_to_t converter_to = conv_color::colconv_to,
+				 conv_color::colconv_from_t converter_from = conv_color::colconv_from);
 
 	/**
 	 * Returns true if this coldef is reftab based
@@ -182,6 +193,9 @@ private:
 	const bool is_reftab;
 	uint bitdepth;
 	const bool is_big_endian;
+
+	conv_color::colconv_from_t converter_from;
+	conv_color::colconv_to_t converter_to;
 };
 
 /**
@@ -190,8 +204,11 @@ private:
 class paldef : public gfxdef
 {
 public:
-	paldef(string id, uint entry_datasize, uint subpal_length, uint subpal_count,
-				 std::optional<uint> subpal_datasize = std::nullopt);
+	paldef(
+			string id, uint entry_datasize, uint subpal_length, uint subpal_count,
+			std::optional<uint> subpal_datasize = std::nullopt,
+			conv_palette::palconv_to_t converter_to = conv_palette::palconv_to,
+			conv_palette::palconv_from_t converter_from = conv_palette::palconv_from);
 
 	/**
 	 * Returns the size in bits of a single color entry
@@ -239,6 +256,9 @@ private:
 	uint subpal_length;
 	uint subpal_count;
 	uint subpal_datasize;
+
+	conv_palette::palconv_to_t converter_to;
+	conv_palette::palconv_from_t converter_from;
 };
 
 } // namespace chrgfx

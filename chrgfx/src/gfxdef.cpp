@@ -14,10 +14,12 @@ string gfxdef::get_id() const { return id; };
 
 chrdef::chrdef(string id, uint width, uint height, uint bitplanes,
 							 vector<uint> planeoffset, vector<uint> pixeloffset,
-							 vector<uint> rowoffset)
+							 vector<uint> rowoffset, conv_chr::chrconv_to_t converter_to,
+							 conv_chr::chrconv_from_t converter_from)
 		: gfxdef(std::move(id)), datasize(width * height * bitplanes), width(width),
 			height(height), bitplanes(bitplanes), planeoffset(std::move(planeoffset)),
-			pixeloffset(std::move(pixeloffset)), rowoffset(std::move(rowoffset)){};
+			pixeloffset(std::move(pixeloffset)), rowoffset(std::move(rowoffset)),
+			converter_to(converter_to), converter_from(converter_from){};
 
 uint chrdef::get_width() const { return width; }
 uint chrdef::get_height() const { return height; }
@@ -28,13 +30,18 @@ uint chrdef::get_planeoffset_at(uint pos) const { return planeoffset[pos]; };
 uint chrdef::get_datasize() const { return datasize; }
 
 coldef::coldef(string id, uint bitdepth, vector<rgb_layout> layout,
-							 bool is_big_endian)
+							 bool is_big_endian, conv_color::colconv_to_t converter_to,
+							 conv_color::colconv_from_t converter_from)
 		: gfxdef(std::move(id)), bitdepth(bitdepth), layout(std::move(layout)),
-			is_big_endian(is_big_endian), is_reftab(false){};
+			is_big_endian(is_big_endian), is_reftab(false),
+			converter_to(converter_to), converter_from(converter_from){};
 
-coldef::coldef(string id, palette reftab, bool is_big_endian)
+coldef::coldef(string id, palette reftab, bool is_big_endian,
+							 conv_color::colconv_to_t converter_to,
+							 conv_color::colconv_from_t converter_from)
 		: gfxdef(std::move(id)), reftab(std::move(reftab)),
-			is_big_endian(is_big_endian), is_reftab(true){};
+			is_big_endian(is_big_endian), is_reftab(true), converter_to(converter_to),
+			converter_from(converter_from){};
 
 rgb_layout coldef::get_rgb_pass(uint pass) const { return layout[pass]; }
 
@@ -83,11 +90,14 @@ bool coldef::use_reftab() const { return is_reftab; }
 bool coldef::get_is_big_endian() const { return is_big_endian; }
 
 paldef::paldef(string id, uint entry_datasize, uint subpal_length,
-							 uint subpal_count, std::optional<uint> subpal_datasize)
+							 uint subpal_count, std::optional<uint> subpal_datasize,
+							 conv_palette::palconv_to_t converter_to,
+							 conv_palette::palconv_from_t converter_from)
 		: gfxdef(std::move(id)), entry_datasize(entry_datasize),
 			subpal_length(subpal_length), subpal_count(subpal_count),
 			subpal_datasize(subpal_datasize ? subpal_datasize.value()
-																			: entry_datasize * subpal_length){};
+																			: entry_datasize * subpal_length),
+			converter_to(converter_to), converter_from(converter_from){};
 
 uint paldef::get_entry_datasize() const { return entry_datasize; }
 

@@ -1,6 +1,10 @@
 
 #include "defblocks.hpp"
 
+using std::map;
+using std::pair;
+using std::string;
+
 static constexpr char COMMENT_MARKER = '#';
 static constexpr char BLOCK_OPENER = '{';
 static constexpr char BLOCK_CLOSER = '}';

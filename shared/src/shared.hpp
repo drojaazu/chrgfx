@@ -8,14 +8,23 @@
 #include <string>
 #include <vector>
 
-using std::string;
+/*
+	Hardcoding /etc isn't best practice, I'm sure, but I couldn't find a standard
+	way of doing it otherwise. Anyone with a better implementation is certainly
+	welcome to open a PR.
+*/
+std::string const DEFAULT_LIB_PATH{"/etc/chrgfx"};
+std::string const DEFAULT_GFXDEF_FILE{DEFAULT_LIB_PATH + "/gfxdefs"};
 
 struct runtime_config {
-	string profile{""};
-	string gfxdef{""};
+	string profile;
+	string gfxdef;
+	string chrdef;
+	string coldef;
+	string paldef;
 	std::optional<unsigned int> subpalette;
 
-	runtime_config() { subpalette = std::nullopt; }
+	runtime_config() : gfxdef(DEFAULT_GFXDEF_FILE), subpalette(std::nullopt){};
 };
 
 class gfxprofile : public chrgfx::gfxdef
@@ -45,10 +54,6 @@ string ltrim(const string &s);
 string rtrim(const string &s);
 string trim(const string &s);
 
-std::pair<string, string> kvsplit(const string &line, const char delim = ' ');
-
 bool process_default_args(runtime_config &cfg, int argc, char **argv);
-
-template <typename T> T sto(string const &str);
 
 #endif
