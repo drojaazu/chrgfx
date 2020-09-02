@@ -5,13 +5,13 @@ namespace chrgfx
 {
 namespace conv_chr
 {
-std::map<string const, chrconv_to_t> const converters_to{
-		{"default", chrconv_to}};
+std::map<string const, cvto_chr_t> const converters_to{
+		{"default", cvto_chr}};
 
-std::map<string const, chrconv_from_t> const converters_from{
-		{"default", chrconv_from}};
+std::map<string const, cvfrom_chr_t> const converters_from{
+		{"default", cvfrom_chr}};
 
-u8 *chrconv_to(chrdef const &to_def, u8 const *data)
+u8 *cvto_chr(chrdef const &to_def, u8 const *data)
 {
 	/*
 		-for every line...
@@ -63,7 +63,7 @@ u8 *chrconv_to(chrdef const &to_def, u8 const *data)
 	return out;
 }
 
-u8 *chrconv_from(chrdef const &from_def, u8 const *data)
+u8 *cvfrom_chr(chrdef const &from_def, u8 const *data)
 {
 	s16 line_iter{0}, pixel_iter{0}, plane_iter{0};
 	u16 curr_pixel, work_byte{0}, work_bit{0}, bitpos_y{0}, bitpos_x{0},

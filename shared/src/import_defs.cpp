@@ -1,6 +1,12 @@
 
 #include "import_defs.hpp"
 
+using namespace chrgfx;
+using namespace vd;
+
+using std::map;
+using std::string;
+
 namespace defkeys
 {
 
@@ -39,7 +45,7 @@ static constexpr char PRF_CHRDEF[] = "chrdef", PRF_COLDEF[] = "coldef",
 
 static constexpr char ERR_KEY_NOT_FOUND[] = "Could not find required key";
 
-palette create_palette(std::string const &pal)
+palette create_palette(string const &pal)
 {
 
 	string value{pal};
@@ -47,7 +53,7 @@ palette create_palette(std::string const &pal)
 	value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
 
 	std::stringstream ss(value);
-	std::string this_value;
+	string this_value;
 	u8 red{0}, green{0}, blue{0};
 	palette out;
 	while(std::getline(ss, this_value, ',')) {
@@ -196,7 +202,7 @@ chrdef validate_chrdef_block(defblock const &def_block)
 
 	// SETTING: converter_to
 	mapiter = def_block.find(defkeys::CHR_CONVERTER_TO);
-	conv_chr::chrconv_to_t temp_converter_to;
+	conv_chr::cvto_chr_t temp_converter_to;
 	try {
 		if(mapiter != def_block.end()) {
 			temp_converter_to = conv_chr::converters_to.at(mapiter->second);
@@ -209,7 +215,7 @@ chrdef validate_chrdef_block(defblock const &def_block)
 
 	// SETTING: converter_from
 	mapiter = def_block.find(defkeys::CHR_CONVERTER_FROM);
-	conv_chr::chrconv_from_t temp_converter_from{nullptr};
+	conv_chr::cvfrom_chr_t temp_converter_from{nullptr};
 	try {
 		if(mapiter != def_block.end()) {
 			temp_converter_from = conv_chr::converters_from.at(mapiter->second);
@@ -358,7 +364,7 @@ coldef validate_coldef_block(defblock const &def_block)
 
 		// SETTING: converter_to
 		mapiter = def_block.find(defkeys::COL_CONVERTER_TO);
-		conv_color::colconv_to_t temp_converter_to;
+		conv_color::cvto_col_t temp_converter_to;
 		try {
 			if(mapiter != def_block.end()) {
 				temp_converter_to = conv_color::converters_to.at(mapiter->second);
@@ -371,7 +377,7 @@ coldef validate_coldef_block(defblock const &def_block)
 
 		// SETTING: converter_from
 		mapiter = def_block.find(defkeys::COL_CONVERTER_FROM);
-		conv_color::colconv_from_t temp_converter_from{nullptr};
+		conv_color::cvfrom_col_t temp_converter_from{nullptr};
 		try {
 			if(mapiter != def_block.end()) {
 				temp_converter_from = conv_color::converters_from.at(mapiter->second);
@@ -441,7 +447,7 @@ paldef validate_paldef_block(defblock const &def_block)
 
 	// SETTING: converter_to
 	mapiter = def_block.find(defkeys::PAL_CONVERTER_TO);
-	conv_palette::palconv_to_t temp_converter_to;
+	conv_palette::cvto_pal_t temp_converter_to;
 	try {
 		if(mapiter != def_block.end()) {
 			temp_converter_to = conv_palette::converters_to.at(mapiter->second);
@@ -454,7 +460,7 @@ paldef validate_paldef_block(defblock const &def_block)
 
 	// SETTING: converter_from
 	mapiter = def_block.find(defkeys::PAL_CONVERTER_FROM);
-	conv_palette::palconv_from_t temp_converter_from{nullptr};
+	conv_palette::cvfrom_pal_t temp_converter_from{nullptr};
 	try {
 		if(mapiter != def_block.end()) {
 			temp_converter_from = conv_palette::converters_from.at(mapiter->second);

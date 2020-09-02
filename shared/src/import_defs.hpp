@@ -1,8 +1,6 @@
 #ifndef CHRGFX_EXEC_IMPORT_DEFS_H
 #define CHRGFX_EXEC_IMPORT_DEFS_H
 
-#include "chrgfx.hpp"
-#include "shared.hpp"
 #include <algorithm>
 #include <array>
 #include <bits/stdc++.h>
@@ -59,10 +57,10 @@ private:
 
 png::palette create_palette(std::string const &pal);
 
-std::tuple<map<string const, chrgfx::chrdef const>,
-					 map<string const, chrgfx::coldef const>,
-					 map<string const, chrgfx::paldef const>,
-					 map<string const, gfxprofile const>>
+std::tuple<std::map<string const, chrgfx::chrdef const>,
+					 std::map<string const, chrgfx::coldef const>,
+					 std::map<string const, chrgfx::paldef const>,
+					 std::map<string const, gfxprofile const>>
 load_gfxdefs(string const &def_file);
 
 chrgfx::chrdef validate_chrdef_block(defblock const &def_block);

@@ -67,8 +67,8 @@ public:
 	chrdef(string id, uint width, uint height, uint bitplanes,
 				 vector<uint> planeoffset, vector<uint> pixeloffset,
 				 vector<uint> rowoffset,
-				 conv_chr::chrconv_to_t converter_to = conv_chr::chrconv_to,
-				 conv_chr::chrconv_from_t converter_from = conv_chr::chrconv_from);
+				 conv_chr::cvto_chr_t converter_to = conv_chr::cvto_chr,
+				 conv_chr::cvfrom_chr_t converter_from = conv_chr::cvfrom_chr);
 
 	/**
 	 * Returns the width of the tile, in pixels
@@ -105,6 +105,10 @@ public:
 	 */
 	uint get_datasize() const;
 
+	conv_chr::cvfrom_chr_t get_converter_from() const;
+
+	conv_chr::cvto_chr_t get_converter_to() const;
+
 private:
 	uint width;
 	uint height;
@@ -121,8 +125,8 @@ private:
 
 	uint datasize; // size of one chr in bits
 
-	conv_chr::chrconv_from_t converter_from;
-	conv_chr::chrconv_to_t converter_to;
+	conv_chr::cvfrom_chr_t converter_from;
+	conv_chr::cvto_chr_t converter_to;
 };
 
 /**
@@ -140,15 +144,15 @@ public:
 	 */
 	coldef(string id, uint bitdepth, vector<rgb_layout> layout,
 				 bool is_big_endian = false,
-				 conv_color::colconv_to_t converter_to = conv_color::colconv_to,
-				 conv_color::colconv_from_t converter_from = conv_color::colconv_from);
+				 conv_color::cvto_col_t converter_to = conv_color::cvto_color,
+				 conv_color::cvfrom_col_t converter_from = conv_color::cvfrom_color);
 
 	/**
 	 * Constructor for a reftab based coldef
 	 */
 	coldef(string id, palette reftab, bool is_big_endian = false,
-				 conv_color::colconv_to_t converter_to = conv_color::colconv_to,
-				 conv_color::colconv_from_t converter_from = conv_color::colconv_from);
+				 conv_color::cvto_col_t converter_to = conv_color::cvto_color,
+				 conv_color::cvfrom_col_t converter_from = conv_color::cvfrom_color);
 
 	/**
 	 * Returns true if this coldef is reftab based
@@ -187,6 +191,10 @@ public:
 	 */
 	bool get_is_big_endian() const;
 
+	conv_color::cvfrom_col_t get_converter_from() const;
+
+	conv_color::cvto_col_t get_converter_to() const;
+
 private:
 	vector<rgb_layout> layout;
 	palette reftab;
@@ -194,8 +202,8 @@ private:
 	uint bitdepth;
 	const bool is_big_endian;
 
-	conv_color::colconv_from_t converter_from;
-	conv_color::colconv_to_t converter_to;
+	conv_color::cvfrom_col_t converter_from;
+	conv_color::cvto_col_t converter_to;
 };
 
 /**
@@ -204,11 +212,10 @@ private:
 class paldef : public gfxdef
 {
 public:
-	paldef(
-			string id, uint entry_datasize, uint subpal_length, uint subpal_count,
-			std::optional<uint> subpal_datasize = std::nullopt,
-			conv_palette::palconv_to_t converter_to = conv_palette::palconv_to,
-			conv_palette::palconv_from_t converter_from = conv_palette::palconv_from);
+	paldef(string id, uint entry_datasize, uint subpal_length, uint subpal_count,
+				 std::optional<uint> subpal_datasize = std::nullopt,
+				 conv_palette::cvto_pal_t converter_to = conv_palette::cvto_pal,
+				 conv_palette::cvfrom_pal_t converter_from = conv_palette::cvfrom_pal);
 
 	/**
 	 * Returns the size in bits of a single color entry
@@ -251,14 +258,18 @@ public:
 	 */
 	uint get_subpal_datasize_bytes() const;
 
+	conv_palette::cvto_pal_t get_converter_to() const;
+
+	conv_palette::cvfrom_pal_t get_converter_from() const;
+
 private:
 	uint entry_datasize;
 	uint subpal_length;
 	uint subpal_count;
 	uint subpal_datasize;
 
-	conv_palette::palconv_to_t converter_to;
-	conv_palette::palconv_from_t converter_from;
+	conv_palette::cvto_pal_t converter_to;
+	conv_palette::cvfrom_pal_t converter_from;
 };
 
 } // namespace chrgfx

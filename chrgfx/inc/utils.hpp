@@ -12,6 +12,9 @@ namespace chrgfx
 {
 palette make_pal_random();
 
+/**
+ * Indicates that the host system uses big endian architecture
+ */
 extern bool const bigend_sys;
 } // namespace chrgfx
 

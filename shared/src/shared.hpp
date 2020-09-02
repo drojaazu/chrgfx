@@ -8,6 +8,9 @@
 #include <string>
 #include <vector>
 
+static std::string const APP_CONTACT{"Damian R (damian@sudden-desu.net)"};
+static std::string const APP_WEBSITE{"https://github.com/drojaazu/chrgfx"};
+
 /*
 	Hardcoding /etc isn't best practice, I'm sure, but I couldn't find a standard
 	way of doing it otherwise. Anyone with a better implementation is certainly
@@ -18,13 +21,13 @@ std::string const DEFAULT_GFXDEF_FILE{DEFAULT_LIB_PATH + "/gfxdefs"};
 
 struct runtime_config {
 	string profile;
-	string gfxdef;
+	string gfxdefs_file;
 	string chrdef;
 	string coldef;
 	string paldef;
 	std::optional<unsigned int> subpalette;
 
-	runtime_config() : gfxdef(DEFAULT_GFXDEF_FILE), subpalette(std::nullopt){};
+	runtime_config() : gfxdefs_file(DEFAULT_GFXDEF_FILE), subpalette(std::nullopt){};
 };
 
 class gfxprofile : public chrgfx::gfxdef

@@ -24,6 +24,9 @@ palette make_pal_random();
 
 bool is_system_bigendian();
 
+/**
+ * Indicates that the host system uses big endian architecture
+ */
 extern bool const bigend_sys;
 } // namespace chrgfx
 

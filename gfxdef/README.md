@@ -31,9 +31,7 @@ The following hardware is included in the file. Use the `--profile` option to sp
 `snk_neogeocd` - SNK Neo-Geo CD
 
 ## Relationship Between gfxdefs File and libchrgfx
-As a point of clarification, the gfxdefs file is used only by the two frontend utilities. It is an abstraction of the chrdef, paldef and coldef classes used internally in libchrgfx. As such, while the rest of this document delves into these concepts and is useful for developers, it is explained in the context of an external file loaded at runtime.
-
-Those wishing to integrate libchrgfx should refer to the [Using the Library]() section of the main readme as well as the comments in the source code.
+As a point of clarification, the gfxdefs file is used only by the two frontend utilities, `chr2png` and `png2chr`. It is an abstraction of the chrdef, paldef and coldef classes used internally in libchrgfx. As such, while the rest of this document delves into these concepts and is useful for developers, it is explained in the context of an external file loaded at runtime.
 
 ## Definition Format
 A gfxdef is composed of a group up of key-value pairs, one per line, wrapped in C style braces with the type specified at the top. Keys are one word, while values are either a single or comma-delimited list of numbers. For example:
@@ -112,7 +110,7 @@ As a chrdef, it looks like this:
 
 `yoffset` - The offset (in bits) of each pixel row within a tile (y axis); **the number of entries here must match the value of `height`.**
 
-`chr_converter` - (Optional) Specifies the internal conversion function to use; **this is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
+`converter_to`, `converter_from` - (Optional) Specifies the internal conversion functions to use; **this is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
 
 ### Palette Definitions (paldef)
 When we think of a palette, we generally envision a structure that contains a list of colors. This is still the case, but in chrgfx we split up the concept of palette structure and color data. If you imagine a carton of a dozen colorful Easter eggs, the eggs are the colors (coldef) while the carton holding them is the palette (paldef). This ,splitting of color data and palette structure gives us more flexibility and less redundancy, which we'll see later when we talk about profiles.
@@ -132,6 +130,8 @@ Something to note, however, is that the indexed PNGs (i.e. PNGs using a palette 
 `entry_datasize` - The size of a single entry within a palette, in bits
 
 `subpal_datasize` - (Optional) The size of a single subpalette, in bits. This should only be needed in very rare circumstances where the size of a subpalette is greater than the sum of the color data. An example of this is the Nintendo Virtual Boy.
+
+`converter_to`, `converter_from` - (Optional) Specifies the internal conversion functions to use; **this is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
 
 ### Color Definitions (coldef)
 Colors are derived in one of two ways. The first method calculates a color using RGB values specified by the size and position of each color channel within the data. This works for hardware that natively uses RGB colorspace. For hardware which does not, the second method is used. This involves mapping all possible color values to approximate RGB values in a reference table.
@@ -211,7 +211,9 @@ To be clear, **you should not use a reftab AND a color definition.** It's one or
 
 big_endian - (Optional) Indicates the original hardware is big endian; if not specified, default is 0 (false). The value should be either 1 (true, big endian) or 0 (false, little endian). This should be specified for hardware where color data is greater than 8 bits in size.
 
-For RGB based hardware:
+`converter_to`, `converter_from` - (Optional) Specifies the internal conversion functions to use; **this is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
+
+#### For RGB based hardware only:
 
 `bitdepth` - The size of each color component, in bits
 
@@ -229,16 +231,15 @@ For RGB based hardware:
 
 `blue_size` - As anove, for blue component data
 
-For non-RGB based hardware:
+#### For non-RGB based hardware only:
 
 `reftab` - A comma delimited list of HTML style RGB colors to represent each possible non-RGB color on the original hardware
-
-
-
 
 ## Non-standard formats
 These are formats that use custom conversion functions. The list is small right now, but more are planned.
 
-`palette_tilelayerpro`
+`tilelayerpro256`,`tilelayerpro128`,`tilelayerpro64`,`tilelayerpro32`,`tilelayerpro16`
 
-Uses a TileLayer Pro .TPL file for the color palette. Only RGB format palette supported (but check the gfxdef file for notes, as the other modes can be used with the native gfxdefs). The subpalette size can be modified as needed in the gfxdef file.
+Uses a TileLayer Pro .TPL file for the color palette. Only RGB format palette supported. The subpalette size can be modified as needed in the gfxdef file. TPL palettes are officionally only 16, 32, 64, 128 or 256 entries in size. Unfortunately, the file header does not indicate the size, so we have to specify it manually. You can determine this by looking at the size of your file in bytes, subtract 4 (for the header) and divide by 3.
+
+Each of the TPL entries in the default gfxdefs file divides the palette into one subpalette of the total number specified. You can manually subdivide this further to better represent your hardware. For example, if you have a 64 color TPL file, you can change `subpal_count` to 4 and `subpal_length` to 16 to represent a Sega Mega Drive system palette, and then use the `--subpalette` option to select colors as subpalette lines.

@@ -21,52 +21,51 @@ namespace conv_palette
 /**
  * Represents a function to convert a palette to a given encoding
  */
-typedef u8 *(*palconv_to_t)(paldef const &, coldef const &,
-														png::palette const &,
-														std::optional<unsigned int const> const &,
-														std::optional<conv_color::colconv_to_t> const &);
+typedef u8 *(*cvto_pal_t)(paldef const &, coldef const &, png::palette const &,
+													std::optional<unsigned int const> const &,
+													std::optional<conv_color::cvto_col_t> const &);
 
 /**
  * Represents a function to convert a palette from a given encoding
  */
-typedef png::palette (*palconv_from_t)(
+typedef png::palette (*cvfrom_pal_t)(
 		paldef const &, coldef const &, u8 const *,
 		std::optional<unsigned int const> const &,
-		std::optional<conv_color::colconv_from_t> const &);
+		std::optional<conv_color::cvfrom_col_t> const &);
 
 /**
  * Reference of all functions for converting a palette to a given encoding
  */
-extern std::map<std::string const, palconv_to_t> const converters_to;
+extern std::map<std::string const, cvto_pal_t> const converters_to;
 
 /**
  * Reference of all functions for converting a palette from a given encoding
  */
-extern std::map<std::string const, palconv_from_t> const converters_from;
+extern std::map<std::string const, cvfrom_pal_t> const converters_from;
 
 /**
  * Convert a palette to the specified encoding
  */
-u8 *palconv_to(
+u8 *cvto_pal(
 		paldef const &to_paldef, coldef const &to_coldef, png::palette const &data,
 		std::optional<unsigned int const> const &subpal_idx = std::nullopt,
-		std::optional<conv_color::colconv_to_t> const &color_conv = std::nullopt);
+		std::optional<conv_color::cvto_col_t> const &color_conv = std::nullopt);
 
 /**
  * Convert a palette from the specified encoding
  */
-png::palette palconv_from(
+png::palette cvfrom_pal(
 		paldef const &from_paldef, coldef const &from_coldef, u8 const *data,
 		std::optional<unsigned int const> const &subpal_idx = std::nullopt,
-		std::optional<conv_color::colconv_from_t> const &color_conv = std::nullopt);
+		std::optional<conv_color::cvfrom_col_t> const &color_conv = std::nullopt);
 
 /**
- * Convert a palette to TileLayer Pro format
+ * Convert a palette from TileLayer Pro format
  */
-png::palette palconv_tilelayerpro_to(
+png::palette cvfrom_tilelayerpro_pal(
 		paldef const &from_paldef, coldef const &from_coldef, u8 const *data,
 		std::optional<unsigned int const> const &subpal_idx,
-		std::optional<conv_color::colconv_from_t> const &color_conv);
+		std::optional<conv_color::cvfrom_col_t> const &color_conv);
 
 } // namespace conv_palette
 } // namespace chrgfx

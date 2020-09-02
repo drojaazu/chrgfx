@@ -10,6 +10,10 @@ using std::vector;
 
 namespace chrgfx
 {
+
+/**
+ *
+ */
 class chrbank : public vector<uptr<u8>>
 {
 public:

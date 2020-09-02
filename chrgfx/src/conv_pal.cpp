@@ -11,21 +11,19 @@ namespace conv_palette
 {
 
 // converter maps
-std::map<string const, palconv_from_t> const converters_from{
-		{"default", palconv_from}, {"tilelayerpro", palconv_tilelayerpro_to}};
+std::map<string const, cvfrom_pal_t> const converters_from{
+		{"default", cvfrom_pal}, {"tilelayerpro", cvfrom_tilelayerpro_pal}};
 
-std::map<string const, palconv_to_t> const converters_to{
-		{"default", palconv_to}};
+std::map<string const, cvto_pal_t> const converters_to{{"default", cvto_pal}};
 
 png::palette
-palconv_from(paldef const &from_paldef, coldef const &from_coldef,
-						 u8 const *data,
-						 std::optional<unsigned int const> const &subpal_idx,
-						 std::optional<conv_color::colconv_from_t> const &color_conv)
+cvfrom_pal(paldef const &from_paldef, coldef const &from_coldef, u8 const *data,
+					 std::optional<unsigned int const> const &subpal_idx,
+					 std::optional<conv_color::cvfrom_col_t> const &color_conv)
 {
 
-	conv_color::colconv_from_t convert_color{
-			color_conv.value_or(conv_color::colconv_from)};
+	conv_color::cvfrom_col_t convert_color{
+			color_conv.value_or(conv_color::cvfrom_color)};
 
 	uint const subpal_count{from_paldef.get_subpal_count()};
 
@@ -115,13 +113,13 @@ palconv_from(paldef const &from_paldef, coldef const &from_coldef,
 	return out;
 }
 
-u8 *palconv_to(paldef const &to_paldef, coldef const &to_coldef,
-							 png::palette const &data,
-							 std::optional<unsigned int const> const &subpal_idx,
-							 std::optional<conv_color::colconv_to_t> const &color_conv)
+u8 *cvto_pal(paldef const &to_paldef, coldef const &to_coldef,
+						 png::palette const &data,
+						 std::optional<unsigned int const> const &subpal_idx,
+						 std::optional<conv_color::cvto_col_t> const &color_conv)
 {
-	conv_color::colconv_to_t convert_color{
-			color_conv.value_or(conv_color::colconv_to)};
+	conv_color::cvto_col_t convert_color{
+			color_conv.value_or(conv_color::cvto_color)};
 
 	unsigned int const
 			// total number of subpalettes in the system palette
@@ -211,10 +209,10 @@ u8 *palconv_to(paldef const &to_paldef, coldef const &to_coldef,
 	return out;
 }
 
-png::palette palconv_tilelayerpro_to(
+png::palette cvfrom_tilelayerpro_pal(
 		paldef const &from_paldef, coldef const &from_coldef, u8 const *data,
 		std::optional<unsigned int const> const &subpal_idx,
-		std::optional<conv_color::colconv_from_t> const &color_conv)
+		std::optional<conv_color::cvfrom_col_t> const &color_conv)
 {
 	if(data[0] != 0x54 || data[1] != 0x50 || data[2] != 0x4c)
 		std::cerr << "Warning: Does not appear to be a valid TLP palette"
@@ -228,14 +226,18 @@ png::palette palconv_tilelayerpro_to(
 	uint pal_length = from_paldef.get_palette_length();
 
 	// these are the only valid lengths
-	if(pal_length != 16 | pal_length != 32 | pal_length != 64 |
-		 pal_length != 128 | pal_length != 256) {
+	if(pal_length != 16 & pal_length != 32 & pal_length != 64 &
+		 pal_length != 128 & pal_length != 256) {
 		throw std::invalid_argument("Invalid TPL palette length");
 	}
 
 	// start at the actual data
 	data += 4;
 	if(subpal_idx) {
+		if(subpal_idx.value() > (from_paldef.get_subpal_count() - 1)) {
+			throw std::invalid_argument(
+					"Subpalette index greater than subpalette count");
+		}
 		pal_length = from_paldef.get_subpal_length();
 		data += (subpal_idx.value() * from_paldef.get_subpal_length() * 3);
 	}

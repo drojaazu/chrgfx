@@ -7,13 +7,13 @@ namespace conv_color
 {
 
 // converter maps
- std::map<string const, colconv_to_t> const converters_to{
-		{"default", colconv_to}};
+ std::map<string const, cvto_col_t> const converters_to{
+		{"default", cvto_color}};
 
- std::map<string const, colconv_from_t> const converters_from{
-		{"default", colconv_from}};
+ std::map<string const, cvfrom_col_t> const converters_from{
+		{"default", cvfrom_color}};
 
-png::color colconv_from(coldef const &from_coldef, u32 const data)
+png::color cvfrom_color(coldef const &from_coldef, u32 const data)
 {
 	if(from_coldef.use_reftab()) {
 		return from_coldef.get_reftab_entry(data);
@@ -55,7 +55,7 @@ png::color colconv_from(coldef const &from_coldef, u32 const data)
 	}
 };
 
-u32 colconv_to(coldef const &to_coldef, png::color const data)
+u32 cvto_color(coldef const &to_coldef, png::color const data)
 {
 	if(to_coldef.use_reftab()) {
 		return to_coldef.get_reftab_idx(data);

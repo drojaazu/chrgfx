@@ -18,32 +18,32 @@ namespace conv_chr
 /**
  * Represents a function to convert a tile to a given encoding
  */
-typedef u8 *(*chrconv_to_t)(chrdef const &, u8 const *);
+typedef u8 *(*cvto_chr_t)(chrdef const &, u8 const *);
 
 /**
  * Represents a function to convert a tile from a given encoding
  */
-typedef u8 *(*chrconv_from_t)(chrdef const &, u8 const *);
+typedef u8 *(*cvfrom_chr_t)(chrdef const &, u8 const *);
 
 /**
  * Reference of all functions for converting a tile to a given encoding
  */
-extern std::map<std::string const, chrconv_to_t> const converters_to;
+extern std::map<std::string const, cvto_chr_t> const converters_to;
 
 /**
  * Reference of all functions for converting a tile from a given encoding
  */
-extern std::map<std::string const, chrconv_from_t> const converters_from;
+extern std::map<std::string const, cvfrom_chr_t> const converters_from;
 
 /**
  * Convert a tile to the specified encoding
  */
-u8 *chrconv_to(chrdef const &to_def, u8 const *data);
+u8 *cvto_chr(chrdef const &to_def, u8 const *data);
 
 /**
  * Convert a tile from the specified encoding
  */
-u8 *chrconv_from(chrdef const &from_def, u8 const *data);
+u8 *cvfrom_chr(chrdef const &from_def, u8 const *data);
 
 } // namespace conv_chr
 } // namespace chrgfx

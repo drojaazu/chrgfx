@@ -5,6 +5,7 @@ using namespace png;
 namespace chrgfx
 {
 
+// TODO: break this out into a seperate function to return just the pixbuf
 png::image<png::index_pixel> png_render(chrbank const &chr_bank,
 																				palette const &pal,
 																				render_traits const &rtraits)
@@ -12,22 +13,22 @@ png::image<png::index_pixel> png_render(chrbank const &chr_bank,
 	if(chr_bank.size() < 1)
 		throw std::length_error("Tile vector is empty, nothing to render");
 
-	u32 const
+	uint const
 			// chr dimensions
 			chr_pxlwidth{chr_bank.get_chrdef().get_width()},
 			chr_pxlheight{chr_bank.get_chrdef().get_height()},
 
 			// number of tiles in the final row that do not add up to a full row
-			chrcol_modulo{(u32)(chr_bank.size() % rtraits.cols)},
+			chrcol_modulo{(uint)(chr_bank.size() % rtraits.cols)},
 			// final image dimensions (in chrs)
 			outimg_colwidth{rtraits.cols},
-			outimg_rowheight{(u32)(chr_bank.size() / outimg_colwidth +
-														 (chrcol_modulo > 0 ? 1 : 0))},
+			outimg_rowheight{(uint)(chr_bank.size() / outimg_colwidth +
+															(chrcol_modulo > 0 ? 1 : 0))},
 			// final image dimensions (in pixels)
 			// to do: add border calculation: height + ((border size * tile rows) +
 			// border size), width + ((border size * tile cols) + border size)
-			outimg_pxlwidth{(u32)(outimg_colwidth * chr_pxlwidth)},
-			outimg_pxlheight{(u32)(outimg_rowheight * chr_pxlheight)};
+			outimg_pxlwidth{outimg_colwidth * chr_pxlwidth},
+			outimg_pxlheight{outimg_rowheight * chr_pxlheight};
 
 	// pixel buffer to be sent to the final image
 	auto imgbuffer{pixel_buffer<index_pixel>(outimg_pxlwidth, outimg_pxlheight)};
@@ -40,9 +41,10 @@ png::image<png::index_pixel> png_render(chrbank const &chr_bank,
 
 	// number of tiles in the current chr row; this will be constant until the
 	// final row if there is a tile modulo
-	u32 this_chrrow_colcount{outimg_colwidth};
+	uint this_chrrow_colcount{outimg_colwidth};
 
 #ifdef DEBUG
+	std::cerr << "PNG RENDERING REPORT:" << std::endl;
 	std::cerr << "Tile count: " << (int)chr_bank.size() << std::endl;
 	std::cerr << "Tile modulo: " << (int)chrcol_modulo << std::endl;
 	std::cerr << "Tile data size: " << (int)(chr_pxlwidth * chr_pxlheight)
@@ -109,7 +111,6 @@ png::image<png::index_pixel> png_render(chrbank const &chr_bank,
 		} else {
 			trans.resize(rtraits.trns_entry + 1);
 			std::fill(trans.begin(), trans.end(), 255);
-			std::cerr << trans.size() << std::endl;
 			trans.at(rtraits.trns_entry) = 0;
 		}
 		outimg.set_tRNS(trans);

@@ -4,7 +4,7 @@ namespace vd
 {
 bool vd_bool(string const &val)
 {
-	string workval{""};
+	string workval{val};
 	std::transform(val.begin(), val.end(), workval.begin(), tolower);
 	if(workval == "true" || stoi(workval) > 0) {
 		return true;
@@ -12,7 +12,7 @@ bool vd_bool(string const &val)
 	if(workval == "false" || stoi(workval) < 1) {
 		return false;
 	}
-	throw "Inavlid value for boolean";
+	throw std::invalid_argument("Inavlid boolean value");
 }
 
 } // namespace vd

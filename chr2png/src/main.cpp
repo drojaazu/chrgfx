@@ -18,7 +18,7 @@ using namespace chrgfx;
 #include <chrono>
 #endif
 
-void process_args(int argc, char **argv);
+bool process_args(int argc, char **argv);
 void print_help();
 
 // application globals
@@ -42,12 +42,18 @@ runtime_config_chr2png cfg;
 int main(int argc, char **argv)
 {
 	try {
+#ifdef DEBUG
+		std::chrono::high_resolution_clock::time_point t1 =
+				std::chrono::high_resolution_clock::now();
+#endif
 		try {
 			// Runtime State Setup
-			process_args(argc, argv);
+			if(process_args(argc, argv)) {
+				return 0;
+			}
 		} catch(std::exception const &e) {
 			// failure in argument parsing/runtime config
-			std::cerr << e.what() << std::endl;
+			std::cerr << "Invalid argument: " << e.what() << std::endl;
 			return -5;
 		}
 
@@ -59,9 +65,9 @@ int main(int argc, char **argv)
 		}
 
 		// converter function pointers
-		conv_chr::chrconv_from_t chr_from_converter;
-		conv_color::colconv_from_t col_from_converter;
-		conv_palette::palconv_from_t pal_from_converter;
+		conv_chr::cvfrom_chr_t chr_from_converter;
+		conv_color::cvfrom_col_t col_from_converter;
+		conv_palette::cvfrom_pal_t pal_from_converter;
 
 		// load definitions
 		std::tuple<map<string const, chrdef const>, map<string const, coldef const>,
@@ -70,7 +76,7 @@ int main(int argc, char **argv)
 				defs;
 
 		try {
-			defs = load_gfxdefs(cfg.gfxdef);
+			defs = load_gfxdefs(cfg.gfxdefs_file);
 		} catch(std::ios_base::failure const &e) {
 			std::cerr << "gfx-def error: " << std::strerror(errno) << std::endl;
 			return -7;
@@ -81,16 +87,35 @@ int main(int argc, char **argv)
 		map<string const, paldef const> paldefs{std::get<2>(defs)};
 		map<string const, gfxprofile const> profiles{std::get<3>(defs)};
 
+		string chrdef_id, coldef_id, paldef_id;
+
 		auto profile_iter{profiles.find(cfg.profile)};
-		if(profile_iter == profiles.end()) {
-			std::cerr << "Could not find specified profile" << std::endl;
+		if(profile_iter != profiles.end()) {
+			gfxprofile profile{profile_iter->second};
+			chrdef_id = profile.get_chrdef_id();
+			coldef_id = profile.get_coldef_id();
+			paldef_id = profile.get_paldef_id();
+		}
+
+		// specific gfxdefs override profile settings
+		if(!cfg.chrdef.empty()) {
+			chrdef_id = cfg.chrdef;
+		}
+		if(!cfg.coldef.empty()) {
+			coldef_id = cfg.coldef;
+		}
+		if(!cfg.paldef.empty()) {
+			paldef_id = cfg.paldef;
+		}
+
+		// sanity check - chrdef is required
+		if(chrdef_id.empty()) {
+			std::cerr << "Must specify a tile definition (--chr-def or --profile)"
+								<< std::endl;
 			return -8;
 		}
 
-		gfxprofile profile{profile_iter->second};
-
-		auto chrdef_iter{chrdefs.find(cfg.chrdef.empty() ? profile.get_chrdef_id()
-																										 : cfg.chrdef)};
+		auto chrdef_iter{chrdefs.find(chrdef_id)};
 		if(chrdef_iter == chrdefs.end()) {
 			std::cerr << "Could not find specified chrdef" << std::endl;
 			return -9;
@@ -98,8 +123,13 @@ int main(int argc, char **argv)
 
 		chrdef chrdef{chrdef_iter->second};
 
-		auto coldef_iter{coldefs.find(cfg.coldef.empty() ? profile.get_coldef_id()
-																										 : cfg.coldef)};
+		// sanity check - coldef not required - if not specified, use default
+		// built-in
+		if(coldef_id.empty()) {
+			coldef_id = "basic_8bit_random";
+		}
+
+		auto coldef_iter{coldefs.find(coldef_id)};
 		if(coldef_iter == coldefs.end()) {
 			std::cerr << "Could not find specified coldef" << std::endl;
 			return -10;
@@ -107,8 +137,13 @@ int main(int argc, char **argv)
 
 		coldef coldef{coldef_iter->second};
 
-		auto paldef_iter{paldefs.find(cfg.paldef.empty() ? profile.get_paldef_id()
-																										 : cfg.paldef)};
+		// sanity check - paldef not required - if not specified, use default
+		// built-in
+		if(paldef_id.empty()) {
+			paldef_id = "basic_256color";
+		}
+
+		auto paldef_iter{paldefs.find(paldef_id)};
 		if(paldef_iter == paldefs.end()) {
 			std::cerr << "Could not find specified paldef" << std::endl;
 			return -11;
@@ -116,14 +151,24 @@ int main(int argc, char **argv)
 
 		paldef paldef{paldef_iter->second};
 
-		// TODO - temporary, need to load specified conveter
-		chr_from_converter = conv_chr::converters_from.at("default");
-		pal_from_converter = conv_palette::converters_from.at("default");
-		col_from_converter = conv_color::converters_from.at("default");
+		chr_from_converter = chrdef.get_converter_from();
+		pal_from_converter = paldef.get_converter_from();
+		col_from_converter = coldef.get_converter_from();
 
 #ifdef DEBUG
-		std::chrono::high_resolution_clock::time_point t1 =
+		std::chrono::high_resolution_clock::time_point t2 =
 				std::chrono::high_resolution_clock::now();
+		auto duration =
+				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+		std::cerr << "SETUP: " << duration << "ms" << std::endl;
+		std::cerr << "Using chrdef '" << chrdef_id << "'" << std::endl;
+		std::cerr << "Using colrdef '" << coldef_id << "'" << std::endl;
+		std::cerr << "Using paldef '" << paldef_id << "'" << std::endl;
+#endif
+
+#ifdef DEBUG
+		t1 = std::chrono::high_resolution_clock::now();
 #endif
 
 		// tiles first
@@ -139,6 +184,19 @@ int main(int argc, char **argv)
 			workbank.push_back(
 					uptr<u8>(chr_from_converter(chrdef, (u8 *)chunkbuffer)));
 		}
+
+#ifdef DEBUG
+		t2 = std::chrono::high_resolution_clock::now();
+		duration =
+				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+		std::cerr << "TILE CONVERSION: " << std::to_string(duration) << "ms"
+							<< std::endl;
+#endif
+
+#ifdef DEBUG
+		t1 = std::chrono::high_resolution_clock::now();
+#endif
 
 		// then the palette
 		palette workpal;
@@ -163,15 +221,17 @@ int main(int argc, char **argv)
 		}
 
 #ifdef DEBUG
-		std::chrono::high_resolution_clock::time_point t2 =
-				std::chrono::high_resolution_clock::now();
-		auto duration =
+		t2 = std::chrono::high_resolution_clock::now();
+		duration =
 				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-		std::cerr << "Tile conversion: " << duration << "ms" << std::endl;
+		std::cerr << "PALETTE CONVERSION: " << duration << "ms" << std::endl;
+#endif
 
+#ifdef DEBUG
 		t1 = std::chrono::high_resolution_clock::now();
 #endif
+
 		png::image<png::index_pixel> outimg{
 				png_render(workbank, workpal, cfg.rendertraits)};
 
@@ -179,7 +239,11 @@ int main(int argc, char **argv)
 		t2 = std::chrono::high_resolution_clock::now();
 		duration =
 				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-		std::cerr << "Rendering: " << duration << "ms" << std::endl;
+		std::cerr << "PNG RENDER: " << duration << "ms" << std::endl;
+#endif
+
+#ifdef DEBUG
+		t1 = std::chrono::high_resolution_clock::now();
 #endif
 
 		if(cfg.outfile.empty()) {
@@ -187,6 +251,12 @@ int main(int argc, char **argv)
 		} else {
 			outimg.write(cfg.outfile);
 		}
+#ifdef DEBUG
+		t2 = std::chrono::high_resolution_clock::now();
+		duration =
+				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+		std::cerr << "OUTPUT: " << duration << "ms" << std::endl;
+#endif
 
 		return 0;
 	} catch(std::exception const &e) {
@@ -195,7 +265,7 @@ int main(int argc, char **argv)
 	}
 }
 
-void process_args(int argc, char **argv)
+bool process_args(int argc, char **argv)
 {
 	default_long_opts.push_back({"trns", no_argument, nullptr, 't'});
 	default_long_opts.push_back({"trns-index", required_argument, nullptr, 'i'});
@@ -203,7 +273,8 @@ void process_args(int argc, char **argv)
 	default_long_opts.push_back({"chr-data", required_argument, nullptr, 'c'});
 	default_long_opts.push_back({"pal-data", required_argument, nullptr, 'p'});
 	default_long_opts.push_back({"output", required_argument, nullptr, 'o'});
-	default_short_opts.append("ti:d:c:p:o:");
+	default_long_opts.push_back({"help", no_argument, nullptr, 'h'});
+	default_short_opts.append("ti:d:c:p:o:h");
 
 	bool default_processed = process_default_args(cfg, argc, argv);
 
@@ -256,8 +327,14 @@ void process_args(int argc, char **argv)
 			case 'o':
 				cfg.outfile = optarg;
 				break;
+
+			case 'h':
+				print_help();
+				return true;
 		}
 	}
+
+	return false;
 }
 
 void print_help()

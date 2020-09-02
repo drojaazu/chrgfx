@@ -26,7 +26,7 @@ bool process_default_args(runtime_config &cfg, int argc, char **argv)
 		switch(this_opt) {
 			// gfx-def
 			case 'G':
-				cfg.gfxdef = optarg;
+				cfg.gfxdefs_file = optarg;
 				break;
 
 			case 'T':
@@ -55,11 +55,12 @@ bool process_default_args(runtime_config &cfg, int argc, char **argv)
 				break;
 
 			case ':':
-				std::cerr << "Missing arg for option: " << (char)optopt << std::endl;
+				std::cerr << "Missing arg for option: " << std::to_string(optopt)
+									<< std::endl;
 				return false;
 				break;
 			case '?':
-				std::cerr << "Unknown option: " << (char)optopt << std::endl;
+				std::cerr << "Unknown argument" << std::endl;
 				return false;
 		}
 	}

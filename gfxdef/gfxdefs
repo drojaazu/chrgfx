@@ -258,14 +258,62 @@ paldef
 
 paldef
 {
-  id tilelayerpro_standard
+  id tilelayerpro256
   comment TileLayer Pro TPL file
-
-
   entry_datasize 24
   subpal_length 256
   subpal_count 1
-  
+
+  converter_to default
+  converter_from tilelayerpro
+}
+
+paldef
+{
+  id tilelayerpro16
+  comment TileLayer Pro TPL file
+  entry_datasize 24
+  subpal_length 16
+  subpal_count 1
+
+  converter_to default
+  converter_from tilelayerpro
+}
+
+paldef
+{
+  id tilelayerpro32
+  comment TileLayer Pro TPL file
+  entry_datasize 24
+  subpal_length 32
+  subpal_count 1
+
+  converter_to default
+  converter_from tilelayerpro
+}
+
+paldef
+{
+  id tilelayerpro64
+  comment TileLayer Pro TPL file
+  entry_datasize 24
+  subpal_length 64
+  subpal_count 1
+
+  converter_to default
+  converter_from tilelayerpro
+}
+
+paldef
+{
+  id tilelayerpro128
+  comment TileLayer Pro TPL file
+  entry_datasize 24
+  subpal_length 128
+  subpal_count 1
+
+  converter_to default
+  converter_from tilelayerpro
 }
 
 #################################
