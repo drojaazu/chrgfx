@@ -21,6 +21,12 @@ struct render_traits {
 	u16 cols = 8;
 
 	/**
+	 * Draws a 1 pixel border around the inner edges of tiles in the transparent
+	 * entry color
+	 */
+	bool draw_border = false;
+
+	/**
 	 * Enable transparency
 	 */
 	bool use_trns = false;
@@ -32,7 +38,17 @@ struct render_traits {
 };
 
 /**
+ * Renders the specified bank of tiles to a pixel buffer
+ * Does not perform data conversion
+ * Tiles should already be converted to standard format (24bit packed pixel)
+ */
+png::pixel_buffer<png::index_pixel> render(chrbank const &chr_bank,
+																					 render_traits const &rtraits);
+
+/**
  * Renders the specifed bank of tiles and color palette to a PNG image
+ * Does not perform data conversion
+ * Tiles should already be converted to standard format (24bit packed pixel)
  */
 png::image<png::index_pixel> png_render(chrbank const &chr_bank,
 																				palette const &pal,

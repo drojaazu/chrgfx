@@ -17,24 +17,23 @@
 #include "shared.hpp"
 #include "vd.hpp"
 
-class gfxdef_key_error : public std::exception
+class gfxdef_key_error : public std::runtime_error
 {
 public:
 	gfxdef_key_error(std::string err, std::string key, std::string block_id = {})
 			: err(std::move(err)), key(std::move(key)), block_id(std::move(block_id)),
-				msg("'" + err + "' for key '" + key + "'" +
+				std::runtime_error(
+						"Error parsing gfxdef file: '" + err + "' for key '" + key + "'" +
 						(block_id.empty() ? std::string{}
 															: " in block '" + block_id + "'")){};
-	const char *what() { return msg.c_str(); };
 
 private:
-	std::string msg;
 	std::string key;
 	std::string block_id;
 	std::string err;
 };
 
-class gfxdef_value_error : public std::exception
+class gfxdef_value_error : public std::runtime_error
 {
 public:
 	gfxdef_value_error(std::string err, std::string val, std::string key,
@@ -42,13 +41,13 @@ public:
 			: err(std::move(err)),
 				val(val.length() > 16 ? (val.substr(0, 15) + "...") : std::move(val)),
 				key(std::move(key)), block_id(std::move(block_id)),
-				msg("'" + err + "' for val '" + val + "' on key '" + key + "'" +
+				std::runtime_error(
+						"Error parsing gfxdef file: '" + err + "' error for val '" + val +
+						"' on key '" + key + "'" +
 						(block_id.empty() ? std::string{}
 															: " in block '" + block_id + "'")){};
-	const char *what() { return msg.c_str(); };
 
 private:
-	std::string msg;
 	std::string key;
 	std::string val;
 	std::string block_id;

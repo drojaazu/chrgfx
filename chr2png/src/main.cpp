@@ -269,12 +269,13 @@ bool process_args(int argc, char **argv)
 {
 	default_long_opts.push_back({"trns", no_argument, nullptr, 't'});
 	default_long_opts.push_back({"trns-index", required_argument, nullptr, 'i'});
+	default_long_opts.push_back({"border", no_argument, nullptr, 'b'});
 	default_long_opts.push_back({"columns", required_argument, nullptr, 'd'});
 	default_long_opts.push_back({"chr-data", required_argument, nullptr, 'c'});
 	default_long_opts.push_back({"pal-data", required_argument, nullptr, 'p'});
 	default_long_opts.push_back({"output", required_argument, nullptr, 'o'});
 	default_long_opts.push_back({"help", no_argument, nullptr, 'h'});
-	default_short_opts.append("ti:d:c:p:o:h");
+	default_short_opts.append("ti:bd:c:p:o:h");
 
 	bool default_processed = process_default_args(cfg, argc, argv);
 
@@ -312,6 +313,11 @@ bool process_args(int argc, char **argv)
 				} catch(const std::invalid_argument &e) {
 					throw std::invalid_argument("Invalid transparency index value");
 				}
+				break;
+
+			// draw tile border
+			case 'b':
+				cfg.rendertraits.draw_border = true;
 				break;
 
 			// columns
@@ -356,6 +362,8 @@ void print_help()
 	std::cout << "  --output, -o       Specify output PNG image filename"
 						<< std::endl;
 	std::cout << "  --trns, -t         Use image transparency" << std::endl;
+	std::cout << "  --border, -b       Draw 1 pixel border around tiles"
+						<< std::endl;
 	std::cout
 			<< "  --trns-index, -i   Specify palette entry to use as transparency "
 				 "(default is 0)"

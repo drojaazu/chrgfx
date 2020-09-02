@@ -1,12 +1,29 @@
 profile
 {
+  id nec_pcengine_sprites
+  comment NEC PC Engine / TurboGrafx-16 (sprites)
+  chrdef chr_nec_pcengine_sprites
+  paldef pal_nec_pcengine
+  coldef col_nec_pcengine
+}
+
+profile
+{
+  id nec_pcengine_tiles
+  comment NEC PC Engine / TurboGrafx-16 (tiles)
+  chrdef chr_nec_pcengine_tiles
+  paldef pal_nec_pcengine
+  coldef col_nec_pcengine
+}
+
+profile
+{
   id snk_neogeocd
   comment SNK NeoGeo CD
   chrdef chr_snk_neogeocd
   paldef pal_snk_neogeo
   coldef col_snk_neogeo
 }
-
 
 profile
 {
@@ -105,6 +122,18 @@ profile
 ## P A L D E F S
 ##
 #################################
+
+paldef
+{
+  # 2 byte per color
+  # 16 subpalettes, 16 colors each
+  id pal_nec_pcengine
+  comment NEC PC Engine / TurgoGrafx-16
+
+  entry_datasize 16
+  subpal_length 16
+  subpal_count 16
+}
 
 paldef
 {
@@ -324,6 +353,35 @@ paldef
 
 chrdef
 {
+  id chr_nec_pcengine_tiles
+  comment NEC PC Engine / TurgoGrafx-16 (tiles)
+
+  # 8x8 4bpp Planar
+  # 2 byte interleaved
+  width 8
+  height 8
+  bpp 4
+  planeoffset 0,8,128,136
+  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
+  rowoffset 0, 16, 32, 48, 64, 80, 96, 112
+}
+
+chrdef
+{
+  id chr_nec_pcengine_sprites
+  comment NEC PC Engine / TurgoGrafx-16 (sprites)
+
+  # 16x16 4bpp Planar
+  width 16
+  height 16
+  bpp 4
+  planeoffset 0,256,512,768
+  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+  rowoffset 0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240
+}
+
+chrdef
+{
   id chr_snk_neogeocd
   comment SNK NeoGeo CD
 
@@ -477,6 +535,25 @@ chrdef
 ## C O L D E F S
 ##
 #################################
+
+coldef
+{
+  # 15|               |0
+  #   xxxxxxxG GGRRRBBB
+  # (little endian)
+  id col_nec_pcengine
+  comment NEC PC Engine / TurgoGrafx-16
+
+  bitdepth 3
+  red_shift 3
+  red_size 3
+  green_shift 6
+  green_size 3
+  blue_shift 0
+  blue_size 3
+
+  big_endian 0
+}
 
 coldef
 {

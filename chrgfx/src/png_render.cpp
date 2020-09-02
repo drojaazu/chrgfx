@@ -5,10 +5,8 @@ using namespace png;
 namespace chrgfx
 {
 
-// TODO: break this out into a seperate function to return just the pixbuf
-png::image<png::index_pixel> png_render(chrbank const &chr_bank,
-																				palette const &pal,
-																				render_traits const &rtraits)
+pixel_buffer<index_pixel> render(chrbank const &chr_bank,
+																 render_traits const &rtraits)
 {
 	if(chr_bank.size() < 1)
 		throw std::length_error("Tile vector is empty, nothing to render");
@@ -20,15 +18,20 @@ png::image<png::index_pixel> png_render(chrbank const &chr_bank,
 
 			// number of tiles in the final row that do not add up to a full row
 			chrcol_modulo{(uint)(chr_bank.size() % rtraits.cols)},
+
 			// final image dimensions (in chrs)
-			outimg_colwidth{rtraits.cols},
-			outimg_rowheight{(uint)(chr_bank.size() / outimg_colwidth +
+			outimg_chrwidth{rtraits.cols},
+			outimg_chrheight{(uint)(chr_bank.size() / outimg_chrwidth +
 															(chrcol_modulo > 0 ? 1 : 0))},
+
+			// factor in extra pixels from border, if present
+			border_pixel_width{rtraits.draw_border ? outimg_chrwidth - 1 : 0},
+			border_pixel_height{rtraits.draw_border ? outimg_chrheight - 1 : 0},
+
 			// final image dimensions (in pixels)
-			// to do: add border calculation: height + ((border size * tile rows) +
-			// border size), width + ((border size * tile cols) + border size)
-			outimg_pxlwidth{outimg_colwidth * chr_pxlwidth},
-			outimg_pxlheight{outimg_rowheight * chr_pxlheight};
+			outimg_pxlwidth{(outimg_chrwidth * chr_pxlwidth) + border_pixel_width},
+			outimg_pxlheight{(outimg_chrheight * chr_pxlheight) +
+											 border_pixel_height};
 
 	// pixel buffer to be sent to the final image
 	auto imgbuffer{pixel_buffer<index_pixel>(outimg_pxlwidth, outimg_pxlheight)};
@@ -41,10 +44,12 @@ png::image<png::index_pixel> png_render(chrbank const &chr_bank,
 
 	// number of tiles in the current chr row; this will be constant until the
 	// final row if there is a tile modulo
-	uint this_chrrow_colcount{outimg_colwidth};
+	uint this_chrrow_colcount{outimg_chrwidth};
 
 #ifdef DEBUG
 	std::cerr << "PNG RENDERING REPORT:" << std::endl;
+	std::cerr << "Using border: " << std::to_string(rtraits.draw_border)
+						<< std::endl;
 	std::cerr << "Tile count: " << (int)chr_bank.size() << std::endl;
 	std::cerr << "Tile modulo: " << (int)chrcol_modulo << std::endl;
 	std::cerr << "Tile data size: " << (int)(chr_pxlwidth * chr_pxlheight)
@@ -53,28 +58,37 @@ png::image<png::index_pixel> png_render(chrbank const &chr_bank,
 						<< (int)outimg_pxlheight << std::endl;
 #endif
 
-	// top of image, add border if present
 	// for each chr row...
-	for(chrrow_iter = 0; chrrow_iter < outimg_rowheight; ++chrrow_iter) {
+	for(chrrow_iter = 0; chrrow_iter < outimg_chrheight; ++chrrow_iter) {
 		// check for last row
-		if((outimg_rowheight - chrrow_iter) == 1 && (chrcol_modulo > 0)) {
+		if((outimg_chrheight - chrrow_iter) == 1 && (chrcol_modulo > 0)) {
 			this_chrrow_colcount = chrcol_modulo;
 		}
+
+		// add border if present
+		if(rtraits.draw_border && chrrow_iter != 0) {
+			this_outimg_pxlrow.clear();
+			this_outimg_pxlrow.assign(outimg_pxlwidth, rtraits.trns_entry);
+			imgbuffer.put_row(outimg_pxlrow_idx++, this_outimg_pxlrow);
+		}
+
 		// for each pixel in that chr row...
 		for(chr_pxlrow_iter = 0; chr_pxlrow_iter < chr_pxlheight;
 				++chr_pxlrow_iter) {
+
 			this_outimg_pxlrow.clear();
-			// this_outimg_pxlrow.resize(outimg_pxlwidth, 0);
 			this_outimg_pxlrow.reserve(outimg_pxlwidth);
 
-			// beginning of imgout pixel row, add border if present
 			// for each chr column in the row...
 			for(chrcol_iter = 0; chrcol_iter < this_chrrow_colcount; ++chrcol_iter) {
+				// add border pixel if present
+				if(rtraits.draw_border && chrcol_iter != 0) {
+					this_outimg_pxlrow.push_back(rtraits.trns_entry);
+				}
 				this_chroffset =
 						chr_bank[chr_iter++].get() + (chr_pxlrow_iter * chr_pxlwidth);
 				std::copy(this_chroffset, this_chroffset + chr_pxlwidth,
 									std::back_inserter(this_outimg_pxlrow));
-				// end of tile pixels, add border if present
 			}
 
 			// reset to point back to the first tile in the tile row
@@ -91,13 +105,23 @@ png::image<png::index_pixel> png_render(chrbank const &chr_bank,
 			// put rendered row at the end of the final image
 			imgbuffer.put_row(outimg_pxlrow_idx++, this_outimg_pxlrow);
 		}
-		// bottom of tile row, add border if present
 
 		// move to the next row of tiles
-		chr_iter += outimg_colwidth;
+		chr_iter += outimg_chrwidth;
 	}
 
-	image<index_pixel> outimg(outimg_pxlwidth, outimg_pxlheight);
+	return imgbuffer;
+}
+
+png::image<png::index_pixel> png_render(chrbank const &chr_bank,
+																				palette const &pal,
+																				render_traits const &rtraits)
+{
+
+	auto pixbuf{render(chr_bank, rtraits)};
+
+	image<index_pixel> outimg(pixbuf.get_width(), pixbuf.get_height());
+	outimg.set_pixbuf(pixbuf);
 
 	outimg.set_palette(pal);
 
@@ -115,8 +139,6 @@ png::image<png::index_pixel> png_render(chrbank const &chr_bank,
 		}
 		outimg.set_tRNS(trans);
 	}
-
-	outimg.set_pixbuf(imgbuffer);
 
 	return outimg;
 }
