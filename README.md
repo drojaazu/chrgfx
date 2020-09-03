@@ -56,6 +56,10 @@ Specify the subpalette index to use in the output image; value is zero indexed (
 
 Enable transparency in output PNG image
 
+`--border`,`-b`
+
+Draw a 1 pixel border around tiles in output PNG image
+
 `--trans-index`,`-i`
 
 Specify palette index to use for transparency; if not specified, index 0 will be used

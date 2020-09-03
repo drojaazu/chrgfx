@@ -28,11 +28,11 @@ public:
 	rgb_layout(pair<int, uint> red, pair<int, uint> green, pair<int, uint> blue);
 
 	int get_red_shift() const;
-	uint get_red_count() const;
+	uint get_red_size() const;
 	int get_green_shift() const;
-	uint get_green_count() const;
+	uint get_green_size() const;
 	int get_blue_shift() const;
-	uint get_blue_count() const;
+	uint get_blue_size() const;
 
 private:
 	pair<int, uint> red;

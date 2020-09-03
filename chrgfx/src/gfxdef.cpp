@@ -143,9 +143,9 @@ rgb_layout::rgb_layout(pair<int, uint> red, pair<int, uint> green,
 		: red(std::move(red)), green(std::move(green)), blue(std::move(blue)){};
 
 int rgb_layout::get_red_shift() const { return red.first; }
-uint rgb_layout::get_red_count() const { return red.second; }
+uint rgb_layout::get_red_size() const { return red.second; }
 int rgb_layout::get_green_shift() const { return green.first; }
-uint rgb_layout::get_green_count() const { return green.second; }
+uint rgb_layout::get_green_size() const { return green.second; }
 int rgb_layout::get_blue_shift() const { return blue.first; }
-uint rgb_layout::get_blue_count() const { return blue.second; }
+uint rgb_layout::get_blue_size() const { return blue.second; }
 } // namespace chrgfx

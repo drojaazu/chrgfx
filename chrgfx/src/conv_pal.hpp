@@ -22,7 +22,6 @@ namespace conv_palette
  * Represents a function to convert a palette to a given encoding
  */
 typedef u8 *(*cvto_pal_t)(paldef const &, coldef const &, png::palette const &,
-													std::optional<unsigned int const> const &,
 													std::optional<conv_color::cvto_col_t> const &);
 
 /**
@@ -48,7 +47,6 @@ extern std::map<std::string const, cvfrom_pal_t> const converters_from;
  */
 u8 *cvto_pal(
 		paldef const &to_paldef, coldef const &to_coldef, png::palette const &data,
-		std::optional<unsigned int const> const &subpal_idx = std::nullopt,
 		std::optional<conv_color::cvto_col_t> const &color_conv = std::nullopt);
 
 /**

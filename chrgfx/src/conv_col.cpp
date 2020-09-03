@@ -7,10 +7,9 @@ namespace conv_color
 {
 
 // converter maps
- std::map<string const, cvto_col_t> const converters_to{
-		{"default", cvto_color}};
+std::map<string const, cvto_col_t> const converters_to{{"default", cvto_color}};
 
- std::map<string const, cvfrom_col_t> const converters_from{
+std::map<string const, cvfrom_col_t> const converters_from{
 		{"default", cvfrom_color}};
 
 png::color cvfrom_color(coldef const &from_coldef, u32 const data)
@@ -33,18 +32,18 @@ png::color cvfrom_color(coldef const &from_coldef, u32 const data)
 		u8 red_bitcount{0}, green_bitcount{0}, blue_bitcount{0};
 		u8 bitmask{0};
 		for(rgb_layout const &this_pass : from_coldef.get_rgb_layout()) {
-			bitmask = create_bitmask8(this_pass.get_red_count());
+			bitmask = create_bitmask8(this_pass.get_red_size());
 			red |= ((data >> this_pass.get_red_shift()) & bitmask) << red_bitcount;
-			red_bitcount += this_pass.get_red_count();
+			red_bitcount += this_pass.get_red_size();
 
-			bitmask = create_bitmask8(this_pass.get_green_count());
+			bitmask = create_bitmask8(this_pass.get_green_size());
 			green |= ((data >> this_pass.get_green_shift()) & bitmask)
 							 << green_bitcount;
-			green_bitcount += this_pass.get_green_count();
+			green_bitcount += this_pass.get_green_size();
 
-			bitmask = create_bitmask8(this_pass.get_blue_count());
+			bitmask = create_bitmask8(this_pass.get_blue_size());
 			blue |= ((data >> this_pass.get_blue_shift()) & bitmask) << blue_bitcount;
-			blue_bitcount += this_pass.get_blue_count();
+			blue_bitcount += this_pass.get_blue_size();
 		}
 
 		red = expand_bits(red, red_bitcount);
@@ -88,23 +87,23 @@ u32 cvto_color(coldef const &to_coldef, png::color const data)
 		u32 temp;
 
 		for(rgb_layout const &this_pass : to_coldef.get_rgb_layout()) {
-			bitmask = (create_bitmask8(this_pass.get_red_count())) << red_pass_shift;
-			temp = (red & bitmask);
-			temp = temp << this_pass.get_red_shift();
+			bitmask = (create_bitmask8(this_pass.get_red_size())) << red_pass_shift;
+			temp = ((red & bitmask) >> red_pass_shift) << this_pass.get_red_shift();
 			out |= temp;
-			red_pass_shift += this_pass.get_red_count();
+			red_pass_shift += this_pass.get_red_size();
 
-			bitmask = (create_bitmask8(this_pass.get_green_count()))
+			bitmask = (create_bitmask8(this_pass.get_green_size()))
 								<< green_pass_shift;
-			temp = (green & bitmask) << this_pass.get_green_shift();
+			temp = ((green & bitmask) >> green_pass_shift)
+						 << this_pass.get_green_shift();
 			out |= temp;
-			green_pass_shift += this_pass.get_green_count();
+			green_pass_shift += this_pass.get_green_size();
 
-			bitmask = (create_bitmask8(this_pass.get_blue_count()))
-								<< blue_pass_shift;
-			temp = (blue & bitmask) << this_pass.get_blue_shift();
+			bitmask = (create_bitmask8(this_pass.get_blue_size())) << blue_pass_shift;
+			temp = ((blue & bitmask) >> blue_pass_shift)
+						 << this_pass.get_blue_shift();
 			out |= temp;
-			blue_pass_shift += this_pass.get_blue_count();
+			blue_pass_shift += this_pass.get_blue_size();
 		}
 
 		return out;

@@ -40,7 +40,7 @@ profile
   comment Capcom CPS / CPS 2
   chrdef chr_capcom_cps
   paldef pal_capcom_cps
-  coldef col_capcom_cps
+  coldef col_capcom_cps_accurate
 }
 
 profile
@@ -404,8 +404,8 @@ chrdef
   comment SNK NeoGeo
 
   # 16x16 4bpp Planar
-  # note that your tile data will need to be
-  # interleaved (odd|even|odd|even...) into one file first.
+  # note that your tile data (C ROMs) will need to be
+  # interleaved (odd|even|odd|even..., at 2 bytes each) into one file first.
   # see this page: https://wiki.neogeodev.org/index.php?title=Sprite_graphics_format
   width 16
   height 16
@@ -582,13 +582,49 @@ coldef
   # CPS 1/2 color format 
   # 15 |                  |0
   #    BrBrBrBrRRRRGGGGBBBB
-  # four bits of 'bright' component
-  # From MAME:
-  # from my understanding of the schematics, when the 'brightness'
-  # component is set to 0 it should reduce brightness to 1/3
-  # Not sure how to deal with that here yet, so for now we just ignore it...
-  # (it seems to be used mostly for fade in/out, and during regular gameplay
-  # it's full brightness anyway. Anecdotally, anyway.)
+  # 4 bits each of RGB and 4 bits of 'bright' component
+
+  # This version uses the Bright bits as
+  # the shared lower four bits of each color
+  # This makes the colors somewhat inaccurate
+  # as they will be slightly brighter
+  # However, this version is compatible with
+  # converting to CPS raw format as it takes
+  # all eight bits of data into account.
+
+  # Use this coldef if you plan to convert
+  # from PNG to raw CPS data
+  bitdepth 8
+  color_passes 2
+  red_shift 12,8
+  red_size 4,4
+  green_shift 12,4
+  green_size 4,4
+  blue_shift 12,0
+  blue_size 4,4
+
+  big_endian 1
+}
+
+coldef
+{
+  id col_capcom_cps_accurate
+  comment Capcom CPS 1/2 (more accurate colors)
+
+  # CPS 1/2 color format 
+  # 15 |                  |0
+  #    BrBrBrBrRRRRGGGGBBBB
+  # 4 bits each of RGB and 4 bits of 'bright' component
+
+  # This version ignores the bright bits, using only
+  # the RGB values. The colors generated will be exact
+  # to the output from e.g. MAME, but this coldef
+  # will not convert to raw CPS data properly as the
+  # bright bits will not be set, and the color will be
+  # 'dark' from the point of view of the hardware.
+
+  # Use this coldef if you only plan to convert from
+  # raw CPS data to PNG images
   bitdepth 4
   color_passes 1
   red_shift 8

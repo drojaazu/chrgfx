@@ -208,11 +208,23 @@ int main(int argc, char **argv)
 			}
 
 			paldata.seekg(0, paldata.end);
-			int length = paldata.tellg();
+			long length{paldata.tellg()};
 			paldata.seekg(0, paldata.beg);
 
 			char palbuffer[length];
 			paldata.read(palbuffer, length);
+			// TODO: work on a less grody way to do this
+			// if we haven't specified a subpalette, but we don't have enough data for
+			// the full palette, specify a subpalette anyway so we don't barf out junk
+			// data into the color palette
+			if(!cfg.subpalette && length < paldef.get_palette_datasize_bytes()) {
+				cfg.subpalette = 0;
+			}
+
+			if(!cfg.subpalette && length < paldef.get_subpal_datasize_bytes()) {
+				throw std::invalid_argument("Not enough palette data available");
+			}
+
 			workpal = pal_from_converter(paldef, coldef, (u8 *)palbuffer,
 																	 cfg.subpalette, col_from_converter);
 
@@ -225,7 +237,7 @@ int main(int argc, char **argv)
 		duration =
 				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-		std::cerr << "PALETTE CONVERSION: " << duration << "ms" << std::endl;
+		std::cerr << "PALETTE GENERATION: " << duration << "ms" << std::endl;
 #endif
 
 #ifdef DEBUG
@@ -258,6 +270,7 @@ int main(int argc, char **argv)
 		std::cerr << "OUTPUT: " << duration << "ms" << std::endl;
 #endif
 
+		// everything's good, we're outta here
 		return 0;
 	} catch(std::exception const &e) {
 		std::cerr << "FATAL EXCEPTION: " << e.what() << std::endl;
@@ -273,9 +286,10 @@ bool process_args(int argc, char **argv)
 	default_long_opts.push_back({"columns", required_argument, nullptr, 'd'});
 	default_long_opts.push_back({"chr-data", required_argument, nullptr, 'c'});
 	default_long_opts.push_back({"pal-data", required_argument, nullptr, 'p'});
+	default_long_opts.push_back({"subpalette", required_argument, nullptr, 's'});
 	default_long_opts.push_back({"output", required_argument, nullptr, 'o'});
 	default_long_opts.push_back({"help", no_argument, nullptr, 'h'});
-	default_short_opts.append("ti:bd:c:p:o:h");
+	default_short_opts.append("ti:bd:c:p:s:o:h");
 
 	bool default_processed = process_default_args(cfg, argc, argv);
 
@@ -301,7 +315,16 @@ bool process_args(int argc, char **argv)
 				cfg.paldata_name = optarg;
 				break;
 
-				// trns
+			// subpalette
+			case 's':
+				try {
+					cfg.subpalette = std::stoi(optarg);
+				} catch(const std::invalid_argument &e) {
+					throw std::invalid_argument("Invalid subpalette index value");
+				}
+				break;
+
+			// trns
 			case 't':
 				cfg.rendertraits.use_trns = true;
 				break;

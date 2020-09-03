@@ -231,14 +231,16 @@ int main(int argc, char **argv)
 							<< std::endl;
 #endif
 
-#ifdef DEBUG
-		t1 = std::chrono::high_resolution_clock::now();
-#endif
 		// deal with the palette next
 		if(!cfg.pal_outfile.empty()) {
-			uptr<u8> paldef_palette_data{
-					pal_to_converter(paldef, coldef, in_img.get_palette(), cfg.subpalette,
-													 col_to_converter)};
+
+#ifdef DEBUG
+			t1 = std::chrono::high_resolution_clock::now();
+#endif
+
+			uptr<u8> paldef_palette_data{pal_to_converter(
+					paldef, coldef, in_img.get_palette(), col_to_converter)};
+
 #ifdef DEBUG
 			t2 = std::chrono::high_resolution_clock::now();
 			duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
@@ -251,28 +253,32 @@ int main(int argc, char **argv)
 #ifdef DEBUG
 			t1 = std::chrono::high_resolution_clock::now();
 #endif
+
 			std::ofstream pal_outfile{cfg.pal_outfile};
 			if(!pal_outfile.good()) {
 				std::cerr << "pal-output error: " << std::strerror(errno) << std::endl;
 			}
-			size_t filesize{
-					(cfg.subpalette
-							 ? paldef.get_subpal_datasize_bytes()
-							 : (paldef.get_palette_length() > 256
-											? (size_t)(256 * (paldef.get_entry_datasize() / 8))
-											: paldef.get_palette_datasize_bytes()))};
+
+			// TODO: consider splitting the palette conversion routine into two
+			// functions, on for subpal and one for full pal so we always know the
+			// size of the data returned
+			size_t filesize{in_img.get_palette().size() == paldef.get_palette_length()
+													? paldef.get_palette_datasize_bytes()
+													: paldef.get_subpal_datasize_bytes()};
 
 			pal_outfile.write((char *)(paldef_palette_data.get()), filesize);
-		}
+
 #ifdef DEBUG
-		t2 = std::chrono::high_resolution_clock::now();
-		duration =
-				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+			t2 = std::chrono::high_resolution_clock::now();
+			duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
+										 .count();
 
-		std::cerr << "PAL OUTPUT: " << std::to_string(duration) << "ms"
-							<< std::endl;
+			std::cerr << "PAL OUTPUT: " << std::to_string(duration) << "ms"
+								<< std::endl;
 #endif
+		}
 
+		// everything's good, we're outta here
 		return 0;
 	} catch(std::exception const &e) {
 		std::cerr << "FATAL EXCEPTION: " << e.what() << std::endl;
