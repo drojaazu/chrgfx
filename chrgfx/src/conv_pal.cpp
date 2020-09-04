@@ -114,7 +114,7 @@ cvfrom_pal(paldef const &from_paldef, coldef const &from_coldef, u8 const *data,
 }
 
 u8 *cvto_pal(paldef const &to_paldef, coldef const &to_coldef,
-						 png::palette const &data,
+						 png::palette const &inpal,
 						 std::optional<conv_color::cvto_col_t> const &color_conv)
 {
 	/*
@@ -146,18 +146,22 @@ u8 *cvto_pal(paldef const &to_paldef, coldef const &to_coldef,
 
 	unsigned int
 			// the number of entries in the final palette
-			outpal_length{0};
+			outpal_length{0},
+			// the number of subpalettes we'll be outputting
+			out_subpal_count{0};
 
 	// calculate the ranges we'll be working with
-	if(data.size() == to_paldef.get_palette_length()) {
+	if(inpal.size() == to_paldef.get_palette_length()) {
+		out_subpal_count = to_paldef.get_subpal_count();
 		// palette has exact number of entries for a full output palette
 		outpal_length = to_paldef.get_palette_length();
 	} else {
 		// consider the input palette to be subpalette sized
-		if(data.size() < subpal_length) {
+		if(inpal.size() < subpal_length) {
 			throw std::invalid_argument(
 					"PNG palette does not have enough entries for a subpalette");
 		}
+		out_subpal_count = 1;
 		outpal_length = subpal_length;
 	}
 
@@ -183,39 +187,42 @@ u8 *cvto_pal(paldef const &to_paldef, coldef const &to_coldef,
 
 	// converted color
 	u32 this_color{0};
+	uint inpal_offset{0};
+	size_t outdata_bit_ptr{0}, byte_offset{0}, bit_offset{0};
 
-	size_t bit_align_ptr{0}, byte_offset{0}, bit_offset{0};
+	// for every subpalette
+	//  for every color entry in the subpal
+	//   convert that color to coldef'd version
+	//   copy color to output
 
-	// for every color entry in the palette
-	// convert that color into the coldef'ed version
-	// mask away the extra bits
-	// if entry size does not align to bytes, pack entries ***
-	// resize to subpal data size if necessary ***
-	for(unsigned int this_inpal_entry{0}; this_inpal_entry < outpal_length;
-			++this_inpal_entry) {
-		byte_offset = bit_align_ptr / 8;
-		bit_offset = bit_align_ptr % 8;
+	// for every subpalette
+	for(uint this_subpal{0}; this_subpal < out_subpal_count; ++this_subpal) {
+		inpal_offset = this_subpal * subpal_length;
+		// for every color in the subpal
+		for(uint this_subpal_entry{inpal_offset};
+				this_subpal_entry < (inpal_offset + subpal_length);
+				++this_subpal_entry) {
+			byte_offset = outdata_bit_ptr / 8;
+			bit_offset = outdata_bit_ptr % 8;
 
-		this_color =
-				convert_color(to_coldef, data.at(this_inpal_entry)) & outpal_entry_mask;
+			this_color = convert_color(to_coldef, inpal.at(this_subpal_entry)) &
+									 outpal_entry_mask;
 
-		if(entry_datasize < 8) {
-			// entries are less than one byte in size
-			// crazy cases here
-			// big fat ugly TODO here
-			out[byte_offset] |= this_color << bit_offset;
-			// throw std::invalid_argument("Unimplemented, ya dingus");
-		} else {
-			// entries are one byte or larger
-			for(size_t s{0}; s < entry_datasize_bytes; ++s) {
-				entry_temp[s] = (this_color >> (s * 8)) & 0xff;
+			if(entry_datasize < 8) {
+				// color entries are less than one byte in size
+				out[byte_offset] |= this_color << bit_offset;
+			} else {
+				// color entries are one byte or larger
+				for(size_t s{0}; s < entry_datasize_bytes; ++s) {
+					entry_temp[s] = (this_color >> (s * 8)) & 0xff;
+				}
+				copyfunc(entry_temp, entry_temp + entry_datasize_bytes,
+								 out + byte_offset);
 			}
-			copyfunc(entry_temp, entry_temp + entry_datasize_bytes,
-							 out + byte_offset);
+
+			outdata_bit_ptr += entry_datasize;
 		}
-		// TODO - Need to work in check for subpalettes, some kind of counter
-		// and increase this value by the subpal datasize
-		bit_align_ptr += entry_datasize;
+		outdata_bit_ptr += (subpal_datasize - (entry_datasize * subpal_length));
 	}
 
 	return out;

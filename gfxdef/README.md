@@ -4,7 +4,7 @@ Rather than hardcoding conversion routines for each hardware system, chrgfx uses
 There are three "types" within a graphics definition: a tile definition (chrdef), a palette definition (paldef), and a color definition (coldef). There are also profile definitions which are a grouping of the previously mentioned types to represent a certain hardware system.
 
 ## gfxdefs File
-Included with chrgfx is a collection of definitions for many well-known systems, including most of those from the 8 and 16-bit era. This file is meant to be used in conjunction with the `png2chr` and `chr2png` tools. By default, it should be installed to `/usr/local/lib/chrgfx/gfxdefs`.
+Included with chrgfx is a collection of definitions for many well-known systems, including most of those from the 8 and 16-bit era. This file is meant to be used in conjunction with the `png2chr` and `chr2png` tools. By default, it should be installed to `/etc/chrgfx/gfxdefs`.
 
 The following hardware is included in the file. Use the `--profile` option to specify the hardware.
 
@@ -17,6 +17,10 @@ The following hardware is included in the file. Use the `--profile` option to sp
 `nintendo_gb` - Nintendo Game Boy
 
 `nintendo_gb_pocket` - Nintendo Game Boy Pocket
+
+`nec_pcengine_sprites` - NEC PC Engine / TurboGrafx-16 (sprites)
+
+`nec_pcengine_tiles` - NEC PC Engine / TurboGrafx-16 (tiles)
 
 `sega_gg` - Sega Game Gear
 

@@ -207,13 +207,13 @@ int main(int argc, char **argv)
 				return -12;
 			}
 
+			// get the size of the palette data
 			paldata.seekg(0, paldata.end);
 			long length{paldata.tellg()};
-			paldata.seekg(0, paldata.beg);
 
-			char palbuffer[length];
-			paldata.read(palbuffer, length);
-			// TODO: work on a less grody way to do this
+			// TODO: work on a less grody way to do checks on palette data size
+			// should probably develop a wrapper around the data with size, etc
+
 			// if we haven't specified a subpalette, but we don't have enough data for
 			// the full palette, specify a subpalette anyway so we don't barf out junk
 			// data into the color palette
@@ -224,6 +224,16 @@ int main(int argc, char **argv)
 			if(!cfg.subpalette && length < paldef.get_subpal_datasize_bytes()) {
 				throw std::invalid_argument("Not enough palette data available");
 			}
+
+			if(cfg.subpalette && ((cfg.subpalette.value() *
+														 paldef.get_subpal_datasize_bytes()) > length)) {
+				throw std::out_of_range("Specified subpalette index is outside the "
+																"size of the supplied palette data");
+			}
+
+			paldata.seekg(0, paldata.beg);
+			char palbuffer[length];
+			paldata.read(palbuffer, length);
 
 			workpal = pal_from_converter(paldef, coldef, (u8 *)palbuffer,
 																	 cfg.subpalette, col_from_converter);
