@@ -170,11 +170,11 @@ u8 *cvto_pal(paldef const &to_paldef, coldef const &to_coldef,
 
 	// provision and initialize output palette data
 	unsigned int out_datasize{outpal_length *
-														(entry_datasize * subpal_length < subpal_datasize
+														(entry_datasize * subpal_length <= subpal_datasize
 																 ? subpal_datasize / 8
 																 : entry_datasize_bytes)};
 	u8 *out{new u8[out_datasize]};
-	std::fill(out, out + out_datasize, 0);
+	std::fill_n(out, out_datasize, 0);
 
 	// prepare space and function for data layout depending on endianness
 	u8 entry_temp[entry_datasize_bytes];
@@ -210,7 +210,7 @@ u8 *cvto_pal(paldef const &to_paldef, coldef const &to_coldef,
 
 			if(entry_datasize < 8) {
 				// color entries are less than one byte in size
-				out[byte_offset] |= this_color << bit_offset;
+				out[byte_offset] |= (this_color << bit_offset);
 			} else {
 				// color entries are one byte or larger
 				for(size_t s{0}; s < entry_datasize_bytes; ++s) {
@@ -222,6 +222,8 @@ u8 *cvto_pal(paldef const &to_paldef, coldef const &to_coldef,
 
 			outdata_bit_ptr += entry_datasize;
 		}
+		// account for subpalette size
+		// (really only needed when subpal data size > data size of all entries)
 		outdata_bit_ptr += (subpal_datasize - (entry_datasize * subpal_length));
 	}
 
