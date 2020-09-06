@@ -1,7 +1,9 @@
 #ifndef DEFBLOCKS_H
 #define DEFBLOCKS_H
 
-#include <bits/stdc++.h>
+#include <fstream>
+#include <iostream>
+#include <istream>
 #include <cerrno>
 #include <map>
 #include <string>
