@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <array>
-#include <bits/stdc++.h>
 #include <cerrno>
 #include <fstream>
 #include <map>

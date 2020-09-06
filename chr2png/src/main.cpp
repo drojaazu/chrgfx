@@ -2,7 +2,6 @@
 #include "import_defs.hpp"
 #include "shared.hpp"
 
-#include <bits/stdc++.h>
 #include <cerrno>
 #include <getopt.h>
 #include <iostream>
