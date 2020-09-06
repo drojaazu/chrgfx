@@ -1,10 +1,12 @@
 #ifndef DEFBLOCKS_H
 #define DEFBLOCKS_H
 
+#include <algorithm>
+#include <cerrno>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <istream>
-#include <cerrno>
 #include <map>
 #include <string>
 #include <vector>

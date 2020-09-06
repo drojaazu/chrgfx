@@ -6,6 +6,7 @@
 #include <cerrno>
 #include <getopt.h>
 #include <iostream>
+#include <iterator>
 #include <stdio.h>
 
 #ifdef DEBUG
