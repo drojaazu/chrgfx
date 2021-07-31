@@ -30,7 +30,7 @@ extern chrdef basic_8x8_1bpp;
 /**
  * Generates random 8bit RGB values
  */
-extern coldef basic_8bit_random;
+extern rgbcoldef basic_8bit_random;
 
 /**
  * Generic 8bit (256 color) palette

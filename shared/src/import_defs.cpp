@@ -202,10 +202,10 @@ chrdef validate_chrdef_block(defblock const &def_block)
 
 	// SETTING: converter_to
 	mapiter = def_block.find(defkeys::CHR_CONVERTER_TO);
-	conv_chr::cvto_chr_t temp_converter_to;
+	converters::cvto_chr_t temp_converter_to;
 	try {
 		if(mapiter != def_block.end()) {
-			temp_converter_to = conv_chr::converters_to.at(mapiter->second);
+			temp_converter_to = converters::converters_to.at(mapiter->second);
 		}
 	} catch(std::out_of_range const &) {
 		throw gfxdef_value_error("Specified 'to' converter not found",
@@ -215,10 +215,10 @@ chrdef validate_chrdef_block(defblock const &def_block)
 
 	// SETTING: converter_from
 	mapiter = def_block.find(defkeys::CHR_CONVERTER_FROM);
-	conv_chr::cvfrom_chr_t temp_converter_from{nullptr};
+	converters::cvfrom_chr_t temp_converter_from{nullptr};
 	try {
 		if(mapiter != def_block.end()) {
-			temp_converter_from = conv_chr::converters_from.at(mapiter->second);
+			temp_converter_from = converters::converters_from.at(mapiter->second);
 		}
 	} catch(std::out_of_range const &) {
 		throw gfxdef_value_error("Specified 'from' converter not found",

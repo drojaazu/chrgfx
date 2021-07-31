@@ -68,7 +68,7 @@ int main(int argc, char **argv)
 		}
 
 		// converter function pointers
-		conv_chr::cvto_chr_t chr_to_converter;
+		converters::cvto_chr_t chr_to_converter;
 		conv_color::cvto_col_t col_to_converter;
 		conv_palette::cvto_pal_t pal_to_converter;
 

@@ -5,6 +5,6 @@ add_executable(png2chr ${SRCFILES})
 
 target_include_directories(png2chr PUBLIC
   "${PROJECT_SOURCE_DIR}/shared/src"
-	"${PROJECT_SOURCE_DIR}/chrgfx/inc")
+	"${PROJECT_SOURCE_DIR}/chrgfx/include")
 
 target_link_libraries(png2chr LINK_PUBLIC chrgfx)

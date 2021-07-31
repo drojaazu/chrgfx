@@ -4,7 +4,6 @@
 #include <png++/png.hpp>
 
 #include "builtin_defs.hpp"
-#include "chrbank.hpp"
 #include "conv_chr.hpp"
 #include "conv_col.hpp"
 #include "conv_pal.hpp"

@@ -1,12 +1,25 @@
 Language: Cpp
-Standard: Cpp11
+Standard: c++17
 BasedOnStyle: LLVM
-BreakBeforeBraces: Linux
+Cpp11BracedListStyle: false
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeAssignmentOperators: true
+BreakBeforeBraces: Allman
+
 SpaceBeforeParens: Never
 TabWidth: 2
 UseTab: Always
 AlignTrailingComments: true
 AllowShortIfStatementsOnASingleLine: false
 IndentCaseLabels: true
+AlignOperands: true
+AllowAllArgumentsOnNextLine: true
+AllowAllConstructorInitializersOnNextLine: true
 
-Cpp11BracedListStyle: true
+NamespaceIndentation: All
+
+AllowShortFunctionsOnASingleLine: Empty
+BreakConstructorInitializers: AfterColon
+
+PointerAlignment: Middle
