@@ -2,8 +2,8 @@
 #define CHRGFX__CONV_PAL_H
 
 #include "buffer.hpp"
+#include "colconv.hpp"
 #include "coldef.hpp"
-#include "conv_col.hpp"
 #include "paldef.hpp"
 #include "types.hpp"
 #include "utils.hpp"
@@ -12,33 +12,18 @@
 #include <optional>
 #include <string>
 
+using namespace std;
+
 namespace chrgfx
 {
 
 	namespace converters
 	{
 		/**
-		 * Represents a function to convert a palette to a given encoding
-		 */
-		// typedef buffer (*cvto_pal_t)(paldef const &, coldef const &,
-		//														 png::palette const &,
-		//														 std::optional<converters::cvto_col_t> const
-		//&);
-
-		/**
-		 * Represents a function to convert a palette from a given encoding
-		 */
-		// typedef png::palette (*cvfrom_pal_t)(
-		//		paldef const &, coldef const &, u8 const *,
-		//		std::optional<unsigned int const> const &,
-		//		std::optional<converters::cvfrom_col_t> const &);
-
-		/**
 		 * Convert a palette to the specified encoding
 		 */
-		buffer cvto_pal(paldef const & to_paldef, rgbcoldef const & to_coldef,
-										png::palette const & inpal,
-										std::optional<converters::cvto_col_t> const & color_conv)
+		void toFormattedRgbPal(paldef const & paldef, rgbcoldef const & coldef,
+													 palette const & inpal, u8 * outpal)
 		{
 			/*
 				Note about palettes
@@ -48,23 +33,22 @@ namespace chrgfx
 
 				-If input palette length == paldef full palette length, use the full
 				palette (which means this is inherently limited to hardware with full
-				palettes of 256 colors or less) -Otherwise, use subpalette length (check
-				that there are	at least enough values for a subpal)
+				palettes of 256 colors or less)
+				-Otherwise, use subpalette length (check that there are	at least enough
+				values for a subpal)
 			*/
-			converters::cvto_col_t convert_color { color_conv.value_or(
-					converters::cvto_color) };
 
 			unsigned int const
 					// total number of subpalettes in the system palette
-					subpal_count { to_paldef.get_subpal_count() },
+					subpal_count { paldef.getSubpalCount() },
 					// size of a single color within a palette, in bits
-					entry_datasize { to_paldef.get_entry_datasize() },
+					entry_datasize { paldef.getEntryDatasize() },
 					// as above, in bytes
 					entry_datasize_bytes { entry_datasize / 8 },
 					// total number of entries in a single subpalette
-					subpal_length { to_paldef.get_subpal_length() },
+					subpal_length { paldef.getSubpalLength() },
 					// total size of a single subpalette, in bits
-					subpal_datasize { to_paldef.get_subpal_datasize() };
+					subpal_datasize { paldef.getSubpalDatasize() };
 
 			unsigned int
 					// the number of entries in the final palette
@@ -72,19 +56,21 @@ namespace chrgfx
 					// the number of subpalettes we'll be outputting
 					out_subpal_count { 0 };
 
-			// calculate the ranges we'll be working with
-			if(inpal.size() == to_paldef.get_palette_length())
+			// determine if we are working with a system (full) palette
+			// or a sub palette
+
+			// if there are enough entries for a sys palette...
+			if(inpal.size() >= paldef.getPalLength())
 			{
-				out_subpal_count = to_paldef.get_subpal_count();
-				// palette has exact number of entries for a full output palette
-				outpal_length = to_paldef.get_palette_length();
+				out_subpal_count = paldef.getSubpalCount();
+				outpal_length = paldef.getPalLength();
 			}
 			else
 			{
-				// consider the input palette to be subpalette sized
+				// otherwise consider the input palette to be subpalette sized
 				if(inpal.size() < subpal_length)
 				{
-					throw std::invalid_argument(
+					throw invalid_argument(
 							"PNG palette does not have enough entries for a subpalette");
 				}
 				out_subpal_count = 1;
@@ -92,7 +78,7 @@ namespace chrgfx
 			}
 
 			// mask for extracting color bits from the data
-			u32 const outpal_entry_mask { create_bitmask32(entry_datasize) };
+			auto const outpal_entry_mask = create_bitmask32(entry_datasize);
 
 			// provision and initialize output palette data
 			unsigned int out_datasize {
@@ -100,14 +86,14 @@ namespace chrgfx
 														 ? subpal_datasize / 8
 														 : entry_datasize_bytes)
 			};
-			auto out = buffer(out_datasize, 0);
+			// auto out = buffer(out_datasize, 0);
 
 			// std::fill_n(out, out_datasize, 0);
 
 			// prepare space and function for data layout depending on endianness
 			u8 entry_temp[entry_datasize_bytes];
 			u8 * (*copyfunc)(u8 *, u8 *, u8 *);
-			if(bigend_sys == to_coldef.get_is_big_endian())
+			if(bigend_sys == coldef.get_is_big_endian())
 			{
 				copyfunc = std::copy;
 			}
@@ -138,8 +124,9 @@ namespace chrgfx
 					byte_offset = outdata_bit_ptr / 8;
 					bit_offset = outdata_bit_ptr % 8;
 
-					this_color = convert_color(to_coldef, inpal.at(this_subpal_entry)) &
-											 outpal_entry_mask;
+					this_color =
+							toFormattedRgbColor(coldef, inpal.at(this_subpal_entry)) &
+							outpal_entry_mask;
 
 					if(entry_datasize < 8)
 					{
@@ -170,11 +157,10 @@ namespace chrgfx
 		/**
 		 * Convert a palette from the specified encoding
 		 */
-		png::palette
-		cvfrom_pal(paldef const & from_paldef, rgbcoldef const & from_coldef,
-							 u8 const * data,
-							 std::optional<unsigned int const> const & subpal_idx,
-							 std::optional<converters::cvfrom_col_t> const & color_conv)
+		palette toBasicRefPal(paldef const & from_paldef,
+													rgbcoldef const & from_coldef, u8 const * data,
+													optional<unsigned int const> const & subpal_idx,
+													optional<converters::cvfrom_col_t> const & color_conv)
 		{
 
 			converters::cvfrom_col_t convert_color { color_conv.value_or(
@@ -283,8 +269,8 @@ namespace chrgfx
 		 */
 
 		png::palette cvfrom_tilelayerpro_pal(
-				paldef const & from_paldef, rgbcoldef const & from_coldef, u8 const * data,
-				std::optional<unsigned int const> const & subpal_idx,
+				paldef const & from_paldef, rgbcoldef const & from_coldef,
+				u8 const * data, std::optional<unsigned int const> const & subpal_idx,
 				std::optional<converters::cvfrom_col_t> const & color_conv)
 		{
 			if(data[0] != 0x54 || data[1] != 0x50 || data[2] != 0x4c)

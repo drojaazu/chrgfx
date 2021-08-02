@@ -20,7 +20,8 @@ namespace chrgfx
 		/**
 		 * Convert a tile to the specified encoding
 		 */
-		buffer toFormattedChr(chrgfx::chrdef const & to_def, buffer const & data)
+		void toFormattedChr(chrdef const & to_def, u8 const * in_data,
+												u8 * out_data)
 		{
 			/*
 				-for every line...
@@ -38,7 +39,7 @@ namespace chrgfx
 			u16 curr_pixel { 0 }, curr_bit { 0 }, bitpos_y { 0 }, bitpos_x { 0 },
 					bitpos { 0 }, pixel_count { 0 };
 
-			auto out = buffer(to_def.getDataSize() / 8, 0);
+			// auto out = buffer(to_def.getDataSize() / 8, 0);
 
 			// for every line...
 			for(line_iter = 0; line_iter < to_def.getHeight(); ++line_iter)
@@ -48,7 +49,7 @@ namespace chrgfx
 				// for every pixel...
 				for(pixel_iter = 0; pixel_iter < to_def.getWidth(); ++pixel_iter)
 				{
-					curr_pixel = data[pixel_count++];
+					curr_pixel = in_data[pixel_count++];
 
 					// if all the bit planes are unset (i.e. the value is zero)
 					// we can skip the bitplane shenanigans altogether
@@ -68,24 +69,24 @@ namespace chrgfx
 
 						// get the position in the output data for this bit
 						bitpos = bitpos_y + bitpos_x + to_def.getPlaneOffsetAt(plane_iter);
-						out[bitpos / 8] |= (0x80 >> (bitpos % 8));
+						out_data[bitpos / 8] |= (0x80 >> (bitpos % 8));
 					}
 				}
 			}
 
-			return out;
+			// return out;
 		}
 
 		/**
 		 * Convert a tile from the specified encoding
 		 */
-		buffer toBasicChr(chrdef const & from_def, buffer const & data)
+		void toBasicChr(chrdef const & from_def, u8 const * in_data, u8 * out_data)
 		{
 			s16 line_iter { 0 }, pixel_iter { 0 }, plane_iter { 0 };
 			u16 curr_pixel, work_byte { 0 }, work_bit { 0 }, bitpos_y { 0 },
 					bitpos_x { 0 }, bitpos { 0 }, this_pixel { 0 };
 
-			auto out = buffer(from_def.getWidth() * from_def.getHeight(), 0);
+			// auto out = buffer(from_def.getWidth() * from_def.getHeight(), 0);
 
 			/*
 			#ifdef DEBUG
@@ -117,7 +118,7 @@ namespace chrgfx
 						bitpos =
 								bitpos_y + bitpos_x + from_def.getPlaneOffsetAt(plane_iter);
 
-						work_byte = data[bitpos / 8];
+						work_byte = in_data[bitpos / 8];
 						// if work_byte is 0, no bits are set, so no bits will be set in the
 						// output, so let's move to the next byte
 						if(work_byte == 0)
@@ -130,11 +131,11 @@ namespace chrgfx
 						// plane_iter);
 						curr_pixel |= ((work_byte << work_bit) & 0x80) >> (7 - plane_iter);
 					}
-					out[this_pixel++] = curr_pixel;
+					out_data[this_pixel++] = curr_pixel;
 				}
 			}
 
-			return out;
+			// return out;
 		}
 
 	} // namespace converters
