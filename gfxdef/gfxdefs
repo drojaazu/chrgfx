@@ -497,7 +497,7 @@ chrdef
   width 8
   height 8
   bpp 2
-  planeoffset 8,0
+  planeoffset 0,8
   pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
   rowoffset 0, 16, 32, 48, 64, 80, 96, 112
 }
