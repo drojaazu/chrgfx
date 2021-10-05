@@ -29,37 +29,37 @@ namespace chrgfx
 		/**
 		 * \return width of the tile, in pixels
 		 */
-		ushort getWidth() const;
+		ushort width() const;
 
 		/**
 		 * \return height of the tile, in pixels
 		 */
-		ushort getHeight() const;
+		ushort height() const;
 
 		/**
 		 * \return bit depth of the tile
 		 */
-		ushort getBitdepth() const;
+		ushort bitdepth() const;
 
 		/**
 		 * \return bit offset to a given bitplane in a row
 		 */
-		ushort getPlaneOffsetAt(ushort index) const;
+		ushort planeOffsetAt(ushort index) const;
 
 		/**
 		 * \return offset to a given pixel in a row, in bits
 		 */
-		ushort getPixelOffsetAt(ushort index) const;
+		ushort pixelOffsetAt(ushort index) const;
 
 		/**
 		 * \return offset to a given row in the tile, in bits
 		 */
-		ushort getRowOffsetAt(ushort index) const;
+		ushort rowOffsetAt(ushort index) const;
 
 		/**
 		 * \return data size of a single tile, *in bits*
 		 */
-		ushort getDataSize() const;
+		ushort datasize() const;
 	};
 
 } // namespace chrgfx

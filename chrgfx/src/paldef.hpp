@@ -5,12 +5,9 @@
 #include <optional>
 #include <string>
 
-using std::nullopt;
-using std::optional;
-using std::string;
-
 namespace chrgfx
 {
+	using namespace std;
 
 	/**
 	 * \class paldef
@@ -42,50 +39,32 @@ namespace chrgfx
 		/**
 		 * \return number of entries in the system palette
 		 */
-		ushort getPalLength() const
-		{
-			return palLength;
-		}
+		ushort getPalLength() const;
 
 		/**
 		 * \return number of entries in a subpalette
 		 */
-		ushort getSubpalLength() const
-		{
-			return subpalLength;
-		}
+		ushort getSubpalLength() const;
 
 		/**
 		 * \return number of subpalettes in the system palette
 		 */
-		ushort getSubpalCount() const
-		{
-			return subpalCount;
-		}
+		ushort getSubpalCount() const;
 
 		/**
 		 * \return data size of a single entry, *in bits*
 		 */
-		ushort getEntryDatasize() const
-		{
-			return entryDatasize;
-		}
+		ushort getEntryDatasize() const;
 
 		/**
 		 * \return data size of the system palette, *in bits*
 		 */
-		ushort getPaletteDatasize() const
-		{
-			return paletteDatasize;
-		}
+		ushort getPaletteDatasize() const;
 
 		/**
 		 * \return data size of a subpalette, *in bits*
 		 */
-		ushort getSubpalDatasize() const
-		{
-			return subpalDatasize;
-		}
+		ushort getSubpalDatasize() const;
 	};
 
 } // namespace chrgfx

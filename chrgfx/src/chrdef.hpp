@@ -19,85 +19,64 @@ namespace chrgfx
 	{
 
 	protected:
-		ushort width;
-		ushort height;
-		ushort bitdepth;
+		ushort p_width;
+		ushort p_height;
+		ushort p_bitdepth;
 
-		vector<ushort> planeoffset;
-		//ushort const * planeoffset_data;
+		vector<ushort> p_planeoffset;
+		// ushort const * planeoffset_data;
 
-		vector<ushort> pixeloffset;
-		//ushort const * pixeloffset_data;
+		vector<ushort> p_pixeloffset;
+		// ushort const * pixeloffset_data;
 
-		vector<ushort> rowoffset;
-		//ushort const * rowoffset_data;
+		vector<ushort> p_rowoffset;
+		// ushort const * rowoffset_data;
 
-		ushort datasize; // size of one chr in bits
+		ushort p_datasize; // size of one chr in bits
 
 	public:
-		chrdef(string id, ushort width, ushort height,
-					 ushort bitdepth, vector<ushort> planeoffset,
-					 vector<ushort> pixeloffset, vector<ushort> rowoffset) :
+		chrdef(string id, ushort width, ushort height, ushort bitdepth,
+					 vector<ushort> planeoffset, vector<ushort> pixeloffset,
+					 vector<ushort> rowoffset) :
 				gfxdef(id),
-				width(width), height(height), bitdepth(bitdepth),
-				datasize(width * height * bitdepth), planeoffset(planeoffset),
-				pixeloffset(pixeloffset), rowoffset(rowoffset) {};
+				p_width(width), p_height(height), p_bitdepth(bitdepth),
+				p_datasize(width * height * bitdepth), p_planeoffset(planeoffset),
+				p_pixeloffset(pixeloffset), p_rowoffset(rowoffset) {};
 
 		/**
 		 * \return width of the tile, in pixels
 		 */
-		ushort getWidth() const
-		{
-			return width;
-		}
+		ushort width() const;
 
 		/**
 		 * \return height of the tile, in pixels
 		 */
-		ushort getHeight() const
-		{
-			return height;
-		}
+		ushort height() const;
 
 		/**
 		 * \return bit depth of the tile
 		 */
-		ushort getBitdepth() const
-		{
-			return bitdepth;
-		}
-
-		/**
-		 * \return bit offset to a given bitplane in a row
-		 */
-		ushort getPlaneOffsetAt(ushort index) const
-		{
-			return planeoffset[index];
-		};
-
-		/**
-		 * \return offset to a given pixel in a row, in bits
-		 */
-		ushort getPixelOffsetAt(ushort index) const
-		{
-			return pixeloffset[index];
-		};
-
-		/**
-		 * \return offset to a given row in the tile, in bits
-		 */
-		ushort getRowOffsetAt(ushort index) const
-		{
-			return rowoffset[index];
-		};
+		ushort bitdepth() const;
 
 		/**
 		 * \return data size of a single tile, *in bits*
 		 */
-		ushort getDataSize() const
-		{
-			return datasize;
-		}
+		ushort datasize() const;
+
+		/**
+		 * \return bit offset to a given bitplane in a row
+		 */
+		ushort planeOffsetAt(ushort index) const;
+
+		/**
+		 * \return bit offset to a given pixel in a row
+		 */
+		ushort pixelOffsetAt(ushort index) const;
+
+		/**
+		 * \return bit offset to a given row in the tile
+		 */
+		ushort rowOffsetAt(ushort index) const;
 	};
 
 } // namespace chrgfx

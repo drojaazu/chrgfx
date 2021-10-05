@@ -46,7 +46,7 @@ namespace chrgfx
 			u8 bitmask { 0 };
 			u32 temp;
 
-			for(rgb_layout const & this_pass : color_def.get_rgb_layout())
+			for(rgb_layout const & this_pass : color_def.rgbLayout())
 			{
 				bitmask = (create_bitmask8(this_pass.get_red_size())) << red_pass_shift;
 				temp = ((red & bitmask) >> red_pass_shift) << this_pass.get_red_shift();
@@ -90,7 +90,7 @@ namespace chrgfx
 			u8 red { 0 }, green { 0 }, blue { 0 };
 			u8 red_bitcount { 0 }, green_bitcount { 0 }, blue_bitcount { 0 };
 			u8 bitmask { 0 };
-			for(rgb_layout const & this_pass : coldef.get_rgb_layout())
+			for(rgb_layout const & this_pass : coldef.rgbLayout())
 			{
 				bitmask = create_bitmask8(this_pass.get_red_size());
 				red |= ((data >> this_pass.get_red_shift()) & bitmask) << red_bitcount;
@@ -116,12 +116,12 @@ namespace chrgfx
 
 		ushort toFormattedRefColor(refcoldef const & color_def, color const & data)
 		{
-			return color_def.getReftabIndex(data);
+			return color_def.reftabIndex(data);
 		}
 
 		color toBasicRefColor(refcoldef const & color_def, ushort const data)
 		{
-			return color_def.getReftabEntry(data);
+			return color_def.reftabColor(data);
 		}
 
 	} // namespace converters

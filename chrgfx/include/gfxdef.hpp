@@ -7,14 +7,10 @@
 #include <string>
 #include <vector>
 
-using png::color;
-using png::palette;
-using std::pair;
-using std::string;
-using std::vector;
-
 namespace chrgfx
 {
+	using namespace std;
+
 	/**
 	 * Defines the bit positions of RGB channels
 	 * Positive shift values shift right; negative values shift left
@@ -62,69 +58,67 @@ namespace chrgfx
 	class chrdef : public gfxdef
 	{
 	public:
-		chrdef(string id, uint width, uint height, uint bitplanes,
-					 vector<uint> planeoffset, vector<uint> pixeloffset,
-					 vector<uint> rowoffset,
-					 converters::cvto_chr_t converter_to = converters::cvto_chr,
-					 converters::cvfrom_chr_t converter_from = converters::cvfrom_chr);
+		chrdef(string id, ushort width, ushort height, ushort bitdepth,
+					 vector<ushort> planeoffset, vector<ushort> pixeloffset,
+					 vector<ushort> rowoffset) :
+				gfxdef(id),
+				width(width), height(height), bitdepth(bitdepth),
+				datasize(width * height * bitdepth), p_planeoffset(planeoffset),
+				p_pixeloffset(pixeloffset), p_rowoffset(rowoffset) {};
 
 		/**
-		 * Returns the width of the tile, in pixels
+		 * \return width of the tile, in pixels
 		 */
-		uint get_width() const;
+		ushort width() const
+		{
+			return width;
+		}
 
 		/**
-		 * Returns the height of the tile, in pixels
+		 * \return height of the tile, in pixels
 		 */
-		uint getHeight() const;
+		ushort height() const;
 
 		/**
-		 * Returns the bit depth of the tile
+		 * \return bit depth of the tile
 		 */
-		uint getBitdepth() const;
+		ushort bitdepth() const;
 
 		/**
-		 * Returns the offset to a given bitplane in a row, in bits
+		 * \return bit offset to a given bitplane in a row
 		 */
-		uint get_planeoffset_at(uint pos) const;
+		ushort planeOffsetAt(ushort index) const;
 
 		/**
-		 * Returns the offset to a given pixel in a row, in bits
+		 * \return offset to a given pixel in a row, in bits
 		 */
-		uint get_pixeloffset_at(uint pos) const;
+		ushort pixelOffsetAt(ushort index) const;
 
 		/**
-		 * Returns the offset to a given row in the tile, in bits
+		 * \return offset to a given row in the tile, in bits
 		 */
-		uint get_rowoffset_at(uint pos) const;
+		ushort rowOffsetAt(ushort index) const;
 
 		/**
-		 * Returns the size of a single tile, in bits
+		 * \return data size of a single tile, *in bits*
 		 */
-		uint get_datasize() const;
-
-		converters::cvfrom_chr_t get_converter_from() const;
-
-		converters::cvto_chr_t get_converter_to() const;
+		ushort datasize() const;
 
 	private:
-		uint width;
-		uint height;
-		uint bitdepth;
+		ushort width;
+		ushort height;
+		ushort bitdepth;
 
-		vector<uint> planeoffset;
+		vector<uint> p_planeoffset;
 		uint const * planeoffset_data;
 
-		vector<uint> pixeloffset;
+		vector<uint> p_pixeloffset;
 		uint const * pixeloffset_data;
 
-		vector<uint> rowoffset;
+		vector<uint> p_rowoffset;
 		uint const * rowoffset_data;
 
 		uint datasize; // size of one chr in bits
-
-		converters::cvfrom_chr_t converter_from;
-		converters::cvto_chr_t converter_to;
 	};
 
 	/**
