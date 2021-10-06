@@ -10,84 +10,84 @@
 
 namespace chrgfx
 {
-	using namespace std;
-	using namespace png;
+using namespace std;
+using namespace png;
+
+/**
+ * Specifying a table of RGB values that approximately correspond to the
+ * output of the hardware (reftab based)
+ */
+class refcoldef : public gfxdef
+{
+protected:
+	palette p_reftab;
+	const bool p_big_endian;
+
+public:
+	refcoldef(string id, palette reftab, bool is_big_endian = false) :
+			gfxdef(std::move(id)), p_reftab(std::move(reftab)),
+			p_big_endian(is_big_endian) {};
 
 	/**
-	 * Specifying a table of RGB values that approximately correspond to the
-	 * output of the hardware (reftab based)
+	 * Returns the color from the reference palette for the given index
 	 */
-	class refcoldef : public gfxdef
-	{
-	protected:
-		palette p_reftab;
-		const bool p_big_endian;
-
-	public:
-		refcoldef(string id, palette reftab, bool is_big_endian = false) :
-				gfxdef(std::move(id)), p_reftab(std::move(reftab)),
-				p_big_endian(is_big_endian) {};
-
-		/**
-		 * Returns the color from the reference palette for the given index
-		 */
-		color reftabColor(ushort index) const;
-
-		/**
-		 * Returns the index to the color matching the RGB value provided, or its
-		 * nearest color
-		 */
-		ushort reftabIndex(color rgb) const;
-
-		/**
-		 * \brief Returns true if the original harware is big endian (reftab based)
-		 */
-		bool bigEndian() const;
-	};
+	color reftabColor(ushort index) const;
 
 	/**
-	 * Defines color data in one of two ways:
-	 *   - Specifying offsets and width of each RGB color channel within the
-	 * data (rgblayout based)
-
+	 * Returns the index to the color matching the RGB value provided, or its
+	 * nearest color
 	 */
-	class rgbcoldef : public gfxdef
-	{
-	protected:
-		vector<rgb_layout> layout;
-		ushort bitdepth;
-		const bool is_big_endian;
+	ushort reftabIndex(color rgb) const;
 
-	public:
-		/**
-		 * Constructor for an rgblayout based coldef
-		 */
-		rgbcoldef(string id, ushort bitdepth, vector<rgb_layout> layout,
-							bool is_big_endian = false) :
-				gfxdef(std::move(id)),
-				bitdepth(bitdepth), layout(std::move(layout)),
-				is_big_endian(is_big_endian) {};
+	/**
+	 * \brief Returns true if the original harware is big endian (reftab based)
+	 */
+	bool bigEndian() const;
+};
 
-		/**
-		 * Returns the vector of RGB layouts (rgblayout based)
-		 */
-		vector<rgb_layout> & rgbLayout();
+/**
+ * Defines color data in one of two ways:
+ *   - Specifying offsets and width of each RGB color channel within the
+ * data (rgblayout based)
 
-		/**
-		 * Returns the RGB bit layout for the given pass (rgblayout based)
-		 */
-		rgb_layout get_rgb_pass(ushort pass) const;
+ */
+class rgbcoldef : public gfxdef
+{
+protected:
+	vector<rgb_layout> layout;
+	ushort bitdepth;
+	const bool is_big_endian;
 
-		/**
-		 * Returns the bitdepth of the color channels
-		 */
-		ushort getBitdepth() const;
+public:
+	/**
+	 * Constructor for an rgblayout based coldef
+	 */
+	rgbcoldef(string id, ushort bitdepth, vector<rgb_layout> layout,
+						bool is_big_endian = false) :
+			gfxdef(std::move(id)),
+			bitdepth(bitdepth), layout(std::move(layout)),
+			is_big_endian(is_big_endian) {};
 
-		/**
-		 * Returns true if the original harware is big endian (reftab based)
-		 */
-		bool get_is_big_endian() const;
-	};
+	/**
+	 * Returns the vector of RGB layouts (rgblayout based)
+	 */
+	vector<rgb_layout> const & rgbLayout() const;
+
+	/**
+	 * Returns the RGB bit layout for the given pass (rgblayout based)
+	 */
+	rgb_layout get_rgb_pass(ushort pass) const;
+
+	/**
+	 * Returns the bitdepth of the color channels
+	 */
+	ushort getBitdepth() const;
+
+	/**
+	 * Returns true if the original harware is big endian (reftab based)
+	 */
+	bool get_is_big_endian() const;
+};
 } // namespace chrgfx
 
 #endif

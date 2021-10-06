@@ -1,25 +1,21 @@
 Language: Cpp
-Standard: c++17
 BasedOnStyle: LLVM
+
+AlignOperands: Align
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: true
+AllowAllConstructorInitializersOnNextLine: true
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+BreakBeforeBraces: Custom
+BreakConstructorInitializers: AfterColon
+BreakBeforeBraces: Allman
 Cpp11BracedListStyle: false
+IndentCaseLabels: true
+PointerAlignment: Middle
+SpaceBeforeAssignmentOperators: true
 SpaceBeforeCpp11BracedList: true
 SpaceBeforeCtorInitializerColon: true
-SpaceBeforeAssignmentOperators: true
-BreakBeforeBraces: Allman
-
 SpaceBeforeParens: Never
 TabWidth: 2
 UseTab: Always
-AlignTrailingComments: true
-AllowShortIfStatementsOnASingleLine: false
-IndentCaseLabels: true
-AlignOperands: true
-AllowAllArgumentsOnNextLine: true
-AllowAllConstructorInitializersOnNextLine: true
-
-NamespaceIndentation: All
-
-AllowShortFunctionsOnASingleLine: Empty
-BreakConstructorInitializers: AfterColon
-
-PointerAlignment: Middle
