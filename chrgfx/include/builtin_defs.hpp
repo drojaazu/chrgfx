@@ -1,7 +1,9 @@
 #ifndef CHRGFX__BUILTIN_DEFS_H
 #define CHRGFX__BUILTIN_DEFS_H
 
-#include "gfxdef.hpp"
+#include "chrdef.hpp"
+#include "coldef.hpp"
+#include "paldef.hpp"
 #include "utils.hpp"
 
 namespace chrgfx
@@ -15,8 +17,8 @@ namespace chrgfx
  * "previewing" output: for example, if palette data/definition is not yet
  * available but we want to see the tile output.
  *
- * You can add your own built-in definitions here to create a customized library
- * for specific applications.
+ * You can add your own built-in definitions here to create a customized
+ * library for specific applications.
  */
 namespace defs
 {
@@ -25,17 +27,23 @@ namespace defs
  * Minimal, generic CHR format
  * 1bpp 8x8
  */
-extern chrdef basic_8x8_1bpp;
+chrdef basic_8x8_1bpp { "basic_8x8_1bpp",
+												8,
+												8,
+												1,
+												{ 1 },
+												{ 0, 1, 2, 3, 4, 5, 6, 7 },
+												{ 0, 8, 16, 24, 32, 40, 48, 56 } };
 
 /**
  * Generates random 8bit RGB values
  */
-extern rgbcoldef basic_8bit_random;
+refcoldef basic_8bit_random { "basic_8bit_random", make_pal_random() };
 
 /**
  * Generic 8bit (256 color) palette
  */
-extern paldef basic_256color;
+paldef basic_256color { "basic_256color", 8, 256, 1 };
 
 } // namespace defs
 } // namespace chrgfx

@@ -53,8 +53,7 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef, buffer & chrdata,
  * Does not perform data conversion
  * Tiles should already be converted to standard format (24bit packed pixel)
  */
-png::image<png::index_pixel> png_render(chrdef const & chrdef,
-																				vector<buffer> & chrdata,
+png::image<png::index_pixel> png_render(chrdef const & chrdef, buffer & chrdata,
 																				palette const & pal,
 																				render_traits const & rtraits);
 

@@ -2,34 +2,25 @@
 
 namespace chrgfx
 {
-	ushort paldef::getPalLength() const
-	{
-		return palLength;
-	};
 
-	ushort paldef::getSubpalLength() const
-	{
-		return subpalLength;
-	};
+ushort paldef::subpal_size() const
+{
+	return subpalLength;
+}
 
-	ushort paldef::getSubpalCount() const
-	{
-		return subpalCount;
-	};
+ushort paldef::entry_datasize() const
+{
+	return entryDatasize;
+}
 
-	ushort paldef::getEntryDatasize() const
-	{
-		return entryDatasize;
-	};
+ushort paldef::datasize() const
+{
+	return subpalDatasize;
+}
 
-	ushort paldef::getPaletteDatasize() const
-	{
-		return paletteDatasize;
-	};
-
-	ushort paldef::getSubpalDatasize() const
-	{
-		return subpalDatasize;
-	}
+ushort paldef::datasize_bytes() const
+{
+	return subpalDatasize >> 3;
+}
 
 } // namespace chrgfx

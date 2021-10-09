@@ -10,7 +10,19 @@ using png::palette;
 
 namespace chrgfx
 {
+u8 reduce_bits(u8 data, u8 bitcount);
+
+u8 expand_bits(u8 data, u8 bitcount);
+
+u32 create_bitmask32(u8 bitcount);
+
+u16 create_bitmask16(u8 bitcount);
+
+u8 create_bitmask8(u8 bitcount);
+
 palette make_pal_random();
+
+bool is_system_bigendian();
 
 /**
  * Indicates that the host system uses big endian architecture

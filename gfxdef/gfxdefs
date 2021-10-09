@@ -285,66 +285,6 @@ paldef
   subpal_count 192
 }
 
-paldef
-{
-  id tilelayerpro256
-  comment TileLayer Pro TPL file
-  entry_datasize 24
-  subpal_length 256
-  subpal_count 1
-
-  converter_to default
-  converter_from tilelayerpro
-}
-
-paldef
-{
-  id tilelayerpro16
-  comment TileLayer Pro TPL file
-  entry_datasize 24
-  subpal_length 16
-  subpal_count 1
-
-  converter_to default
-  converter_from tilelayerpro
-}
-
-paldef
-{
-  id tilelayerpro32
-  comment TileLayer Pro TPL file
-  entry_datasize 24
-  subpal_length 32
-  subpal_count 1
-
-  converter_to default
-  converter_from tilelayerpro
-}
-
-paldef
-{
-  id tilelayerpro64
-  comment TileLayer Pro TPL file
-  entry_datasize 24
-  subpal_length 64
-  subpal_count 1
-
-  converter_to default
-  converter_from tilelayerpro
-}
-
-paldef
-{
-  id tilelayerpro128
-  comment TileLayer Pro TPL file
-  entry_datasize 24
-  subpal_length 128
-  subpal_count 1
-
-  converter_to default
-  converter_from tilelayerpro
-}
-
 #################################
 ##
 ## C H R D E F S
@@ -536,7 +476,7 @@ chrdef
 ##
 #################################
 
-coldef
+rgbcoldef
 {
   # 15|               |0
   #   xxxxxxxG GGRRRBBB
@@ -555,7 +495,7 @@ coldef
   big_endian 0
 }
 
-coldef
+rgbcoldef
 {
   id col_snk_neogeo
   comment SNK NeoGeo
@@ -574,7 +514,7 @@ coldef
   big_endian 1
 }
 
-coldef
+rgbcoldef
 {
   id col_capcom_cps
   comment Capcom CPS 1/2
@@ -606,7 +546,7 @@ coldef
   big_endian 1
 }
 
-coldef
+rgbcoldef
 {
   id col_capcom_cps_accurate
   comment Capcom CPS 1/2 (more accurate colors)
@@ -637,7 +577,7 @@ coldef
   big_endian 1
 }
 
-coldef
+rgbcoldef
 {
   id col_sega_ms
   comment Sega Master System
@@ -653,7 +593,7 @@ coldef
   blue_size 2
 }
 
-coldef
+rgbcoldef
 {
   id col_sega_gg
   comment Sega Game Gear
@@ -672,7 +612,7 @@ coldef
   big_endian 0
 }
 
-coldef
+rgbcoldef
 {
   id col_nintendo_sfc
   comment Nintendo Super Famicom
@@ -691,7 +631,7 @@ coldef
   big_endian 0
 }
 
-coldef
+refcoldef
 {
   id col_nintendo_vb
   comment Nintendo Virtual Boy
@@ -711,7 +651,7 @@ coldef
   # reftab #000000,#3f0000,#df0000,#ff0000
 }
 
-coldef
+refcoldef
 {
   id col_nintendo_fc
   comment Nintendo Famicom
@@ -725,7 +665,7 @@ coldef
   # Some other palette examples: http://emulation.gametechwiki.com/index.php/Famicom_Color_Palette
 }
 
-coldef
+refcoldef
 {
   id col_nintendo_gb
   comment Nintendo Game Boy
@@ -736,7 +676,7 @@ coldef
   reftab #fffb87,#b1ae4e,#84804e,#4e4e4e
 }
 
-coldef
+refcoldef
 {
   id col_nintendo_gb_pocket
   comment Nintendo Game Boy Pocket
@@ -745,7 +685,7 @@ coldef
   reftab #c4cfa1,#8b956d,#6b7353,#414141
 }
 
-coldef
+rgbcoldef
 {
   id col_sega_md
   comment Sega Megadrive

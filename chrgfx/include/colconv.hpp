@@ -1,32 +1,30 @@
 #ifndef CHRGFX__CONV_COL_H
 #define CHRGFX__CONV_COL_H
 
+#include "coldef.hpp"
 #include "types.hpp"
 #include "utils.hpp"
-#include <map>
-#include <string>
+#include <png++/png.hpp>
 
 namespace chrgfx
 {
-// forward declaration of gfxdef types
-class chrdef;
-class rgbcoldef;
-class paldef;
 
-namespace converters
-{
+using namespace png;
 
 /**
- * Returns a coldef-encoded color from basic color data
+ * \return rgbcoldef formatted color from basic color data
  */
-u32 convertToColor(rgbcoldef const &to_coldef, png::color const data);
+u32 toFormattedRgbColor(rgbcoldef const & color_def, color const & data);
 
 /**
  * Returns a basic color from coldef-encoded color data
  */
-png::color toBasicRgbColor(rgbcoldef const &coldef, u32 const data);
+color toBasicRgbColor(rgbcoldef const & coldef, u32 const data);
 
-} // namespace conv_color
+ushort toFormattedRefColor(refcoldef const & color_def, color const & data);
+
+color toBasicRefColor(refcoldef const & color_def, ushort const data);
+
 } // namespace chrgfx
 
 #endif

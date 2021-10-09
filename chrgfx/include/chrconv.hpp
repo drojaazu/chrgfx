@@ -1,27 +1,26 @@
 #ifndef CHRGFX__CONV_CHR_H
 #define CHRGFX__CONV_CHR_H
 
-#include "types.hpp"
+#include "buffer.hpp"
 #include "chrdef.hpp"
+#include "types.hpp"
+//#include <iomanip>
+#include <map>
+#include <string>
 
 namespace chrgfx
 {
-// forward declaration of gfxdef types
-class buffer;
 
-namespace converters
-{
 /**
  * Convert a tile to the specified encoding
  */
-buffer toFormattedChr(chrdef const & to_def, buffer const & data);
+char * toFormattedChr(chrdef const & to_def, char const * in_data);
 
 /**
  * Convert a tile from the specified encoding
  */
-buffer toBasicChr(chrdef const & from_def, buffer const & data);
+char * toBasicChr(chrdef const & from_def, char const * in_data);
 
-} // namespace converters
 } // namespace chrgfx
 
 #endif

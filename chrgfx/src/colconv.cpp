@@ -2,8 +2,6 @@
 
 namespace chrgfx
 {
-namespace converters
-{
 using namespace png;
 
 u32 toFormattedRgbColor(rgbcoldef const & color_def, color const & data)
@@ -106,5 +104,4 @@ color toBasicRefColor(refcoldef const & color_def, ushort const data)
 {
 	return color_def.reftabColor(data);
 }
-} // namespace converters
 } // namespace chrgfx

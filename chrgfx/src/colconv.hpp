@@ -9,8 +9,6 @@
 namespace chrgfx
 {
 
-namespace converters
-{
 using namespace png;
 
 /**
@@ -26,7 +24,6 @@ color toBasicRgbColor(rgbcoldef const & coldef, u32 const data);
 ushort toFormattedRefColor(refcoldef const & color_def, color const & data);
 
 color toBasicRefColor(refcoldef const & color_def, ushort const data);
-} // namespace converters
 } // namespace chrgfx
 
 #endif
