@@ -9,35 +9,35 @@ using std::string;
 namespace chrgfx
 {
 
-	/**
-	 * \class gfxdef
-	 * \brief Abstract graphics definition class
-	 */
-	class gfxdef
+/**
+ * \class gfxdef
+ * \brief Abstract graphics definition class
+ */
+class gfxdef
+{
+public:
+	gfxdef() = delete;
+	gfxdef(gfxdef &&) = default;
+	gfxdef(gfxdef const &) = default;
+	gfxdef & operator=(gfxdef const &) = delete;
+	gfxdef & operator=(gfxdef &&) = delete;
+
+	string id() const
 	{
-	public:
-		gfxdef() = delete;
-		gfxdef(gfxdef &&) = default;
-		gfxdef(gfxdef const &) = default;
-		gfxdef & operator=(gfxdef const &) = delete;
-		gfxdef & operator=(gfxdef &&) = delete;
-
-		string get_id() const
-		{
-			return id;
-		};
-
-	protected:
-		gfxdef(string const & id) : id(id)
-		{
-#ifdef DEBUG
-			std::cerr << "NEW GFXDEF: " << id << std::endl;
-#endif
-		};
-
-	private:
-		string id;
+		return m_id;
 	};
+
+protected:
+	gfxdef(string const & id) : m_id(id)
+	{
+#ifdef DEBUG
+		std::cerr << "NEW GFXDEF: " << m_id << std::endl;
+#endif
+	};
+
+private:
+	string m_id;
+};
 
 } // namespace chrgfx
 

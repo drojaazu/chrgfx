@@ -20,13 +20,13 @@ using namespace png;
 class refcoldef : public gfxdef
 {
 protected:
-	palette p_reftab;
-	const bool p_big_endian;
+	palette m_reftab;
+	const bool m_big_endian;
 
 public:
 	refcoldef(string id, palette reftab, bool is_big_endian = false) :
-			gfxdef(std::move(id)), p_reftab(std::move(reftab)),
-			p_big_endian(is_big_endian) {};
+			gfxdef(std::move(id)), m_reftab(std::move(reftab)),
+			m_big_endian(is_big_endian) {};
 
 	/**
 	 * Returns the color from the reference palette for the given index
@@ -42,7 +42,7 @@ public:
 	/**
 	 * \brief Returns true if the original harware is big endian (reftab based)
 	 */
-	bool bigEndian() const;
+	bool big_endian() const;
 };
 
 /**
@@ -54,9 +54,9 @@ public:
 class rgbcoldef : public gfxdef
 {
 protected:
-	vector<rgb_layout> layout;
-	ushort bitdepth;
-	const bool is_big_endian;
+	vector<rgb_layout> m_layout;
+	ushort m_bitdepth;
+	const bool m_big_endian;
 
 public:
 	/**
@@ -65,13 +65,13 @@ public:
 	rgbcoldef(string id, ushort bitdepth, vector<rgb_layout> layout,
 						bool is_big_endian = false) :
 			gfxdef(std::move(id)),
-			bitdepth(bitdepth), layout(std::move(layout)),
-			is_big_endian(is_big_endian) {};
+			m_bitdepth(bitdepth), m_layout(std::move(layout)),
+			m_big_endian(is_big_endian) {};
 
 	/**
 	 * Returns the vector of RGB layouts (rgblayout based)
 	 */
-	vector<rgb_layout> const & rgbLayout() const;
+	vector<rgb_layout> const & rgb_layout() const;
 
 	/**
 	 * Returns the RGB bit layout for the given pass (rgblayout based)
@@ -81,12 +81,12 @@ public:
 	/**
 	 * Returns the bitdepth of the color channels
 	 */
-	ushort getBitdepth() const;
+	ushort bitdepth() const;
 
 	/**
 	 * Returns true if the original harware is big endian (reftab based)
 	 */
-	bool get_is_big_endian() const;
+	bool big_endian() const;
 };
 } // namespace chrgfx
 

@@ -7,13 +7,13 @@ using namespace png;
 
 color refcoldef::reftabColor(ushort index) const
 {
-	return p_reftab[index];
+	return m_reftab[index];
 };
 
 ushort refcoldef::reftabIndex(color rgb) const
 {
 	size_t idx { 0 };
-	for(auto & this_color : p_reftab)
+	for(auto & this_color : m_reftab)
 	{
 		if(this_color.red == rgb.red && this_color.green == rgb.green &&
 			 this_color.blue == rgb.blue)
@@ -24,15 +24,15 @@ ushort refcoldef::reftabIndex(color rgb) const
 	}
 
 	// this could certainly use some tuning, but it mostly works
-	std::vector<std::pair<int, int>> distances;
-	distances.reserve(this->p_reftab.size());
+	vector<pair<int, int>> distances;
+	distances.reserve(this->m_reftab.size());
 	int pal_color_iter { 0 };
-	for(const auto & this_color : this->p_reftab)
+	for(const auto & this_color : this->m_reftab)
 	{
 		int this_distance = (abs(this_color.red - rgb.red)) +
 												(abs(this_color.green - rgb.green)) +
 												(abs(this_color.blue - rgb.blue));
-		distances.push_back(std::pair<int, int>(pal_color_iter, this_distance));
+		distances.push_back(pair<int, int>(pal_color_iter, this_distance));
 		++pal_color_iter;
 	}
 
@@ -40,7 +40,7 @@ ushort refcoldef::reftabIndex(color rgb) const
 	idx = 0;
 	for(const auto & this_entry : distances)
 	{
-		if(std::get<1>(this_entry) < dist_check)
+		if(get<1>(this_entry) < dist_check)
 		{
 			dist_check = this_entry.second;
 			idx = this_entry.first;
@@ -50,29 +50,29 @@ ushort refcoldef::reftabIndex(color rgb) const
 	return idx;
 };
 
-bool refcoldef::bigEndian() const
+bool refcoldef::big_endian() const
 {
-	return p_big_endian;
+	return m_big_endian;
 };
 
-vector<rgb_layout> const & rgbcoldef::rgbLayout() const
+vector<rgb_layout> const & rgbcoldef::layout() const
 {
-	return layout;
+	return m_layout;
 };
 
-rgb_layout rgbcoldef::get_rgb_pass(ushort pass) const
+rgb_layout rgbcoldef::rgb_pass(ushort pass) const
 {
-	return layout[pass];
+	return m_layout[pass];
 }
 
-ushort rgbcoldef::getBitdepth() const
+ushort rgbcoldef::bitdepth() const
 {
-	return bitdepth;
+	return m_bitdepth;
 };
 
-bool rgbcoldef::get_is_big_endian() const
+bool rgbcoldef::big_endian() const
 {
-	return is_big_endian;
+	return m_big_endian;
 };
 
 } // namespace chrgfx

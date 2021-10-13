@@ -22,13 +22,13 @@ namespace chrgfx
 		gfxdef & operator=(gfxdef const &) = delete;
 		gfxdef & operator=(gfxdef &&) = delete;
 
-		string get_id() const
+		string id() const
 		{
-			return id;
+			return m_id;
 		};
 
 	protected:
-		gfxdef(string const & id) : id(id)
+		gfxdef(string const & id) : m_id(id)
 		{
 #ifdef DEBUG
 			std::cerr << "NEW GFXDEF: " << id << std::endl;
@@ -36,7 +36,7 @@ namespace chrgfx
 		};
 
 	private:
-		string id;
+		string m_id;
 	};
 
 } // namespace chrgfx

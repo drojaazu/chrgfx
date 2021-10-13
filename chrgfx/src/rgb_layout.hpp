@@ -8,52 +8,51 @@ using std::pair;
 
 namespace chrgfx
 {
-	/**
-	 * \class rgb_layout
-	 * \brief Defines the bit positions of RGB channel data
-	 * Positive shift values shift right; negative values shift left
-	 */
-	class rgb_layout
+/**
+ * \brief Defines the bit positions of RGB channel data
+ * Positive shift values shift right; negative values shift left
+ */
+class rgb_layout
+{
+public:
+	rgb_layout(pair<short, ushort> red, pair<short, ushort> green,
+						 pair<short, ushort> blue);
+
+	short red_shift() const
 	{
-	public:
-		rgb_layout(pair<int, unsigned int> red, pair<int, unsigned int> green,
-							 pair<int, unsigned int> blue);
+		return m_red.first;
+	}
 
-		int get_red_shift() const
-		{
-			return red.first;
-		}
+	ushort red_size() const
+	{
+		return m_red.second;
+	}
 
-		unsigned int get_red_size() const
-		{
-			return red.second;
-		}
+	short green_shift() const
+	{
+		return m_green.first;
+	}
 
-		int get_green_shift() const
-		{
-			return green.first;
-		}
+	ushort green_size() const
+	{
+		return m_green.second;
+	}
 
-		unsigned int get_green_size() const
-		{
-			return green.second;
-		}
+	short blue_shift() const
+	{
+		return m_blue.first;
+	}
 
-		int get_blue_shift() const
-		{
-			return blue.first;
-		}
+	ushort blue_size() const
+	{
+		return m_blue.second;
+	}
 
-		unsigned int get_blue_size() const
-		{
-			return blue.second;
-		}
-
-	protected:
-		pair<int, unsigned int> red;
-		pair<int, unsigned int> green;
-		pair<int, unsigned int> blue;
-	};
+protected:
+	pair<short, ushort> m_red;
+	pair<short, ushort> m_green;
+	pair<short, ushort> m_blue;
+};
 
 } // namespace chrgfx
 

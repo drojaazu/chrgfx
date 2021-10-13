@@ -38,10 +38,10 @@ public:
 	chrdef(string id, ushort width, ushort height, ushort bitdepth,
 				 vector<ushort> planeoffset, vector<ushort> pixeloffset,
 				 vector<ushort> rowoffset) :
-			gfxdef(id),
+			gfxdef(move(id)),
 			p_width(width), p_height(height), p_bitdepth(bitdepth),
-			p_datasize(width * height * bitdepth), p_planeoffset(planeoffset),
-			p_pixeloffset(pixeloffset), p_rowoffset(rowoffset) {};
+			p_datasize(width * height * bitdepth), p_planeoffset(move(planeoffset)),
+			p_pixeloffset(move(pixeloffset)), p_rowoffset(move(rowoffset)) {};
 
 	/**
 	 * \return width of the tile, in pixels

@@ -449,10 +449,10 @@ load_gfxdefs(string const & def_file)
 	for(auto it = block_iter.first; it != block_iter.second; ++it)
 	{
 		chrdef temp_def = validate_chrdef_block(it->second);
-		chrdefs.insert({ temp_def.get_id(), std::move(temp_def) });
+		chrdefs.insert({ temp_def.id(), std::move(temp_def) });
 	}
 	// add library builtin def
-	chrdefs.insert({ defs::basic_8x8_1bpp.get_id(), defs::basic_8x8_1bpp });
+	chrdefs.insert({ defs::basic_8x8_1bpp.id(), defs::basic_8x8_1bpp });
 
 	map<string const, rgbcoldef const> rgbcoldefs;
 	// block_iter = blocks.find("coldef");
@@ -460,7 +460,7 @@ load_gfxdefs(string const & def_file)
 	for(auto it = block_iter.first; it != block_iter.second; ++it)
 	{
 		rgbcoldef temp_def = validate_rgbcoldef_block(it->second);
-		rgbcoldefs.insert({ temp_def.get_id(), std::move(temp_def) });
+		rgbcoldefs.insert({ temp_def.id(), std::move(temp_def) });
 		// block_iter++;
 	}
 
@@ -470,12 +470,12 @@ load_gfxdefs(string const & def_file)
 	for(auto it = block_iter.first; it != block_iter.second; ++it)
 	{
 		refcoldef temp_def = validate_refcoldef_block(it->second);
-		refcoldefs.insert({ temp_def.get_id(), std::move(temp_def) });
+		refcoldefs.insert({ temp_def.id(), std::move(temp_def) });
 		// block_iter++;
 	}
 
 	refcoldefs.insert(
-			{ defs::basic_8bit_random.get_id(), defs::basic_8bit_random });
+			{ defs::basic_8bit_random.id(), defs::basic_8bit_random });
 
 	map<string const, paldef const> paldefs;
 	// block_iter = blocks.find("paldef");
@@ -483,11 +483,11 @@ load_gfxdefs(string const & def_file)
 	for(auto it = block_iter.first; it != block_iter.second; ++it)
 	{
 		paldef temp_def = validate_paldef_block(it->second);
-		paldefs.insert({ temp_def.get_id(), std::move(temp_def) });
+		paldefs.insert({ temp_def.id(), std::move(temp_def) });
 		// block_iter++;
 	}
 
-	paldefs.insert({ defs::basic_256color.get_id(), defs::basic_256color });
+	paldefs.insert({ defs::basic_256color.id(), defs::basic_256color });
 
 	map<string const, gfxprofile const> profiles;
 	// block_iter = blocks.find("profile");
@@ -495,7 +495,7 @@ load_gfxdefs(string const & def_file)
 	for(auto it = block_iter.first; it != block_iter.second; ++it)
 	{
 		gfxprofile temp_def { validate_profile_block(it->second) };
-		profiles.insert({ temp_def.get_id(), temp_def });
+		profiles.insert({ temp_def.id(), temp_def });
 		//++block_iter;
 	}
 

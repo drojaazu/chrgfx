@@ -12,18 +12,26 @@ namespace chrgfx
 using namespace png;
 
 /**
- * \return rgbcoldef formatted color from basic color data
+ * Convert a basic color to a formatted color with the given rgbcoldef
  */
-u32 toFormattedRgbColor(rgbcoldef const & color_def, color const & data);
+u32 to_formatted_rgbcolor(rgbcoldef const & rgbcoldef, color const & basic_color);
 
 /**
- * Returns a basic color from coldef-encoded color data
+ * Convert a formatted color to a basic color with the given rgbcoldef
  */
-color toBasicRgbColor(rgbcoldef const & coldef, u32 const data);
+color to_basic_rgbcolor(rgbcoldef const & rgbcoldef, u32 const formatted_color);
 
-ushort toFormattedRefColor(refcoldef const & color_def, color const & data);
+/**
+ * Convert a basic color to a formatted color with the given refcoldef
+ */
+ushort to_formatted_refcolor(refcoldef const & refcoldef,
+													 color const & basic_color);
 
-color toBasicRefColor(refcoldef const & color_def, ushort const data);
+/**
+ * Convert a formatted color to a basic color with the given refcoldef
+ */
+color to_basic_ref_color(refcoldef const & refcoldef,
+											ushort const formatted_color);
 
 } // namespace chrgfx
 

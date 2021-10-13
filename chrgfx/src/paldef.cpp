@@ -3,24 +3,19 @@
 namespace chrgfx
 {
 
-ushort paldef::subpal_size() const
+ushort paldef::pal_length() const
 {
-	return subpalLength;
+	return m_pal_length;
 }
 
 ushort paldef::entry_datasize() const
 {
-	return entryDatasize;
+	return m_entry_datasize;
 }
 
 ushort paldef::datasize() const
 {
-	return subpalDatasize;
-}
-
-ushort paldef::datasize_bytes() const
-{
-	return subpalDatasize >> 3;
+	return m_subpal_datasize;
 }
 
 } // namespace chrgfx

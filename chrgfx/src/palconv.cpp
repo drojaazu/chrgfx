@@ -5,8 +5,9 @@ namespace chrgfx
 
 using namespace std;
 
-buffer toFormattedPal(paldef const & paldef, rgbcoldef const & rgbcoldef,
-											palette const & paldata, const ushort subpal_idx = 0)
+buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
+											palette const & basic_palette,
+											const ushort subpal_idx = 0)
 {
 	size_t const
 			// size of a single color within a palette, in bits
@@ -17,11 +18,11 @@ buffer toFormattedPal(paldef const & paldef, rgbcoldef const & rgbcoldef,
 			// total size of a subpalette, in bits
 			subpal_datasize { paldef.datasize() },
 			// as above, in bytes
-			subpal_datasize_bytes { paldef.datasize_bytes() },
+			subpal_datasize_bytes { paldef.datasize() / 8 },
 			// total number of entries in a subpalette
-			subpal_length { paldef.subpal_size() },
+			subpal_length { paldef.pal_length() },
 			// total number of subpalettes available in the given palette
-			subpal_count { paldata.size() / subpal_length };
+			subpal_count { basic_palette.size() / subpal_length };
 
 	if(subpal_count == 0)
 	{
@@ -39,7 +40,7 @@ buffer toFormattedPal(paldef const & paldef, rgbcoldef const & rgbcoldef,
 	// used to copy the color entry bytes into a temp array
 	// to be cast as a machine-native u32
 	char * (*copyfunc)(char *, char *, char *);
-	if(bigend_sys == rgbcoldef.get_is_big_endian())
+	if(bigend_sys == rgbcoldef.big_endian())
 	{
 		copyfunc = std::copy;
 	}
@@ -72,7 +73,8 @@ buffer toFormattedPal(paldef const & paldef, rgbcoldef const & rgbcoldef,
 
 	auto out_iter = out.begin();
 
-	auto paldata_iter { paldata.begin() + (subpal_idx * subpal_datasize_bytes) };
+	auto paldata_iter { basic_palette.begin() +
+											(subpal_idx * subpal_datasize_bytes) };
 
 	// for every color in the subpal
 	for(uint this_subpal_entry { 0 }; this_subpal_entry < subpal_length;
@@ -81,7 +83,7 @@ buffer toFormattedPal(paldef const & paldef, rgbcoldef const & rgbcoldef,
 		byte_align_pos = bit_align_pos / 8;
 		bit_align_mod = bit_align_pos % 8;
 
-		this_entry = toFormattedRgbColor(rgbcoldef, *paldata_iter);
+		this_entry = to_formatted_rgbcolor(rgbcoldef, *paldata_iter);
 		if(bit_align_mod > 0)
 		{
 			this_entry <<= bit_align_mod;
@@ -107,8 +109,9 @@ buffer toFormattedPal(paldef const & paldef, rgbcoldef const & rgbcoldef,
 	++paldata_iter;
 }
 
-palette toBasicPal(paldef const & paldef, rgbcoldef const & rgbcoldef,
-									 buffer const & paldata, const ushort subpal_idx = 0)
+palette to_basic_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
+									 buffer const & formatted_palette,
+									 const ushort subpal_idx = 0)
 {
 
 	// some basic data geometry
@@ -121,11 +124,11 @@ palette toBasicPal(paldef const & paldef, rgbcoldef const & rgbcoldef,
 			// total size of a subpalette, in bits
 			subpal_datasize { paldef.datasize() },
 			// as above, in bytes
-			subpal_datasize_bytes { paldef.datasize_bytes() },
+			subpal_datasize_bytes { paldef.datasize() / 8 },
 			// total number of entries in a subpalette
-			subpal_length { paldef.subpal_size() },
+			subpal_length { paldef.pal_length() },
 			// total number of subpalettes available in the given palette
-			subpal_count { paldata.size() / subpal_length };
+			subpal_count { formatted_palette.size() / subpal_length };
 
 	if(subpal_count == 0)
 	{
@@ -143,7 +146,7 @@ palette toBasicPal(paldef const & paldef, rgbcoldef const & rgbcoldef,
 	// used to copy the color entry bytes into a temp array
 	// to be cast as a machine-native u32
 	char * (*copyfunc)(char *, char *, char *);
-	if(bigend_sys == rgbcoldef.get_is_big_endian())
+	if(bigend_sys == rgbcoldef.big_endian())
 	{
 		copyfunc = std::copy;
 	}
@@ -177,7 +180,8 @@ palette toBasicPal(paldef const & paldef, rgbcoldef const & rgbcoldef,
 	palette out;
 	out.reserve(subpal_length);
 
-	auto paldata_iter { paldata.begin() + (subpal_idx * subpal_datasize_bytes) };
+	auto paldata_iter { formatted_palette.begin() +
+											(subpal_idx * subpal_datasize_bytes) };
 	// auto paldata_end { paldata_iter + subpal_datasize_bytes };
 
 	// processing loop
@@ -204,7 +208,7 @@ palette toBasicPal(paldef const & paldef, rgbcoldef const & rgbcoldef,
 		entry_buff >>= bit_align_mod;
 		entry_buff &= entry_buff_bitmask;
 
-		out.push_back(toBasicRgbColor(rgbcoldef, entry_buff));
+		out.push_back(to_basic_rgbcolor(rgbcoldef, entry_buff));
 
 		// advance the read position
 		bit_align_pos += entry_datasize;

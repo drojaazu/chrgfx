@@ -19,16 +19,16 @@ namespace chrgfx
 /**
  * Convert a palette to the specified encoding
  */
-u8 * toFormattedPal(paldef const & paldef, rgbcoldef const & rgbcoldef,
-										palette const & paldata,
-										optional<unsigned int const> const & subpal_idx);
+buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
+											palette const & basic_palette,
+											const ushort subpal_idx = 0);
 
 /**
  * Convert a palette from the specified encoding
  */
-palette toBasicPal(paldef const & from_paldef, rgbcoldef const & rgbcoldef,
-									 u8 const * data,
-									 optional<unsigned int const> const & subpal_idx);
+palette to_basic_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
+									 buffer const & formatted_palette,
+									 const ushort subpal_idx = 0);
 
 /**
  * Convert a palette to the specified encoding

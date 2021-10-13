@@ -17,44 +17,33 @@ class paldef : public gfxdef
 {
 
 protected:
-	ushort palLength;
-	ushort subpalLength;
-	ushort subpalCount;
-
-	ushort entryDatasize;
-	ushort subpalDatasize;
-	ushort paletteDatasize;
+	ushort p_palLength;
+	ushort p_subpalLength;
+	ushort p_entryDatasize;
+	ushort p_subpalDatasize;
 
 public:
 	paldef(string id, ushort const entryDatasize, ushort const subpalLength,
-				 ushort const subpalCount,
 				 optional<ushort> const subpal_datasize = nullopt) :
 			gfxdef(id),
-			entryDatasize(entryDatasize), subpalLength(subpalLength),
-			subpalCount(subpalCount), palLength(subpalLength * subpalCount),
-			subpalDatasize(subpal_datasize ? subpal_datasize.value()
-																		 : entryDatasize * subpalLength),
-			paletteDatasize(subpalDatasize * subpalCount) {};
+			p_entryDatasize(entryDatasize), p_subpalLength(subpalLength),
+			p_subpalDatasize(subpal_datasize ? subpal_datasize.value()
+																			 : entryDatasize * subpalLength) {};
 
 	/**
 	 * \return number of entries in a subpalette
 	 */
-	ushort subpal_size() const;
+	ushort subpalLength() const;
 
 	/**
 	 * \return data size of a single entry, *in bits*
 	 */
-	ushort entry_datasize() const;
+	ushort entryDatasize() const;
 
 	/**
-	 * \return data size of the subpalette palette, *in bits*
+	 * \return data size of the subpalette, *in bits*
 	 */
 	ushort datasize() const;
-
-	/**
-	 * \return data size of the subpalette palette in bytes
-	 */
-	ushort datasize_bytes() const;
 };
 
 } // namespace chrgfx

@@ -11,14 +11,26 @@ namespace chrgfx
 {
 
 /**
- * Convert a tile to the specified encoding
+ * Convert a basic tile to a formatted tile with the given chrdef
  */
-char * toFormattedChr(chrdef const & to_def, char const * in_data);
+byte * to_formatted_chr(chrdef const & chrdef, byte const * basic_chr);
 
 /**
- * Convert a tile from the specified encoding
+ * Convert a basic tile to a formatted tile with the given chrdef
  */
-char * toBasicChr(chrdef const & from_def, char const * in_data);
+void to_formatted_chr_fast(chrdef const & chrdef, byte const * in_basic_chr,
+												byte * out_formatted_chr);
+
+/**
+ * Convert a formatted tile to a basic tile with the given chrdef
+ */
+byte * to_basic_chr(chrdef const & chrdef, byte const * formatted_chr);
+
+/**
+ * Convert a formatted tile to a basic tile with the given chrdef
+ */
+void to_basic_chr_fast(chrdef const & chrdef, byte const * in_formatted_chr,
+										byte * out_basic_chr);
 
 } // namespace chrgfx
 

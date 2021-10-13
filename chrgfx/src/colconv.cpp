@@ -4,7 +4,8 @@ namespace chrgfx
 {
 using namespace png;
 
-u32 toFormattedRgbColor(rgbcoldef const & color_def, color const & data)
+u32 to_formatted_rgbcolor(rgbcoldef const & rgbcoldef,
+													color const & basic_color)
 {
 
 	/*
@@ -26,37 +27,37 @@ u32 toFormattedRgbColor(rgbcoldef const & color_def, color const & data)
 	*/
 
 	u32 out { 0 };
-	u8 bitdepth = color_def.getBitdepth();
-	u8 red { reduce_bits(data.red, bitdepth) }, red_pass_shift { 0 },
-			green { reduce_bits(data.green, bitdepth) }, green_pass_shift { 0 },
-			blue { reduce_bits(data.blue, bitdepth) }, blue_pass_shift { 0 };
+	u8 bitdepth = rgbcoldef.bitdepth();
+	u8 red { reduce_bits(basic_color.red, bitdepth) }, red_pass_shift { 0 },
+			green { reduce_bits(basic_color.green, bitdepth) },
+			green_pass_shift { 0 }, blue { reduce_bits(basic_color.blue, bitdepth) },
+			blue_pass_shift { 0 };
 
 	u8 bitmask { 0 };
 	u32 temp;
 
-	for(auto const & this_pass : color_def.rgbLayout())
+	for(auto const & this_pass : rgbcoldef.layout())
 	{
-		bitmask = (create_bitmask8(this_pass.get_red_size())) << red_pass_shift;
-		temp = ((red & bitmask) >> red_pass_shift) << this_pass.get_red_shift();
+		bitmask = (create_bitmask8(this_pass.red_size())) << red_pass_shift;
+		temp = ((red & bitmask) >> red_pass_shift) << this_pass.red_shift();
 		out |= temp;
-		red_pass_shift += this_pass.get_red_size();
+		red_pass_shift += this_pass.red_size();
 
-		bitmask = (create_bitmask8(this_pass.get_green_size())) << green_pass_shift;
-		temp = ((green & bitmask) >> green_pass_shift)
-					 << this_pass.get_green_shift();
+		bitmask = (create_bitmask8(this_pass.green_size())) << green_pass_shift;
+		temp = ((green & bitmask) >> green_pass_shift) << this_pass.green_shift();
 		out |= temp;
-		green_pass_shift += this_pass.get_green_size();
+		green_pass_shift += this_pass.green_size();
 
-		bitmask = (create_bitmask8(this_pass.get_blue_size())) << blue_pass_shift;
-		temp = ((blue & bitmask) >> blue_pass_shift) << this_pass.get_blue_shift();
+		bitmask = (create_bitmask8(this_pass.blue_size())) << blue_pass_shift;
+		temp = ((blue & bitmask) >> blue_pass_shift) << this_pass.blue_shift();
 		out |= temp;
-		blue_pass_shift += this_pass.get_blue_size();
+		blue_pass_shift += this_pass.blue_size();
 	}
 
 	return out;
 }
 
-color toBasicRgbColor(rgbcoldef const & coldef, u32 const data)
+color to_basic_rgbcolor(rgbcoldef const & rgbcoldef, u32 const formatted_color)
 {
 
 	/*
@@ -72,20 +73,22 @@ psuedo:
 	u8 red { 0 }, green { 0 }, blue { 0 };
 	u8 red_bitcount { 0 }, green_bitcount { 0 }, blue_bitcount { 0 };
 	u8 bitmask { 0 };
-	for(rgb_layout const & this_pass : coldef.rgbLayout())
+	for(rgb_layout const & this_pass : rgbcoldef.layout())
 	{
-		bitmask = create_bitmask8(this_pass.get_red_size());
-		red |= ((data >> this_pass.get_red_shift()) & bitmask) << red_bitcount;
-		red_bitcount += this_pass.get_red_size();
+		bitmask = create_bitmask8(this_pass.red_size());
+		red |= ((formatted_color >> this_pass.red_shift()) & bitmask)
+					 << red_bitcount;
+		red_bitcount += this_pass.red_size();
 
-		bitmask = create_bitmask8(this_pass.get_green_size());
-		green |= ((data >> this_pass.get_green_shift()) & bitmask)
+		bitmask = create_bitmask8(this_pass.green_size());
+		green |= ((formatted_color >> this_pass.green_shift()) & bitmask)
 						 << green_bitcount;
-		green_bitcount += this_pass.get_green_size();
+		green_bitcount += this_pass.green_size();
 
-		bitmask = create_bitmask8(this_pass.get_blue_size());
-		blue |= ((data >> this_pass.get_blue_shift()) & bitmask) << blue_bitcount;
-		blue_bitcount += this_pass.get_blue_size();
+		bitmask = create_bitmask8(this_pass.blue_size());
+		blue |= ((formatted_color >> this_pass.blue_shift()) & bitmask)
+						<< blue_bitcount;
+		blue_bitcount += this_pass.blue_size();
 	}
 
 	red = expand_bits(red, red_bitcount);
@@ -95,13 +98,16 @@ psuedo:
 	return color(red, green, blue);
 }
 
-ushort toFormattedRefColor(refcoldef const & color_def, color const & data)
+ushort to_formatted_refcolor(refcoldef const & refcoldef,
+														 color const & basic_color)
 {
-	return color_def.reftabIndex(data);
+	return refcoldef.reftabIndex(basic_color);
 }
 
-color toBasicRefColor(refcoldef const & color_def, ushort const data)
+color to_basic_ref_color(refcoldef const & refcoldef,
+												 ushort const formatted_color)
 {
-	return color_def.reftabColor(data);
+	return refcoldef.reftabColor(formatted_color);
 }
+
 } // namespace chrgfx

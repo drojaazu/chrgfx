@@ -24,18 +24,18 @@ public:
 	 * \brief Copy constructor
 	 */
 	basic_buffer(basic_buffer const & other) :
-			p_datasize { other.p_datasize },
-			p_buffer { (DataT *)malloc(other.p_size) }, p_size { other.p_size }
+			m_datasize { other.m_datasize },
+			m_buffer { (DataT *)malloc(other.m_size) }, m_size { other.m_size }
 	{
-		if(this->p_buffer == nullptr)
+		if(this->m_buffer == nullptr)
 			throw std::runtime_error("Could not create buffer");
 		// std::copy_n(other.p_buffer, other.p_datasize, this->p_buffer);
-		std::memcpy(this->p_buffer, other.p_buffer, other.p_datasize);
+		std::memcpy(this->m_buffer, other.m_buffer, other.m_datasize);
 #ifdef DEBUG
 		std::cerr << "Copying existing buffer at " << std::showbase << std::hex
-							<< (std::size_t)other.p_buffer << " to "
-							<< (std::size_t)this->p_buffer << ", datasize "
-							<< this->p_datasize << ", count " << this->p_size << std::endl;
+							<< (std::size_t)other.m_buffer << " to "
+							<< (std::size_t)this->m_buffer << ", datasize "
+							<< this->m_datasize << ", count " << this->m_size << std::endl;
 #endif
 	};
 
@@ -43,16 +43,16 @@ public:
 	 * \brief Move constructor
 	 */
 	basic_buffer(basic_buffer && other) :
-			p_datasize { other.p_datasize }, p_buffer { std::move(other.p_buffer) },
-			p_size { other.p_size }
+			m_datasize { other.m_datasize }, m_buffer { std::move(other.m_buffer) },
+			m_size { other.m_size }
 	{
-		if(this->p_buffer == nullptr)
+		if(this->m_buffer == nullptr)
 			throw std::runtime_error("Source buffer is null");
 #ifdef DEBUG
 		std::cerr << "Moving existing buffer at " << std::showbase << std::hex
-							<< (std::size_t)other.p_buffer << " to "
-							<< (std::size_t)this->p_buffer << ", datasize "
-							<< this->p_datasize << std::endl;
+							<< (std::size_t)other.m_buffer << " to "
+							<< (std::size_t)this->m_buffer << ", datasize "
+							<< this->m_datasize << std::endl;
 #endif
 	};
 
@@ -63,8 +63,8 @@ public:
 	 */
 	basic_buffer(std::istream & data,
 							 size_t const block_size = DEFAULT_BLOCK_SZ) :
-			p_datasize { 0 },
-			p_size { 0 }, p_buffer { nullptr }
+			m_datasize { 0 },
+			m_size { 0 }, m_buffer { nullptr }
 	{
 		stream_in(data, block_size);
 	}
@@ -77,12 +77,12 @@ public:
 	 * \param size Size of existing data
 	 */
 	basic_buffer(DataT * data, size_t const size) :
-			p_buffer { data }, p_size(size), p_datasize { sizeof(DataT) * size }
+			m_buffer { data }, m_size(size), m_datasize { sizeof(DataT) * size }
 	{
 #ifdef DEBUG
 		std::cerr << __func__ << ": Taking existing buffer at " << std::showbase
-							<< std::hex << (std::size_t)this->p_buffer << ", datasize "
-							<< this->p_datasize << std::endl;
+							<< std::hex << (std::size_t)this->m_buffer << ", datasize "
+							<< this->m_datasize << std::endl;
 #endif
 	}
 
@@ -91,101 +91,101 @@ public:
 	 * \param size Number of DataT elements
 	 */
 	basic_buffer(size_t const size, char const initial = 0) :
-			p_size(size), p_datasize(sizeof(DataT) * size)
+			m_size(size), m_datasize(sizeof(DataT) * size)
 	{
-		this->p_buffer = (DataT *)malloc(this->p_datasize);
-		if(this->p_buffer == nullptr)
+		this->m_buffer = (DataT *)malloc(this->m_datasize);
+		if(this->m_buffer == nullptr)
 			throw std::runtime_error("Failed to allocate buffer space");
 
 		std::fill(this->begin(), this->end(), initial);
 #ifdef DEBUG
 		std::cerr << __func__ << ": Created empty buffer at " << std::showbase
-							<< std::hex << (std::size_t)this->p_buffer << ", datasize "
-							<< this->p_datasize << std::endl;
+							<< std::hex << (std::size_t)this->m_buffer << ", datasize "
+							<< this->m_datasize << std::endl;
 #endif
 	}
 
 	~basic_buffer()
 	{
-		if(this->p_buffer != nullptr)
+		if(this->m_buffer != nullptr)
 		{
 #ifdef DEBUG
 			std::cerr << "Freeing buffer at " << std::showbase << std::hex
-								<< (std::size_t)this->p_buffer << ", datasize "
-								<< this->p_datasize << std::endl;
+								<< (std::size_t)this->m_buffer << ", datasize "
+								<< this->m_datasize << std::endl;
 #endif
-			free(this->p_buffer);
+			free(this->m_buffer);
 		}
 	}
 
 	size_t datasize() const
 	{
-		return this->p_datasize;
+		return this->m_datasize;
 	}
 
 	size_t size() const
 	{
-		return this->p_size;
+		return this->m_size;
 	}
 
 	DataT const * data() const
 	{
-		return this->p_buffer;
+		return this->m_buffer;
 	}
 
 	DataT * data()
 	{
-		return this->p_buffer;
+		return this->m_buffer;
 	}
 
 	size_t grow(size_t additional)
 	{
 		if(additional == 0)
-			return this->p_size;
+			return this->m_size;
 
 		size_t additional_bytes = additional * sizeof(DataT);
 
-		this->p_buffer =
-				(DataT *)realloc(this->p_buffer, (this->p_datasize + additional_bytes));
-		if(this->p_buffer == nullptr)
+		this->m_buffer =
+				(DataT *)realloc(this->m_buffer, (this->m_datasize + additional_bytes));
+		if(this->m_buffer == nullptr)
 			throw std::bad_alloc();
-		std::fill_n(this->p_buffer + this->p_datasize, additional_bytes, 0);
-		this->p_datasize += additional_bytes;
-		this->p_size += additional;
+		std::fill_n(this->m_buffer + this->m_datasize, additional_bytes, 0);
+		this->m_datasize += additional_bytes;
+		this->m_size += additional;
 #ifdef DEBUG
 		std::cerr << "Resized buffer at " << std::showbase << std::hex
-							<< (std::size_t)this->p_buffer << ", new datasize "
-							<< this->p_datasize << std::endl;
+							<< (std::size_t)this->m_buffer << ", new datasize "
+							<< this->m_datasize << std::endl;
 #endif
 
-		return this->p_size;
+		return this->m_size;
 	}
 
 	size_t append(DataT * other_data, size_t other_size)
 	{
 		if(other_size == 0)
-			return this->p_datasize;
+			return this->m_datasize;
 
 		size_t other_size_bytes = other_size * sizeof(DataT);
 
-		this->p_buffer =
-				(DataT *)realloc(this->p_buffer, (this->p_datasize + other_size_bytes));
-		if(this->p_buffer == nullptr)
+		this->m_buffer =
+				(DataT *)realloc(this->m_buffer, (this->m_datasize + other_size_bytes));
+		if(this->m_buffer == nullptr)
 			throw std::bad_alloc();
 
 		// std::copy(data, data + size, this->p_buffer + this->p_size);
-		std::memcpy(((char *)this->p_buffer) + this->p_datasize, (char *)other_data,
+		std::memcpy(((char *)this->m_buffer) + this->m_datasize, (char *)other_data,
 								other_size_bytes);
 
-		this->p_datasize += other_size_bytes;
-		this->p_size += other_size;
+		this->m_datasize += other_size_bytes;
+		this->m_size += other_size;
 
-		return this->p_size;
+		return this->m_size;
 	}
 
 	size_t append(basic_buffer const & other)
 	{
-		return append(other.p_buffer, other.p_size);
+		return append(other.m_buffer, other.m_size);
 	}
 
 	friend std::ostream & operator<<(std::ostream & out,
@@ -203,18 +203,18 @@ public:
 
 	DataT & operator[](size_t const index)
 	{
-		if(index > this->p_size)
+		if(index > this->m_size)
 			throw std::out_of_range("Specified subscript out of range");
 
-		return this->p_buffer[index];
+		return this->m_buffer[index];
 	}
 
 	DataT const & operator[](size_t const index) const
 	{
-		if(index > this->p_size)
+		if(index > this->m_size)
 			throw std::out_of_range("Specified subscript out of range");
 
-		return this->p_buffer[index];
+		return this->m_buffer[index];
 	}
 
 	// TODO: proper bounds checking on the iterator
@@ -476,67 +476,67 @@ public:
 
 	basic_buffer(iterator<DataT> start, iterator<DataT> end)
 	{
-		this->p_datasize = end - start;
-		this->p_buffer = (DataT *)malloc(this->p_datasize);
-		if(this->p_buffer == nullptr)
+		this->m_datasize = end - start;
+		this->m_buffer = (DataT *)malloc(this->m_datasize);
+		if(this->m_buffer == nullptr)
 			throw std::runtime_error("Could not create buffer");
-		std::copy(start, end, this->p_buffer);
+		std::copy(start, end, this->m_buffer);
 #ifdef DEBUG
 		std::cerr << "Copied portion of existing buffer to" << std::showbase
-							<< std::hex << (std::size_t)this->p_buffer << ", size "
-							<< this->p_datasize << std::endl;
+							<< std::hex << (std::size_t)this->m_buffer << ", size "
+							<< this->m_datasize << std::endl;
 #endif
 	}
 
 	template <typename IterT> iterator<IterT> begin() const
 	{
-		return iterator<IterT>((IterT *)this->p_buffer);
+		return iterator<IterT>((IterT *)this->m_buffer);
 	}
 
 	template <typename IterT> const_iterator<IterT> cbegin() const
 	{
-		return const_iterator<IterT>((IterT *)this->p_buffer);
+		return const_iterator<IterT>((IterT *)this->m_buffer);
 	}
 
 	template <typename IterT> iterator<IterT> end() const
 	{
-		return iterator<IterT>((IterT *)(((char *)this->p_buffer) + p_datasize));
+		return iterator<IterT>((IterT *)(((char *)this->m_buffer) + m_datasize));
 	}
 
 	template <typename IterT> const_iterator<IterT> cend() const
 	{
 		return const_iterator<IterT>(
-				(IterT *)(((char *)this->p_buffer) + p_datasize));
+				(IterT *)(((char *)this->m_buffer) + m_datasize));
 	}
 
 	iterator<DataT> begin() const
 	{
-		return iterator(this->p_buffer);
+		return iterator(this->m_buffer);
 	}
 
 	const_iterator<DataT> cbegin() const
 	{
-		return const_iterator(this->p_buffer);
+		return const_iterator(this->m_buffer);
 	}
 
 	iterator<DataT> end() const
 	{
-		return iterator((DataT *)(((char *)this->p_buffer) + p_datasize));
+		return iterator((DataT *)(((char *)this->m_buffer) + m_datasize));
 	}
 
 	const_iterator<DataT> cend() const
 	{
-		return const_iterator((DataT *)(((char *)this->p_buffer) + p_datasize));
+		return const_iterator((DataT *)(((char *)this->m_buffer) + m_datasize));
 	}
 
 	bool operator==(basic_buffer<DataT> const & other) const
 	{
-		if(p_datasize != other.p_datasize)
+		if(m_datasize != other.m_datasize)
 			return false;
-		char * this_data = (char *)p_buffer;
-		char * other_data = (char *)other.p_buffer;
+		char * this_data = (char *)m_buffer;
+		char * other_data = (char *)other.m_buffer;
 
-		for(auto offset = 0; offset < p_datasize; ++offset)
+		for(auto offset = 0; offset < m_datasize; ++offset)
 			if(*this_data++ != *other_data++)
 				return false;
 		return true;
@@ -550,9 +550,9 @@ public:
 protected:
 	static size_t const DEFAULT_BLOCK_SZ { 0x20000 };
 
-	DataT * p_buffer { nullptr };
-	size_t p_datasize { 0 };
-	size_t p_size { 0 };
+	DataT * m_buffer { nullptr };
+	size_t m_datasize { 0 };
+	size_t m_size { 0 };
 
 	void stream_in(std::istream & in, size_t const block_size)
 	{
@@ -578,24 +578,24 @@ protected:
 
 				bytes_read = in.gcount();
 
-				this->p_buffer =
-						(DataT *)realloc(this->p_buffer, (this->p_datasize + bytes_read));
-				if(this->p_buffer == nullptr)
+				this->m_buffer =
+						(DataT *)realloc(this->m_buffer, (this->m_datasize + bytes_read));
+				if(this->m_buffer == nullptr)
 					throw std::runtime_error("Failed to reallocate internal buffer");
 
 				// std::copy_n(block_buff, bytes_read,
 				//						buffer.p_buffer + buffer.p_datasize);
-				std::memcpy(((char *)this->p_buffer) + this->p_datasize, block_buff,
+				std::memcpy(((char *)this->m_buffer) + this->m_datasize, block_buff,
 										bytes_read);
 
-				this->p_datasize += bytes_read;
+				this->m_datasize += bytes_read;
 			}
 
-			this->p_size = this->p_datasize / sizeof(DataT);
+			this->m_size = this->m_datasize / sizeof(DataT);
 
 #ifdef DEBUG
 			std::cerr << "Created buffer from stream at " << std::showbase << std::hex
-								<< (std::size_t)this->p_buffer << ", size " << this->p_datasize
+								<< (std::size_t)this->m_buffer << ", size " << this->m_datasize
 								<< std::endl;
 #endif
 			if(block_buff != nullptr)
