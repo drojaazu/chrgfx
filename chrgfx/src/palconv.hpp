@@ -7,9 +7,6 @@
 #include "paldef.hpp"
 #include "types.hpp"
 #include "utils.hpp"
-#include <algorithm>
-#include <map>
-#include <optional>
 #include <string>
 
 using namespace std;
@@ -22,21 +19,21 @@ namespace chrgfx
  */
 buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 														palette const & basic_palette,
-														const ushort subpal_idx = 0);
+														const ushort subpal_idx);
 
 /**
  * Convert a palette from the specified encoding
  */
 palette to_basic_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 												 buffer const & formatted_palette,
-												 const ushort subpal_idx = 0);
+												 const ushort subpal_idx);
 
 /**
  * Convert a palette to the specified encoding
  */
 buffer to_formatted_palette(paldef const & paldef, refcoldef const & refcoldef,
 														palette const & basic_palette,
-														const ushort subpal_idx = 0);
+														const ushort subpal_idx);
 
 /**
  * Convert a palette from the specified encoding
@@ -44,7 +41,7 @@ buffer to_formatted_palette(paldef const & paldef, refcoldef const & refcoldef,
 palette to_basic_palette(paldef const & from_paldef,
 												 refcoldef const & refcoldef,
 												 buffer const & formatted_palette,
-												 const ushort subpal_idx = 0);
+												 const ushort subpal_idx);
 
 } // namespace chrgfx
 

@@ -12,9 +12,9 @@ typedef int8_t s8;
 typedef int16_t s16;
 typedef int32_t s32;
 
-template <typename T> using uptr = std::unique_ptr<T[]>;
-template <typename T> using sptr = std::shared_ptr<T[]>;
+template <typename T> using uptr = std::unique_ptr<T>;
+template <typename T> using sptr = std::shared_ptr<T>;
 
-typedef uint8_t byte;
+typedef uint8_t byte_t;
 
 #endif

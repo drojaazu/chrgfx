@@ -3,7 +3,7 @@
 namespace chrgfx
 {
 
-byte reduce_bits(byte data, u8 bitcount)
+byte_t reduce_bits(byte_t data, u8 bitcount)
 {
 	// convert color bit depths algo:
 	// (bitdepth_a_value * bitdepth_b_max) / bitdepth_a_max = bitdepth_b_value
@@ -15,7 +15,7 @@ byte reduce_bits(byte data, u8 bitcount)
 /**
  * Expands bits to fill out a full byte.
  */
-byte expand_bits(byte data, u8 bitcount)
+byte_t expand_bits(byte_t data, u8 bitcount)
 {
 	// shamelessly stolen from MAME
 	if(bitcount == 1)

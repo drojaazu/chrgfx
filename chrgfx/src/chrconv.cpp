@@ -3,15 +3,15 @@
 namespace chrgfx
 {
 
-byte * to_formatted_chr(chrdef const & chrdef, byte const * basic_chr)
+byte_t * to_formatted_chr(chrdef const & chrdef, byte_t const * basic_chr)
 {
 	auto out_data = new u8[chrdef.datasize() / 8];
 	to_formatted_chr_fast(chrdef, basic_chr, out_data);
 	return out_data;
 }
 
-void to_formatted_chr_fast(chrdef const & chrdef, byte const * in_basic_chr,
-													 byte * out_formatted_chr)
+void to_formatted_chr_fast(chrdef const & chrdef, byte_t const * in_basic_chr,
+													 byte_t * out_formatted_chr)
 {
 	/*
 		-for every line...
@@ -69,18 +69,18 @@ void to_formatted_chr_fast(chrdef const & chrdef, byte const * in_basic_chr,
 	// return out_data;
 }
 
-byte * to_basic_chr(chrdef const & chrdef, byte const * formatted_chr)
+byte_t * to_basic_chr(chrdef const & chrdef, byte_t const * formatted_chr)
 {
 	auto out_data = new u8[chrdef.datasize() / 8];
 	to_basic_chr_fast(chrdef, formatted_chr, out_data);
 	return out_data;
 }
 
-void to_basic_chr_fast(chrdef const & chrdef, byte const * in_formatted_chr,
-											 byte * out_basic_chr)
+void to_basic_chr_fast(chrdef const & chrdef, byte_t const * in_formatted_chr,
+											 byte_t * out_basic_chr)
 {
 	ushort line_iter { 0 }, pixel_iter { 0 }, plane_iter { 0 }, curr_pixel,
-			work_byte { 0 }, work_bit { 0 }, bitpos_y { 0 }, bitpos_x { 0 },
+			work_byte_t { 0 }, work_bit { 0 }, bitpos_y { 0 }, bitpos_x { 0 },
 			bitpos { 0 }, this_pixel { 0 };
 
 	// auto out_data = new byte[chrdef.datasize() / 8];
@@ -114,18 +114,18 @@ void to_basic_chr_fast(chrdef const & chrdef, byte const * in_formatted_chr,
 			{
 				bitpos = bitpos_y + bitpos_x + chrdef.planeOffsetAt(plane_iter);
 
-				work_byte = in_formatted_chr[bitpos / 8];
-				// if work_byte is 0, no bits are set, so no bits will be set in the
+				work_byte_t = in_formatted_chr[bitpos / 8];
+				// if work_byte_t is 0, no bits are set, so no bits will be set in the
 				// output, so let's move to the next byte
-				if(work_byte == 0)
+				if(work_byte_t == 0)
 					continue;
 				work_bit = bitpos % 8;
 
-				// curr_pixel |= ((work_byte << curr_bit) & 0x80) >>
+				// curr_pixel |= ((work_byte_t << curr_bit) & 0x80) >>
 				//							((8 - chrdef.get_bitplanes()) + plane_iter);
-				// curr_pixel |= (work_byte & (0x80 >> curr_bit)) >> (7 -
+				// curr_pixel |= (work_byte_t & (0x80 >> curr_bit)) >> (7 -
 				// plane_iter);
-				curr_pixel |= ((work_byte << work_bit) & 0x80) >> (7 - plane_iter);
+				curr_pixel |= ((work_byte_t << work_bit) & 0x80) >> (7 - plane_iter);
 			}
 			// TODO turn this into a pointer
 			// out_data[this_pixel++] = curr_pixel;

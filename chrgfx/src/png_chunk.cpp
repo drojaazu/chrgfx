@@ -2,8 +2,8 @@
 
 namespace chrgfx
 {
-vector<uptr<byte>> png_chunk(chrdef const & chrdef,
-														 pixel_buffer<index_pixel> const & bitmap)
+vector<uptr<byte_t>> png_chunk(chrdef const & chrdef,
+															 pixel_buffer<index_pixel> const & bitmap)
 {
 	// class to chunk an input png into 8x8 chrs
 	// psuedo:
@@ -25,16 +25,16 @@ vector<uptr<byte>> png_chunk(chrdef const & chrdef,
 	uint const img_col_chr { bitmap.get_height() / chr_pxlheight };
 	uint const chr_count { img_row_chr * img_col_chr };
 
-	vector<uptr<byte>> out;
+	vector<uptr<byte_t>> out;
 	out.reserve(chr_count);
 	// std::fill(outbank.begin(), outbank.end(), uptr<u8>(new u8[chrw * chrh]));
 	for(size_t make_outchr_iter { 0 }; make_outchr_iter < chr_count;
 			++make_outchr_iter)
-		out.push_back(uptr<byte>(new byte[chr_pxlwidth * chr_pxlheight]));
+		out.push_back(uptr<byte_t>(new byte_t[chr_pxlwidth * chr_pxlheight]));
 
 	// TODO rework these iters so it's more efficient in the loop
-	vector<uptr<byte>>::iterator chr_row_iter { out.begin() };
-	vector<uptr<byte>>::iterator out_chr_iter_relative { out.begin() };
+	vector<uptr<byte_t>>::iterator chr_row_iter { out.begin() };
+	vector<uptr<byte_t>>::iterator out_chr_iter_relative { out.begin() };
 
 	// temp vector holding the pixels from the current bmp row
 	auto this_bmprow = vector<index_pixel>();

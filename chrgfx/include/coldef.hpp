@@ -71,12 +71,12 @@ public:
 	/**
 	 * Returns the vector of RGB layouts (rgblayout based)
 	 */
-	vector<rgb_layout> const & rgb_layout() const;
+	vector<rgb_layout> const & layout() const;
 
 	/**
 	 * Returns the RGB bit layout for the given pass (rgblayout based)
 	 */
-	rgb_layout get_rgb_pass(ushort pass) const;
+	rgb_layout rgb_pass(ushort pass) const;
 
 	/**
 	 * Returns the bitdepth of the color channels

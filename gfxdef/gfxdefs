@@ -125,7 +125,7 @@ profile
 
 paldef
 {
-  # 2 byte per color
+  # 2 byte_t per color
   # 16 subpalettes, 16 colors each
   id pal_nec_pcengine
   comment NEC PC Engine / TurgoGrafx-16
@@ -174,7 +174,7 @@ paldef
   id pal_sega_ms
   comment Sega Master System
 
-  # 32 colors per palette, 1 byte per color
+  # 32 colors per palette, 1 byte_t per color
   # 2 subpalettes, 16 colors each
   entry_datasize 8
   subpal_length 16
@@ -186,7 +186,7 @@ paldef
   id pal_sega_gg
   comment Sega Game Gear
 
-  # 32 colors per palette, 2 byte per color
+  # 32 colors per palette, 2 byte_t per color
   # 2 subpalettes, 16 colors each
   entry_datasize 16
   subpal_length 16
@@ -223,7 +223,7 @@ paldef
 
   # We manually specify the subpalette data size here since
   # VB subpalettes are actually word length, with the upper
-  # byte ignored
+  # byte_t ignored
   subpal_datasize 16
 }
 
@@ -245,7 +245,7 @@ paldef
   id pal_nintendo_gb
   comment Nintendo Game Boy
 
-  # 2 bits per color, 4 colors, packed (1 byte per palette)
+  # 2 bits per color, 4 colors, packed (1 byte_t per palette)
   # 3 palettes (3 bytes, stored at 0xFF47 in memory)
   entry_datasize 2
   subpal_length 4
@@ -297,7 +297,7 @@ chrdef
   comment NEC PC Engine / TurgoGrafx-16 (tiles)
 
   # 8x8 4bpp Planar
-  # 2 byte interleaved
+  # 2 byte_t interleaved
   width 8
   height 8
   bpp 4

@@ -21,8 +21,8 @@ namespace chrgfx
  * Returns a collection of tiles in the specified chrdef format using the
  * given bitmap
  */
-vector<uptr<byte>> png_chunk(chrdef const & chrdef,
-														 pixel_buffer<index_pixel> const & bitmap);
+vector<uptr<byte_t>> png_chunk(chrdef const & chrdef,
+															 pixel_buffer<index_pixel> const & bitmap);
 
 } // namespace chrgfx
 

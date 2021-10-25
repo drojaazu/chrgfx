@@ -14,12 +14,12 @@ namespace chrgfx
 /**
  * Convert a basic tile to a formatted tile with the given chrdef
  */
-byte * to_formatted_chr(chrdef const & chrdef, byte const * basic_chr);
+byte_t * to_formatted_chr(chrdef const & chrdef, byte_t const * basic_chr);
 
 /**
  * Convert a formatted tile to a basic tile with the given chrdef
  */
-byte * to_basic_chr(chrdef const & chrdef, byte const * formatted_chr);
+byte_t * to_basic_chr(chrdef const & chrdef, byte_t const * formatted_chr);
 
 } // namespace chrgfx
 

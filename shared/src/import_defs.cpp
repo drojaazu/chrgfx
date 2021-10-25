@@ -410,29 +410,19 @@ paldef validate_paldef_block(defblock const & def_block)
 		throw gfxdef_key_error(ERR_KEY_NOT_FOUND, defkeys::PAL_SUBPAL_LENGTH,
 													 temp_id);
 	}
-	auto temp_subpal_length { vd_int_pos<ushort>(mapiter->second) };
+	auto temp_pal_length { vd_int_pos<ushort>(mapiter->second) };
 
-	// SETTING: subpal_count
-	// RULES: required
-	mapiter = def_block.find(defkeys::PAL_SUBPAL_COUNT);
-	if(mapiter == def_block.end())
-	{
-		throw gfxdef_key_error(ERR_KEY_NOT_FOUND, defkeys::PAL_SUBPAL_COUNT,
-													 temp_id);
-	}
-	auto temp_subpal_count { vd_int_pos<ushort>(mapiter->second) };
-
-	// SETTING: subpal_datasize
+	// SETTING: pal_datasize
 	// RULES: optional
 	mapiter = def_block.find(defkeys::PAL_SUBPAL_DATASIZE);
-	std::optional<uint> temp_subpal_datasize { std::nullopt };
+	std::optional<uint> temp_pal_datasize { std::nullopt };
 	if(mapiter != def_block.end())
 	{
-		temp_subpal_datasize = vd_int_pos<ushort>(mapiter->second);
+		temp_pal_datasize = vd_int_pos<ushort>(mapiter->second);
 	}
 
-	return paldef { temp_id, temp_entry_datasize, temp_subpal_length,
-									temp_subpal_count, temp_subpal_datasize };
+	return paldef { temp_id, temp_entry_datasize, temp_pal_length,
+									temp_pal_datasize };
 }
 
 std::tuple<map<string const, chrdef const>, map<string const, rgbcoldef const>,
@@ -474,8 +464,7 @@ load_gfxdefs(string const & def_file)
 		// block_iter++;
 	}
 
-	refcoldefs.insert(
-			{ defs::basic_8bit_random.id(), defs::basic_8bit_random });
+	refcoldefs.insert({ defs::basic_8bit_random.id(), defs::basic_8bit_random });
 
 	map<string const, paldef const> paldefs;
 	// block_iter = blocks.find("paldef");

@@ -6,19 +6,19 @@ namespace chrgfx
 using namespace std;
 
 buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
-											palette const & basic_palette,
-											const ushort subpal_idx = 0)
+														palette const & basic_palette,
+														const ushort subpal_idx = 0)
 {
 	size_t const
 			// size of a single color within a palette, in bits
 			entry_datasize { paldef.entry_datasize() },
 			// as above, in bytes
-			entry_datasize_bytes { (entry_datasize / 8) +
+			entry_datasize_bytes { ((unsigned)(entry_datasize >> 3)) +
 														 (entry_datasize % 8 > 0 ? 1 : 0) },
 			// total size of a subpalette, in bits
 			subpal_datasize { paldef.datasize() },
 			// as above, in bytes
-			subpal_datasize_bytes { paldef.datasize() / 8 },
+			subpal_datasize_bytes { (unsigned)(paldef.datasize() >> 3) },
 			// total number of entries in a subpalette
 			subpal_length { paldef.pal_length() },
 			// total number of subpalettes available in the given palette
@@ -53,7 +53,7 @@ buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 			// tracks bit position within the paldata
 			bit_align_pos { 0 },
 			byte_align_pos { 0 },
-			// mod 8 of bitpos, indicating number of bits past the last byte aligned
+			// mod 8 of bitpos, indicating number of bits past the last byte_t aligned
 			// boundary at which the read pointer is, and thus the number of bits
 			// that the entry should be shifted in order to bring it to its correct
 			// value
@@ -90,7 +90,7 @@ buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 			this_entry |= out[byte_align_pos];
 		}
 
-		// color entries are one byte or larger
+		// color entries are one byte_t or larger
 		// for(size_t s { 0 }; s < entry_datasize_bytes; ++s)
 		//{
 		//	entry_temp[s] = (this_entry >> (s * 8)) & 0xff;
@@ -110,8 +110,8 @@ buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 }
 
 palette to_basic_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
-									 buffer const & formatted_palette,
-									 const ushort subpal_idx = 0)
+												 buffer const & formatted_palette,
+												 const ushort subpal_idx = 0)
 {
 
 	// some basic data geometry
@@ -119,12 +119,12 @@ palette to_basic_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 			// size of a single color within a palette, in bits
 			entry_datasize { paldef.entry_datasize() },
 			// as above, in bytes
-			entry_datasize_bytes { (entry_datasize / 8) +
+			entry_datasize_bytes { (entry_datasize >> 3) +
 														 (entry_datasize % 8 > 0 ? 1 : 0) },
 			// total size of a subpalette, in bits
 			subpal_datasize { paldef.datasize() },
 			// as above, in bytes
-			subpal_datasize_bytes { paldef.datasize() / 8 },
+			subpal_datasize_bytes { (unsigned)(paldef.datasize() >> 3) },
 			// total number of entries in a subpalette
 			subpal_length { paldef.pal_length() },
 			// total number of subpalettes available in the given palette
@@ -159,14 +159,14 @@ palette to_basic_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 	size_t
 			// tracks bit position within the paldata
 			bit_align_pos { 0 },
-			// mod 8 of bitpos, indicating number of bits past the last byte aligned
+			// mod 8 of bitpos, indicating number of bits past the last byte_t aligned
 			// boundary at which the read pointer is, and thus the number of bits
 			// that the entry should be shifted in order to bring it to its correct
 			// value
 			bit_align_mod { 0 }, temp_buff_size { entry_datasize_bytes };
 
 	// the temporary buffer will hold the entry value "extracted" from the palette
-	// data byte by byte before it is copied to another buffer respecting the
+	// data byte_t by byte_t before it is copied to another buffer respecting the
 	// endianness of the local machine
 	char temp_buff[temp_buff_size];
 	fill_n(temp_buff, temp_buff_size, 0);
@@ -193,8 +193,8 @@ palette to_basic_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 		bit_align_mod = bit_align_pos % 8;
 
 		// this is inefficient when working with bit-sized palette entries
-		// in that we are copying the same byte multiple times
-		// (e.g. a 2 bit palette will work with the same byte 4 times)
+		// in that we are copying the same byte_t multiple times
+		// (e.g. a 2 bit palette will work with the same byte_t 4 times)
 		// however, trying to account for this would require additional code
 		// complexity that would likely outweigh simply recopying a single byte
 		// a few times...
