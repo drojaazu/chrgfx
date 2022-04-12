@@ -7,53 +7,44 @@
 #include <fstream>
 #include <map>
 #include <sstream>
+#include <string.h>
 #include <string>
 #include <tuple>
 #include <vector>
 
-#include "builtin_defs.hpp"
 #include "chrgfx.hpp"
 #include "defblocks.hpp"
+#include "gfxprofile.hpp"
 #include "shared.hpp"
 #include "vd.hpp"
 
-class gfxdef_key_error : public std::runtime_error
+class gfxdef_key_error : public std::exception
 {
 public:
-	gfxdef_key_error(std::string err, std::string key,
-									 std::string block_id = {}) :
-			err(std::move(err)),
-			key(std::move(key)), block_id(std::move(block_id)),
-			std::runtime_error(
-					"Error parsing gfxdef file: '" + err + "' for key '" + key + "'" +
-					(block_id.empty() ? std::string {}
-														: " in block '" + block_id + "'")) {};
+	gfxdef_key_error(char const * err, char const * key,
+									 char const * block_id = nullptr);
+
+	const char * what() const noexcept override;
 
 private:
-	std::string key;
-	std::string block_id;
-	std::string err;
+	char const * m_key;
+	char const * m_block_id;
+	char const * m_err;
 };
 
-class gfxdef_value_error : public std::runtime_error
+class gfxdef_value_error : public std::exception
 {
 public:
-	gfxdef_value_error(std::string err, std::string val, std::string key,
-										 std::string block_id = {}) :
-			err(std::move(err)),
-			val(val.length() > 16 ? (val.substr(0, 15) + "...") : std::move(val)),
-			key(std::move(key)), block_id(std::move(block_id)),
-			std::runtime_error("Error parsing gfxdef file: '" + err +
-												 "' error for val '" + val + "' on key '" + key + "'" +
-												 (block_id.empty()
-															? std::string {}
-															: " in block '" + block_id + "'")) {};
+	gfxdef_value_error(char const * err, char const * key, char const * value,
+										 char const * block_id = nullptr);
+
+	const char * what() const noexcept override;
 
 private:
-	std::string key;
-	std::string val;
-	std::string block_id;
-	std::string err;
+	char const * m_key;
+	char const * m_value;
+	char const * m_block_id;
+	char const * m_err;
 };
 
 png::palette create_palette(std::string const & pal);

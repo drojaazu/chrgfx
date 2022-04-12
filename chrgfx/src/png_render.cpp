@@ -1,12 +1,17 @@
 #include "png_render.hpp"
+#include <algorithm>
+
+using namespace std;
 
 namespace chrgfx
 {
-pixel_buffer<index_pixel> render(chrdef const & chrdef, buffer & chrdata,
+
+pixel_buffer<index_pixel> render(chrdef const & chrdef,
+																 buffer<byte_t> const & chrdata,
 																 render_traits const & rtraits)
 {
 	if(chrdata.size() < 1)
-		throw std::length_error("Tile data is empty, nothing to render");
+		throw length_error("Tile data is empty, nothing to render");
 
 	size_t const
 			// chr dimensions
@@ -16,10 +21,10 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef, buffer & chrdata,
 			chr_datasize { (chrdef.datasize() / (size_t)8) },
 
 			// number of tiles in the final row that do not add up to a full row
-			chrcol_modulo { (chrdata.size() % rtraits.cols) },
+			chrcol_modulo { (chrdata.size() % rtraits.columns) },
 
 			// final image dimensions (in chrs)
-			outimg_chrwidth { rtraits.cols },
+			outimg_chrwidth { rtraits.columns },
 			outimg_chrheight { (chrdata.size() / outimg_chrwidth +
 													(chrcol_modulo > 0 ? 1 : 0)) },
 
@@ -39,7 +44,7 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef, buffer & chrdata,
 	// declare iters and buffers and such for processing
 	size_t chrrow_iter { 0 }, chr_pxlrow_iter { 0 }, chrcol_iter { 0 },
 			chr_iter { 0 }, outimg_pxlrow_idx { 0 };
-	auto this_outimg_pxlrow { std::vector<index_pixel>() };
+	auto this_outimg_pxlrow { vector<index_pixel>() };
 	u8 * this_chroffset { nullptr };
 
 	// number of tiles in the current chr row; this will be constant until the
@@ -47,20 +52,16 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef, buffer & chrdata,
 	size_t this_chrrow_colcount { outimg_chrwidth };
 
 #ifdef DEBUG
-	std::cerr << "PNG RENDERING REPORT:" << std::endl;
-	std::cerr << "Using border: " << std::to_string(rtraits.draw_border)
-						<< std::endl;
-	std::cerr << "Tile count: " << (int)(chrdata.datasize() / chrdef.datasize())
-						<< std::endl;
-	std::cerr << "Tile modulo: " << (int)chrcol_modulo << std::endl;
-	std::cerr << "Tile data size: " << (int)(chr_pxlwidth * chr_pxlheight)
-						<< std::endl;
-	std::cerr << "Final img size: " << (int)outimg_pxlwidth << "x"
-						<< (int)outimg_pxlheight << std::endl;
+	cerr << "PNG RENDERING REPORT:" << endl;
+	cerr << "Using border: " << to_string(rtraits.draw_border) << endl;
+	cerr << "Tile count: " << (int)(chrdata.datasize() / chrdef.datasize())
+			 << endl;
+	cerr << "Tile modulo: " << (int)chrcol_modulo << endl;
+	cerr << "Tile data size: " << (int)(chr_pxlwidth * chr_pxlheight) << endl;
+	cerr << "Final img size: " << (int)outimg_pxlwidth << "x"
+			 << (int)outimg_pxlheight << endl;
 #endif
 
-	char * chr_row { nullptr };
-	char * pixel_row { nullptr };
 	// for each chr row...
 	for(chrrow_iter = 0; chrrow_iter < outimg_chrheight; ++chrrow_iter)
 	{
@@ -70,13 +71,14 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef, buffer & chrdata,
 			this_chrrow_colcount = chrcol_modulo;
 		}
 
-		chr_row = chrdata.data() + (chrrow_iter * chrdef.datasize());
+		byte_t const * chr_row { chrdata.data() +
+														 (chrrow_iter * chrdef.datasize()) };
 
 		// add border if present
 		if(rtraits.draw_border && chrrow_iter != 0)
 		{
 			this_outimg_pxlrow.clear();
-			this_outimg_pxlrow.assign(outimg_pxlwidth, rtraits.trns_entry);
+			this_outimg_pxlrow.assign(outimg_pxlwidth, rtraits.trns_index);
 			imgbuffer.put_row(outimg_pxlrow_idx++, this_outimg_pxlrow);
 		}
 
@@ -87,7 +89,7 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef, buffer & chrdata,
 			this_outimg_pxlrow.clear();
 			this_outimg_pxlrow.reserve(outimg_pxlwidth);
 
-			pixel_row = chr_row + (chr_pxlrow_iter * chr_pxlwidth);
+			byte_t const * pixel_row { chr_row + (chr_pxlrow_iter * chr_pxlwidth) };
 
 			// for each chr column in the row...
 			for(chrcol_iter = 0; chrcol_iter < this_chrrow_colcount; ++chrcol_iter)
@@ -95,15 +97,15 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef, buffer & chrdata,
 				// add border pixel if present
 				if(rtraits.draw_border && chrcol_iter != 0)
 				{
-					this_outimg_pxlrow.push_back(rtraits.trns_entry);
+					this_outimg_pxlrow.push_back(rtraits.trns_index);
 				}
 				// this_chroffset =
 				//		(u8 *)chrdata[chr_iter++].data() + (chr_pxlrow_iter *
 				// chr_pxlwidth);
-				// std::copy(this_chroffset, this_chroffset + chr_pxlwidth,
-				//					std::back_inserter(this_outimg_pxlrow));
-				std::copy(pixel_row, pixel_row + chr_pxlwidth,
-									std::back_inserter(this_outimg_pxlrow));
+				// copy(this_chroffset, this_chroffset + chr_pxlwidth,
+				//					back_inserter(this_outimg_pxlrow));
+				copy(pixel_row, pixel_row + chr_pxlwidth,
+						 back_inserter(this_outimg_pxlrow));
 				pixel_row += chr_datasize;
 			}
 
@@ -115,9 +117,9 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef, buffer & chrdata,
 			// if there is a tile modulo)
 			if(this_outimg_pxlrow.size() < outimg_pxlwidth)
 			{
-				std::fill_n(std::back_inserter(this_outimg_pxlrow),
-										(outimg_pxlwidth - this_outimg_pxlrow.size()),
-										rtraits.trns_entry);
+				fill_n(back_inserter(this_outimg_pxlrow),
+							 (outimg_pxlwidth - this_outimg_pxlrow.size()),
+							 rtraits.trns_index);
 			}
 			// put rendered row at the end of the final image
 			imgbuffer.put_row(outimg_pxlrow_idx++, this_outimg_pxlrow);
@@ -130,7 +132,8 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef, buffer & chrdata,
 	return imgbuffer;
 }
 
-png::image<png::index_pixel> png_render(chrdef const & chrdef, buffer & chrdata,
+png::image<png::index_pixel> png_render(chrdef const & chrdef,
+																				buffer<byte_t> const & chrdata,
 																				palette const & pal,
 																				render_traits const & rtraits)
 {
@@ -148,15 +151,15 @@ png::image<png::index_pixel> png_render(chrdef const & chrdef, buffer & chrdata,
 		png::tRNS trans;
 
 		// this could probably be done better...
-		if(!rtraits.trns_entry)
+		if(!rtraits.trns_index)
 		{
 			trans.push_back(0);
 		}
 		else
 		{
-			trans.resize(rtraits.trns_entry + 1);
-			std::fill(trans.begin(), trans.end(), 255);
-			trans.at(rtraits.trns_entry) = 0;
+			trans.resize(rtraits.trns_index + 1);
+			fill(trans.begin(), trans.end(), 255);
+			trans.at(rtraits.trns_index) = 0;
 		}
 		outimg.set_tRNS(trans);
 	}

@@ -1,42 +1,51 @@
 #include "chrdef.hpp"
 
+using namespace std;
+
 namespace chrgfx
 {
-	using namespace std;
+chrdef::chrdef(char const * id, ushort const width, ushort const height,
+							 ushort const bitdepth, vector<ushort> const & planeoffset,
+							 vector<ushort> const & pixeloffset,
+							 vector<ushort> const & rowoffset) :
+		gfxdef(id),
+		m_width(width), m_height(height), m_bitdepth(bitdepth),
+		m_datasize(width * height * bitdepth), m_planeoffset(planeoffset),
+		m_pixeloffset(pixeloffset), m_rowoffset(rowoffset) {};
 
-	ushort chrdef::width() const
-	{
-		return p_width;
-	}
+ushort chrdef::width() const
+{
+	return m_width;
+}
 
-	ushort chrdef::height() const
-	{
-		return p_height;
-	}
+ushort chrdef::height() const
+{
+	return m_height;
+}
 
-	ushort chrdef::bitdepth() const
-	{
-		return p_bitdepth;
-	}
+ushort chrdef::bitdepth() const
+{
+	return m_bitdepth;
+}
 
-	ushort chrdef::datasize() const
-	{
-		return p_datasize;
-	};
+ushort chrdef::datasize() const
+{
+	return m_datasize;
+};
 
-	ushort chrdef::planeOffsetAt(ushort index) const
-	{
-		return p_planeoffset[index];
-	};
+ushort chrdef::plane_offset(ushort const index) const
+{
+	return m_planeoffset[index];
+};
 
-	ushort chrdef::pixelOffsetAt(ushort index) const
-	{
-		return p_pixeloffset[index];
-	};
+ushort chrdef::pixel_offset(ushort const index) const
+{
+	return m_pixeloffset[index];
+};
 
-	ushort chrdef::rowOffsetAt(ushort index) const
-	{
-		return p_rowoffset[index];
-	};
+ushort chrdef::row_offset(ushort const index) const
+{
+	return m_rowoffset[index];
+};
 
 } // namespace chrgfx

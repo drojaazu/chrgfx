@@ -1,13 +1,14 @@
 #include "palconv.hpp"
+#include "colconv.hpp"
+#include "utils.hpp"
 
 namespace chrgfx
 {
 
 using namespace std;
 
-buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
-														palette const & basic_palette,
-														const ushort subpal_idx = 0)
+byte_t * encode_pal(paldef const & paldef, coldef const & coldef,
+										palette const * palette)
 {
 	size_t const
 			// size of a single color within a palette, in bits
@@ -20,27 +21,28 @@ buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 			// as above, in bytes
 			subpal_datasize_bytes { (unsigned)(paldef.datasize() >> 3) },
 			// total number of entries in a subpalette
-			subpal_length { paldef.pal_length() },
-			// total number of subpalettes available in the given palette
-			subpal_count { basic_palette.size() / subpal_length };
-
-	if(subpal_count == 0)
-	{
-		throw invalid_argument(
-				"Not enough entries within the given basic palette to create a "
-				"subpalette with the given paldef");
-	}
+			subpal_length { paldef.pal_length() };
+	// total number of subpalettes available in the given palette
+	// subpal_count { basic_palette.size() / subpal_length };
+	/*
+		if(subpal_count == 0)
+		{
+			throw invalid_argument(
+					"Not enough entries within the given basic palette to create a "
+					"subpalette with the given paldef");
+		}
 
 	if(subpal_idx >= subpal_count)
 	{
 		throw out_of_range("Requested subpalette index beyond the range of the "
 											 "given palette data");
 	}
+*/
 
 	// used to copy the color entry bytes into a temp array
 	// to be cast as a machine-native u32
 	char * (*copyfunc)(char *, char *, char *);
-	if(bigend_sys == rgbcoldef.big_endian())
+	if(bigend_sys == coldef.big_endian())
 	{
 		copyfunc = std::copy;
 	}
@@ -59,9 +61,9 @@ buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 			// value
 			bit_align_mod { 0 };
 
-	auto out = buffer(subpal_datasize_bytes);
+	auto out = new byte_t[subpal_datasize_bytes];
 	// auto out { new u8[subpal_datasize_bytes] };
-	std::fill_n(out.begin(), subpal_datasize_bytes, 0);
+	std::fill_n(out, subpal_datasize_bytes, 0);
 
 	// prepare space and function for data layout depending on endianness
 	char entry_temp[entry_datasize_bytes];
@@ -71,10 +73,11 @@ buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 
 	// size_t outdata_bit_ptr { 0 }, byte_offset { 0 }, bit_offset { 0 };
 
-	auto out_iter = out.begin();
+	auto out_ptr = &out[0];
 
-	auto paldata_iter { basic_palette.begin() +
-											(subpal_idx * subpal_datasize_bytes) };
+	// auto paldata_iter { basic_palette.begin() +
+	//										(subpal_idx * subpal_datasize_bytes) };
+	auto paldata_iter = palette->begin();
 
 	// for every color in the subpal
 	for(uint this_subpal_entry { 0 }; this_subpal_entry < subpal_length;
@@ -83,7 +86,20 @@ buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 		byte_align_pos = bit_align_pos / 8;
 		bit_align_mod = bit_align_pos % 8;
 
-		this_entry = to_formatted_rgbcolor(rgbcoldef, *paldata_iter);
+		switch(coldef.type())
+		{
+			case rgb:
+				this_entry =
+						encode_col(static_cast<rgbcoldef const &>(coldef), *paldata_iter);
+				break;
+			case ref:
+				this_entry =
+						encode_col(static_cast<refcoldef const &>(coldef), *paldata_iter);
+				break;
+			default:
+				// should never happen, but for completeness
+				throw runtime_error("Invalid coldef type");
+		}
 		if(bit_align_mod > 0)
 		{
 			this_entry <<= bit_align_mod;
@@ -96,7 +112,10 @@ buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 		//	entry_temp[s] = (this_entry >> (s * 8)) & 0xff;
 		//}
 		copyfunc((char *)&this_entry, ((char *)&this_entry) + entry_datasize_bytes,
-						 &*out_iter);
+						 (char *)out_ptr);
+
+		out_ptr += entry_datasize_bytes;
+		++paldata_iter;
 
 		byte_align_pos += entry_datasize;
 	}
@@ -106,12 +125,10 @@ buffer to_formatted_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 	//	}
 
 	return out;
-	++paldata_iter;
 }
 
-palette to_basic_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
-												 buffer const & formatted_palette,
-												 const ushort subpal_idx = 0)
+palette decode_pal(paldef const & paldef, coldef const & coldef,
+									 byte_t const * palette)
 {
 
 	// some basic data geometry
@@ -126,27 +143,33 @@ palette to_basic_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 			// as above, in bytes
 			subpal_datasize_bytes { (unsigned)(paldef.datasize() >> 3) },
 			// total number of entries in a subpalette
-			subpal_length { paldef.pal_length() },
-			// total number of subpalettes available in the given palette
-			subpal_count { formatted_palette.size() / subpal_length };
+			subpal_length { paldef.pal_length() };
+	// total number of subpalettes available in the given palette
+	// subpal_count { palette.size() / subpal_length };
 
-	if(subpal_count == 0)
-	{
-		throw invalid_argument(
-				"Not enough entries within the given basic palette to create a "
-				"subpalette with the given paldef");
-	}
+	// NOTE: not using subpals anymore - a palette for our sake is one that
+	// applies on a single chr so the user will need to provide a pointer to the
+	// data within the system palette data block
 
-	if(subpal_idx >= subpal_count)
-	{
-		throw out_of_range("Requested subpalette index beyond the range of the "
-											 "given palette data");
-	}
+	/*
+		if(subpal_count == 0)
+		{
+			throw invalid_argument(
+					"Not enough entries within the given basic palette to create a "
+					"subpalette with the given paldef");
+		}
+
+		if(subpal_idx >= subpal_count)
+		{
+			throw out_of_range("Requested subpalette index beyond the range of the "
+												 "given palette data");
+		}
+	*/
 
 	// used to copy the color entry bytes into a temp array
 	// to be cast as a machine-native u32
 	char * (*copyfunc)(char *, char *, char *);
-	if(bigend_sys == rgbcoldef.big_endian())
+	if(bigend_sys == coldef.big_endian())
 	{
 		copyfunc = std::copy;
 	}
@@ -177,12 +200,14 @@ palette to_basic_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 
 	u32 const entry_buff_bitmask = create_bitmask32(entry_datasize);
 
-	palette out;
+	// auto out = new color[subpal_length];
+	png::palette out;
 	out.reserve(subpal_length);
 
-	auto paldata_iter { formatted_palette.begin() +
-											(subpal_idx * subpal_datasize_bytes) };
-	// auto paldata_end { paldata_iter + subpal_datasize_bytes };
+	// auto paldata_iter { palette.begin() + (subpal_idx * subpal_datasize_bytes)
+	// };
+	//  auto paldata_end { paldata_iter + subpal_datasize_bytes };
+	auto paldata_iter = palette;
 
 	// processing loop
 	// for every color in the subpal
@@ -200,7 +225,8 @@ palette to_basic_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 		// a few times...
 
 		// copy all data for one color entry into the temp buffer
-		copyfunc(&*paldata_iter, &*paldata_iter + temp_buff_size, temp_buff);
+		copyfunc((char *)paldata_iter, (char *)paldata_iter + temp_buff_size,
+						 temp_buff);
 
 		// recast that buffer (array) as a 32 bit value, shift it into its
 		// correct position, and mask off extraneous upper bits
@@ -208,7 +234,22 @@ palette to_basic_palette(paldef const & paldef, rgbcoldef const & rgbcoldef,
 		entry_buff >>= bit_align_mod;
 		entry_buff &= entry_buff_bitmask;
 
-		out.push_back(to_basic_rgbcolor(rgbcoldef, entry_buff));
+		// out.push_back(decode_col(coldef, entry_buff));
+
+		switch(coldef.type())
+		{
+			case rgb:
+				out[this_subpal_entry] =
+						decode_col(static_cast<rgbcoldef const &>(coldef), entry_buff);
+				break;
+			case ref:
+				out[this_subpal_entry] =
+						decode_col(static_cast<refcoldef const &>(coldef), entry_buff);
+				break;
+			default:
+				// should never happen, but for completeness
+				throw runtime_error("Invalid coldef type");
+		}
 
 		// advance the read position
 		bit_align_pos += entry_datasize;

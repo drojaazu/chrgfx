@@ -1,5 +1,5 @@
-#ifndef CHRGFX__PUBLIC_H
-#define CHRGFX__PUBLIC_H
+#ifndef CHRGFX__CHRGFX_HPP
+#define CHRGFX__CHRGFX_HPP
 
 #include <png++/png.hpp>
 
@@ -9,7 +9,6 @@
 #include "colconv.hpp"
 #include "coldef.hpp"
 #include "gfxdef.hpp"
-#include "global.hpp"
 #include "palconv.hpp"
 #include "paldef.hpp"
 #include "png_chunk.hpp"

@@ -1,4 +1,5 @@
 
+#include "app.hpp"
 #include "chrgfx.hpp"
 #include "import_defs.hpp"
 #include "shared.hpp"
@@ -20,15 +21,6 @@ using namespace chrgfx;
 
 bool process_args(int argc, char ** argv);
 void print_help();
-
-// application globals
-static unsigned int const APP_VERSION_MAJOR { 1 };
-static unsigned int const APP_VERSION_MINOR { 0 };
-static unsigned int const APP_VERSION_FIX { 0 };
-static std::string const APP_VERSION { std::to_string(APP_VERSION_MAJOR) + "." +
-																			 std::to_string(APP_VERSION_MINOR) + "." +
-																			 std::to_string(APP_VERSION_FIX) };
-static std::string const APP_NAME { "png2chr" };
 
 struct runtime_config_png2chr : runtime_config
 {
@@ -90,7 +82,7 @@ int main(int argc, char ** argv)
 
 		try
 		{
-			defs = load_gfxdefs(cfg.gfxdefs_file);
+			defs = load_gfxdefs(cfg.gfxdefs_path);
 		}
 		catch(std::ios_base::failure const & e)
 		{
@@ -115,23 +107,23 @@ int main(int argc, char ** argv)
 		if(profile_iter != profiles.end())
 		{
 			gfxprofile profile { profile_iter->second };
-			chrdef_id = profile.get_chrdef_id();
-			coldef_id = profile.get_coldef_id();
-			paldef_id = profile.get_paldef_id();
+			chrdef_id = profile.chrdef_id();
+			coldef_id = profile.coldef_id();
+			paldef_id = profile.paldef_id();
 		}
 
 		// specific gfxdefs override profile settings
-		if(!cfg.chrdef.empty())
+		if(!cfg.chrdef_id.empty())
 		{
-			chrdef_id = cfg.chrdef;
+			chrdef_id = cfg.chrdef_id;
 		}
-		if(!cfg.coldef.empty())
+		if(!cfg.coldef_id.empty())
 		{
-			coldef_id = cfg.coldef;
+			coldef_id = cfg.coldef_id;
 		}
-		if(!cfg.paldef.empty())
+		if(!cfg.paldef_id.empty())
 		{
-			paldef_id = cfg.paldef;
+			paldef_id = cfg.paldef_id;
 		}
 
 		// sanity check - chrdef is required
@@ -158,19 +150,19 @@ int main(int argc, char ** argv)
 			coldef_id = "basic_8bit_random";
 		}
 
-		coldef coldef;
+		chrgfx::coldef * coldef;
 
 		auto rgbcoldef_iter { rgbcoldefs.find(coldef_id) };
 		if(rgbcoldef_iter != rgbcoldefs.end())
 		{
-			coldef.p_rgbcoldef = &rgbcoldef_iter->second;
+			coldef = (chrgfx::coldef *)&rgbcoldef_iter->second;
 		}
 		else
 		{
 			auto refcoldef_iter { refcoldefs.find(coldef_id) };
 			if(refcoldef_iter != refcoldefs.end())
 			{
-				coldef.p_refcoldef = &refcoldef_iter->second;
+				coldef = (chrgfx::coldef *)&refcoldef_iter->second;
 			}
 			else
 			{
@@ -202,7 +194,7 @@ int main(int argc, char ** argv)
 				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
 		std::cerr << "SETUP: " << duration << "ms" << std::endl;
-		std::cerr << "Using gfxdefs file: " << cfg.gfxdefs_file << std::endl;
+		std::cerr << "Using gfxdefs file: " << cfg.gfxdefs_path << std::endl;
 		std::cerr << "Using chrdef '" << chrdef_id << "'" << std::endl;
 		std::cerr << "Using colrdef '" << coldef_id << "'" << std::endl;
 		std::cerr << "Using paldef '" << paldef_id << "'" << std::endl;
@@ -229,7 +221,8 @@ int main(int argc, char ** argv)
 		// deal with tiles first
 		if(!cfg.chr_outfile.empty())
 		{
-			chrbank png_chrbank { chrgfx::png_chunk(chrdef, in_img.get_pixbuf()) };
+			buffer<byte_t> png_chunk { chrgfx::png_chunk(chrdef,
+																									 in_img.get_pixbuf()) };
 
 #ifdef DEBUG
 			t2 = std::chrono::high_resolution_clock::now();
@@ -250,13 +243,17 @@ int main(int argc, char ** argv)
 				return -12;
 			}
 
-			size_t chunksize { chrdef.get_datasize() / 8 };
+			size_t chunksize { (unsigned)(chrdef.datasize() / 8) };
 
-			for(const auto & chr : png_chrbank)
+			auto iter = png_chunk.begin();
+			auto iter_end = png_chunk.end();
+
+			while(iter != iter_end)
 			{
-				u8 * temp_chr { chr_to_converter(chrdef, chr.get()) };
+				byte_t * temp_chr { encode_chr(chrdef, &(*iter)) };
 				std::copy(temp_chr, temp_chr + chunksize,
 									std::ostream_iterator<u8>(chr_outfile));
+				iter += chrdef.datasize() / 8;
 			}
 		}
 #ifdef DEBUG
@@ -276,8 +273,8 @@ int main(int argc, char ** argv)
 			t1 = std::chrono::high_resolution_clock::now();
 #endif
 
-			uptr<u8> paldef_palette_data { pal_to_converter(
-					paldef, coldef, in_img.get_palette(), col_to_converter) };
+			auto paldef_palette_data { encode_pal(paldef, *coldef,
+																						in_img.get_palette()) };
 
 #ifdef DEBUG
 			t2 = std::chrono::high_resolution_clock::now();
@@ -301,10 +298,7 @@ int main(int argc, char ** argv)
 			// TODO: consider splitting the palette conversion routine into two
 			// functions, on for subpal and one for full pal so we always know the
 			// size of the data returned
-			size_t filesize { in_img.get_palette().size() ==
-																paldef.get_palette_length()
-														? paldef.get_palette_datasize_bytes()
-														: paldef.get_subpal_datasize_bytes() };
+			size_t filesize { paldef.datasize() / 8 };
 
 			pal_outfile.write((char *)(paldef_palette_data.get()), filesize);
 
@@ -381,7 +375,7 @@ bool process_args(int argc, char ** argv)
 
 void print_help()
 {
-	std::cerr << APP_NAME << " - ver " << APP_VERSION << std::endl << std::endl;
+	std::cerr << APP::NAME << " - ver " << APP::VERSION << std::endl << std::endl;
 	std::cerr << "Valid options:" << std::endl;
 	std::cerr << "  --gfx-def, -G   Specify filename with "
 							 "tile/palette/color/profile definitions"

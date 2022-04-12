@@ -1,3 +1,4 @@
+#include "app.hpp"
 #include "chrgfx.hpp"
 #include "import_defs.hpp"
 #include "shared.hpp"
@@ -19,15 +20,6 @@ using namespace chrgfx;
 
 bool process_args(int argc, char ** argv);
 void print_help();
-
-// application globals
-static unsigned int const APP_VERSION_MAJOR { 1 };
-static unsigned int const APP_VERSION_MINOR { 0 };
-static unsigned int const APP_VERSION_FIX { 0 };
-static std::string const APP_VERSION { std::to_string(APP_VERSION_MAJOR) + "." +
-																			 std::to_string(APP_VERSION_MINOR) + "." +
-																			 std::to_string(APP_VERSION_FIX) };
-static std::string const APP_NAME { "chr2png" };
 
 struct runtime_config_chr2png : runtime_config
 {
@@ -85,7 +77,7 @@ int main(int argc, char ** argv)
 
 		try
 		{
-			defs = load_gfxdefs(cfg.gfxdefs_file);
+			defs = load_gfxdefs(cfg.gfxdefs_path);
 		}
 		catch(std::ios_base::failure const & e)
 		{
@@ -105,23 +97,23 @@ int main(int argc, char ** argv)
 		if(profile_iter != profiles.end())
 		{
 			gfxprofile profile { profile_iter->second };
-			chrdef_id = profile.get_chrdef_id();
-			coldef_id = profile.get_coldef_id();
-			paldef_id = profile.get_paldef_id();
+			chrdef_id = profile.chrdef_id();
+			coldef_id = profile.coldef_id();
+			paldef_id = profile.paldef_id();
 		}
 
 		// specific gfxdefs override profile settings
-		if(!cfg.chrdef.empty())
+		if(!cfg.chrdef_id.empty())
 		{
-			chrdef_id = cfg.chrdef;
+			chrdef_id = cfg.chrdef_id;
 		}
-		if(!cfg.coldef.empty())
+		if(!cfg.coldef_id.empty())
 		{
-			coldef_id = cfg.coldef;
+			coldef_id = cfg.coldef_id;
 		}
-		if(!cfg.paldef.empty())
+		if(!cfg.paldef_id.empty())
 		{
-			paldef_id = cfg.paldef;
+			paldef_id = cfg.paldef_id;
 		}
 
 		// sanity check - chrdef is required
@@ -148,19 +140,19 @@ int main(int argc, char ** argv)
 			coldef_id = "basic_8bit_random";
 		}
 
-		coldef coldef;
+		chrgfx::coldef * coldef;
 
 		auto rgbcoldef_iter { rgbcoldefs.find(coldef_id) };
 		if(rgbcoldef_iter != rgbcoldefs.end())
 		{
-			coldef.p_rgbcoldef = &rgbcoldef_iter->second;
+			coldef = (chrgfx::coldef *)&(rgbcoldef_iter->second);
 		}
 		else
 		{
 			auto refcoldef_iter { refcoldefs.find(coldef_id) };
 			if(refcoldef_iter != refcoldefs.end())
 			{
-				coldef.p_refcoldef = &refcoldef_iter->second;
+				coldef = (chrgfx::coldef *)&refcoldef_iter->second;
 			}
 			else
 			{
@@ -205,7 +197,7 @@ int main(int argc, char ** argv)
 		vector<uptr<u8>> workbank;
 		size_t chunksize = (chrdef.datasize() / 8);
 		char chunkbuffer[chunksize];
-		buffer workbuffer(0);
+		buffer<byte_t> workbuffer(0);
 		size_t outchunk_size = chrdef.width() * chrdef.height();
 
 		while(1)
@@ -214,9 +206,9 @@ int main(int argc, char ** argv)
 			if(chrdata.eof())
 				break;
 
-			workbuffer.append(toBasicChr(chrdef, chunkbuffer), outchunk_size);
+			workbuffer.append(decode_chr(chrdef, chunkbuffer), outchunk_size);
 
-			// workbank.push_back(uptr<u8>(toBasicChr(chrdef, (u8 *)chunkbuffer)));
+			// workbank.push_back(uptr<u8>(to_basic_chr(chrdef, (u8 *)chunkbuffer)));
 		}
 
 #ifdef DEBUG
@@ -258,32 +250,23 @@ int main(int argc, char ** argv)
 				cfg.subpalette = 0;
 			}
 
-			if(!cfg.subpalette && length < paldef.datasize_bytes())
+			if(!cfg.subpalette && length < (paldef.datasize() / 8))
 			{
 				throw std::invalid_argument("Not enough palette data available");
 			}
 
 			if(cfg.subpalette &&
-				 ((cfg.subpalette.value() * paldef.datasize_bytes()) > length))
+				 ((cfg.subpalette.value() * (paldef.datasize() / 8)) > length))
 			{
 				throw std::out_of_range("Specified subpalette index is outside the "
 																"size of the supplied palette data");
 			}
 
 			paldata.seekg(0, paldata.beg);
-			char palbuffer[length];
+			byte_t palbuffer[length];
 			paldata.read(palbuffer, length);
 
-			if(coldef.p_rgbcoldef != nullptr)
-			{
-				workpal = toBasicPal(paldef, *coldef.p_rgbcoldef, (u8 *)palbuffer,
-														 cfg.subpalette);
-			}
-			else
-			{
-				workpal = toBasicPal(paldef, *coldef.p_refcoldef, (u8 *)palbuffer,
-														 cfg.subpalette);
-			}
+			workpal = decode_pal(paldef, *coldef, palbuffer);
 		}
 		else
 		{
@@ -302,8 +285,8 @@ int main(int argc, char ** argv)
 		t1 = std::chrono::high_resolution_clock::now();
 #endif
 
-		png::image<png::index_pixel> outimg { png_render(chrdef, workbuffer, workpal,
-																										 cfg.rendertraits) };
+		png::image<png::index_pixel> outimg { png_render(
+				chrdef, workbuffer, workpal, cfg.rendertraits) };
 
 #ifdef DEBUG
 		t2 = std::chrono::high_resolution_clock::now();
@@ -404,7 +387,7 @@ bool process_args(int argc, char ** argv)
 			case 'i':
 				try
 				{
-					cfg.rendertraits.trns_entry = std::stoi(optarg);
+					cfg.rendertraits.trns_index = std::stoi(optarg);
 				}
 				catch(const std::invalid_argument & e)
 				{
@@ -421,7 +404,7 @@ bool process_args(int argc, char ** argv)
 			case 'd':
 				try
 				{
-					cfg.rendertraits.cols = std::stoi(optarg);
+					cfg.rendertraits.columns = std::stoi(optarg);
 				}
 				catch(const std::invalid_argument & e)
 				{
@@ -445,7 +428,7 @@ bool process_args(int argc, char ** argv)
 
 void print_help()
 {
-	std::cout << APP_NAME << " - ver " << APP_VERSION << std::endl << std::endl;
+	std::cout << APP::NAME << " - ver " << APP::VERSION << std::endl << std::endl;
 	std::cout << "Valid options:" << std::endl;
 	std::cout << "  --gfx-def, -G   Specify graphics data format" << std::endl;
 	std::cout

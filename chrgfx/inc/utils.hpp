@@ -1,5 +1,5 @@
-#ifndef CHRGFX__UTILS_H
-#define CHRGFX__UTILS_H
+#ifndef CHRGFX__UTILS_HPP
+#define CHRGFX__UTILS_HPP
 
 #include "types.hpp"
 #include <algorithm>

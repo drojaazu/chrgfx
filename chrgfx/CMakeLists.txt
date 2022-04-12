@@ -3,7 +3,9 @@ add_library(chrgfx SHARED ${SRCFILES})
 
 include(GNUInstallDirs)
 
-set_target_properties(chrgfx PROPERTIES SOVERSION 1)
+set_target_properties(chrgfx PROPERTIES SOVERSION 2)
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/app.hpp.cfg" "${CMAKE_CURRENT_SOURCE_DIR}/src/app.hpp")
 
 set(HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/global.hpp
@@ -21,6 +23,9 @@ set(HEADERS
 )
 
 set_target_properties(chrgfx PROPERTIES PUBLIC_HEADER "${HEADERS}")
+
+target_include_directories(chrgfx PUBLIC
+	"${PROJECT_SOURCE_DIR}/chrgfx/inc")
 
 find_library(PNG_LIB png)
 if(NOT PNG_LIB)

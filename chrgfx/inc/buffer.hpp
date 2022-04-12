@@ -1,3 +1,11 @@
+/**
+ * @file buffer.hpp
+ * @author Motoi Productions (Damian Rogers damian@motoi.pro)
+ * @brief Data buffer wrapper
+ *
+ * Updates:
+ * 20220410 Initial
+ */
 #ifndef __MOTOI__BUFFER_HPP
 #define __MOTOI__BUFFER_HPP
 
@@ -8,35 +16,23 @@
 #include <iterator>
 #include <memory>
 
-/**
- * Data buffer class
- * \note The template type specifier is only for
- */
-template <typename DataT> class basic_buffer
+template <typename DataT = char> class buffer
 {
-protected:
-	static size_t const DEFAULT_BLOCK_SZ { 0x20000 };
-
-	DataT * m_buffer { nullptr };
-	size_t m_datasize { 0 };
-	size_t m_size { 0 };
-
 public:
-	basic_buffer() = delete;
-	basic_buffer & operator=(basic_buffer const &) = delete;
-	// buffer(buffer &&) = delete;
-	basic_buffer & operator=(basic_buffer &&) = delete;
+	buffer() = delete;
+	buffer & operator=(buffer const &) = delete;
+	buffer & operator=(buffer &&) = delete;
 
 	/**
 	 * \brief Copy constructor
 	 */
-	basic_buffer(basic_buffer const & other) :
+	buffer(buffer const & other) :
 			m_datasize { other.m_datasize },
-			m_buffer { (DataT *)malloc(other.m_size) }, m_size { other.m_size }
+			m_buffer { (DataT *)malloc(other.m_datasize) }, m_size { other.m_size }
 	{
 		if(this->m_buffer == nullptr)
 			throw std::runtime_error("Could not create buffer");
-		// std::copy_n(other.m_buffer, other.m_datasize, this->m_buffer);
+		// std::copy_n(other.p_buffer, other.p_datasize, this->p_buffer);
 		std::memcpy(this->m_buffer, other.m_buffer, other.m_datasize);
 #ifdef DEBUG
 		std::cerr << "Copying existing buffer at " << std::showbase << std::hex
@@ -49,7 +45,7 @@ public:
 	/**
 	 * \brief Move constructor
 	 */
-	basic_buffer(basic_buffer && other) :
+	buffer(buffer && other) :
 			m_datasize { other.m_datasize }, m_buffer { std::move(other.m_buffer) },
 			m_size { other.m_size }
 	{
@@ -68,10 +64,8 @@ public:
 	 * \param data Input stream
 	 * \param block_size Stream read buffer (default 128kKiB)
 	 */
-	basic_buffer(std::istream & data,
-							 size_t const block_size = DEFAULT_BLOCK_SZ) :
-			m_datasize { 0 },
-			m_size { 0 }, m_buffer { nullptr }
+	buffer(std::istream & data, size_t const block_size = DEFAULT_BLOCK_SZ) :
+			m_datasize { 0 }, m_size { 0 }, m_buffer { nullptr }
 	{
 		stream_in(data, block_size);
 	}
@@ -83,7 +77,7 @@ public:
 	 * \param data Pointer to data
 	 * \param size Size of existing data
 	 */
-	basic_buffer(DataT * data, size_t const size) :
+	buffer(DataT * data, size_t const size) :
 			m_buffer { data }, m_size(size), m_datasize { sizeof(DataT) * size }
 	{
 #ifdef DEBUG
@@ -97,7 +91,7 @@ public:
 	 * Create an empty buffer of size bytes and optional initial value
 	 * \param size Number of DataT elements
 	 */
-	basic_buffer(size_t const size, char const initial = 0) :
+	buffer(size_t const size, char const initial = 0) :
 			m_size(size), m_datasize(sizeof(DataT) * size)
 	{
 		this->m_buffer = (DataT *)malloc(this->m_datasize);
@@ -112,7 +106,7 @@ public:
 #endif
 	}
 
-	~basic_buffer()
+	~buffer()
 	{
 		if(this->m_buffer != nullptr)
 		{
@@ -168,43 +162,58 @@ public:
 		return this->m_size;
 	}
 
-	size_t append(DataT * other_data, size_t other_size)
+	size_t append(buffer const & other)
 	{
-		if(other_size == 0)
-			return this->m_datasize;
-
-		size_t other_size_bytes = other_size * sizeof(DataT);
+		if(other.size() == 0)
+			return this->m_size;
 
 		this->m_buffer =
-				(DataT *)realloc(this->m_buffer, (this->m_datasize + other_size_bytes));
+				(DataT *)realloc(this->m_buffer, this->m_datasize + other.m_datasize);
 		if(this->m_buffer == nullptr)
 			throw std::bad_alloc();
 
-		// std::copy(data, data + size, this->m_buffer + this->m_size);
-		std::memcpy(((char *)this->m_buffer) + this->m_datasize, (char *)other_data,
-								other_size_bytes);
+		// std::copy((char *)other.m_buffer,
+		//					(char *)(other.m_buffer) + other.m_datasize,
+		//					(char *)(this->m_buffer) + this->m_datasize);
+		std::memcpy((char *)(this->m_buffer) + this->m_datasize,
+								(char *)other.m_buffer, other.m_datasize);
 
-		this->m_datasize += other_size_bytes;
-		this->m_size += other_size;
+		this->m_datasize += other.m_datasize;
+		this->m_size += other.m_size;
 
 		return this->m_size;
 	}
 
-	size_t append(basic_buffer const & other)
+	size_t append(DataT * const other, size_t size)
 	{
-		return append(other.m_buffer, other.m_size);
+		if(size == 0)
+			return this->m_size;
+
+		this->m_buffer = (DataT *)realloc(this->m_buffer, this->m_datasize + size);
+		if(this->m_buffer == nullptr)
+			throw std::bad_alloc();
+
+		// std::copy((char *)other.m_buffer,
+		//					(char *)(other.m_buffer) + other.m_datasize,
+		//					(char *)(this->m_buffer) + this->m_datasize);
+		std::memcpy((char *)(this->m_buffer) + this->m_datasize, (char *)other,
+								size);
+
+		this->m_datasize += size;
+		this->m_size += size / sizeof(DataT);
+
+		return this->m_size;
 	}
 
-	friend std::ostream & operator<<(std::ostream & out,
-																	 const basic_buffer & buffer)
+	friend std::ostream & operator<<(std::ostream & out, const buffer & buffer)
 	{
 		std::copy(buffer.begin(), buffer.end(), std::ostream_iterator<DataT>(out));
 		return out;
 	}
 
-	friend std::istream & operator>>(std::istream & in, basic_buffer & buffer)
+	friend std::istream & operator>>(std::istream & in, buffer & buffer)
 	{
-		stream_in(buffer, in, DEFAULT_BLOCK_SZ);
+		buffer->stream_in(in, DEFAULT_BLOCK_SZ);
 		return in;
 	}
 
@@ -481,7 +490,7 @@ public:
 		pointer ptr { nullptr };
 	};
 
-	basic_buffer(iterator<DataT> start, iterator<DataT> end)
+	buffer(iterator<DataT> start, iterator<DataT> end)
 	{
 		this->m_datasize = end - start;
 		this->m_buffer = (DataT *)malloc(this->m_datasize);
@@ -507,7 +516,10 @@ public:
 
 	template <typename IterT> iterator<IterT> end() const
 	{
-		return iterator<IterT>((IterT *)(((char *)this->m_buffer) + m_datasize));
+		// the end iter should be divisible by the size of the iter type
+		return iterator<IterT>(
+				(IterT *)(((char *)this->m_buffer) +
+									(m_datasize - (m_datasize % sizeof(IterT)))));
 	}
 
 	template <typename IterT> const_iterator<IterT> cend() const
@@ -518,25 +530,26 @@ public:
 
 	iterator<DataT> begin() const
 	{
-		return iterator(this->m_buffer);
+		return iterator<DataT>(this->m_buffer);
 	}
 
 	const_iterator<DataT> cbegin() const
 	{
-		return const_iterator(this->m_buffer);
+		return const_iterator<DataT>(this->m_buffer);
 	}
 
 	iterator<DataT> end() const
 	{
-		return iterator((DataT *)(((char *)this->m_buffer) + m_datasize));
+		return iterator<DataT>((DataT *)(((char *)this->m_buffer) + m_datasize));
 	}
 
 	const_iterator<DataT> cend() const
 	{
-		return const_iterator((DataT *)(((char *)this->m_buffer) + m_datasize));
+		return const_iterator<DataT>(
+				(DataT *)(((char *)this->m_buffer) + m_datasize));
 	}
 
-	bool operator==(basic_buffer<DataT> const & other) const
+	bool operator==(buffer<DataT> const & other) const
 	{
 		if(m_datasize != other.m_datasize)
 			return false;
@@ -549,12 +562,22 @@ public:
 		return true;
 	}
 
-	bool operator!=(basic_buffer<DataT> const & other) const
+	bool operator!=(buffer<DataT> const & other) const
 	{
 		return !(*this == other);
 	}
 
 protected:
+	static size_t const DEFAULT_BLOCK_SZ { 0x20000 };
+
+	DataT * m_buffer { nullptr };
+
+	// m_datasize is the *size in bytes*
+	size_t m_datasize { 0 };
+
+	// m_size is the *size in DataT*
+	size_t m_size { 0 };
+
 	void stream_in(std::istream & in, size_t const block_size)
 	{
 
@@ -585,7 +608,7 @@ protected:
 					throw std::runtime_error("Failed to reallocate internal buffer");
 
 				// std::copy_n(block_buff, bytes_read,
-				//						buffer.m_buffer + buffer.m_datasize);
+				//						buffer.p_buffer + buffer.p_datasize);
 				std::memcpy(((char *)this->m_buffer) + this->m_datasize, block_buff,
 										bytes_read);
 
@@ -609,25 +632,6 @@ protected:
 			throw;
 		}
 	}
-};
-
-class buffer : public basic_buffer<char>
-{
-public:
-	buffer(basic_buffer const & other) : basic_buffer<char>(other) {};
-
-	buffer(basic_buffer && other) : basic_buffer<char>(other) {};
-
-	buffer(std::istream & data, size_t const block_size = DEFAULT_BLOCK_SZ) :
-			basic_buffer<char>(data, block_size) {};
-
-	buffer(char * data, size_t const size) : basic_buffer<char>(data, size) {};
-
-	buffer(size_t const size, char const initial = 0) :
-			basic_buffer(size, initial) {};
-
-	buffer(iterator<char> start, iterator<char> end) :
-			basic_buffer(start, end) {};
 };
 
 #endif

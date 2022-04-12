@@ -3,7 +3,7 @@
 namespace chrgfx
 {
 
-byte_t reduce_bits(byte_t data, u8 bitcount)
+inline byte_t reduce_bits(byte_t data, u8 bitcount)
 {
 	// convert color bit depths algo:
 	// (bitdepth_a_value * bitdepth_b_max) / bitdepth_a_max = bitdepth_b_value
