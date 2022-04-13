@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-using std::vector;
-
 namespace chrgfx
 {
 
@@ -18,9 +16,10 @@ class chrdef : public gfxdef
 {
 
 public:
-	chrdef(char const * id, ushort const width, ushort const height,
-				 ushort const bitdepth, vector<ushort> const & planeoffset,
-				 vector<ushort> const & pixeloffset, vector<ushort> const & rowoffset);
+	chrdef(std::string const & id, ushort const width, ushort const height,
+				 ushort const bitdepth, std::vector<ushort> const & planeoffset,
+				 std::vector<ushort> const & pixeloffset,
+				 std::vector<ushort> const & rowoffset);
 
 	/**
 	 * @return ushort Width of the tile in pixels
@@ -62,11 +61,11 @@ protected:
 	ushort const m_height;
 	ushort const m_bitdepth;
 
-	vector<ushort> m_planeoffset;
+	std::vector<ushort> m_planeoffset;
 
-	vector<ushort> m_pixeloffset;
+	std::vector<ushort> m_pixeloffset;
 
-	vector<ushort> m_rowoffset;
+	std::vector<ushort> m_rowoffset;
 
 	ushort const m_datasize;
 };

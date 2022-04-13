@@ -18,34 +18,7 @@
 #include "shared.hpp"
 #include "vd.hpp"
 
-class gfxdef_key_error : public std::exception
-{
-public:
-	gfxdef_key_error(char const * err, char const * key,
-									 char const * block_id = nullptr);
 
-	const char * what() const noexcept override;
-
-private:
-	char const * m_key;
-	char const * m_block_id;
-	char const * m_err;
-};
-
-class gfxdef_value_error : public std::exception
-{
-public:
-	gfxdef_value_error(char const * err, char const * key, char const * value,
-										 char const * block_id = nullptr);
-
-	const char * what() const noexcept override;
-
-private:
-	char const * m_key;
-	char const * m_value;
-	char const * m_block_id;
-	char const * m_err;
-};
 
 png::palette create_palette(std::string const & pal);
 

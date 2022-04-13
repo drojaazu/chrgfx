@@ -7,12 +7,12 @@ namespace chrgfx
 using namespace std;
 using namespace png;
 
-coldef::coldef(char const * id, coldef_type type, bool const big_endian) :
+coldef::coldef(string const & id, coldef_type type, bool const big_endian) :
 		gfxdef(id), m_type(type), m_big_endian(big_endian)
 {
 }
 
-refcoldef::refcoldef(char const * id, palette const & reftab,
+refcoldef::refcoldef(string const & id, palette const & reftab,
 										 bool const big_endian) :
 		coldef(id, ref, big_endian),
 		m_reftab(reftab) {};
@@ -62,6 +62,11 @@ ushort refcoldef::reftabIndex(color rgb) const
 	return idx;
 };
 
+png::palette const & refcoldef::reftab() const
+{
+	return m_reftab;
+}
+
 bool coldef::big_endian() const
 {
 	return m_big_endian;
@@ -72,7 +77,7 @@ coldef_type coldef::type() const
 	return m_type;
 }
 
-rgbcoldef::rgbcoldef(char const * id, ushort const bitdepth,
+rgbcoldef::rgbcoldef(string const & id, ushort const bitdepth,
 										 vector<rgb_layout> const & layout, bool const big_endian) :
 		coldef(id, rgb, big_endian),
 		m_bitdepth(bitdepth), m_layout(layout) {};
@@ -82,7 +87,7 @@ vector<rgb_layout> const & rgbcoldef::layout() const
 	return m_layout;
 };
 
-rgb_layout rgbcoldef::rgb_pass(ushort pass) const
+rgb_layout const & rgbcoldef::rgb_pass(ushort pass) const
 {
 	return m_layout[pass];
 }

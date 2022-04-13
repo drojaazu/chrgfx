@@ -5,9 +5,6 @@
 #include <optional>
 #include <string>
 
-using std::nullopt;
-using std::optional;
-
 namespace chrgfx
 {
 
@@ -18,8 +15,9 @@ namespace chrgfx
 class paldef : public gfxdef
 {
 public:
-	paldef(char const * id, ushort const entry_datasize, ushort const pal_length,
-				 optional<ushort const> const pal_datasize = nullopt);
+	paldef(std::string const & id, ushort const entry_datasize,
+				 ushort const pal_length,
+				 std::optional<ushort const> const pal_datasize = std::nullopt);
 
 	/**
 	 * \return number of entries in a subpalette

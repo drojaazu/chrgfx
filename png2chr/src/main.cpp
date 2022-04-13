@@ -298,9 +298,9 @@ int main(int argc, char ** argv)
 			// TODO: consider splitting the palette conversion routine into two
 			// functions, on for subpal and one for full pal so we always know the
 			// size of the data returned
-			size_t filesize { paldef.datasize() / 8 };
+			size_t filesize { (size_t)(paldef.datasize() / 8) };
 
-			pal_outfile.write((char *)(paldef_palette_data.get()), filesize);
+			pal_outfile.write((char *)(paldef_palette_data), filesize);
 
 #ifdef DEBUG
 			t2 = std::chrono::high_resolution_clock::now();

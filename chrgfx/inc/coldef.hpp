@@ -8,10 +8,6 @@
 
 namespace chrgfx
 {
-using png::color;
-using png::palette;
-using std::vector;
-
 enum coldef_type
 {
 	ref,
@@ -34,7 +30,7 @@ protected:
 	coldef_type m_type;
 	const bool m_big_endian;
 
-	explicit coldef(char const * id, coldef_type type, bool const big_endian);
+	coldef(std::string const & id, coldef_type type, bool const big_endian);
 };
 
 /**
@@ -44,7 +40,7 @@ protected:
 class refcoldef : public coldef
 {
 public:
-	refcoldef(char const * id, palette const & reftab,
+	refcoldef(std::string const & id, png::palette const & reftab,
 						bool const big_endian = false);
 
 	/**
@@ -54,16 +50,18 @@ public:
 	 * @return color Returns the color from the reference palette for the given
 	 * index
 	 */
-	color reftabColor(ushort index) const;
+	png::color reftabColor(ushort index) const;
 
 	/**
 	 * Returns the index to the color matching the RGB value provided, or its
 	 * nearest color
 	 */
-	ushort reftabIndex(color rgb) const;
+	ushort reftabIndex(png::color rgb) const;
+
+	png::palette const & reftab() const;
 
 protected:
-	palette const m_reftab;
+	png::palette const m_reftab;
 };
 
 class rgbcoldef : public coldef
@@ -73,18 +71,19 @@ public:
 	/**
 	 * Constructor for an rgblayout based coldef
 	 */
-	rgbcoldef(char const * id, ushort const bitdepth,
-						vector<rgb_layout> const & layout, bool const big_endian = false);
+	rgbcoldef(std::string const &, ushort const bitdepth,
+						std::vector<rgb_layout> const & layout,
+						bool const big_endian = false);
 
 	/**
 	 * Returns the vector of RGB layouts
 	 */
-	vector<rgb_layout> const & layout() const;
+	std::vector<rgb_layout> const & layout() const;
 
 	/**
 	 * Returns the RGB bit layout for the given pass
 	 */
-	rgb_layout rgb_pass(ushort pass) const;
+	rgb_layout const & rgb_pass(ushort pass) const;
 
 	/**
 	 * Returns the bitdepth of the color channels
@@ -92,7 +91,7 @@ public:
 	ushort bitdepth() const;
 
 protected:
-	vector<rgb_layout> const m_layout;
+	std::vector<rgb_layout> const m_layout;
 	ushort const m_bitdepth;
 };
 } // namespace chrgfx

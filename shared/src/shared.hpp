@@ -33,6 +33,6 @@ struct runtime_config
 	optional<unsigned int> subpalette;
 };
 
-bool process_default_args(runtime_config const & cfg, int argc, char ** argv);
+bool process_default_args(runtime_config & cfg, int argc, char ** argv);
 
 #endif

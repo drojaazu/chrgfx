@@ -10,9 +10,9 @@ using png::palette;
 
 namespace chrgfx
 {
-u8 reduce_bits(u8 data, u8 bitcount);
+byte_t reduce_bits(byte_t data, u8 bitcount);
 
-u8 expand_bits(u8 data, u8 bitcount);
+byte_t expand_bits(byte_t data, u8 bitcount);
 
 u32 create_bitmask32(u8 bitcount);
 

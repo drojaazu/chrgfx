@@ -4,7 +4,7 @@ using namespace std;
 
 namespace chrgfx
 {
-chrdef::chrdef(char const * id, ushort const width, ushort const height,
+chrdef::chrdef(string const & id, ushort const width, ushort const height,
 							 ushort const bitdepth, vector<ushort> const & planeoffset,
 							 vector<ushort> const & pixeloffset,
 							 vector<ushort> const & rowoffset) :

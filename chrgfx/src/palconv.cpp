@@ -8,7 +8,7 @@ namespace chrgfx
 using namespace std;
 
 byte_t * encode_pal(paldef const & paldef, coldef const & coldef,
-										palette const * palette)
+										png::palette const & palette)
 {
 	size_t const
 			// size of a single color within a palette, in bits
@@ -77,7 +77,7 @@ byte_t * encode_pal(paldef const & paldef, coldef const & coldef,
 
 	// auto paldata_iter { basic_palette.begin() +
 	//										(subpal_idx * subpal_datasize_bytes) };
-	auto paldata_iter = palette->begin();
+	auto paldata_iter = palette.begin();
 
 	// for every color in the subpal
 	for(uint this_subpal_entry { 0 }; this_subpal_entry < subpal_length;
@@ -201,8 +201,9 @@ palette decode_pal(paldef const & paldef, coldef const & coldef,
 	u32 const entry_buff_bitmask = create_bitmask32(entry_datasize);
 
 	// auto out = new color[subpal_length];
-	png::palette out;
-	out.reserve(subpal_length);
+	// png++ expects a full 8 bit palette
+	png::palette out(256, color { 0, 0, 0 });
+	// out.reserve(subpal_length);
 
 	// auto paldata_iter { palette.begin() + (subpal_idx * subpal_datasize_bytes)
 	// };

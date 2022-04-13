@@ -5,17 +5,44 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <istream>
 #include <vector>
 
-using std::map;
-using std::pair;
-using std::string;
+using namespace std;
 
 char constexpr COMMENT_MARKER { '#' };
 char constexpr BLOCK_OPENER { '{' };
 char constexpr BLOCK_CLOSER { '}' };
 char constexpr KV_DELIM { ' ' };
+
+defblock_key_error::defblock_key_error(char const * what, char const * key,
+																			 char const * block_id) :
+		m_key(key),
+		m_block_id(block_id), std::runtime_error(what)
+{
+}
+
+char const * defblock_key_error::key() const
+{
+	return m_key;
+}
+
+char const * defblock_key_error::block() const
+{
+	return m_block_id;
+}
+
+defblock_value_error::defblock_value_error(char const * what, char const * key,
+																					 char const * value,
+																					 char const * block_id) :
+		defblock_key_error(what, key, block_id),
+		m_value(value)
+{
+}
+
+char const * defblock_value_error::value() const
+{
+	return m_value;
+}
 
 string ltrim(string const & s)
 {
@@ -50,20 +77,16 @@ pair<string, string> kvsplit(string const & line)
 
 defblock parse_defblock(std::istream & in)
 {
-
 	if(!in.good())
-	{
-		throw std::ios_base::failure(std::strerror(errno));
-	}
+		throw runtime_error("Could not read from defblock stream");
 
 	string opener_check;
 	std::getline(in, opener_check);
 	std::replace(opener_check.begin(), opener_check.end(), '\t', ' ');
 	opener_check = trim(opener_check);
+
 	if(opener_check[0] != BLOCK_OPENER || opener_check.size() != 1)
-	{
-		throw "Block opening delimiter not found or junk data found on opener line";
-	}
+		throw runtime_error("Block opener not found after definition");
 
 	string this_line;
 
@@ -89,7 +112,7 @@ defblock parse_defblock(std::istream & in)
 		// didn't find a closer
 		if(in.eof())
 		{
-			throw "Hit end of file before end of block";
+			throw "Reached end of input before finding a block closer";
 		}
 
 		// no issues, just a normal line, clean and append to the block
@@ -99,25 +122,20 @@ defblock parse_defblock(std::istream & in)
 	return out;
 }
 
-std::multimap<string const, defblock const> load_defblocks(string const & file)
+std::multimap<string const, defblock const> load_defblocks(istream & in)
 {
-	std::ifstream in { file };
 	if(!in.good())
-	{
-		throw std::ios_base::failure(std::strerror(errno));
-	}
-
-	in.seekg(std::ios::beg);
+		throw runtime_error("Could not read from defblock stream");
 
 	string this_line, work_line, cached_line, this_def_name, this_block;
 
-	std::multimap<string const, defblock const> out;
+	multimap<string const, defblock const> out;
 
-	while(std::getline(in, this_line))
+	while(getline(in, this_line))
 	{
 		work_line = this_line;
-		std::replace(work_line.begin(), work_line.end(), '\t', ' ');
-		work_line = ltrim(this_line);
+		replace(work_line.begin(), work_line.end(), '\t', ' ');
+		work_line = trim(this_line);
 
 		// blank line or a comment; move on
 		if(work_line.empty() || work_line[0] == COMMENT_MARKER)
@@ -125,8 +143,8 @@ std::multimap<string const, defblock const> load_defblocks(string const & file)
 			continue;
 		}
 
-		// block delimiters cannot be used in declaration name
-		// (or syntax error in the file)
+		// we shouldn't expect to find a block opener/closer at this point
+		// (should be on the next line)
 		if(work_line.find(BLOCK_OPENER) != string::npos ||
 			 work_line.find(BLOCK_CLOSER) != string::npos)
 		{

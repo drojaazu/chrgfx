@@ -1,6 +1,8 @@
 #ifndef __CHRGFX__GFXDEF_HPP
 #define __CHRGFX__GFXDEF_HPP
 
+#include <string>
+
 namespace chrgfx
 {
 /**
@@ -16,12 +18,12 @@ public:
 	gfxdef & operator=(gfxdef const &) = delete;
 	gfxdef & operator=(gfxdef &&) = delete;
 
-	char const * id() const;
+	std::string const & id() const;
 
 protected:
-	gfxdef(char const * id);
+	gfxdef(std::string const & id);
 
-	char const * m_id;
+	std::string const m_id;
 };
 
 } // namespace chrgfx
