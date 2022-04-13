@@ -194,7 +194,7 @@ int main(int argc, char ** argv)
 #endif
 
 		// tiles first
-		vector<uptr<u8>> workbank;
+		//vector<uptr<u8>> workbank;
 		size_t chunksize = (chrdef.datasize() / 8);
 		char chunkbuffer[chunksize];
 		buffer<byte_t> workbuffer(0);
