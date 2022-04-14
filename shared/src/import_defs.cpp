@@ -51,7 +51,7 @@ char const * PRF_PALDEF = "paldef";
 
 char const * ERR_KEY_NOT_FOUND = "Could not find required key";
 
-palette create_palette(string const & pal)
+palette parse_palette(string const & pal)
 {
 	string value { pal };
 	// remove any spaces from the value before processing
@@ -266,7 +266,7 @@ refcoldef validate_refcoldef_block(defblock const & def_block)
 	png::palette temp_pal;
 	try
 	{
-		temp_pal = create_palette(mapiter->second);
+		temp_pal = parse_palette(mapiter->second);
 	}
 	catch(std::invalid_argument const & e)
 	{
@@ -454,10 +454,7 @@ paldef validate_paldef_block(defblock const & def_block)
 									temp_pal_datasize };
 }
 
-std::tuple<map<string const, chrdef const>, map<string const, rgbcoldef const>,
-					 map<string const, refcoldef const>, map<string const, paldef const>,
-					 map<string const, gfxprofile const>>
-load_gfxdefs(string const & def_file)
+def_collection load_gfxdefs(string const & def_file)
 {
 	auto def_stream = ifstream_checked(def_file.c_str());
 	std::multimap<string const, defblock const> blocks { load_defblocks(
@@ -472,7 +469,8 @@ load_gfxdefs(string const & def_file)
 		chrdefs.insert({ temp_def.id(), std::move(temp_def) });
 	}
 	// add library builtin def
-	chrdefs.insert({ string(defs::basic_8x8_1bpp.id()), defs::basic_8x8_1bpp });
+	chrdefs.insert(
+			{ string(gfxdefs::basic_8x8_1bpp.id()), gfxdefs::basic_8x8_1bpp });
 
 	map<string const, rgbcoldef const> rgbcoldefs;
 	// block_iter = blocks.find("coldef");
@@ -495,7 +493,7 @@ load_gfxdefs(string const & def_file)
 	}
 
 	refcoldefs.insert(
-			{ string(defs::basic_8bit_random.id()), defs::basic_8bit_random });
+			{ string(gfxdefs::basic_8bit_random.id()), gfxdefs::basic_8bit_random });
 
 	map<string const, paldef const> paldefs;
 	// block_iter = blocks.find("paldef");
@@ -507,7 +505,8 @@ load_gfxdefs(string const & def_file)
 		// block_iter++;
 	}
 
-	paldefs.insert({ string(defs::basic_256color.id()), defs::basic_256color });
+	paldefs.insert(
+			{ string(gfxdefs::basic_256color.id()), gfxdefs::basic_256color });
 
 	map<string const, gfxprofile const> profiles;
 	// block_iter = blocks.find("profile");
@@ -519,5 +518,5 @@ load_gfxdefs(string const & def_file)
 		//++block_iter;
 	}
 
-	return std::make_tuple(chrdefs, rgbcoldefs, refcoldefs, paldefs, profiles);
+	return { chrdefs, rgbcoldefs, refcoldefs, paldefs, profiles };
 }

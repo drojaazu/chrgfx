@@ -34,7 +34,7 @@ protected:
 };
 
 /**
- * @brief Encoding for non-RGB based colors
+ * @brief Non-RGB (reftab based) color encoding
  *
  */
 class refcoldef : public coldef
@@ -44,17 +44,13 @@ public:
 						bool const big_endian = false);
 
 	/**
-	 * @brief
-	 *
-	 * @param index
-	 * @return color Returns the color from the reference palette for the given
-	 * index
+	 * @return color color from the reference palette for the given index
 	 */
 	png::color reftabColor(ushort index) const;
 
 	/**
-	 * Returns the index to the color matching the RGB value provided, or its
-	 * nearest color
+	 * @return index to the color matching the RGB value provided, or
+	 * the index to the nearest matching color
 	 */
 	ushort reftabIndex(png::color rgb) const;
 
@@ -64,29 +60,29 @@ protected:
 	png::palette const m_reftab;
 };
 
+/**
+ * @brief RGB color encoding
+ *
+ */
 class rgbcoldef : public coldef
 {
-
 public:
-	/**
-	 * Constructor for an rgblayout based coldef
-	 */
 	rgbcoldef(std::string const &, ushort const bitdepth,
 						std::vector<rgb_layout> const & layout,
 						bool const big_endian = false);
 
 	/**
-	 * Returns the vector of RGB layouts
+	 * @return referece to the collection of RGB layouts
 	 */
 	std::vector<rgb_layout> const & layout() const;
 
 	/**
-	 * Returns the RGB bit layout for the given pass
+	 * @return RGB bit layout for the given pass index
 	 */
 	rgb_layout const & rgb_pass(ushort pass) const;
 
 	/**
-	 * Returns the bitdepth of the color channels
+	 * @return bitdepth of the color channels
 	 */
 	ushort bitdepth() const;
 

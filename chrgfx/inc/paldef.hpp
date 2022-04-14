@@ -9,8 +9,7 @@ namespace chrgfx
 {
 
 /**
- * \class paldef
- * \brief Defines the structure of a system palette
+ * @brief Palette encoding
  */
 class paldef : public gfxdef
 {
@@ -20,22 +19,21 @@ public:
 				 std::optional<ushort const> const pal_datasize = std::nullopt);
 
 	/**
-	 * \return number of entries in a subpalette
+	 * @return number of entries in the palette
 	 */
 	ushort pal_length() const;
 
 	/**
-	 * \return data size of a single entry, *in bits*
+	 * @return data size of a single entry *in bits*
 	 */
 	ushort entry_datasize() const;
 
 	/**
-	 * \return data size of the subpalette, *in bits*
+	 * @return data size of the whole palette *in bits*
 	 */
 	ushort datasize() const;
 
 protected:
-	// ushort m_pal_length;
 	ushort const m_pal_length;
 	ushort const m_entry_datasize;
 	ushort const m_subpal_datasize;

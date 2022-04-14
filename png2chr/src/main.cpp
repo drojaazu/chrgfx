@@ -74,27 +74,7 @@ int main(int argc, char ** argv)
 		}
 
 		// load definitions
-		std::tuple<
-				map<string const, chrdef const>, map<string const, rgbcoldef const>,
-				map<string const, refcoldef const>, map<string const, paldef const>,
-				map<string const, gfxprofile const>>
-				defs;
-
-		try
-		{
-			defs = load_gfxdefs(cfg.gfxdefs_path);
-		}
-		catch(std::ios_base::failure const & e)
-		{
-			std::cerr << "gfx-def error: " << std::strerror(errno) << std::endl;
-			return -7;
-		}
-
-		map<string const, chrdef const> chrdefs { std::get<0>(defs) };
-		map<string const, rgbcoldef const> rgbcoldefs { std::get<1>(defs) };
-		map<string const, refcoldef const> refcoldefs { std::get<2>(defs) };
-		map<string const, paldef const> paldefs { std::get<3>(defs) };
-		map<string const, gfxprofile const> profiles { std::get<4>(defs) };
+		auto gfxdefs { load_gfxdefs(cfg.gfxdefs_path) };
 
 		if(cfg.chr_outfile.empty() && cfg.pal_outfile.empty())
 		{
@@ -103,8 +83,8 @@ int main(int argc, char ** argv)
 
 		string chrdef_id, coldef_id, paldef_id;
 
-		auto profile_iter { profiles.find(cfg.profile) };
-		if(profile_iter != profiles.end())
+		auto profile_iter { gfxdefs.profiles.find(cfg.profile) };
+		if(profile_iter != gfxdefs.profiles.end())
 		{
 			gfxprofile profile { profile_iter->second };
 			chrdef_id = profile.chrdef_id();
@@ -134,8 +114,8 @@ int main(int argc, char ** argv)
 			return -8;
 		}
 
-		auto chrdef_iter { chrdefs.find(chrdef_id) };
-		if(chrdef_iter == chrdefs.end())
+		auto chrdef_iter { gfxdefs.chrdefs.find(chrdef_id) };
+		if(chrdef_iter == gfxdefs.chrdefs.end())
 		{
 			std::cerr << "Could not find specified chrdef" << std::endl;
 			return -9;
@@ -152,15 +132,15 @@ int main(int argc, char ** argv)
 
 		chrgfx::coldef * coldef;
 
-		auto rgbcoldef_iter { rgbcoldefs.find(coldef_id) };
-		if(rgbcoldef_iter != rgbcoldefs.end())
+		auto rgbcoldef_iter { gfxdefs.rgbcoldefs.find(coldef_id) };
+		if(rgbcoldef_iter != gfxdefs.rgbcoldefs.end())
 		{
 			coldef = (chrgfx::coldef *)&rgbcoldef_iter->second;
 		}
 		else
 		{
-			auto refcoldef_iter { refcoldefs.find(coldef_id) };
-			if(refcoldef_iter != refcoldefs.end())
+			auto refcoldef_iter { gfxdefs.refcoldefs.find(coldef_id) };
+			if(refcoldef_iter != gfxdefs.refcoldefs.end())
 			{
 				coldef = (chrgfx::coldef *)&refcoldef_iter->second;
 			}
@@ -178,8 +158,8 @@ int main(int argc, char ** argv)
 			paldef_id = "basic_256color";
 		}
 
-		auto paldef_iter { paldefs.find(paldef_id) };
-		if(paldef_iter == paldefs.end())
+		auto paldef_iter { gfxdefs.paldefs.find(paldef_id) };
+		if(paldef_iter == gfxdefs.paldefs.end())
 		{
 			std::cerr << "Could not find specified paldef" << std::endl;
 			return -11;
@@ -245,15 +225,16 @@ int main(int argc, char ** argv)
 
 			size_t chunksize { (unsigned)(chrdef.datasize() / 8) };
 
-			auto iter = png_chunk.begin();
-			auto iter_end = png_chunk.end();
+			auto ptr_imgdata = png_chunk.data();
+			auto ptr_imgdata_end = png_chunk.data() + png_chunk.datasize();
 
-			while(iter != iter_end)
+			while(ptr_imgdata != ptr_imgdata_end)
 			{
-				byte_t * temp_chr { encode_chr(chrdef, &(*iter)) };
+				byte_t * temp_chr { encode_chr(chrdef, ptr_imgdata) };
 				std::copy(temp_chr, temp_chr + chunksize,
-									std::ostream_iterator<u8>(chr_outfile));
-				iter += chrdef.datasize() / 8;
+									std::ostream_iterator<byte_t>(chr_outfile));
+				ptr_imgdata += chrdef.width() * chrdef.height();
+				delete[] temp_chr;
 			}
 		}
 #ifdef DEBUG
@@ -261,8 +242,8 @@ int main(int argc, char ** argv)
 		duration =
 				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-		std::cerr << "CHR OUTPUT: " << std::to_string(duration) << "ms"
-							<< std::endl;
+		std::cerr << "CHR ENCODE & OUTPUT TO STREAM: " << std::to_string(duration)
+							<< "ms" << std::endl;
 #endif
 
 		// deal with the palette next
@@ -307,7 +288,7 @@ int main(int argc, char ** argv)
 			duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
 										 .count();
 
-			std::cerr << "PAL OUTPUT: " << std::to_string(duration) << "ms"
+			std::cerr << "PAL OUTPUT TO STREAM: " << std::to_string(duration) << "ms"
 								<< std::endl;
 #endif
 		}
@@ -317,7 +298,7 @@ int main(int argc, char ** argv)
 	}
 	catch(std::exception const & e)
 	{
-		std::cerr << "FATAL EXCEPTION: " << e.what() << std::endl;
+		std::cerr << "Error: " << e.what() << std::endl;
 		return -1;
 	}
 }

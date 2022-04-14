@@ -1,11 +1,13 @@
 #include "paldef.hpp"
 
+using namespace std;
+
 namespace chrgfx
 {
 
-paldef::paldef(std::string const & id, ushort const entry_datasize,
+paldef::paldef(string const & id, ushort const entry_datasize,
 							 ushort const pal_length,
-							 std::optional<ushort const> const pal_datasize) :
+							 optional<ushort const> const pal_datasize) :
 		gfxdef(id),
 		m_entry_datasize(entry_datasize), m_pal_length(pal_length),
 		m_subpal_datasize(pal_datasize ? pal_datasize.value()

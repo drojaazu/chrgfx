@@ -83,7 +83,7 @@ byte_t * encode_pal(paldef const & paldef, coldef const & coldef,
 	for(uint this_subpal_entry { 0 }; this_subpal_entry < subpal_length;
 			++this_subpal_entry)
 	{
-		byte_align_pos = bit_align_pos / 8;
+		byte_align_pos = bit_align_pos >> 3;
 		bit_align_mod = bit_align_pos % 8;
 
 		switch(coldef.type())

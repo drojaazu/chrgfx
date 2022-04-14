@@ -7,7 +7,6 @@ namespace chrgfx
 {
 /**
  * @brief Abstract encoding class
- *
  */
 class gfxdef
 {

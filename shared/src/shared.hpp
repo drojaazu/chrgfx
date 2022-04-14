@@ -4,7 +4,6 @@
 #include "chrgfx.hpp"
 #include <getopt.h>
 #include <iostream>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -30,7 +29,6 @@ struct runtime_config
 	string chrdef_id;
 	string coldef_id;
 	string paldef_id;
-	optional<unsigned int> subpalette;
 };
 
 bool process_default_args(runtime_config & cfg, int argc, char ** argv);

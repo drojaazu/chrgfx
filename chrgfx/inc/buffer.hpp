@@ -1,6 +1,6 @@
 /**
  * @file buffer.hpp
- * @author Motoi Productions (Damian Rogers damian@motoi.pro)
+ * @author Motoi Productions (Damian Rogers / damian@motoi.pro)
  * @brief Data buffer wrapper
  *
  * Updates:
@@ -34,7 +34,7 @@ public:
 			throw std::runtime_error("Could not create buffer");
 		// std::copy_n(other.p_buffer, other.p_datasize, this->p_buffer);
 		std::memcpy(this->m_buffer, other.m_buffer, other.m_datasize);
-#ifdef DEBUG
+#ifdef DEBUG_BUFFER
 		std::cerr << "Copying existing buffer at " << std::showbase << std::hex
 							<< (std::size_t)other.m_buffer << " to "
 							<< (std::size_t)this->m_buffer << ", datasize "
@@ -51,7 +51,7 @@ public:
 	{
 		if(this->m_buffer == nullptr)
 			throw std::runtime_error("Source buffer is null");
-#ifdef DEBUG
+#ifdef DEBUG_BUFFER
 		std::cerr << "Moving existing buffer at " << std::showbase << std::hex
 							<< (std::size_t)other.m_buffer << " to "
 							<< (std::size_t)this->m_buffer << ", datasize "
@@ -67,6 +67,11 @@ public:
 	buffer(std::istream & data, size_t const block_size = DEFAULT_BLOCK_SZ) :
 			m_datasize { 0 }, m_size { 0 }, m_buffer { nullptr }
 	{
+#ifdef DEBUG_BUFFER
+		std::cerr << "Reading data from input stream in " << std::showbase
+							<< std::hex << (std::size_t)block_size << "byte blocks"
+							<< std::endl;
+#endif
 		stream_in(data, block_size);
 	}
 
@@ -80,7 +85,7 @@ public:
 	buffer(DataT * data, size_t const size) :
 			m_buffer { data }, m_size(size), m_datasize { sizeof(DataT) * size }
 	{
-#ifdef DEBUG
+#ifdef DEBUG_BUFFER
 		std::cerr << __func__ << ": Taking existing buffer at " << std::showbase
 							<< std::hex << (std::size_t)this->m_buffer << ", datasize "
 							<< this->m_datasize << std::endl;
@@ -99,7 +104,7 @@ public:
 			throw std::runtime_error("Failed to allocate buffer space");
 
 		std::fill(this->begin(), this->end(), initial);
-#ifdef DEBUG
+#ifdef DEBUG_BUFFER
 		std::cerr << __func__ << ": Created empty buffer at " << std::showbase
 							<< std::hex << (std::size_t)this->m_buffer << ", datasize "
 							<< this->m_datasize << std::endl;
@@ -110,7 +115,7 @@ public:
 	{
 		if(this->m_buffer != nullptr)
 		{
-#ifdef DEBUG
+#ifdef DEBUG_BUFFER
 			std::cerr << "Freeing buffer at " << std::showbase << std::hex
 								<< (std::size_t)this->m_buffer << ", datasize "
 								<< this->m_datasize << std::endl;
@@ -119,42 +124,83 @@ public:
 		}
 	}
 
+	/**
+	 * @return size_t size of the buffer *in bytes*
+	 */
 	size_t datasize() const
 	{
 		return this->m_datasize;
 	}
 
+	/**
+	 * @return size_t size of the buffer in type DataT
+	 */
 	size_t size() const
 	{
 		return this->m_size;
 	}
 
+	/**
+	 * @return DataT const* pointer to buffer in memory
+	 */
 	DataT const * data() const
 	{
 		return this->m_buffer;
 	}
 
+	/**
+	 * @return DataT const* pointer to buffer in memory
+	 */
 	DataT * data()
 	{
 		return this->m_buffer;
 	}
 
-	size_t grow(size_t additional)
+	size_t resize(size_t const new_size)
 	{
-		if(additional == 0)
+		if(new_size == 0 || new_size == this->m_size)
 			return this->m_size;
 
-		size_t additional_bytes = additional * sizeof(DataT);
+		if(new_size > this->m_size)
+			return append(new_size);
 
+#ifdef DEBUG_BUFFER
+		size_t prev_datasize = this->m_datasize;
+#endif
+
+		size_t new_size_bytes = new_size * sizeof(DataT);
+		this->m_buffer = (DataT *)realloc(this->m_buffer, new_size_bytes);
+		if(this->m_buffer == nullptr)
+			throw std::bad_alloc();
+
+		this->m_datasize = new_size_bytes;
+		this->m_size = new_size;
+
+#ifdef DEBUG_BUFFER
+		std::cerr << "Shrunk buffer at " << std::showbase << std::hex
+							<< (std::size_t)this->m_buffer << ", prev datasize "
+							<< prev_datasize << " new datasize " << this->m_datasize
+							<< std::endl;
+#endif
+
+		return this->m_size;
+	}
+
+	size_t append(size_t const size, char const initial = 0)
+	{
+		if(size == 0)
+			return this->m_size;
+
+		size_t additional_bytes = size * sizeof(DataT);
 		this->m_buffer =
 				(DataT *)realloc(this->m_buffer, (this->m_datasize + additional_bytes));
 		if(this->m_buffer == nullptr)
 			throw std::bad_alloc();
 		std::fill_n(this->m_buffer + this->m_datasize, additional_bytes, 0);
 		this->m_datasize += additional_bytes;
-		this->m_size += additional;
-#ifdef DEBUG
-		std::cerr << "Resized buffer at " << std::showbase << std::hex
+		this->m_size += size;
+#ifdef DEBUG_BUFFER
+		std::cerr << "Grew buffer at " << std::showbase << std::hex
 							<< (std::size_t)this->m_buffer << ", new datasize "
 							<< this->m_datasize << std::endl;
 #endif
@@ -166,6 +212,12 @@ public:
 	{
 		if(other.size() == 0)
 			return this->m_size;
+
+#ifdef DEBUG_BUFFER
+		std::cerr << "Appending data from other buffer at " << std::showbase
+							<< std::hex << (std::size_t)other.m_buffer << ", datasize "
+							<< other.datasize << std::endl;
+#endif
 
 		this->m_buffer =
 				(DataT *)realloc(this->m_buffer, this->m_datasize + other.m_datasize);
@@ -188,6 +240,11 @@ public:
 	{
 		if(size == 0)
 			return this->m_size;
+
+#ifdef DEBUG_BUFFER
+		std::cerr << "Appending data via pointer to " << std::showbase << std::hex
+							<< (std::size_t)other << ", datasize " << size << std::endl;
+#endif
 
 		this->m_buffer = (DataT *)realloc(this->m_buffer, this->m_datasize + size);
 		if(this->m_buffer == nullptr)
@@ -497,7 +554,7 @@ public:
 		if(this->m_buffer == nullptr)
 			throw std::runtime_error("Could not create buffer");
 		std::copy(start, end, this->m_buffer);
-#ifdef DEBUG
+#ifdef DEBUG_BUFFER
 		std::cerr << "Copied portion of existing buffer to" << std::showbase
 							<< std::hex << (std::size_t)this->m_buffer << ", size "
 							<< this->m_datasize << std::endl;
@@ -617,7 +674,7 @@ protected:
 
 			this->m_size = this->m_datasize / sizeof(DataT);
 
-#ifdef DEBUG
+#ifdef DEBUG_BUFFER
 			std::cerr << "Created buffer from stream at " << std::showbase << std::hex
 								<< (std::size_t)this->m_buffer << ", size " << this->m_datasize
 								<< std::endl;

@@ -10,7 +10,6 @@ namespace chrgfx
 
 /**
  * @brief Tile encoding
- *
  */
 class chrdef : public gfxdef
 {
@@ -42,30 +41,47 @@ public:
 	ushort datasize() const;
 
 	/**
-	 * @return ushort Bit offset to specified bitplane in a row
+	 * @return Reference to the collection of bit offsets to bitplanes within a
+	 * row
 	 */
-	ushort plane_offset(ushort const bitplane_index) const;
+	std::vector<ushort> const & plane_offsets() const;
 
 	/**
-	 * @return ushort Bit offset to specified pixel in a row
+	 * @return Reference to the collection of bit offsets to pixels within a
+	 * row
 	 */
-	ushort pixel_offset(ushort const pixel_index) const;
+	std::vector<ushort> const & pixel_offsets() const;
 
 	/**
-	 * @return ushort Bit offset to specified row in the tile
+	 * @return Reference to the collection of bit offsets to rows within a tile
 	 */
-	ushort row_offset(ushort const row_index) const;
+	std::vector<ushort> const & row_offsets() const;
+
+	/**
+	 * @return ushort Bit offset to specified bitplane index within a row
+	 */
+	ushort plane_offset_at(ushort const bitplane_index) const;
+
+	/**
+	 * @return ushort Bit offset to specified pixel index within a row
+	 */
+	ushort pixel_offset_at(ushort const pixel_index) const;
+
+	/**
+	 * @return ushort Bit offset to specified row index within a tile
+	 */
+	ushort row_offset_at(ushort const row_index) const;
 
 protected:
 	ushort const m_width;
 	ushort const m_height;
 	ushort const m_bitdepth;
 
-	std::vector<ushort> m_planeoffset;
+	std::vector<ushort> m_planeoffsets;
 
-	std::vector<ushort> m_pixeloffset;
+	std::vector<ushort> m_pixeloffsets;
 
-	std::vector<ushort> m_rowoffset;
+	std::vector<ushort> m_rowoffsets;
 
 	ushort const m_datasize;
 };

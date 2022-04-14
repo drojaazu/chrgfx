@@ -10,7 +10,7 @@ namespace chrgfx
 {
 /**
  * @brief Defines the bit positions of RGB channel data
- * Positive shift values shift right; negative values shift left
+ * @note Positive shift values shift right; negative values shift left
  */
 class rgb_layout
 {

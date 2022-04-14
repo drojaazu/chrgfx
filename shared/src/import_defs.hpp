@@ -18,16 +18,19 @@
 #include "shared.hpp"
 #include "vd.hpp"
 
+struct def_collection
+{
+public:
+	std::map<string const, chrgfx::chrdef const> const chrdefs;
+	std::map<string const, chrgfx::rgbcoldef const> const rgbcoldefs;
+	std::map<string const, chrgfx::refcoldef const> const refcoldefs;
+	std::map<string const, chrgfx::paldef const> const paldefs;
+	std::map<string const, gfxprofile const> const profiles;
+};
 
+png::palette parse_palette(std::string const & pal);
 
-png::palette create_palette(std::string const & pal);
-
-std::tuple<std::map<string const, chrgfx::chrdef const>,
-					 std::map<string const, chrgfx::rgbcoldef const>,
-					 std::map<string const, chrgfx::refcoldef const>,
-					 std::map<string const, chrgfx::paldef const>,
-					 std::map<string const, gfxprofile const>>
-load_gfxdefs(string const & def_file);
+def_collection load_gfxdefs(string const & def_file);
 
 chrgfx::chrdef validate_chrdef_block(defblock const & def_block);
 

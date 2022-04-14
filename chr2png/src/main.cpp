@@ -1,5 +1,6 @@
 #include "app.hpp"
 #include "chrgfx.hpp"
+#include "filesys.hpp"
 #include "import_defs.hpp"
 #include "shared.hpp"
 
@@ -9,33 +10,23 @@
 #include <map>
 #include <stdio.h>
 
-using std::map;
-using std::string;
-using std::vector;
-using namespace chrgfx;
-
 #ifdef DEBUG
 #include <chrono>
 #endif
+
+using namespace chrgfx;
+using namespace std;
 
 bool process_args(int argc, char ** argv);
 void print_help();
 
 struct runtime_config_chr2png : runtime_config
 {
-	string chrdata_name { "" }, paldata_name { "" };
-	chrgfx::render_traits rendertraits;
-	string outfile { "" };
-};
-
-// option settings
-runtime_config_chr2png cfg;
-
-struct coldef
-{
-	rgbcoldef const * p_rgbcoldef { nullptr };
-	refcoldef const * p_refcoldef { nullptr };
-};
+	string chrdata_name;
+	string paldata_name;
+	render_config rendertraits;
+	string out_path;
+} cfg;
 
 int main(int argc, char ** argv)
 {
@@ -61,40 +52,16 @@ int main(int argc, char ** argv)
 		}
 
 		// see if we even have good input before moving on
-		std::ifstream chrdata { cfg.chrdata_name };
-		if(!chrdata.good())
-		{
-			std::cerr << "chr-data error: " << std::strerror(errno) << std::endl;
-			return -6;
-		}
+		ifstream chrdata { ifstream_checked(cfg.chrdata_name.c_str()) };
 
 		// load definitions
-		std::tuple<
-				map<string const, chrdef const>, map<string const, rgbcoldef const>,
-				map<string const, refcoldef const>, map<string const, paldef const>,
-				map<string const, gfxprofile const>>
-				defs;
-
-		try
-		{
-			defs = load_gfxdefs(cfg.gfxdefs_path);
-		}
-		catch(std::ios_base::failure const & e)
-		{
-			std::cerr << "gfx-def error: " << std::strerror(errno) << std::endl;
-			return -7;
-		}
-
-		map<string const, chrdef const> chrdefs { std::get<0>(defs) };
-		map<string const, rgbcoldef const> rgbcoldefs { std::get<1>(defs) };
-		map<string const, refcoldef const> refcoldefs { std::get<2>(defs) };
-		map<string const, paldef const> paldefs { std::get<3>(defs) };
-		map<string const, gfxprofile const> profiles { std::get<4>(defs) };
+		// TODO just uh make this a struct...
+		auto gfxdefs { load_gfxdefs(cfg.gfxdefs_path) };
 
 		string chrdef_id, coldef_id, paldef_id;
 
-		auto profile_iter { profiles.find(cfg.profile) };
-		if(profile_iter != profiles.end())
+		auto profile_iter { gfxdefs.profiles.find(cfg.profile) };
+		if(profile_iter != gfxdefs.profiles.end())
 		{
 			gfxprofile profile { profile_iter->second };
 			chrdef_id = profile.chrdef_id();
@@ -124,14 +91,14 @@ int main(int argc, char ** argv)
 			return -8;
 		}
 
-		auto chrdef_iter { chrdefs.find(chrdef_id) };
-		if(chrdef_iter == chrdefs.end())
+		auto chrdef_iter { gfxdefs.chrdefs.find(chrdef_id) };
+		if(chrdef_iter == gfxdefs.chrdefs.end())
 		{
 			std::cerr << "Could not find specified chrdef" << std::endl;
 			return -9;
 		}
 
-		chrdef chrdef { chrdef_iter->second };
+		chrgfx::chrdef chrdef { chrdef_iter->second };
 
 		// sanity check - coldef not required - if not specified, use default
 		// built-in
@@ -140,17 +107,17 @@ int main(int argc, char ** argv)
 			coldef_id = "basic_8bit_random";
 		}
 
-		chrgfx::coldef * coldef;
+		coldef * coldef;
 
-		auto rgbcoldef_iter { rgbcoldefs.find(coldef_id) };
-		if(rgbcoldef_iter != rgbcoldefs.end())
+		auto rgbcoldef_iter { gfxdefs.rgbcoldefs.find(coldef_id) };
+		if(rgbcoldef_iter != gfxdefs.rgbcoldefs.end())
 		{
-			coldef = (chrgfx::coldef *)&(rgbcoldef_iter->second);
+			coldef = (chrgfx::coldef *)&rgbcoldef_iter->second;
 		}
 		else
 		{
-			auto refcoldef_iter { refcoldefs.find(coldef_id) };
-			if(refcoldef_iter != refcoldefs.end())
+			auto refcoldef_iter { gfxdefs.refcoldefs.find(coldef_id) };
+			if(refcoldef_iter != gfxdefs.refcoldefs.end())
 			{
 				coldef = (chrgfx::coldef *)&refcoldef_iter->second;
 			}
@@ -168,8 +135,8 @@ int main(int argc, char ** argv)
 			paldef_id = "basic_256color";
 		}
 
-		auto paldef_iter { paldefs.find(paldef_id) };
-		if(paldef_iter == paldefs.end())
+		auto paldef_iter { gfxdefs.paldefs.find(paldef_id) };
+		if(paldef_iter == gfxdefs.paldefs.end())
 		{
 			std::cerr << "Could not find specified paldef" << std::endl;
 			return -11;
@@ -189,26 +156,37 @@ int main(int argc, char ** argv)
 		std::cerr << "Using paldef '" << paldef_id << "'" << std::endl;
 #endif
 
+/*******************************************************
+ *             TILE CONVERSION
+ *******************************************************/
 #ifdef DEBUG
 		t1 = std::chrono::high_resolution_clock::now();
 #endif
 
-		// tiles first
-		//vector<uptr<u8>> workbank;
-		size_t chunksize = (chrdef.datasize() / 8);
-		char chunkbuffer[chunksize];
-		buffer<byte_t> workbuffer(0);
-		size_t outchunk_size = chrdef.width() * chrdef.height();
+		size_t
+				// byte size of one encoded tile
+				in_chunksize { chrdef.datasize() / (size_t)8 },
+				// byte size of one basic (decoded) tile
+				out_chunksize { (size_t)(chrdef.width() * chrdef.height()) };
 
+		// buffer for a single encoded tile, read from the stream
+		char in_tile[in_chunksize];
+
+		// basic tiles buffer
+		buffer<byte_t> out_buffer(0);
+
+		/*
+			Some speed testing was done and, somewhat surprisingly, calling append on
+			the buffer repeatedly was a bit faster than creating a large temporary
+			buffer and resizing
+		*/
 		while(1)
 		{
-			chrdata.read(chunkbuffer, chunksize);
+			chrdata.read(in_tile, in_chunksize);
 			if(chrdata.eof())
 				break;
 
-			workbuffer.append(decode_chr(chrdef, chunkbuffer), outchunk_size);
-
-			// workbank.push_back(uptr<u8>(to_basic_chr(chrdef, (u8 *)chunkbuffer)));
+			out_buffer.append(decode_chr(chrdef, in_tile), out_chunksize);
 		}
 
 #ifdef DEBUG
@@ -220,20 +198,17 @@ int main(int argc, char ** argv)
 							<< std::endl;
 #endif
 
+/*******************************************************
+ *                PALETTE CONVERSION
+ *******************************************************/
 #ifdef DEBUG
-		t1 = std::chrono::high_resolution_clock::now();
+		t1 = chrono::high_resolution_clock::now();
 #endif
 
-		// then the palette
 		palette workpal;
-		if(cfg.paldata_name != "")
+		if(!cfg.paldata_name.empty())
 		{
-			std::ifstream paldata { cfg.paldata_name };
-			if(!paldata.good())
-			{
-				std::cerr << "pal-data error: " << std::strerror(errno) << std::endl;
-				return -12;
-			}
+			ifstream paldata { ifstream_checked(cfg.paldata_name.c_str()) };
 
 			// get the size of the palette data
 			paldata.seekg(0, paldata.end);
@@ -242,24 +217,9 @@ int main(int argc, char ** argv)
 			// TODO: work on a less grody way to do checks on palette data size
 			// should probably develop a wrapper around the data with size, etc
 
-			// if we haven't specified a subpalette, but we don't have enough data for
-			// the full palette, specify a subpalette anyway so we don't barf out junk
-			// data into the color palette
-			if(!cfg.subpalette)
-			{
-				cfg.subpalette = 0;
-			}
-
-			if(!cfg.subpalette && length < (paldef.datasize() / 8))
+			if(length < (paldef.datasize() / 8))
 			{
 				throw std::invalid_argument("Not enough palette data available");
-			}
-
-			if(cfg.subpalette &&
-				 ((cfg.subpalette.value() * (paldef.datasize() / 8)) > length))
-			{
-				throw std::out_of_range("Specified subpalette index is outside the "
-																"size of the supplied palette data");
 			}
 
 			paldata.seekg(0, paldata.beg);
@@ -286,7 +246,7 @@ int main(int argc, char ** argv)
 #endif
 
 		png::image<png::index_pixel> outimg { png_render(
-				chrdef, workbuffer, workpal, cfg.rendertraits) };
+				chrdef, out_buffer, workpal, cfg.rendertraits) };
 
 #ifdef DEBUG
 		t2 = std::chrono::high_resolution_clock::now();
@@ -299,19 +259,19 @@ int main(int argc, char ** argv)
 		t1 = std::chrono::high_resolution_clock::now();
 #endif
 
-		if(cfg.outfile.empty())
+		if(cfg.out_path.empty())
 		{
 			outimg.write_stream(std::cout);
 		}
 		else
 		{
-			outimg.write(cfg.outfile);
+			outimg.write(cfg.out_path);
 		}
 #ifdef DEBUG
 		t2 = std::chrono::high_resolution_clock::now();
 		duration =
 				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-		std::cerr << "OUTPUT: " << duration << "ms" << std::endl;
+		std::cerr << "OUTPUT TO STREAM: " << duration << "ms" << std::endl;
 #endif
 
 		// everything's good, we're outta here
@@ -319,7 +279,7 @@ int main(int argc, char ** argv)
 	}
 	catch(std::exception const & e)
 	{
-		std::cerr << "FATAL EXCEPTION: " << e.what() << std::endl;
+		std::cerr << "Error: " << e.what() << std::endl;
 		return -1;
 	}
 }
@@ -366,18 +326,6 @@ bool process_args(int argc, char ** argv)
 				cfg.paldata_name = optarg;
 				break;
 
-			// subpalette
-			case 's':
-				try
-				{
-					cfg.subpalette = std::stoi(optarg);
-				}
-				catch(const std::invalid_argument & e)
-				{
-					throw std::invalid_argument("Invalid subpalette index value");
-				}
-				break;
-
 			// trns
 			case 't':
 				cfg.rendertraits.use_trns = true;
@@ -414,7 +362,7 @@ bool process_args(int argc, char ** argv)
 
 			// output
 			case 'o':
-				cfg.outfile = optarg;
+				cfg.out_path = optarg;
 				break;
 
 			case 'h':
@@ -455,7 +403,5 @@ void print_help()
 			<< "  --columns, -c      Specify number of columns per row of tiles in "
 				 "output image"
 			<< std::endl;
-	std::cout << "  --subpalette, -s   Specify subpalette (default is 0)"
-						<< std::endl;
 	std::cout << "  --help, -h         Display this text" << std::endl;
 }

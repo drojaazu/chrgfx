@@ -3,51 +3,48 @@
 namespace chrgfx
 {
 
-byte_t reduce_bits(byte_t data, u8 bitcount)
+byte_t reduce_bitdepth(byte_t data, u8 bitdepth)
 {
 	// convert color bit depths algo:
 	// (bitdepth_a_value * bitdepth_b_max) / bitdepth_a_max = bitdepth_b_value
 	// (we make max + 1 below, to give it greater range and more accurate
 	// translation)
-	return (data * (create_bitmask8(bitcount) + 1)) / 256;
+	return (data * (create_bitmask8(bitdepth) + 1)) / 256;
 }
 
-/**
- * Expands bits to fill out a full byte.
- */
-byte_t expand_bits(byte_t data, u8 bitcount)
+byte_t expand_bitdepth(byte_t data, u8 bitdepth)
 {
 	// shamelessly stolen from MAME
-	if(bitcount == 1)
+	if(bitdepth == 1)
 	{
 		return (data & 1) ? 0xff : 0x00;
 	}
-	if(bitcount == 2)
+	if(bitdepth == 2)
 	{
 		data &= 3;
 		return (data << 6) | (data << 4) | (data << 2) | data;
 	}
-	if(bitcount == 3)
+	if(bitdepth == 3)
 	{
 		data &= 7;
 		return (data << 5) | (data << 2) | (data >> 1);
 	}
-	if(bitcount == 4)
+	if(bitdepth == 4)
 	{
 		data &= 0xf;
 		return (data << 4) | data;
 	}
-	if(bitcount == 5)
+	if(bitdepth == 5)
 	{
 		data &= 0x1f;
 		return (data << 3) | (data >> 2);
 	}
-	if(bitcount == 6)
+	if(bitdepth == 6)
 	{
 		data &= 0x3f;
 		return (data << 2) | (data >> 4);
 	}
-	if(bitcount == 7)
+	if(bitdepth == 7)
 	{
 		data &= 0x7f;
 		return (data << 1) | (data >> 6);
@@ -55,11 +52,6 @@ byte_t expand_bits(byte_t data, u8 bitcount)
 	return data;
 }
 
-/**
- * Returns a 32bit value with the specified number of bits set, starting from
- * the LSB
- * e.g. 5 bits = 0b00011111 = 0x0000001F
- */
 u32 create_bitmask32(u8 bitcount)
 {
 	// max 32 bits
@@ -75,11 +67,7 @@ u32 create_bitmask32(u8 bitcount)
 	}
 	return bitmask;
 }
-/**
- * Returns a 16bit value with the specified number of bits set, starting from
- * the LSB
- * e.g. 5 bits = 0b00011111 = 0x001F
- */
+
 u16 create_bitmask16(u8 bitcount)
 {
 	// max 16 bits
@@ -96,11 +84,6 @@ u16 create_bitmask16(u8 bitcount)
 	return bitmask;
 }
 
-/**
- * Returns an 8bit value with the specified number of bits set, starting from
- * the LSB
- * e.g. 5 bits = 0b00011111 = 0x1F
- */
 u8 create_bitmask8(u8 bitcount)
 {
 	// max 8 bits
@@ -115,12 +98,6 @@ u8 create_bitmask8(u8 bitcount)
 		bitmask |= (bitmask << 1) | 1;
 	}
 	return bitmask;
-}
-
-u32 reverse_32(u32 value)
-{
-	return ((value & 0x000000ff) << 24) | ((value & 0x0000ff00) << 16) |
-				 ((value & 0x00ff0000) << 8) | ((value & 0x000000ff) << 0);
 }
 
 palette make_pal_random()
@@ -147,9 +124,7 @@ palette make_pal_random()
 	return outpal;
 }
 
-/**
- * Determines the endianness of the local system
- */
+
 bool is_system_bigendian()
 {
 	// shamelessly stolen from stack overflow

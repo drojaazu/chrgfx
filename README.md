@@ -207,9 +207,9 @@ However, the SNES is a little endian system, which means the least significant b
     7|       |0  15|       |8
       GGGRRRRR      xBBBBBGG
 
-It's important to specify if the color data is little or big endian so it can be properly processed on the local machine .
+It's important to specify if the color data is little or big endian so it can be properly processed on the local machine.
 
-(It's important to note that endianness does not matter in memory. Data is always stored with most significant bits to the "left" and less significant bits to the "right." Endianness only matters in data stored as a file, with which we are obviously working.)
+(It's also important to note that endianness does not matter while in memory. Data is always stored with most significant bits to the "left" and less significant bits to the "right." Endianness only matters as data stored in a file, with which we are obviously working.)
 
 Note that a color data is only for devices which have colors with RGB components. Hardware that uses YIQ or other such non-RGB colorspaces will need a pre-defined palette of color approximations.
 

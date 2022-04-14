@@ -138,7 +138,7 @@ Something to note, however, is that the indexed PNGs (i.e. PNGs using a palette 
 `converter_to`, `converter_from` - (Optional) Specifies the internal conversion functions to use; **this is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
 
 ### Color Definitions (coldef)
-Colors are derived in one of two ways. The first method calculates a color using RGB values specified by the size and position of each color channel within the data. This works for hardware that natively uses RGB colorspace. For hardware which does not, the second method is used. This involves mapping all possible color values to approximate RGB values in a reference table.
+Colors are derived in one of two ways. The first method calculates a color using RGB values specified by the size and position of each color channel within the data. This works for hardware that natively uses RGB colorspace. For hardware which does not, the second method is used. This involves mapping all possible colors to approximate RGB values in a reference table.
 
 Here is an example of an RGB definition using the Super Famicom:
 
@@ -161,11 +161,11 @@ Here is an example of an RGB definition using the Super Famicom:
       big_endian 0
     }
 
-The basic algorithm works by shifting and masking the component data. Therefore we specify the size of the data for each component and its position relative to the least significant bit. You can visualize this with the bit layout in the comments above. There are five bits of red, which are natually positioned at the LSB, so the shift is 0. There are five bits of green, which need to be shifted 5 bits to the right to arrive at the LSB. Finally, blue is 5 bits as well, shifted 10 bits to the right.
+The basic algorithm works by shifting the channel bitsand masking the component data. Therefore we specify the size of the data for each component and its position relative to the least significant bit. You can visualize this with the bit layout in the comments above. There are five bits of red, which are natually positioned at the LSB, so the shift is 0. There are five bits of green, which need to be shifted 5 bits to the right to arrive at the LSB. Finally, blue is 5 bits as well, shifted 10 bits to the right.
 
 This is fine for simple layouts with single blocks of sequential data, like the Super Famicom, but let's look at the definition for the Neo-Geo next:
 
-    coldef
+    rgbcoldef
     {
       id col_snk_neogeo
       comment SNK NeoGeo
@@ -192,8 +192,7 @@ It is imperative that each color channel size/shift specifiers have a number of 
 
 Reference tables are much easier to understand and define. As an example, the original Nintendo Famicom uses the YIQ color space and encodes the colors directly into the TV signal. With 64 colors available, we need to provide an RGB value that approximates the original perceived color for each of those entries.
 
-
-    coldef
+    refcoldef
     {
       id col_nintendo_fc
       comment Nintendo Famicom
@@ -208,8 +207,6 @@ Reference tables are much easier to understand and define. As an example, the or
 (The full list of 64 colors was abridged here for readability.)
 
 The first entry will correspond to value 0, the next to value 1, and so on.
-
-To be clear, **you should not use a reftab AND a color definition.** It's one or the other. If for some reason both are specified, the reftab takes precedence.
 
 ### coldef reference
 

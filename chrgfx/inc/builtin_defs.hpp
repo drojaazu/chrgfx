@@ -19,26 +19,25 @@ namespace chrgfx
  * You can add your own built-in definitions here to create a customized
  * library for specific applications.
  */
-namespace defs
+namespace gfxdefs
 {
 
 /**
- * Minimal, generic CHR format
- * 1bpp 8x8
+ * @brief Minimal, generic CHR format (1bpp 8x8)
  */
 extern chrdef basic_8x8_1bpp;
 
 /**
- * Generates random 8bit RGB values
+ * @brief Randomized 8 bit color palette
  */
 extern refcoldef basic_8bit_random;
 
 /**
- * Generic 8bit (256 color) palette
+ * @brief Generic 8 bit (256 color) palette
  */
 extern paldef basic_256color;
 
-} // namespace defs
+} // namespace gfxdefs
 } // namespace chrgfx
 
 #endif

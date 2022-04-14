@@ -23,56 +23,66 @@ buffer<byte_t> png_chunk(chrdef const & chrdef,
 	// --- for each chr column
 	// ---- read curr pixel row 8 pixels, store into output vector of chrs
 
-	// store the chr dimensions locally
-	uint chr_pxlwidth { (chrdef.width()) }, chr_pxlheight { chrdef.height() };
+	size_t const
+			// chr pixel dimensions
+			chr_pxlwidth { chrdef.width() },
+			chr_pxlheight { chrdef.height() },
+			chr_datasize { chr_pxlwidth * chr_pxlheight },
 
-	// get image dimensions in tile size & final tile count
-	uint const img_row_chr { bitmap.get_width() / chr_pxlwidth };
-	uint const img_col_chr { bitmap.get_height() / chr_pxlheight };
-	uint const chr_count { img_row_chr * img_col_chr };
+			// input image dimensions (in tiles)
+			img_chrwidth { bitmap.get_width() / chr_pxlwidth },
+			img_chrheight { bitmap.get_height() / chr_pxlheight },
+			img_row_pxlwidth { bitmap.get_width() },
+			chr_count { img_chrwidth * img_chrheight },
 
-	buffer<byte_t> out(chr_count);
-	// std::fill(outbank.begin(), outbank.end(), uptr<u8>(new u8[chrw * chrh]));
-	// for(size_t make_outchr_iter { 0 }; make_outchr_iter < chr_count;
-	//		++make_outchr_iter)
-	//	out.push_back(uptr<byte_t>(new byte_t[chr_pxlwidth * chr_pxlheight]));
+			chrrow_datasize { chr_datasize * img_chrwidth };
 
-	// TODO rework these iters so it's more efficient in the loop
-	auto chr_row_iter { out.begin() };
-	auto out_chr_iter_relative { out.begin() };
-
-	// temp vector holding the pixels from the current bmp row
-	auto this_bmprow = vector<index_pixel>();
+	buffer<byte_t> out(chr_count * chr_datasize);
 
 	// iters and counters
-	size_t img_col_pxl { 0 }, // tracks the current pixel row in the source bitmap
-			chrrow_iter { 0 }, pxlrow_iter { 0 }, col_chr_iter { 0 },
-			chrcol_iter { 0 };
+	size_t i_in_pxlrow { 0 }, // tracks the current pixel row in the source bitmap
+			i_chrrow { 0 }, i_chr_pxlrow { 0 }, i_chrcol { 0 }, chrcol_iter { 0 },
+			// offset to start of the pixel row in the next chr from the end of the
+			// previous
+			next_chr { chr_datasize - chr_pxlwidth };
 
-	// for each chr row
-	for(chrrow_iter = 0; chrrow_iter < img_col_chr; ++chrrow_iter)
+	byte_t
+			// pointer to start of current tile row
+			*ptr_out_chrrow { out.data() },
+			// pointer to start of the current pixel row within the current tile row
+			*ptr_out_pxlrow { ptr_out_chrrow },
+			// pointer to the start of the current pixel row within the current tile
+			*ptr_out_pxlchr { ptr_out_pxlrow };
+
+	index_pixel const
+			// pointer to start of the currect pixel row
+			// TODO the underlying structure holding the rows in pixerl_buffer is a
+			// std::vector so the data should be contiguous, shouldn't need to call
+			// get_row and can just advance the pointer
+			* ptr_img_pxlrow { nullptr };
+
+	// for each tile row...
+	for(i_chrrow = 0; i_chrrow < img_chrheight; ++i_chrrow)
 	{
-		// point the out iter to the beginning of the current chr row
-		out_chr_iter_relative = out.begin();
-		out_chr_iter_relative += (chrrow_iter * img_row_chr);
 
-		// for each pxl row in the current chr row
-		for(pxlrow_iter = 0; pxlrow_iter < chr_pxlheight; ++pxlrow_iter)
+		// for each pixel row in the tile row...
+		for(i_chr_pxlrow = 0; i_chr_pxlrow < chr_pxlheight; ++i_chr_pxlrow)
 		{
-			// reset the out iter to the beginning of the row
-			chr_row_iter = out_chr_iter_relative;
 			// point to the next pixel row in the source image
-			auto this_bmprow_ptr { bitmap.get_row(img_col_pxl++).begin() };
+			ptr_img_pxlrow = bitmap.get_row(i_in_pxlrow++).data();
 
-			// for every (chr width) pixels in the pixel row
-			for(col_chr_iter = 0; col_chr_iter < img_row_chr; ++col_chr_iter)
+			// for every (chr width) pixels in the pixel row...
+			for(i_chrcol = 0; i_chrcol < img_chrwidth; ++i_chrcol)
 			{
-				std::copy_n(this_bmprow_ptr + (col_chr_iter * chr_pxlwidth),
-										chr_pxlwidth, chr_row_iter + (pxlrow_iter * chr_pxlwidth));
-				chr_row_iter++;
-				chr_row_iter++;
+				for(auto i = 0; i < chr_pxlwidth; ++i)
+					*ptr_out_pxlchr++ = *ptr_img_pxlrow++;
+				ptr_out_pxlchr += next_chr;
 			}
+
+			ptr_out_pxlchr = ptr_out_pxlrow += chr_pxlwidth;
 		}
+
+		ptr_out_pxlchr = ptr_out_pxlrow = ptr_out_chrrow += chrrow_datasize;
 	}
 
 	return out;

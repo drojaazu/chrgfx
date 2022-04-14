@@ -10,7 +10,7 @@ namespace chrgfx
 {
 
 /**
- * Returns a collection of tiles in the specified chrdef format using the
+ * @brief Returns a collection of tiles in the specified chrdef format using the
  * given bitmap
  */
 buffer<byte_t> png_chunk(chrdef const & chrdef,

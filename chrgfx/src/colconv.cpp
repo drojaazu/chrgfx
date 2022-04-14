@@ -27,9 +27,9 @@ u32 encode_col(rgbcoldef const & rgbcoldef, color const & color)
 
 	u32 out { 0 };
 	u8 bitdepth = rgbcoldef.bitdepth();
-	byte_t red { reduce_bits(color.red, bitdepth) }, red_pass_shift { 0 },
-			green { reduce_bits(color.green, bitdepth) }, green_pass_shift { 0 },
-			blue { reduce_bits(color.blue, bitdepth) }, blue_pass_shift { 0 };
+	byte_t red { reduce_bitdepth(color.red, bitdepth) }, red_pass_shift { 0 },
+			green { reduce_bitdepth(color.green, bitdepth) }, green_pass_shift { 0 },
+			blue { reduce_bitdepth(color.blue, bitdepth) }, blue_pass_shift { 0 };
 
 	u8 bitmask { 0 };
 	u32 temp;
@@ -91,9 +91,9 @@ psuedo:
 		blue_bitcount += this_pass.blue_size();
 	}
 
-	red = expand_bits(red, red_bitcount);
-	green = expand_bits(green, green_bitcount);
-	blue = expand_bits(blue, blue_bitcount);
+	red = expand_bitdepth(red, red_bitcount);
+	green = expand_bitdepth(green, green_bitcount);
+	blue = expand_bitdepth(blue, blue_bitcount);
 
 	return png::color(red, green, blue);
 }

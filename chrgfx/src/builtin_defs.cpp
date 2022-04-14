@@ -9,7 +9,7 @@
 namespace chrgfx
 {
 
-namespace defs
+namespace gfxdefs
 {
 
 /**
@@ -34,7 +34,7 @@ refcoldef basic_8bit_random { "basic_8bit_random", make_pal_random() };
  */
 paldef basic_256color { "basic_256color", 8, 256, 1 };
 
-} // namespace defs
+} // namespace gfxdefs
 } // namespace chrgfx
 
 #endif
