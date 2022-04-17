@@ -383,8 +383,8 @@ chrdef
   height 8
   bpp 4
   planeoffset 0,8,16,24
-  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
-  rowoffset 0, 32, 64, 96, 128, 160, 192, 224
+  pixeloffset 0,1,2,3,4,5,6,7
+  rowoffset 0,32,64,96,128,160,192,224
 }
 
 chrdef
@@ -398,6 +398,17 @@ chrdef
   planeoffset 0,8,128,136
   pixeloffset 0,1,2,3,4,5,6,7
   rowoffset 0,16,32,48,64,80,96,112
+}
+
+chrdef
+{
+  id chr_nintendo_sfc_3bpp
+  comment Nintendo Super Famicom (3BPP)
+  # 8x8 3bpp planar
+  width 8
+  height 8
+  bpp 3
+  converter_from decode_chr_nintendo_sfc_3bpp
 }
 
 chrdef
@@ -437,7 +448,7 @@ chrdef
   width 8
   height 8
   bpp 2
-  planeoffset 8,0
+  planeoffset 0,8
   pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
   rowoffset 0, 16, 32, 48, 64, 80, 96, 112
 }

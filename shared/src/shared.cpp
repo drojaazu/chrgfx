@@ -1,29 +1,44 @@
 #include "shared.hpp"
 
-using std::string;
+using namespace std;
 
 string const GFXDEF_PATH { CONFIG_PATH + "/gfxdefs" };
 string const CONFIG_PATH { "/etc/chrgfx" };
 
-string default_short_opts { ":G:T:C:L:P:" };
+string short_opts { ":G:T:C:L:P:" };
 
-std::vector<option> default_long_opts {
-	{ "gfx-def", required_argument, nullptr, 'G' },
-	{ "chr-def", required_argument, nullptr, 'T' },
-	{ "col-def", required_argument, nullptr, 'C' },
-	{ "pal-def", required_argument, nullptr, 'L' },
-	{ "profile", required_argument, nullptr, 'P' }
+vector<option> long_opts { { "gfx-def", required_argument, nullptr, 'G' },
+													 { "profile", required_argument, nullptr, 'P' },
+													 { "chr-def", required_argument, nullptr, 'T' },
+													 { "col-def", required_argument, nullptr, 'C' },
+													 { "pal-def", required_argument, nullptr, 'L' } };
+
+vector<option_details> opt_details {
+	{ false, L"Path to graphics encoding definitions", L"path" },
+	{ false, L"Graphics profile to use", nullptr },
+	{ false,
+		L"Tile encoding to use; overrides tile encoding in graphics profile "
+		L"(if specified)",
+		nullptr },
+	{ false,
+		L"Color encoding to use; overrides color encoding in graphics "
+		L"profile (if specified)",
+		nullptr },
+	{ false,
+		L"Palette encoding to use; overrides palette encoding in "
+		L"graphics profile (if specified)",
+		nullptr }
 };
 
 bool process_default_args(runtime_config & cfg, int argc, char ** argv)
 {
 	// add the terminating element
-	default_long_opts.push_back({ nullptr, 0, nullptr, 0 });
+	long_opts.push_back({ nullptr, 0, nullptr, 0 });
 
 	while(true)
 	{
-		const auto this_opt = getopt_long(argc, argv, default_short_opts.data(),
-																			default_long_opts.data(), nullptr);
+		const auto this_opt =
+				getopt_long(argc, argv, short_opts.data(), long_opts.data(), nullptr);
 		if(this_opt == -1)
 			break;
 

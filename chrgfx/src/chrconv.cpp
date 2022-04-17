@@ -108,19 +108,6 @@ byte_t * decode_chr(chrdef const & chrdef, byte_t const * encoded_chr,
 			*ptr_pxl_offset { chrdef.pixel_offsets().data() },
 			*ptr_plane_offset { chrdef.plane_offsets().data() };
 
-	/*
-	#ifdef DEBUG
-		std::cerr << "This chr data:" << std::endl;
-		std::cerr << std::hex;
-		for(s16 datadump = 0; datadump < (chrdef->charincrement / 8);
-	++datadump) { std::cerr << std::setw(2) << std::setfill('0') <<
-	(int)data[datadump]
-								<< " ";
-		}
-		std::cerr << std::dec << std::endl << std::endl;
-	#endif
-	*/
-
 	// for every line...
 	for(i_row = 0; i_row < chr_height; ++i_row)
 	{

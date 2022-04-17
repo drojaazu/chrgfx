@@ -10,8 +10,8 @@ namespace APP {
 	static unsigned int const VERSION_PATCH{0};
 	static char const * VERSION{"1.2.0"};
 
-	static char const * NAME{"png2chr"};
-	static char const * CONTACT{"Damian R (damian@motoi.pro)"};
-	static char const * WEBSITE{"https://github.com/drojaazu"};
+	static wchar_t const * NAME{L"png2chr"};
+	static wchar_t const * CONTACT{L"Damian R (damian@motoi.pro)"};
+	static wchar_t const * WEBSITE{L"https://github.com/drojaazu"};
 }
 #endif

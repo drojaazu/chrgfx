@@ -1,23 +1,16 @@
 #ifndef CHRGFX_EXEC_IMPORT_DEFS_H
 #define CHRGFX_EXEC_IMPORT_DEFS_H
 
-#include <algorithm>
-#include <array>
-#include <cerrno>
-#include <fstream>
-#include <map>
-#include <sstream>
-#include <string.h>
-#include <string>
-#include <tuple>
-#include <vector>
-
 #include "chrgfx.hpp"
 #include "defblocks.hpp"
 #include "gfxprofile.hpp"
-#include "shared.hpp"
-#include "vd.hpp"
+#include <map>
+#include <string>
 
+/**
+ * @brief Container for the gfxdefs parsed from the file
+ *
+ */
 struct def_collection
 {
 public:

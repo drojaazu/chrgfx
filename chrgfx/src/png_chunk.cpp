@@ -8,7 +8,7 @@ using namespace png;
 
 namespace chrgfx
 {
-buffer<byte_t> png_chunk(chrdef const & chrdef,
+buffer<byte_t> png_chunk(size_t const tile_width, size_t const tile_height,
 												 pixel_buffer<index_pixel> const & bitmap)
 {
 	// class to chunk an input png into 8x8 chrs
@@ -23,15 +23,18 @@ buffer<byte_t> png_chunk(chrdef const & chrdef,
 	// --- for each chr column
 	// ---- read curr pixel row 8 pixels, store into output vector of chrs
 
+	if(tile_width == 0 || tile_height == 0)
+		throw invalid_argument("Invalid tile dimensions");
+
+	if(bitmap.get_width() < tile_width || bitmap.get_height() < tile_height)
+		throw invalid_argument("Source image too small to form a tile");
+
 	size_t const
 			// chr pixel dimensions
-			chr_pxlwidth { chrdef.width() },
-			chr_pxlheight { chrdef.height() },
-			chr_datasize { chr_pxlwidth * chr_pxlheight },
-
+			chr_datasize { tile_width * tile_height },
 			// input image dimensions (in tiles)
-			img_chrwidth { bitmap.get_width() / chr_pxlwidth },
-			img_chrheight { bitmap.get_height() / chr_pxlheight },
+			img_chrwidth { bitmap.get_width() / tile_width },
+			img_chrheight { bitmap.get_height() / tile_height },
 			img_row_pxlwidth { bitmap.get_width() },
 			chr_count { img_chrwidth * img_chrheight },
 
@@ -44,7 +47,7 @@ buffer<byte_t> png_chunk(chrdef const & chrdef,
 			i_chrrow { 0 }, i_chr_pxlrow { 0 }, i_chrcol { 0 }, chrcol_iter { 0 },
 			// offset to start of the pixel row in the next chr from the end of the
 			// previous
-			next_chr { chr_datasize - chr_pxlwidth };
+			next_chr { chr_datasize - tile_width };
 
 	byte_t
 			// pointer to start of current tile row
@@ -66,7 +69,7 @@ buffer<byte_t> png_chunk(chrdef const & chrdef,
 	{
 
 		// for each pixel row in the tile row...
-		for(i_chr_pxlrow = 0; i_chr_pxlrow < chr_pxlheight; ++i_chr_pxlrow)
+		for(i_chr_pxlrow = 0; i_chr_pxlrow < tile_height; ++i_chr_pxlrow)
 		{
 			// point to the next pixel row in the source image
 			ptr_img_pxlrow = bitmap.get_row(i_in_pxlrow++).data();
@@ -74,12 +77,12 @@ buffer<byte_t> png_chunk(chrdef const & chrdef,
 			// for every (chr width) pixels in the pixel row...
 			for(i_chrcol = 0; i_chrcol < img_chrwidth; ++i_chrcol)
 			{
-				for(auto i = 0; i < chr_pxlwidth; ++i)
+				for(auto i = 0; i < tile_width; ++i)
 					*ptr_out_pxlchr++ = *ptr_img_pxlrow++;
 				ptr_out_pxlchr += next_chr;
 			}
 
-			ptr_out_pxlchr = ptr_out_pxlrow += chr_pxlwidth;
+			ptr_out_pxlchr = ptr_out_pxlrow += tile_width;
 		}
 
 		ptr_out_pxlchr = ptr_out_pxlrow = ptr_out_chrrow += chrrow_datasize;

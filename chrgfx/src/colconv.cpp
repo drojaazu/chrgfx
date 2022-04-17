@@ -1,9 +1,10 @@
 #include "colconv.hpp"
 #include "utils.hpp"
 
+using namespace png;
+
 namespace chrgfx
 {
-using namespace png;
 
 u32 encode_col(rgbcoldef const & rgbcoldef, color const & color)
 {
@@ -57,7 +58,7 @@ u32 encode_col(rgbcoldef const & rgbcoldef, color const & color)
 
 u32 encode_col(refcoldef const & refcoldef, color const & color)
 {
-	return refcoldef.reftabIndex(color);
+	return refcoldef.by_color(color);
 }
 
 color decode_col(rgbcoldef const & rgbcoldef, u32 const color)
@@ -100,7 +101,7 @@ psuedo:
 
 color decode_col(refcoldef const & refcoldef, u32 const color)
 {
-	return refcoldef.reftabColor(color);
+	return refcoldef.by_value(color);
 }
 
 } // namespace chrgfx

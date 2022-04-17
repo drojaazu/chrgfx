@@ -1,9 +1,8 @@
-
-#include "app.hpp"
 #include "chrgfx.hpp"
+#include "filesys.hpp"
 #include "import_defs.hpp"
 #include "shared.hpp"
-
+#include "usage.hpp"
 #include <cerrno>
 #include <getopt.h>
 #include <iostream>
@@ -14,9 +13,7 @@
 #include <chrono>
 #endif
 
-using std::map;
-using std::string;
-using std::vector;
+using namespace std;
 using namespace chrgfx;
 
 bool process_args(int argc, char ** argv);
@@ -27,27 +24,35 @@ struct runtime_config_png2chr : runtime_config
 	string pngdata_name { "" };
 	string chr_outfile { "" };
 	string pal_outfile { "" };
-};
+} cfg;
 
-// option settings
-runtime_config_png2chr cfg;
-
-struct coldef
+void init()
 {
-	rgbcoldef const * p_rgbcoldef { nullptr };
-	refcoldef const * p_refcoldef { nullptr };
-};
+	long_opts.push_back({ "chr-output", required_argument, nullptr, 'c' });
+	long_opts.push_back({ "pal-output", required_argument, nullptr, 'p' });
+	long_opts.push_back({ "png-data", required_argument, nullptr, 'b' });
+	long_opts.push_back({ "help", no_argument, nullptr, 'h' });
+	long_opts.push_back({ 0, 0, 0, 0 });
+	short_opts.append("c:p:b:h");
+
+	opt_details.push_back({ true, L"Path to output encoded tiles", nullptr });
+	opt_details.push_back({ true, L"Path to output encoded palette", nullptr });
+	opt_details.push_back({ true, L"Path to input PNG image", nullptr });
+	opt_details.push_back({ false, L"Display program usage", nullptr });
+}
 
 int main(int argc, char ** argv)
 {
 	try
 	{
+
 #ifdef DEBUG
 		std::chrono::high_resolution_clock::time_point t1 =
 				std::chrono::high_resolution_clock::now();
 #endif
 		try
 		{
+			init();
 			// Runtime State Setup
 			if(process_args(argc, argv))
 			{
@@ -61,17 +66,12 @@ int main(int argc, char ** argv)
 		}
 
 		// set up input data
-		std::ifstream png_file;
-		std::istream & png_data = (cfg.pngdata_name.empty() ? std::cin : png_file);
+		std::ifstream png_fstream;
+		std::istream & png_data =
+				(cfg.pngdata_name.empty() ? std::cin : png_fstream);
+
 		if(!cfg.pngdata_name.empty())
-		{
-			png_file.open(cfg.pngdata_name);
-			if(!png_file.good())
-			{
-				std::cerr << "png-data error: " << std::strerror(errno) << std::endl;
-				return -6;
-			}
-		}
+			png_fstream = ifstream_checked(cfg.pngdata_name.c_str());
 
 		// load definitions
 		auto gfxdefs { load_gfxdefs(cfg.gfxdefs_path) };
@@ -97,10 +97,12 @@ int main(int argc, char ** argv)
 		{
 			chrdef_id = cfg.chrdef_id;
 		}
+
 		if(!cfg.coldef_id.empty())
 		{
 			coldef_id = cfg.coldef_id;
 		}
+
 		if(!cfg.paldef_id.empty())
 		{
 			paldef_id = cfg.paldef_id;
@@ -114,35 +116,33 @@ int main(int argc, char ** argv)
 			return -8;
 		}
 
-		auto chrdef_iter { gfxdefs.chrdefs.find(chrdef_id) };
-		if(chrdef_iter == gfxdefs.chrdefs.end())
+		auto i_find_chrdef { gfxdefs.chrdefs.find(chrdef_id) };
+		if(i_find_chrdef == gfxdefs.chrdefs.end())
 		{
 			std::cerr << "Could not find specified chrdef" << std::endl;
 			return -9;
 		}
 
-		chrdef chrdef { chrdef_iter->second };
+		chrdef chrdef { i_find_chrdef->second };
 
 		// sanity check - coldef not required - if not specified, use default
 		// built-in
 		if(coldef_id.empty())
-		{
 			coldef_id = "basic_8bit_random";
-		}
 
 		chrgfx::coldef * coldef;
 
-		auto rgbcoldef_iter { gfxdefs.rgbcoldefs.find(coldef_id) };
-		if(rgbcoldef_iter != gfxdefs.rgbcoldefs.end())
+		auto i_find_rgbcoldef { gfxdefs.rgbcoldefs.find(coldef_id) };
+		if(i_find_rgbcoldef != gfxdefs.rgbcoldefs.end())
 		{
-			coldef = (chrgfx::coldef *)&rgbcoldef_iter->second;
+			coldef = (chrgfx::coldef *)&i_find_rgbcoldef->second;
 		}
 		else
 		{
-			auto refcoldef_iter { gfxdefs.refcoldefs.find(coldef_id) };
-			if(refcoldef_iter != gfxdefs.refcoldefs.end())
+			auto i_find_refcoldef { gfxdefs.refcoldefs.find(coldef_id) };
+			if(i_find_refcoldef != gfxdefs.refcoldefs.end())
 			{
-				coldef = (chrgfx::coldef *)&refcoldef_iter->second;
+				coldef = (chrgfx::coldef *)&i_find_refcoldef->second;
 			}
 			else
 			{
@@ -158,14 +158,14 @@ int main(int argc, char ** argv)
 			paldef_id = "basic_256color";
 		}
 
-		auto paldef_iter { gfxdefs.paldefs.find(paldef_id) };
-		if(paldef_iter == gfxdefs.paldefs.end())
+		auto i_find_paldef { gfxdefs.paldefs.find(paldef_id) };
+		if(i_find_paldef == gfxdefs.paldefs.end())
 		{
 			std::cerr << "Could not find specified paldef" << std::endl;
 			return -11;
 		}
 
-		paldef paldef { paldef_iter->second };
+		paldef paldef { i_find_paldef->second };
 
 #ifdef DEBUG
 		std::chrono::high_resolution_clock::time_point t2 =
@@ -174,10 +174,10 @@ int main(int argc, char ** argv)
 				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
 		std::cerr << "SETUP: " << duration << "ms" << std::endl;
-		std::cerr << "Using gfxdefs file: " << cfg.gfxdefs_path << std::endl;
-		std::cerr << "Using chrdef '" << chrdef_id << "'" << std::endl;
-		std::cerr << "Using colrdef '" << coldef_id << "'" << std::endl;
-		std::cerr << "Using paldef '" << paldef_id << "'" << std::endl;
+		std::cerr << "  Using gfxdefs file: " << cfg.gfxdefs_path << std::endl;
+		std::cerr << "  Using chrdef '" << chrdef_id << "'" << std::endl;
+		std::cerr << "  Using colrdef '" << coldef_id << "'" << std::endl;
+		std::cerr << "  Using paldef '" << paldef_id << "'" << std::endl;
 #endif
 
 #ifdef DEBUG
@@ -201,8 +201,8 @@ int main(int argc, char ** argv)
 		// deal with tiles first
 		if(!cfg.chr_outfile.empty())
 		{
-			buffer<byte_t> png_chunk { chrgfx::png_chunk(chrdef,
-																									 in_img.get_pixbuf()) };
+			buffer<byte_t> png_chunk { chrgfx::png_chunk(
+					chrdef.width(), chrdef.height(), in_img.get_pixbuf()) };
 
 #ifdef DEBUG
 			t2 = std::chrono::high_resolution_clock::now();
@@ -305,13 +305,6 @@ int main(int argc, char ** argv)
 
 bool process_args(int argc, char ** argv)
 {
-	default_long_opts.push_back(
-			{ "chr-output", required_argument, nullptr, 'c' });
-	default_long_opts.push_back(
-			{ "pal-output", required_argument, nullptr, 'p' });
-	default_long_opts.push_back({ "png-data", required_argument, nullptr, 'b' });
-	default_long_opts.push_back({ "help", no_argument, nullptr, 'h' });
-	default_short_opts.append("c:p:b:h");
 
 	bool default_processed = process_default_args(cfg, argc, argv);
 
@@ -323,8 +316,8 @@ bool process_args(int argc, char ** argv)
 
 	while(true)
 	{
-		const auto this_opt = getopt_long(argc, argv, default_short_opts.data(),
-																			default_long_opts.data(), nullptr);
+		const auto this_opt =
+				getopt_long(argc, argv, short_opts.data(), long_opts.data(), nullptr);
 		if(this_opt == -1)
 			break;
 
@@ -347,13 +340,19 @@ bool process_args(int argc, char ** argv)
 
 			// help
 			case 'h':
-				print_help();
+				show_usage(long_opts.data(), opt_details.data());
 				return true;
 		}
 	}
 	return false;
 }
 
+void print_help()
+{
+	show_usage(long_opts.data(), opt_details.data());
+}
+
+/*
 void print_help()
 {
 	std::cerr << APP::NAME << " - ver " << APP::VERSION << std::endl << std::endl;
@@ -388,3 +387,4 @@ void print_help()
 						<< std::endl;
 	std::cerr << "  --help, -h         Display this text" << std::endl;
 }
+*/

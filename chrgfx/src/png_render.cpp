@@ -10,27 +10,29 @@ using namespace png;
 namespace chrgfx
 {
 
-pixel_buffer<index_pixel> render(chrdef const & chrdef,
+pixel_buffer<index_pixel> render(size_t const tile_width,
+																 size_t const tile_height,
 																 buffer<byte_t> const & chrdata,
 																 render_config const & rcfg)
 {
-	if(chrdata.size() < (chrdef.datasize() >> 3))
+
+	if(tile_width == 0 || tile_height == 0)
+		throw invalid_argument("Invalid tile dimensions");
+
+	size_t const chr_datasize { tile_width * tile_height };
+
+	if(chrdata.size() < (chr_datasize))
 		throw invalid_argument("Not enough data in buffer to render a tile");
 
 	size_t const
-			// chr pixel dimensions
-			chr_pxlwidth { chrdef.width() },
-			chr_pxlheight { chrdef.height() },
-			chr_datasize { chr_pxlwidth * chr_pxlheight },
-
 			// number of tiles in the final image
 			chr_count { chrdata.size() / chr_datasize },
 
 			// excess tiles in the final row
-			final_chrrow_excess { chr_count % rcfg.columns },
+			final_chrrow_excess { chr_count % rcfg.row_size },
 
 			// final image dimensions (in chrs)
-			outimg_chrwidth { rcfg.columns },
+			outimg_chrwidth { rcfg.row_size },
 			outimg_chrheight { chr_count / outimg_chrwidth +
 												 (final_chrrow_excess > 0 ? 1 : 0) },
 
@@ -46,9 +48,8 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef,
 			// outimg_pxlwidth { (outimg_chrwidth * chr_pxlwidth) + border_pixel_width
 			// }, outimg_pxlheight { (outimg_chrheight * chr_pxlheight) +
 			//									 border_pixel_height };
-			outimg_pxlwidth { (outimg_chrwidth * chr_pxlwidth) + border_pxlwidth },
-			outimg_pxlheight { (outimg_chrheight * chr_pxlheight) +
-												 border_pxlheight };
+			outimg_pxlwidth { (outimg_chrwidth * tile_width) + border_pxlwidth },
+			outimg_pxlheight { (outimg_chrheight * tile_height) + border_pxlheight };
 
 	pixel_buffer<index_pixel> out_pxlbuffer(outimg_pxlwidth, outimg_pxlheight);
 
@@ -67,7 +68,7 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef,
 			this_chrrow_chrcount { outimg_chrwidth },
 			// offset to start of the pixel row in the next chr from the end of the
 			// previous
-			next_chr { chr_datasize - chr_pxlwidth };
+			next_chr { chr_datasize - tile_width };
 
 	// the pixel row which will hold the amalgamated tile pixel rows
 	vector<index_pixel> pxlrow_work(outimg_pxlwidth, rcfg.trns_index);
@@ -108,7 +109,7 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef,
 			out_pxlbuffer.put_row(i_out_pxlrow++, pxlrow_work);
 
 		// for each pixel row in the tile row...
-		for(i_chr_pxlrow = 0; i_chr_pxlrow < chr_pxlheight; ++i_chr_pxlrow)
+		for(i_chr_pxlrow = 0; i_chr_pxlrow < tile_height; ++i_chr_pxlrow)
 		{
 
 			// for each tile in the row...
@@ -121,7 +122,7 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef,
 
 				// not bothering with std::copy/etc when it's so simple to do it this
 				// way...
-				for(auto i = 0; i < chr_pxlwidth; ++i)
+				for(auto i = 0; i < tile_width; ++i)
 					*ptr_pxlrow_work++ = *ptr_in_pxlchr++;
 
 				ptr_in_pxlchr += next_chr;
@@ -137,7 +138,7 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef,
 				*ptr_pxlrow_work++ = rcfg.trns_index;
 			ptr_pxlrow_work -= outimg_pxlwidth;
 
-			ptr_in_pxlchr = ptr_in_pxlrow += chr_pxlwidth;
+			ptr_in_pxlchr = ptr_in_pxlrow += tile_width;
 		}
 
 		ptr_in_pxlchr = ptr_in_pxlrow = ptr_in_chrrow += chrrow_datasize;
@@ -146,15 +147,16 @@ pixel_buffer<index_pixel> render(chrdef const & chrdef,
 	return out_pxlbuffer;
 }
 
-image<index_pixel> png_render(chrdef const & chrdef,
+image<index_pixel> png_render(size_t const tile_width, size_t const tile_height,
 															buffer<byte_t> const & chrdata,
-															palette const & pal, render_config const & rcfg)
+															png::palette const & pal,
+															render_config const & rcfg)
 {
 	if(pal.size() < 256)
 		throw invalid_argument(
 				"Palette must contain a full 256 entries for PNG export");
 
-	auto pixbuf { render(chrdef, chrdata, rcfg) };
+	auto pixbuf { render(tile_width, tile_height, chrdata, rcfg) };
 
 	image<index_pixel> outimg(pixbuf.get_width(), pixbuf.get_height());
 	outimg.set_pixbuf(pixbuf);

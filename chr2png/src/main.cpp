@@ -28,6 +28,33 @@ struct runtime_config_chr2png : runtime_config
 	string out_path;
 } cfg;
 
+void init()
+{
+	long_opts.push_back({ "chr-data", required_argument, nullptr, 'c' });
+	long_opts.push_back({ "pal-data", required_argument, nullptr, 'p' });
+	long_opts.push_back({ "trns", no_argument, nullptr, 't' });
+	long_opts.push_back({ "trns-index", required_argument, nullptr, 'i' });
+	long_opts.push_back({ "border", no_argument, nullptr, 'b' });
+	long_opts.push_back({ "row-size", required_argument, nullptr, 'r' });
+	long_opts.push_back({ "output", required_argument, nullptr, 'o' });
+	long_opts.push_back({ "help", no_argument, nullptr, 'h' });
+	long_opts.push_back({ 0, 0, 0, 0 });
+	short_opts.append("ti:bd:c:p:s:o:h");
+
+	opt_details.push_back({ false, L"Path to input encoded tiles", nullptr });
+	opt_details.push_back({ false, L"Path to input encoded palette", nullptr });
+	opt_details.push_back({ false, L"Use palette transparency", nullptr });
+	opt_details.push_back(
+			{ false, L"Palette index to use for transparency", nullptr });
+	opt_details.push_back({ false,
+													L"Draw a 1 pixel border around tiles in output image",
+													nullptr });
+	opt_details.push_back(
+			{ false, L"Number of tiles per row in output image", nullptr });
+	opt_details.push_back({ false, L"Path to output PNG image", nullptr });
+	opt_details.push_back({ false, L"Display program usage", nullptr });
+}
+
 int main(int argc, char ** argv)
 {
 	try
@@ -39,6 +66,7 @@ int main(int argc, char ** argv)
 		try
 		{
 			// Runtime State Setup
+			init();
 			if(process_args(argc, argv))
 			{
 				return 0;
@@ -51,11 +79,10 @@ int main(int argc, char ** argv)
 			return -5;
 		}
 
-		// see if we even have good input before moving on
+		// see if we have good input before moving on
 		ifstream chrdata { ifstream_checked(cfg.chrdata_name.c_str()) };
 
 		// load definitions
-		// TODO just uh make this a struct...
 		auto gfxdefs { load_gfxdefs(cfg.gfxdefs_path) };
 
 		string chrdef_id, coldef_id, paldef_id;
@@ -91,14 +118,14 @@ int main(int argc, char ** argv)
 			return -8;
 		}
 
-		auto chrdef_iter { gfxdefs.chrdefs.find(chrdef_id) };
-		if(chrdef_iter == gfxdefs.chrdefs.end())
+		auto i_find_chrdef { gfxdefs.chrdefs.find(chrdef_id) };
+		if(i_find_chrdef == gfxdefs.chrdefs.end())
 		{
 			std::cerr << "Could not find specified chrdef" << std::endl;
 			return -9;
 		}
 
-		chrgfx::chrdef chrdef { chrdef_iter->second };
+		chrgfx::chrdef chrdef { i_find_chrdef->second };
 
 		// sanity check - coldef not required - if not specified, use default
 		// built-in
@@ -107,19 +134,19 @@ int main(int argc, char ** argv)
 			coldef_id = "basic_8bit_random";
 		}
 
-		coldef * coldef;
+		chrgfx::coldef * coldef;
 
-		auto rgbcoldef_iter { gfxdefs.rgbcoldefs.find(coldef_id) };
-		if(rgbcoldef_iter != gfxdefs.rgbcoldefs.end())
+		auto i_find_rgbcoldef { gfxdefs.rgbcoldefs.find(coldef_id) };
+		if(i_find_rgbcoldef != gfxdefs.rgbcoldefs.end())
 		{
-			coldef = (chrgfx::coldef *)&rgbcoldef_iter->second;
+			coldef = (chrgfx::coldef *)&i_find_rgbcoldef->second;
 		}
 		else
 		{
-			auto refcoldef_iter { gfxdefs.refcoldefs.find(coldef_id) };
-			if(refcoldef_iter != gfxdefs.refcoldefs.end())
+			auto i_find_refcoldef { gfxdefs.refcoldefs.find(coldef_id) };
+			if(i_find_refcoldef != gfxdefs.refcoldefs.end())
 			{
-				coldef = (chrgfx::coldef *)&refcoldef_iter->second;
+				coldef = (chrgfx::coldef *)&i_find_refcoldef->second;
 			}
 			else
 			{
@@ -210,21 +237,12 @@ int main(int argc, char ** argv)
 		{
 			ifstream paldata { ifstream_checked(cfg.paldata_name.c_str()) };
 
-			// get the size of the palette data
-			paldata.seekg(0, paldata.end);
-			long length { paldata.tellg() };
-
-			// TODO: work on a less grody way to do checks on palette data size
-			// should probably develop a wrapper around the data with size, etc
-
-			if(length < (paldef.datasize() / 8))
-			{
-				throw std::invalid_argument("Not enough palette data available");
-			}
-
-			paldata.seekg(0, paldata.beg);
-			byte_t palbuffer[length];
-			paldata.read(palbuffer, length);
+			size_t pal_size = paldef.datasize() / 8;
+			byte_t palbuffer[pal_size];
+			paldata.read(palbuffer, pal_size);
+			if(paldata.gcount() > pal_size)
+				throw std::invalid_argument(
+						"Input palette data too small to form a valid palette");
 
 			workpal = decode_pal(paldef, *coldef, palbuffer);
 		}
@@ -246,7 +264,8 @@ int main(int argc, char ** argv)
 #endif
 
 		png::image<png::index_pixel> outimg { png_render(
-				chrdef, out_buffer, workpal, cfg.rendertraits) };
+				chrdef.width(), chrdef.height(), out_buffer, workpal,
+				cfg.rendertraits) };
 
 #ifdef DEBUG
 		t2 = std::chrono::high_resolution_clock::now();
@@ -286,18 +305,6 @@ int main(int argc, char ** argv)
 
 bool process_args(int argc, char ** argv)
 {
-	default_long_opts.push_back({ "trns", no_argument, nullptr, 't' });
-	default_long_opts.push_back(
-			{ "trns-index", required_argument, nullptr, 'i' });
-	default_long_opts.push_back({ "border", no_argument, nullptr, 'b' });
-	default_long_opts.push_back({ "columns", required_argument, nullptr, 'd' });
-	default_long_opts.push_back({ "chr-data", required_argument, nullptr, 'c' });
-	default_long_opts.push_back({ "pal-data", required_argument, nullptr, 'p' });
-	default_long_opts.push_back(
-			{ "subpalette", required_argument, nullptr, 's' });
-	default_long_opts.push_back({ "output", required_argument, nullptr, 'o' });
-	default_long_opts.push_back({ "help", no_argument, nullptr, 'h' });
-	default_short_opts.append("ti:bd:c:p:s:o:h");
 
 	bool default_processed = process_default_args(cfg, argc, argv);
 
@@ -309,8 +316,8 @@ bool process_args(int argc, char ** argv)
 
 	while(true)
 	{
-		const auto this_opt = getopt_long(argc, argv, default_short_opts.data(),
-																			default_long_opts.data(), nullptr);
+		const auto this_opt =
+				getopt_long(argc, argv, short_opts.data(), long_opts.data(), nullptr);
 		if(this_opt == -1)
 			break;
 
@@ -352,7 +359,7 @@ bool process_args(int argc, char ** argv)
 			case 'd':
 				try
 				{
-					cfg.rendertraits.columns = std::stoi(optarg);
+					cfg.rendertraits.row_size = std::stoi(optarg);
 				}
 				catch(const std::invalid_argument & e)
 				{
@@ -374,34 +381,4 @@ bool process_args(int argc, char ** argv)
 	return false;
 }
 
-void print_help()
-{
-	std::cout << APP::NAME << " - ver " << APP::VERSION << std::endl << std::endl;
-	std::cout << "Valid options:" << std::endl;
-	std::cout << "  --gfx-def, -G   Specify graphics data format" << std::endl;
-	std::cout
-			<< "  --chr-def, -C   Specify tile data format (overrides tile format "
-				 "in gfx-def)"
-			<< std::endl;
-	std::cout << "  --chr-data, -c     Filename to input tile data" << std::endl;
-	std::cout
-			<< "  --pal-def, -P   Specify palette data format (overrides palette "
-				 "format in gfx-def)"
-			<< std::endl;
-	std::cout << "  --pal-data, -p     Filename to input palette data"
-						<< std::endl;
-	std::cout << "  --output, -o       Specify output PNG image filename"
-						<< std::endl;
-	std::cout << "  --trns, -t         Use image transparency" << std::endl;
-	std::cout << "  --border, -b       Draw 1 pixel border around tiles"
-						<< std::endl;
-	std::cout
-			<< "  --trns-index, -i   Specify palette entry to use as transparency "
-				 "(default is 0)"
-			<< std::endl;
-	std::cout
-			<< "  --columns, -c      Specify number of columns per row of tiles in "
-				 "output image"
-			<< std::endl;
-	std::cout << "  --help, -h         Display this text" << std::endl;
-}
+void print_help() {}

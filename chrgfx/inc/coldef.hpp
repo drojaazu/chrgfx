@@ -8,6 +8,7 @@
 
 namespace chrgfx
 {
+
 enum coldef_type
 {
 	ref,
@@ -16,7 +17,6 @@ enum coldef_type
 
 /**
  * @brief Abstract class for color encodings
- *
  */
 class coldef : public gfxdef
 {
@@ -27,15 +27,14 @@ public:
 	coldef_type type() const;
 
 protected:
-	coldef_type m_type;
-	const bool m_big_endian;
+	coldef_type const m_type;
+	bool const m_big_endian;
 
-	coldef(std::string const & id, coldef_type type, bool const big_endian);
+	coldef(std::string const & id, coldef_type const type, bool const big_endian);
 };
 
 /**
  * @brief Non-RGB (reftab based) color encoding
- *
  */
 class refcoldef : public coldef
 {
@@ -46,13 +45,13 @@ public:
 	/**
 	 * @return color color from the reference palette for the given index
 	 */
-	png::color reftabColor(ushort index) const;
+	png::color by_value(ushort index) const;
 
 	/**
 	 * @return index to the color matching the RGB value provided, or
 	 * the index to the nearest matching color
 	 */
-	ushort reftabIndex(png::color rgb) const;
+	ushort by_color(png::color rgb) const;
 
 	png::palette const & reftab() const;
 

@@ -1,10 +1,10 @@
 #ifndef __MOTOI__DEFBLOCKS_H
 #define __MOTOI__DEFBLOCKS_H
 
+#include <istream>
 #include <map>
 #include <stdexcept>
 #include <string>
-#include <istream>
 
 class defblock_key_error : public std::runtime_error
 {
@@ -13,7 +13,6 @@ public:
 										 char const * block_id = nullptr);
 
 	char const * key() const;
-
 	char const * block() const;
 
 private:
@@ -35,10 +34,6 @@ private:
 };
 
 typedef std::map<std::string const, std::string const> defblock;
-
-std::string ltrim(std::string const & s);
-std::string rtrim(std::string const & s);
-std::string trim(std::string const & s);
 
 std::multimap<std::string const, defblock const>
 load_defblocks(std::istream & in);

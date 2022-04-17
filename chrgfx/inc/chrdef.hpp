@@ -76,14 +76,11 @@ protected:
 	ushort const m_width;
 	ushort const m_height;
 	ushort const m_bitdepth;
+	ushort const m_datasize;
 
 	std::vector<ushort> m_planeoffsets;
-
 	std::vector<ushort> m_pixeloffsets;
-
 	std::vector<ushort> m_rowoffsets;
-
-	ushort const m_datasize;
 };
 
 } // namespace chrgfx

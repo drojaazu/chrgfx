@@ -17,12 +17,12 @@ refcoldef::refcoldef(string const & id, palette const & reftab,
 		coldef(id, ref, big_endian),
 		m_reftab(reftab) {};
 
-color refcoldef::reftabColor(ushort index) const
+color refcoldef::by_value(ushort index) const
 {
 	return m_reftab[index];
 };
 
-ushort refcoldef::reftabIndex(color rgb) const
+ushort refcoldef::by_color(color rgb) const
 {
 	size_t idx { 0 };
 	for(auto & this_color : m_reftab)
