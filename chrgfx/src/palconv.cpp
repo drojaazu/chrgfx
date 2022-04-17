@@ -106,11 +106,6 @@ byte_t * encode_pal(paldef const & paldef, coldef const & coldef,
 			this_entry |= out[byte_align_pos];
 		}
 
-		// color entries are one byte_t or larger
-		// for(size_t s { 0 }; s < entry_datasize_bytes; ++s)
-		//{
-		//	entry_temp[s] = (this_entry >> (s * 8)) & 0xff;
-		//}
 		copyfunc((char *)&this_entry, ((char *)&this_entry) + entry_datasize_bytes,
 						 (char *)out_ptr);
 
@@ -119,10 +114,6 @@ byte_t * encode_pal(paldef const & paldef, coldef const & coldef,
 
 		byte_align_pos += entry_datasize;
 	}
-	// account for subpalette size
-	// (really only needed when subpal data size > data size of all entries)
-	// outdata_bit_ptr += (subpal_datasize - (entry_datasize * subpal_length));
-	//	}
 
 	return out;
 }
@@ -144,27 +135,6 @@ palette decode_pal(paldef const & paldef, coldef const & coldef,
 			subpal_datasize_bytes { (unsigned)(paldef.datasize() >> 3) },
 			// total number of entries in a subpalette
 			subpal_length { paldef.pal_length() };
-	// total number of subpalettes available in the given palette
-	// subpal_count { palette.size() / subpal_length };
-
-	// NOTE: not using subpals anymore - a palette for our sake is one that
-	// applies on a single chr so the user will need to provide a pointer to the
-	// data within the system palette data block
-
-	/*
-		if(subpal_count == 0)
-		{
-			throw invalid_argument(
-					"Not enough entries within the given basic palette to create a "
-					"subpalette with the given paldef");
-		}
-
-		if(subpal_idx >= subpal_count)
-		{
-			throw out_of_range("Requested subpalette index beyond the range of the "
-												 "given palette data");
-		}
-	*/
 
 	// used to copy the color entry bytes into a temp array
 	// to be cast as a machine-native u32
@@ -205,9 +175,6 @@ palette decode_pal(paldef const & paldef, coldef const & coldef,
 	png::palette out(256, color { 0, 0, 0 });
 	// out.reserve(subpal_length);
 
-	// auto paldata_iter { palette.begin() + (subpal_idx * subpal_datasize_bytes)
-	// };
-	//  auto paldata_end { paldata_iter + subpal_datasize_bytes };
 	auto paldata_iter = palette;
 
 	// processing loop
@@ -222,7 +189,7 @@ palette decode_pal(paldef const & paldef, coldef const & coldef,
 		// in that we are copying the same byte_t multiple times
 		// (e.g. a 2 bit palette will work with the same byte_t 4 times)
 		// however, trying to account for this would require additional code
-		// complexity that would likely outweigh simply recopying a single byte
+		// complexity that would likely outweigh recopying a single byte
 		// a few times...
 
 		// copy all data for one color entry into the temp buffer

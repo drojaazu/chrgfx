@@ -3,6 +3,7 @@
 #include "import_defs.hpp"
 #include "shared.hpp"
 #include "usage.hpp"
+#include "parsing.hpp"
 #include <cerrno>
 #include <getopt.h>
 #include <iostream>

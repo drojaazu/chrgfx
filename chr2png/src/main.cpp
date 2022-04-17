@@ -2,8 +2,8 @@
 #include "chrgfx.hpp"
 #include "filesys.hpp"
 #include "import_defs.hpp"
+#include "parsing.hpp"
 #include "shared.hpp"
-
 #include <cerrno>
 #include <getopt.h>
 #include <iostream>
@@ -84,6 +84,28 @@ int main(int argc, char ** argv)
 
 		// load definitions
 		auto gfxdefs { load_gfxdefs(cfg.gfxdefs_path) };
+
+		// there isn't really an elegant way of dealing with the custom converters
+		// since they do not conform to a function signature or interface, etc. For
+		// now, we represent each of the converters with a unique id (similar to the
+		// ids in the gfxdefs file) and will call them in a case.
+
+		// the converters are, at least, grouped by similar type: converters dealing
+		// with tiles are equivalent to chrdefs, those dealing with palettes are
+		// equivalent to paldefs, etc.
+
+		// The lists below are used to check whether an id specified by the user is
+		// one of the custom converters if it didn't match the ids imported from the
+		// gfxdefs file
+		vector<string> custom_conv_chr { "decode_chr_nintendo_sfc_3bpp" };
+
+		vector<string> custom_conv_pal { "decode_pal_tilelayerpro",
+																		 "encode_pal_tilelayerpro",
+																		 "decode_pal_paintshoppro",
+																		 "encode_pal_paintshoppro" };
+
+		// no custom color converters, yet
+		// vector<string> custom_conv_col {};
 
 		string chrdef_id, coldef_id, paldef_id;
 
@@ -203,9 +225,9 @@ int main(int argc, char ** argv)
 		buffer<byte_t> out_buffer(0);
 
 		/*
-			Some speed testing was done and, somewhat surprisingly, calling append on
-			the buffer repeatedly was a bit faster than creating a large temporary
-			buffer and resizing
+			Some speed testing was done and, somewhat surprisingly, calling append
+			on the buffer repeatedly was a bit faster than creating a large
+			temporary buffer and resizing
 		*/
 		while(1)
 		{

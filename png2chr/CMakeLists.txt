@@ -7,7 +7,6 @@ add_executable(png2chr ${SRCFILES})
 
 target_include_directories(png2chr
 	PUBLIC "${PROJECT_SOURCE_DIR}/shared/src"
-	PUBLIC "${PROJECT_SOURCE_DIR}/chrgfx/src"
 	PUBLIC "${PROJECT_SOURCE_DIR}/chrgfx/inc"
 	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )

@@ -18,7 +18,7 @@ char constexpr KV_DELIM { ' ' };
 defblock_key_error::defblock_key_error(char const * what, char const * key,
 																			 char const * block_id) :
 		m_key(key),
-		m_block_id(block_id), std::runtime_error(what)
+		m_block_id(block_id), runtime_error(what)
 {
 }
 
@@ -45,14 +45,14 @@ char const * defblock_value_error::value() const
 	return m_value;
 }
 
-defblock parse_defblock(std::istream & in)
+defblock parse_defblock(istream & in)
 {
 	if(!in.good())
 		throw runtime_error("Could not read from defblock stream");
 
 	string opener_check;
-	std::getline(in, opener_check);
-	std::replace(opener_check.begin(), opener_check.end(), '\t', ' ');
+	getline(in, opener_check);
+	replace(opener_check.begin(), opener_check.end(), '\t', ' ');
 	trim(opener_check);
 
 	if(opener_check[0] != BLOCK_OPENER || opener_check.size() != 1)
@@ -62,9 +62,9 @@ defblock parse_defblock(std::istream & in)
 
 	defblock out;
 
-	while(std::getline(in, this_line))
+	while(getline(in, this_line))
 	{
-		std::replace(this_line.begin(), this_line.end(), '\t', ' ');
+		replace(this_line.begin(), this_line.end(), '\t', ' ');
 		trim(this_line);
 		if(this_line == "" || this_line[0] == COMMENT_MARKER)
 		{
@@ -92,7 +92,7 @@ defblock parse_defblock(std::istream & in)
 	return out;
 }
 
-std::multimap<string const, defblock const> load_defblocks(istream & in)
+multimap<string const, defblock const> load_defblocks(istream & in)
 {
 	if(!in.good())
 		throw runtime_error("Could not read from defblock stream");

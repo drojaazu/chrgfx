@@ -6,11 +6,10 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/app.hpp.cfg" "${CMAKE_CURRENT_SO
 add_executable(chr2png ${SRCFILES})
 
 target_include_directories(chr2png
-	PUBLIC "${PROJECT_SOURCE_DIR}/shared/src/"
 	PUBLIC "${PROJECT_SOURCE_DIR}/shared/src"
-	PUBLIC "${PROJECT_SOURCE_DIR}/chrgfx/src"
 	PUBLIC "${PROJECT_SOURCE_DIR}/chrgfx/inc"
 	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
+
 
 target_link_libraries(chr2png LINK_PUBLIC chrgfx)

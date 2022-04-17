@@ -1,6 +1,7 @@
 #include "custom.hpp"
 #include "chrconv.hpp"
 #include "chrdef.hpp"
+#include "parsing.hpp"
 #include <algorithm>
 #include <iostream>
 #include <stdexcept>
@@ -55,7 +56,7 @@ palette decode_pal_tilelayerpro(istream & tpl_palette)
 	if(tpl_palette.eof())
 		throw invalid_argument("Reached EOF before reading file header");
 
-	if(buffer[0] != 0x54 || buffer[1] != 0x50 || buffer[2] != 0x4c)
+	if(buffer[0] != 'T' || buffer[1] != 'P' || buffer[2] != 'L')
 		throw invalid_argument("Invalid TileLayer Pro palette (invalid header)");
 
 	if(tpl_palette.get() != 0)
@@ -76,6 +77,20 @@ palette decode_pal_tilelayerpro(istream & tpl_palette)
 	return out;
 };
 
+void encode_pal_tilelayerpro(palette const & palette, ostream & output)
+{
+	if(!output.good())
+		throw runtime_error("Output palette is not in a good state");
+
+	output << "TPL";
+	output << (char)0;
+	for(auto const & col : palette)
+	{
+		output << col.red << col.green << col.blue;
+	}
+	output.flush();
+}
+
 palette decode_pal_paintshoppro(istream & psp_palette)
 {
 	/*
@@ -94,20 +109,20 @@ palette decode_pal_paintshoppro(istream & psp_palette)
 
 	if(!getline(psp_palette, line))
 		throw invalid_argument("Could not read file header");
-	line.erase(remove(line.begin(), line.end(), '\r'), line.end());
+	strip_cr(line);
 	if(line != "JASC-PAL")
 		throw invalid_argument("Invalid PaintShop Pro palette (invalid header)");
 
 	if(!getline(psp_palette, line))
 		throw invalid_argument("Could not read file version");
-	line.erase(remove(line.begin(), line.end(), '\r'), line.end());
+	strip_cr(line);
 	if(line != "0100")
 		throw invalid_argument(
 				"Invalid PaintShop Pro palette (unsupported version)");
 
 	if(!getline(psp_palette, line))
 		throw invalid_argument("Could not read entry count");
-	line.erase(remove(line.begin(), line.end(), '\r'), line.end());
+	strip_cr(line);
 	// TODO catches around this
 	size_t pal_size = stoul(line);
 
@@ -117,10 +132,27 @@ palette decode_pal_paintshoppro(istream & psp_palette)
 	{
 		if(!getline(psp_palette, line))
 			throw invalid_argument("Could not read palette entry");
-		line.erase(remove(line.begin(), line.end(), '\r'), line.end());
+		strip_cr(line);
+
+		auto rgb = stovec<png::byte>(line, ' ');
+		out.push_back({ { rgb[0], rgb[1], rgb[2] } });
 	}
 
 	return out;
+}
+
+void encode_pal_paintshoppro(palette const & palette, ostream & output)
+{
+	if(!output.good())
+		throw runtime_error("Output palette is not in a good state");
+	output << "JASC-PAL" << endl;
+	output << "0100" << endl;
+	output << palette.size() << endl;
+	for(auto const & col : palette)
+	{
+		output << col.red << ' ' << col.green << ' ' << col.blue << endl;
+	}
+	output.flush();
 }
 
 } // namespace custom
