@@ -109,7 +109,7 @@ gfxprofile validate_profile_block(defblock const & def_block)
 	if(mapiter == def_block.end())
 	{
 		throw defblock_key_error("Could not find tile definition in gfxdef profile",
-														 defkeys::PRF_CHRDEF, temp_id.c_str());
+														 defkeys::PRF_CHRDEF, temp_id);
 	}
 	string temp_chrdef { mapiter->second };
 
@@ -117,7 +117,7 @@ gfxprofile validate_profile_block(defblock const & def_block)
 	if(mapiter == def_block.end())
 	{
 		throw defblock_key_error("Could not find color defition in gfxdef profile",
-														 defkeys::PRF_COLDEF, temp_id.c_str());
+														 defkeys::PRF_COLDEF, temp_id);
 	}
 	string temp_coldef { mapiter->second };
 
@@ -126,11 +126,11 @@ gfxprofile validate_profile_block(defblock const & def_block)
 	{
 		throw defblock_key_error(
 				"Could not find palette definition in gfxdef profile",
-				defkeys::PRF_PALDEF, temp_id.c_str());
+				defkeys::PRF_PALDEF, temp_id);
 	}
 	string temp_paldef { mapiter->second };
 
-	return gfxprofile { temp_id.c_str(), temp_chrdef, temp_coldef, temp_paldef };
+	return gfxprofile { temp_id, temp_chrdef, temp_coldef, temp_paldef };
 }
 
 // instead of looping over the pairs, we'll go down each setting of the def
@@ -155,8 +155,7 @@ chrdef validate_chrdef_block(defblock const & def_block)
 	mapiter = def_block.find(defkeys::CHR_WIDTH);
 	if(mapiter == def_block.end())
 	{
-		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::CHR_WIDTH,
-														 temp_id.c_str());
+		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::CHR_WIDTH, temp_id);
 	}
 	auto temp_width { sto_pos<ushort>(mapiter->second) };
 
@@ -165,8 +164,7 @@ chrdef validate_chrdef_block(defblock const & def_block)
 	mapiter = def_block.find(defkeys::CHR_HEIGHT);
 	if(mapiter == def_block.end())
 	{
-		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::CHR_HEIGHT,
-														 temp_id.c_str());
+		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::CHR_HEIGHT, temp_id);
 	}
 	auto temp_height { sto_pos<ushort>(mapiter->second) };
 
@@ -175,15 +173,13 @@ chrdef validate_chrdef_block(defblock const & def_block)
 	mapiter = def_block.find(defkeys::CHR_BPP);
 	if(mapiter == def_block.end())
 	{
-		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::CHR_BPP,
-														 temp_id.c_str());
+		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::CHR_BPP, temp_id);
 	}
 	auto temp_bpp { sto_pos<ushort>(mapiter->second) };
 	if(temp_bpp > 8)
 	{
 		throw defblock_value_error("Value cannot be greater than 8",
-															 to_string(temp_bpp).c_str(), defkeys::CHR_BPP,
-															 temp_id.c_str());
+															 to_string(temp_bpp), defkeys::CHR_BPP, temp_id);
 	}
 
 	// SETTING: planeoffset
@@ -193,14 +189,14 @@ chrdef validate_chrdef_block(defblock const & def_block)
 	if(mapiter == def_block.end())
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::CHR_PLANEOFFSET,
-														 temp_id.c_str());
+														 temp_id);
 	}
 	auto temp_planeoffset { stovec<ushort>(mapiter->second) };
 	if(temp_planeoffset.size() != temp_bpp)
 	{
 		throw defblock_value_error(
 				"planeoffset must have number of entries equal to value of bpp",
-				mapiter->second.c_str(), defkeys::CHR_PLANEOFFSET, temp_id.c_str());
+				mapiter->second, defkeys::CHR_PLANEOFFSET, temp_id);
 	}
 
 	// SETTING: pixeloffset
@@ -210,14 +206,14 @@ chrdef validate_chrdef_block(defblock const & def_block)
 	if(mapiter == def_block.end())
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::CHR_PIXELOFFSET,
-														 temp_id.c_str());
+														 temp_id);
 	}
 	auto temp_pixeloffset { stovec<ushort>(mapiter->second) };
 	if(temp_pixeloffset.size() != temp_width)
 	{
 		throw defblock_value_error(
 				"pixeloffset must have number of entries equal to value of width",
-				mapiter->second.c_str(), defkeys::CHR_PIXELOFFSET, temp_id.c_str());
+				mapiter->second, defkeys::CHR_PIXELOFFSET, temp_id);
 	}
 
 	// SETTING: rowoffset
@@ -227,17 +223,17 @@ chrdef validate_chrdef_block(defblock const & def_block)
 	if(mapiter == def_block.end())
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::CHR_ROWOFFSET,
-														 temp_id.c_str());
+														 temp_id);
 	}
 	auto temp_rowoffset { stovec<ushort>(mapiter->second) };
 	if(temp_rowoffset.size() != temp_height)
 	{
 		throw defblock_value_error(
 				"rowoffset must have number of entries equal to value of height",
-				mapiter->second.c_str(), defkeys::CHR_ROWOFFSET, temp_id.c_str());
+				mapiter->second, defkeys::CHR_ROWOFFSET, temp_id);
 	}
 
-	return chrdef { temp_id.c_str(),	temp_width,				temp_height,	 temp_bpp,
+	return chrdef { temp_id,					temp_width,				temp_height,	 temp_bpp,
 									temp_planeoffset, temp_pixeloffset, temp_rowoffset };
 }
 
@@ -266,8 +262,7 @@ refcoldef validate_refcoldef_block(defblock const & def_block)
 	mapiter = def_block.find(defkeys::COL_REFTAB);
 	if(mapiter == def_block.end())
 	{
-		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_REFTAB,
-														 temp_id.c_str());
+		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_REFTAB, temp_id);
 	}
 
 	png::palette temp_pal;
@@ -277,10 +272,10 @@ refcoldef validate_refcoldef_block(defblock const & def_block)
 	}
 	catch(invalid_argument const & e)
 	{
-		throw defblock_value_error(e.what(), mapiter->second.c_str(),
-															 defkeys::COL_REFTAB, temp_id.c_str());
+		throw defblock_value_error(e.what(), mapiter->second, defkeys::COL_REFTAB,
+															 temp_id);
 	}
-	return refcoldef(temp_id.c_str(), temp_pal, temp_is_big_endian);
+	return refcoldef(temp_id, temp_pal, temp_is_big_endian);
 }
 
 rgbcoldef validate_rgbcoldef_block(defblock const & def_block)
@@ -308,8 +303,7 @@ rgbcoldef validate_rgbcoldef_block(defblock const & def_block)
 	mapiter = def_block.find(defkeys::COL_BITDEPTH);
 	if(mapiter == def_block.end())
 	{
-		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_BITDEPTH,
-														 temp_id.c_str());
+		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_BITDEPTH, temp_id);
 	}
 	auto temp_bitdepth { sto_pos<ushort>(mapiter->second) };
 
@@ -327,7 +321,7 @@ rgbcoldef validate_rgbcoldef_block(defblock const & def_block)
 	if(mapiter == def_block.end())
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_RED_SHIFT,
-														 temp_id.c_str());
+														 temp_id);
 	}
 	auto temp_red_shift { stovec<int>(mapiter->second) };
 	if(temp_red_shift.size() != temp_color_passes)
@@ -339,8 +333,7 @@ rgbcoldef validate_rgbcoldef_block(defblock const & def_block)
 	mapiter = def_block.find(defkeys::COL_RED_SIZE);
 	if(mapiter == def_block.end())
 	{
-		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_RED_SIZE,
-														 temp_id.c_str());
+		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_RED_SIZE, temp_id);
 	}
 	auto temp_red_size { stovec<ushort>(mapiter->second) };
 	if(temp_red_size.size() != temp_color_passes)
@@ -353,7 +346,7 @@ rgbcoldef validate_rgbcoldef_block(defblock const & def_block)
 	if(mapiter == def_block.end())
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_GREEN_SHIFT,
-														 temp_id.c_str());
+														 temp_id);
 	}
 	auto temp_green_shift { stovec<int>(mapiter->second) };
 	if(temp_green_shift.size() != temp_color_passes)
@@ -366,7 +359,7 @@ rgbcoldef validate_rgbcoldef_block(defblock const & def_block)
 	if(mapiter == def_block.end())
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_GREEN_SIZE,
-														 temp_id.c_str());
+														 temp_id);
 	}
 	auto temp_green_size { stovec<ushort>(mapiter->second) };
 	if(temp_green_size.size() != temp_color_passes)
@@ -379,7 +372,7 @@ rgbcoldef validate_rgbcoldef_block(defblock const & def_block)
 	if(mapiter == def_block.end())
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_BLUE_SHIFT,
-														 temp_id.c_str());
+														 temp_id);
 	}
 	auto temp_blue_shift { stovec<int>(mapiter->second) };
 	if(temp_blue_shift.size() != temp_color_passes)
@@ -392,7 +385,7 @@ rgbcoldef validate_rgbcoldef_block(defblock const & def_block)
 	if(mapiter == def_block.end())
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_BLUE_SIZE,
-														 temp_id.c_str());
+														 temp_id);
 	}
 	auto temp_blue_size { stovec<ushort>(mapiter->second) };
 	if(temp_blue_size.size() != temp_color_passes)
@@ -411,8 +404,7 @@ rgbcoldef validate_rgbcoldef_block(defblock const & def_block)
 				{ temp_blue_shift[pass_iter], temp_blue_size[pass_iter] } });
 	}
 
-	return rgbcoldef { temp_id.c_str(), temp_bitdepth, passes,
-										 temp_is_big_endian };
+	return rgbcoldef { temp_id, temp_bitdepth, passes, temp_is_big_endian };
 }
 
 paldef validate_paldef_block(defblock const & def_block)
@@ -434,7 +426,7 @@ paldef validate_paldef_block(defblock const & def_block)
 	if(mapiter == def_block.end())
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::PAL_ENTRY_DATASIZE,
-														 temp_id.c_str());
+														 temp_id);
 	}
 	auto temp_entry_datasize { sto<ushort>(mapiter->second) };
 
@@ -444,7 +436,7 @@ paldef validate_paldef_block(defblock const & def_block)
 	if(mapiter == def_block.end())
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::PAL_SUBPAL_LENGTH,
-														 temp_id.c_str());
+														 temp_id);
 	}
 	auto temp_pal_length { sto<ushort>(mapiter->second) };
 
@@ -457,7 +449,7 @@ paldef validate_paldef_block(defblock const & def_block)
 		temp_pal_datasize = sto<ushort>(mapiter->second);
 	}
 
-	return paldef { temp_id.c_str(), temp_entry_datasize, temp_pal_length,
+	return paldef { temp_id, temp_entry_datasize, temp_pal_length,
 									temp_pal_datasize };
 }
 

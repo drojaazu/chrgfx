@@ -35,12 +35,7 @@ template <typename StringT> void strip_cr(std::basic_string<StringT> & s)
  */
 template <typename StringT> void ltrim(std::basic_string<StringT> & s)
 {
-	size_t at_space = s.find_first_not_of(' ');
-	size_t at_tab = s.find_last_not_of('\t');
-	if(at_space == std::string::npos && at_tab == std::string::npos)
-		return;
-	size_t at = at_space >= at_tab ? at_space : at_tab;
-	s.erase(0, at);
+	s.erase(0, s.find_first_not_of("\t\n\v\f\r "));
 }
 
 /**
@@ -50,13 +45,7 @@ template <typename StringT> void ltrim(std::basic_string<StringT> & s)
  */
 template <typename StringT> void rtrim(std::basic_string<StringT> & s)
 {
-	size_t at_space = s.find_first_not_of(' ');
-	size_t at_tab = s.find_last_not_of('\t');
-	if(at_space == std::string::npos && at_tab == std::string::npos)
-		return;
-	size_t at = at_space <= at_tab ? at_space : at_tab;
-
-	s.erase(at, s.size() - at);
+	s.erase(s.find_last_not_of("\t\n\v\f\r ") + 1);
 }
 
 /**
@@ -144,7 +133,10 @@ std::vector<T> stovec(std::basic_string<StringT> const & s,
 	std::basic_string<StringT> line;
 
 	while(getline(ss, line, delim))
+	{
+		trim(line);
 		out.push_back(sto<T>(line));
+	}
 
 	return out;
 }

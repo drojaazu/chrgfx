@@ -402,17 +402,6 @@ chrdef
 
 chrdef
 {
-  id chr_nintendo_sfc_3bpp
-  comment Nintendo Super Famicom (3BPP)
-  # 8x8 3bpp planar
-  width 8
-  height 8
-  bpp 3
-  converter_from decode_chr_nintendo_sfc_3bpp
-}
-
-chrdef
-{
   id chr_nintendo_vb
   comment Nintendo Virtual Boy
 

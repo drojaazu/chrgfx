@@ -15,32 +15,33 @@ char constexpr BLOCK_OPENER { '{' };
 char constexpr BLOCK_CLOSER { '}' };
 char constexpr KV_DELIM { ' ' };
 
-defblock_key_error::defblock_key_error(char const * what, char const * key,
-																			 char const * block_id) :
+defblock_key_error::defblock_key_error(string const & what, string const & key,
+																			 string const & block_id) :
 		m_key(key),
 		m_block_id(block_id), runtime_error(what)
 {
 }
 
-char const * defblock_key_error::key() const
+string defblock_key_error::key() const
 {
 	return m_key;
 }
 
-char const * defblock_key_error::block() const
+string defblock_key_error::block() const
 {
 	return m_block_id;
 }
 
-defblock_value_error::defblock_value_error(char const * what, char const * key,
-																					 char const * value,
-																					 char const * block_id) :
+defblock_value_error::defblock_value_error(string const & what,
+																					 string const & key,
+																					 string const & value,
+																					 string const & block_id) :
 		defblock_key_error(what, key, block_id),
 		m_value(value)
 {
 }
 
-char const * defblock_value_error::value() const
+string defblock_value_error::value() const
 {
 	return m_value;
 }

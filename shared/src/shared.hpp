@@ -2,6 +2,7 @@
 #define CHRGFX__SHARED_SHARED_HPP
 
 #include "chrgfx.hpp"
+#include "import_defs.hpp"
 #include "usage.hpp"
 #include <getopt.h>
 #include <iostream>
@@ -30,6 +31,19 @@ struct runtime_config
 	std::string paldef_id;
 };
 
-bool process_default_args(runtime_config & cfg, int argc, char ** argv);
+class def_helper
+{
+public:
+	chrgfx::chrdef const * chrdef;
+	chrgfx::coldef const * coldef;
+	chrgfx::paldef const * paldef;
+
+	def_helper(runtime_config & cfg);
+
+private:
+	def_collection m_defs;
+};
+
+bool shared_args(char this_opt, runtime_config & cfg);
 
 #endif

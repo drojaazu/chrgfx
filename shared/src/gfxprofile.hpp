@@ -10,7 +10,7 @@ using std::string;
 class gfxprofile : public gfxdef
 {
 public:
-	gfxprofile(char const * id, string const & chrdef_id,
+	gfxprofile(string const & id, string const & chrdef_id,
 						 string const & coldef_id, string const & paldef_id);
 
 	string chrdef_id() const;

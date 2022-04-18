@@ -9,28 +9,29 @@
 class defblock_key_error : public std::runtime_error
 {
 public:
-	defblock_key_error(char const * what, char const * key,
-										 char const * block_id = nullptr);
+	defblock_key_error(std::string const & what, std::string const & key,
+										 std::string const & block_id = nullptr);
 
-	char const * key() const;
-	char const * block() const;
+	std::string key() const;
+	std::string block() const;
 
 private:
-	char const * m_key;
-	char const * m_block_id;
-	char const * m_what;
+	std::string const m_key;
+	std::string const m_block_id;
+	std::string const m_what;
 };
 
 class defblock_value_error : public defblock_key_error
 {
 public:
-	defblock_value_error(char const * what, char const * key, char const * value,
-											 char const * block_id = nullptr);
+	defblock_value_error(std::string const & what, std::string const & key,
+											 std::string const & value,
+											 std::string const & block_id = nullptr);
 
-	char const * value() const;
+	std::string value() const;
 
 private:
-	char const * m_value;
+	std::string const m_value;
 };
 
 typedef std::map<std::string const, std::string const> defblock;
