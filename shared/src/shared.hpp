@@ -1,62 +1,54 @@
-#ifndef CHRGFX_EXEC_SHARED_H
-#define CHRGFX_EXEC_SHARED_H
+#ifndef CHRGFX__SHARED_SHARED_HPP
+#define CHRGFX__SHARED_SHARED_HPP
 
 #include "chrgfx.hpp"
+#include "import_defs.hpp"
+#include "usage.hpp"
 #include <getopt.h>
 #include <iostream>
-#include <optional>
 #include <string>
 #include <vector>
-
-static std::string const APP_CONTACT{"Damian R (damian@sudden-desu.net)"};
-static std::string const APP_WEBSITE{"https://github.com/drojaazu/chrgfx"};
 
 /*
 	Hardcoding /etc isn't best practice, I'm sure, but I couldn't find a standard
 	way of doing it otherwise. Anyone with a better implementation is certainly
 	welcome to open a PR.
 */
-std::string const DEFAULT_LIB_PATH{"/etc/chrgfx"};
-std::string const DEFAULT_GFXDEF_FILE{DEFAULT_LIB_PATH + "/gfxdefs"};
-
-struct runtime_config {
-	string profile;
-	string gfxdefs_file;
-	string chrdef;
-	string coldef;
-	string paldef;
-	std::optional<unsigned int> subpalette;
-
-	runtime_config() : gfxdefs_file(DEFAULT_GFXDEF_FILE), subpalette(std::nullopt){};
-};
-
-class gfxprofile : public chrgfx::gfxdef
-{
-public:
-	gfxprofile(string const &id, string const &chrdef_id, string const &coldef_id,
-						 string const &paldef_id)
-			: chrgfx::gfxdef(std::move(id)), chrdef_id(std::move(chrdef_id)),
-				coldef_id(std::move(coldef_id)), paldef_id(std::move(paldef_id)){};
-
-	string get_chrdef_id() const { return chrdef_id; }
-	string get_coldef_id() const { return coldef_id; }
-	string get_paldef_id() const { return paldef_id; }
-
-private:
-	string chrdef_id;
-	string coldef_id;
-	string paldef_id;
-};
+extern std::string const CONFIG_PATH;
+extern std::string const GFXDEF_PATH;
 
 // these are intentionally mutable
-extern string default_short_opts;
+extern std::string short_opts;
+extern std::vector<option> long_opts;
+extern std::vector<option_details> opt_details;
 
-extern std::vector<option> default_long_opts;
+struct runtime_config
+{
+	std::string profile;
+	std::string gfxdefs_path;
+	std::string chrdef_id;
+	std::string coldef_id;
+	std::string paldef_id;
+	bool list_gfxdefs;
 
-string ltrim(const string &s);
-string rtrim(const string &s);
-string trim(const string &s);
+	runtime_config();
+};
 
-bool process_default_args(runtime_config &cfg, int argc, char **argv);
+class def_helper
+{
+public:
+	chrgfx::chrdef const * chrdef;
+	chrgfx::coldef const * coldef;
+	chrgfx::paldef const * paldef;
+
+	def_helper(runtime_config & cfg);
+
+	void list_gfxdefs(std::ostream & os);
+
+private:
+	def_collection m_defs;
+};
+
+bool shared_args(char this_opt, runtime_config & cfg);
 
 #endif

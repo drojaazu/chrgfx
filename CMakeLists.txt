@@ -2,17 +2,24 @@ INCLUDE (CheckIncludeFiles)
 
 # define project
 cmake_minimum_required (VERSION 3.5)
-project (chrgfx VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+
+set(PROJECT_CONTACT "Damian R (damian@motoi.pro)")
+set(PROJECT_WEBSITE "https://github.com/drojaazu")
+
+
 set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
 # chrgfx library
+project (chrgfx VERSION 2.0.0 LANGUAGES CXX)
 add_subdirectory(chrgfx)
 # conversion executables
+project (chr2png VERSION 1.2.0 LANGUAGES CXX)
 add_subdirectory(chr2png)
+project (png2chr VERSION 1.2.0 LANGUAGES CXX)
 add_subdirectory(png2chr)
 
 if (NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)

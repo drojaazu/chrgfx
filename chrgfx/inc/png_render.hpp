@@ -1,58 +1,71 @@
-#ifndef CHRGFX__RENDER_H
-#define CHRGFX__RENDER_H
+#ifndef CHRGFX__PNG_RENDER_HPP
+#define CHRGFX__PNG_RENDER_HPP
 
-#include "chrbank.hpp"
+#include "buffer.hpp"
+#include "chrdef.hpp"
 #include "types.hpp"
-#include "utils.hpp"
-#include <algorithm>
 #include <png++/png.hpp>
-#include <stdio.h>
 
 namespace chrgfx
 {
 
+ushort const DEFAULT_ROW_SIZE = 16;
+bool const DEFAULT_DRAW_BORDER = false;
+bool const DEFAULT_USE_TRNS = true;
+u8 const DEFAULT_TRNS_INDEX = 0;
+
 /**
- * Options for rendering a PNG image from a collection of tiles
+ * @brief Tile rendering settings
  */
-struct render_traits {
+struct render_config
+{
+public:
 	/**
-	 * Number of columns of tiles in the PNG image
+	 * @brief Number of tiles per row in the output image
+	 *
 	 */
-	u16 cols = 8;
+	ushort row_size;
 
 	/**
-	 * Draws a 1 pixel border around the inner edges of tiles in the transparent
-	 * entry color
+	 * @brief Draw a 1 pixel border around the inner edges of tiles in the
+	 * transparent entry color
 	 */
-	bool draw_border = false;
+	bool draw_border;
 
 	/**
-	 * Enable transparency
+	 * @brief Enable transparency
 	 */
-	bool use_trns = false;
+	bool use_trns;
 
 	/**
-	 * Palette entry to use for transparency
+	 * @brief Palette entry to use for transparency
+	 * Also used as the border color when rendering
 	 */
-	u8 trns_entry = 0;
+	u8 trns_index;
+
+	render_config() :
+			row_size(DEFAULT_ROW_SIZE), draw_border(DEFAULT_DRAW_BORDER),
+			use_trns(DEFAULT_USE_TRNS), trns_index(DEFAULT_TRNS_INDEX)
+	{
+	}
 };
 
 /**
- * Renders the specified bank of tiles to a pixel buffer
- * Does not perform data conversion
- * Tiles should already be converted to standard format (24bit packed pixel)
+ * @brief Renders a collection of basic (unencoded) tiles to a pixel buffer
  */
-png::pixel_buffer<png::index_pixel> render(chrbank const &chr_bank,
-																					 render_traits const &rtraits);
+png::pixel_buffer<png::index_pixel> render(size_t const tile_width,
+																					 size_t const tile_height,
+																					 buffer<byte_t> const & chrdata,
+																					 render_config const & rcfg);
 
 /**
- * Renders the specifed bank of tiles and color palette to a PNG image
- * Does not perform data conversion
- * Tiles should already be converted to standard format (24bit packed pixel)
+ * @brief Renders a collection of basic (unencoded) tiles to a PNG image
  */
-png::image<png::index_pixel> png_render(chrbank const &chr_bank,
-																				palette const &pal,
-																				render_traits const &rtraits);
+png::image<png::index_pixel> png_render(size_t const tile_width,
+																				size_t const tile_height,
+																				buffer<byte_t> const & chrdata,
+																				png::palette const & pal,
+																				render_config const & rcfg);
 
 } // namespace chrgfx
 

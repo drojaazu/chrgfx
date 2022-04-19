@@ -125,28 +125,24 @@ profile
 
 paldef
 {
-  # 2 byte per color
+  # 2 byte_t per color
   # 16 subpalettes, 16 colors each
   id pal_nec_pcengine
   comment NEC PC Engine / TurgoGrafx-16
 
   entry_datasize 16
-  subpal_length 16
-  subpal_count 16
+  pal_length 16
+
 }
 
 paldef
 {
   id pal_snk_neogeo
   comment SNK NeoGeo
-
-  # Neo-Geo has 256 palettes of 16 colors each
-  # which means a total system palette size of 4096 colors!
-  # we can only have up to 256 colors in our indexed PNG output
-  # so using the subpalette option while rendering is a must!
+  # Neo-Geo has 256 palettes (!) of 16 colors each
   entry_datasize 16
-  subpal_length 16
-  subpal_count 256
+  pal_length 16
+
 }
 
 paldef
@@ -165,8 +161,8 @@ paldef
   # so the palettes are at 0x91c000
   # length is 0x1800
   entry_datasize 16
-  subpal_length 16
-  subpal_count 192
+  pal_length 16
+
 }
 
 paldef
@@ -174,11 +170,11 @@ paldef
   id pal_sega_ms
   comment Sega Master System
 
-  # 32 colors per palette, 1 byte per color
+  # 32 colors per palette, 1 byte_t per color
   # 2 subpalettes, 16 colors each
   entry_datasize 8
-  subpal_length 16
-  subpal_count 2
+  pal_length 16
+
 }
 
 paldef
@@ -186,11 +182,11 @@ paldef
   id pal_sega_gg
   comment Sega Game Gear
 
-  # 32 colors per palette, 2 byte per color
+  # 32 colors per palette, 2 byte_t per color
   # 2 subpalettes, 16 colors each
   entry_datasize 16
-  subpal_length 16
-  subpal_count 2
+  pal_length 16
+
 }
 
 paldef
@@ -199,15 +195,12 @@ paldef
   comment Nintendo Super Famicom
 
   # 256 colors total
-  # Subpalette length varies by video mode
+  # Palette length varies by video mode
   # Default is 16 palettes of 16 colors each,
   # so that's what we're using here
-  # If you modify the subpal_length to match
-  # a graphics mode, make sure to update
-  # subpal_count as well so length * count = 256!
   entry_datasize 16
-  subpal_length 16
-  subpal_count 16
+  pal_length 16
+
 }
 
 paldef
@@ -218,13 +211,13 @@ paldef
   # palette data is 1 byte; lowest two bits ignored as padding
   # 8 palettes total
   entry_datasize 2
-  subpal_length 4
-  subpal_count 8
+  pal_length 4
 
-  # We manually specify the subpalette data size here since
-  # VB subpalettes are actually word length, with the upper
-  # byte ignored
-  subpal_datasize 16
+
+  # We manually specify the palette data size here since
+  # VB palettes are actually word length, with the upper
+  # byte_t ignored
+  pal_datasize 16
 }
 
 paldef
@@ -236,8 +229,8 @@ paldef
   # (color 0 is always transparent)
 
   entry_datasize 8
-  subpal_length 4
-  subpal_count 8
+  pal_length 4
+
 }
 
 paldef
@@ -245,11 +238,11 @@ paldef
   id pal_nintendo_gb
   comment Nintendo Game Boy
 
-  # 2 bits per color, 4 colors, packed (1 byte per palette)
+  # 2 bits per color, 4 colors, packed (1 byte_t per palette)
   # 3 palettes (3 bytes, stored at 0xFF47 in memory)
   entry_datasize 2
-  subpal_length 4
-  subpal_count 3
+  pal_length 4
+
 }
 
 paldef
@@ -260,8 +253,8 @@ paldef
   # 4 subpalettes of 16 colors each (64 colors total)
   
   entry_datasize 16
-  subpal_length 16
-  subpal_count 4
+  pal_length 16
+
 }
 
 paldef
@@ -281,68 +274,7 @@ paldef
   # length is 0x1800
   
   entry_datasize 16
-  subpal_length 16
-  subpal_count 192
-}
-
-paldef
-{
-  id tilelayerpro256
-  comment TileLayer Pro TPL file
-  entry_datasize 24
-  subpal_length 256
-  subpal_count 1
-
-  converter_to default
-  converter_from tilelayerpro
-}
-
-paldef
-{
-  id tilelayerpro16
-  comment TileLayer Pro TPL file
-  entry_datasize 24
-  subpal_length 16
-  subpal_count 1
-
-  converter_to default
-  converter_from tilelayerpro
-}
-
-paldef
-{
-  id tilelayerpro32
-  comment TileLayer Pro TPL file
-  entry_datasize 24
-  subpal_length 32
-  subpal_count 1
-
-  converter_to default
-  converter_from tilelayerpro
-}
-
-paldef
-{
-  id tilelayerpro64
-  comment TileLayer Pro TPL file
-  entry_datasize 24
-  subpal_length 64
-  subpal_count 1
-
-  converter_to default
-  converter_from tilelayerpro
-}
-
-paldef
-{
-  id tilelayerpro128
-  comment TileLayer Pro TPL file
-  entry_datasize 24
-  subpal_length 128
-  subpal_count 1
-
-  converter_to default
-  converter_from tilelayerpro
+  pal_length 16
 }
 
 #################################
@@ -357,7 +289,7 @@ chrdef
   comment NEC PC Engine / TurgoGrafx-16 (tiles)
 
   # 8x8 4bpp Planar
-  # 2 byte interleaved
+  # 2 byte_t interleaved
   width 8
   height 8
   bpp 4
@@ -443,8 +375,8 @@ chrdef
   height 8
   bpp 4
   planeoffset 0,8,16,24
-  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
-  rowoffset 0, 32, 64, 96, 128, 160, 192, 224
+  pixeloffset 0,1,2,3,4,5,6,7
+  rowoffset 0,32,64,96,128,160,192,224
 }
 
 chrdef
@@ -536,7 +468,7 @@ chrdef
 ##
 #################################
 
-coldef
+rgbcoldef
 {
   # 15|               |0
   #   xxxxxxxG GGRRRBBB
@@ -555,7 +487,7 @@ coldef
   big_endian 0
 }
 
-coldef
+rgbcoldef
 {
   id col_snk_neogeo
   comment SNK NeoGeo
@@ -574,7 +506,7 @@ coldef
   big_endian 1
 }
 
-coldef
+rgbcoldef
 {
   id col_capcom_cps
   comment Capcom CPS 1/2
@@ -606,7 +538,7 @@ coldef
   big_endian 1
 }
 
-coldef
+rgbcoldef
 {
   id col_capcom_cps_accurate
   comment Capcom CPS 1/2 (more accurate colors)
@@ -637,7 +569,7 @@ coldef
   big_endian 1
 }
 
-coldef
+rgbcoldef
 {
   id col_sega_ms
   comment Sega Master System
@@ -653,7 +585,7 @@ coldef
   blue_size 2
 }
 
-coldef
+rgbcoldef
 {
   id col_sega_gg
   comment Sega Game Gear
@@ -672,7 +604,7 @@ coldef
   big_endian 0
 }
 
-coldef
+rgbcoldef
 {
   id col_nintendo_sfc
   comment Nintendo Super Famicom
@@ -691,7 +623,7 @@ coldef
   big_endian 0
 }
 
-coldef
+refcoldef
 {
   id col_nintendo_vb
   comment Nintendo Virtual Boy
@@ -711,7 +643,7 @@ coldef
   # reftab #000000,#3f0000,#df0000,#ff0000
 }
 
-coldef
+refcoldef
 {
   id col_nintendo_fc
   comment Nintendo Famicom
@@ -725,7 +657,7 @@ coldef
   # Some other palette examples: http://emulation.gametechwiki.com/index.php/Famicom_Color_Palette
 }
 
-coldef
+refcoldef
 {
   id col_nintendo_gb
   comment Nintendo Game Boy
@@ -736,7 +668,7 @@ coldef
   reftab #fffb87,#b1ae4e,#84804e,#4e4e4e
 }
 
-coldef
+refcoldef
 {
   id col_nintendo_gb_pocket
   comment Nintendo Game Boy Pocket
@@ -745,7 +677,7 @@ coldef
   reftab #c4cfa1,#8b956d,#6b7353,#414141
 }
 
-coldef
+rgbcoldef
 {
   id col_sega_md
   comment Sega Megadrive
