@@ -19,10 +19,13 @@ public:
 
 	std::string const & id() const;
 
+	std::string const & description() const;
+
 protected:
-	gfxdef(std::string const & id);
+	gfxdef(std::string const & id, std::string const & description = "");
 
 	std::string const m_id;
+	std::string const m_desc;
 };
 
 } // namespace chrgfx

@@ -30,7 +30,8 @@ protected:
 	coldef_type const m_type;
 	bool const m_big_endian;
 
-	coldef(std::string const & id, coldef_type const type, bool const big_endian);
+	coldef(std::string const & id, coldef_type const type, bool const big_endian,
+				 std::string const & description = "");
 };
 
 /**
@@ -40,7 +41,8 @@ class refcoldef : public coldef
 {
 public:
 	refcoldef(std::string const & id, png::palette const & reftab,
-						bool const big_endian = false);
+						bool const big_endian = false,
+						std::string const & description = "");
 
 	/**
 	 * @return color color from the reference palette for the given index
@@ -68,7 +70,8 @@ class rgbcoldef : public coldef
 public:
 	rgbcoldef(std::string const &, ushort const bitdepth,
 						std::vector<rgb_layout> const & layout,
-						bool const big_endian = false);
+						bool const big_endian = false,
+						std::string const & description = "");
 
 	/**
 	 * @return referece to the collection of RGB layouts

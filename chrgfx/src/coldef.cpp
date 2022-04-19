@@ -7,14 +7,16 @@ namespace chrgfx
 using namespace std;
 using namespace png;
 
-coldef::coldef(string const & id, coldef_type type, bool const big_endian) :
-		gfxdef(id), m_type(type), m_big_endian(big_endian)
+coldef::coldef(string const & id, coldef_type type, bool const big_endian,
+							 string const & description) :
+		gfxdef(id, description),
+		m_type(type), m_big_endian(big_endian)
 {
 }
 
 refcoldef::refcoldef(string const & id, palette const & reftab,
-										 bool const big_endian) :
-		coldef(id, ref, big_endian),
+										 bool const big_endian, string const & description) :
+		coldef(id, ref, big_endian, description),
 		m_reftab(reftab) {};
 
 color refcoldef::by_value(ushort index) const
@@ -78,8 +80,9 @@ coldef_type coldef::type() const
 }
 
 rgbcoldef::rgbcoldef(string const & id, ushort const bitdepth,
-										 vector<rgb_layout> const & layout, bool const big_endian) :
-		coldef(id, rgb, big_endian),
+										 vector<rgb_layout> const & layout, bool const big_endian,
+										 string const & description) :
+		coldef(id, rgb, big_endian, description),
 		m_bitdepth(bitdepth), m_layout(layout) {};
 
 vector<rgb_layout> const & rgbcoldef::layout() const

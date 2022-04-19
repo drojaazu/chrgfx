@@ -4,10 +4,12 @@
 #include <png++/png.hpp>
 
 #include "buffer.hpp"
+#include "builtin_defs.hpp"
 #include "chrconv.hpp"
 #include "chrdef.hpp"
 #include "colconv.hpp"
 #include "coldef.hpp"
+#include "custom.hpp"
 #include "gfxdef.hpp"
 #include "palconv.hpp"
 #include "paldef.hpp"

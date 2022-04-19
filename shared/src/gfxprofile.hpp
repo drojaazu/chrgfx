@@ -11,7 +11,8 @@ class gfxprofile : public gfxdef
 {
 public:
 	gfxprofile(string const & id, string const & chrdef_id,
-						 string const & coldef_id, string const & paldef_id);
+						 string const & coldef_id, string const & paldef_id,
+						 string const & description = "");
 
 	string chrdef_id() const;
 

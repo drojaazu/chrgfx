@@ -1,7 +1,7 @@
 # chrgfx
 A library with CLI utilities for converting tile (aka CHR) based graphics used in retro video games to and from PNG, with support for a wide range of hardware via external graphics definitions.
 
-The library itself, libchrgfx, can be integrated into any C++ application. There are also two support utilities included, `chr2png` and `png2chr`. The former will convert raw tile and/or palette data to a PNG image, while the latter will take a sufficiently compatible PNG and return raw tile/palette data.
+The library itself, libchrgfx, can be integrated into any C++ application. 
 
 ## Building
 chrgfx requires [png++](https://www.nongnu.org/pngpp/) to be installed and uses CMake for the build process. From the root of the project directory:
@@ -11,128 +11,124 @@ chrgfx requires [png++](https://www.nongnu.org/pngpp/) to be installed and uses 
     make
     sudo make install
 
-## gfxdef Concepts
-The conversion routines rely on graphics definitions (gfxdef), which describe the layout of the raw data. There are three kinds of definitions: tile (chrdef), palette (paldef) and color (coldef).
+# Utilities Usage
+There are two support utilities included: `chr2png` and `png2chr`. The former will convert encoded tile and/or palette data to a PNG image, while the latter will take a sufficiently compatible PNG and output encoded tile/palette data.
 
-Moreover, for convenience, there are also profiles, which are simply a grouping of one chrdef, paldef and coldef to represent the graphics system of a certain piece of hardware. In this way, we reduce redundancies for hardware that may share one type of definition, but not others. For example, the Sega Master System and Game Gear have the same tile format, but the palette and color definitions are different. We can make a different profile for each system, with both using the same chrdef but seperate pal and coldefs. Another example is the original Gameboy and the later Gameboy Pocket. They are exactly the same in hardware, but the original has a more green tint while the Pocket is more gray. We can create profiles for both, with the same tile and palette formats, but with a different color list to simulate their different perceived colors.
+The conversion routines rely on graphics definitions (gfxdef), which describe the format of the data for encoding and decoding. There are three kinds of definitions: tile (chrdef), palette (paldef) and color (coldef).
+
+Moreover, for convenience, there are also profiles, which are groupings of one chrdef, paldef and coldef to represent the graphics system of a certain piece of hardware. In this way, we reduce redundancies for hardware that may share one type of definition, but not others. For example, the Sega Master System and Game Gear have the same tile format, but the palette and color encodings are different. We can make a different profile for each system, with both using the same tile encoding but seperate palette and color encodings. Another example is the original Gameboy and the later Gameboy Pocket. They are exactly the same in hardware, but the original has a more green tint while the Pocket is more gray. We can create profiles for both, with the same tile and palette formats, but with a different color list to simulate their different perceived colors.
 
 With this system, chrgfx is extensible and can support practically any tile-based hardware.
 
-The project comes with a number of definitions for many common hardware systems already created. These can be found in the `gfxdef` directory. Please [see the readme there](gfxdef/README.md) and [the actual definitions file](gfxdef/gfxdefs) for more details.
+The project comes with a number of definitions for many common hardware systems already created in a gfxdefs file. Please [see the readme in the gfxdef directory](gfxdef/README.md) and [the actual definitions file](gfxdef/gfxdefs) for more details.
 
 ## chr2png - Usage
-`--gfx-def`,`-G`
+`--gfx-def <filepath>`, `-G <filepath>`
 
 Path to gfxdef file; if not specified, defaults to `/etc/chrgfx/gfxdefs`
 
-`--profile`,`-P`
+`--profile <gfx_profile>`, `-P <gfx_profile_id>`
 
-Specify which graphics profile to use
+Specify graphics profile to use
 
-`--chr-def`,`-T` (required, see note)
+`--chr-def <tile_encoding_id>`, `-T <tile_encoding_id>`
 
-Specify which tile definition to use; only required if not using `--profile`, which should already have a tile definition; if `--chr-def` and `--profile` are both specified, `--chr-def` overrides the tile definition in the profile
+`--col-def <color_encoding_id>`, `-C <color_encoding_id>`
 
-`--col-def`,`-C` (required, see note)
+`--pal-def <palette_encoding_id>`, `-L <palette_encoding_id>`
 
-Specify which color definition to use; only required if `--pal-data` is supplied; if `--col-def` and `--profile` are both specified, `--col-def` overrides the color definition in the profile
+These arguments specify the tile, color and palette encoding, respectively. They are only required if a graphics profile was not specified. If they are used in conjunction with a graphics profile, they will override that particular encoding. (For example, using `--chr-def` will override the tile encoding that was specified in the profile.)
 
-`--pal-def`,`-L` (required, see note)
+`--chr-data <filepath>`, `-c <filepath>`
 
-Specify which palette definition to use; only required if `--pal-data` is supplied; if `--pal-def` and `--profile` are both specified, `--pal-def` overrides the palette definition in the profile
+Required; path to the encoded tile data
 
-`--chr-data`,`-c` (required)
+`--pal-data <filepath>`, `-p <filepath>`
 
-Filepath of the raw tile (CHR) data
+Path to the encoded palette data; if not specified, an 8-bit (256 color) palette of random colors will be generated
 
-`--pal-data`,`-p`
+`--output <filepath>`, `-o <filepath>`
 
-Filepath of the raw palette data; if not specified, an 8-bit (256 color) palette of random colors will be generated
+Path to output PNG image; if not specifed, will output to stdout
 
-`--output`,`-o`  (required, see note)
+`--row-size <integer>`, `-r <integer>`
 
-Specify output PNG filepath; if not specifed, will output to stdout
+Specify the number of tiles in a row in the output PNG
 
-`--columns`,`-d`
-
-Specify the number of tile columns to render in the output image
-
-`--subpalette`,`-s`
-
-Specify the subpalette index to use in the output image; value is zero indexed (i.e. the first palette ie 0, second palette is 1, and so on); if not specified, the full palette will be used
-
-`--trns`,`-t`
+`--trns`, `-t`
 
 Enable transparency in output PNG image
 
-`--border`,`-b`
+`--border`, `-b`
 
 Draw a 1 pixel border around tiles in output PNG image
 
-`--trans-index`,`-i`
+`--trans-index <integer>`, `-i <integer>`
 
 Specify palette index to use for transparency; if not specified, index 0 will be used
 
-`--help`,`-h`
+`--list-gfxdefs`, `-l`
 
-Display built in help
+List all encodings available in the gfxdefs file
 
-### Example
-    chr2png --profile sega_md --chr-data sonic1_sprite.chr --pal-data sonic1.cram --trns --subpalette 0 --columns 32 > sonic1_sprite.png
+`--help`, `-h`
+
+Display built in program usage
+
+### Example Usage
+    chr2png --profile sega_md --chr-data sonic1_sprite.chr --pal-data sonic1.cram --trns --row-size 32 > sonic1_sprite.png
 
 ## png2chr - Usage
-`--gfx-def`,`-G`
+`--gfx-def <filepath>`, `-G <filepath>`
 
-Path to gfxdef file; if not specified, defaults to `/usr/local/lib/chrgfx/gfxdefs`
+Path to gfxdef file; if not specified, defaults to `/etc/chrgfx/gfxdefs`
 
-`--profile`,`-P` (required)
+`--profile <gfx_profile>`, `-P <gfx_profile_id>`
 
-Specify which graphics profile to use
+Specify graphics profile to use
 
-`--chr-def`,`-T` (required, see note)
+`--chr-def <tile_encoding_id>`, `-T <tile_encoding_id>`
 
-Specify which tile definition to use; if `--chr-def` and `--profile` are both specified, `--chr-def` overrides the tile definition in the profile; only required if not using `--profile`, which should already have a tile definition
+`--col-def <color_encoding_id>`, `-C <color_encoding_id>`
 
-`--col-def`,`-C` (required, see note)
+`--pal-def <palette_encoding_id>`, `-L <palette_encoding_id>`
 
-Specify which color definition to use; if `--col-def` and `--profile` are both specified, `--col-def` overrides the color definition in the profile; only required if `--pal-data` is supplied
+These arguments specify the tile, color and palette encoding, respectively. They are only required if a graphics profile was not specified. If they are used in conjunction with a graphics profile, they will override that particular encoding. (For example, using `--chr-def` will override the tile encoding that was specified in the profile.)
 
-`--pal-def`,`-L` (required, see note)
+`--png-data <filepath>`, `-b <filepath>` 
 
-Specify which palette definition to use; if `--pal-def` and `--profile` are both specified, `--pal-def` overrides the palette definition in the profile; only required if `--pal-data` is supplied
+Path to the input PNG image; if not specified, expects PNG data piped from stdin
 
-`--png-data`,`-b` (required, see note)
+`--chr-output <filepath>`, `-c <filepath>`
 
-Specify the input PNG image; if not specified, expects PNG data from stdin
+`--pal-output <filepath>`, `-p <filepath>`
 
-`--chr-output`,`-c`
+Path to the output tile and palette data, respectively. One or both must be specified.
 
-Specify filepath of output tile data; if not specified, `--pal-output` must be set
+`--list-gfxdefs`, `-l`
 
-`--pal-output`,`-p` 
+List all encodings available in the gfxdefs file
 
-Specify filepath of output palette data; if not specified, `--chr-output` must be set
-
-`--help`,`-h`
+`--help`, `-h`
 
 Display built in help
 
 ### Example
-    cat crono_sprite.png | png2chr --profile nintendo_sfc --chr-output crono.chr --pal-output crono.pal
+    png2chr --profile nintendo_sfc --chr-output crono.chr --pal-output crono.pal < crono_sprite.png
 
-## Using libchrgfx
+# libchrgfx
 The core of chrgfx is libchrgfx, which contains all the subroutines and data structures for converting between formats and importing/exporting PNG images. Most of the documentation appears in the source code.
 
-Headers are installed to `/usr/include/chrgfx` and the .so to `/usr/lib`. You can include `chrgfx.hpp` for all everything, or pick and choose headers for specific functions.
+Headers are installed to `/usr/include/chrgfx` and the .so to `/usr/lib`. You can include `chrgfx.hpp` for everything, or pick and choose headers for specific functions.
 
 Please see the readme in the gfxdefs directory for a high level overview of some of the concepts and data structures.
 
 ## Non-gfxdef Formats / Custom Conversion Functions
-Though the vanilla tile/color/palette definition system should work with most hardware, some formats may not fit cleanly into the algorithms. For example, the Super Famicom has a 3bpp quasi-format which won't work as a tile definition. Or if we want to import a modern format, such as palette data from TileLayer Pro or Paint Shop Pro, the basic palette converter function is not sufficient.
+Though the vanilla tile/color/palette encoding system should work with most hardware, some formats may not fit cleanly into the algorithms. For example, the Super Famicom has a 3bpp quasi-format which won't work as a tile encoding. Or if we want to import a modern format, such as palette data from TileLayer Pro or Paint Shop Pro, the basic palette converter function is not sufficient.
 
-In such cases, custom conversion code must be written and compiled into the program to be called referenced by gfxdef files with the `converter_to` and `converter_from` options. This is an advanced option that requires knowledge of C++. Please check the `conv_*` source code files for more details on implementing your own code. And pull requests to merge in your new format are certainly welcome!
+In such cases, custom conversion code must be written. There are currently a handful of these within the `custom` namespace in libchrgfx. However, they are not yet integrated into the frontend tools (png2chr and chr2png).
 
-# Console graphics primer
+# Retro Graphics Primer
 The below is provided for those who are new to tile based graphics or who want clarification on some of the concepts around which chrgfx is designed.
 
 ## Tile (aka CHR)
@@ -160,9 +156,7 @@ There are two main methods for storing the colors of a bitmap: direct and indexe
 
 In indexed color mode, colors themselves are divorced from pixels and stored as a seperate list. As a result, *each pixel specifies an entry in that color list*. This seperate color list is known as a color palette. Indexed color images are smaller in data size than direct color since each pixel only needs enough bits to reference one of those palette entries. The tradeoff here is that the color list is small, usually 256 color maximum. This means indexed mode is no good for things like photographs, which need a full range of color to reproduce what we see. But it works great for imagery with a narrow range of colors, like cartoon artwork and pixelated video game graphics.
 
-It's important to understand the distinction between colors *possible* and colors *available.* As we said in the previous section, the Super Famicom has 15bit color, meaning 32,769 colors are *possible.* However, its color palette only has 256 entries, which means only 256 colors are *available* to be displayed at any one time.
-
-Recall that the individual pixels of our indexed-mode tiles reference an entry number within a palette. Therefore, *the number of data bits allocated to a pixel determines the number of colors it can reference*. So, if a tile is limited to 2 bits of data per pixel, it can only have four values (00, 01, 10, 11), and can reference only four colors within the system palette. This introduces the concept of subpalettes: a subpalette is a sequential array of colors within the system palette. Mega Drive tile graphics are 4bpp (four bits per pixel), which means each pixel can access 16 colors from within the system palette. So, the system palette of 64 colors is neatly broken down into four subpalettes of 16 colors each. Tile graphics can then use any one of those four subpalettes, sometimes called a palette line.
+It's important to understand the distinction between colors *possible* and colors *available.* As we said in the previous section, the Super Famicom has 15bit color, meaning 32,769 colors are *possible.* However, its color palette only has 256 entries, which means only 256 colors are *available* to be displayed at any one time. And the graphics are 4 bits per pixel, meaning there are a maximum of 16 colors available in the tile. 
 
 ## Graphics As Data
 So now that we have explained things at a theoretical level, let's look at how these concepts are implemented in data. It's important to have a basic understanding of how the data is stored and arranged when attempting to create graphics definitions.
@@ -190,7 +184,7 @@ In planar format, the values of bit 0 for all pixels are stored together, follow
 
 The [Neo-Geo Development Wiki has an excellent visualization](https://wiki.neogeodev.org/index.php?title=Sprite_graphics_format) of planar data that may help if you're having trouble understanding the concept.
 
-Ultimately, the different formats used on different hardware are variations on bitdepth and the arrangement of bitplanes/pixels. A tile definition used by chrgfx is a "map" of this arrangement, used to decode/encode the tile graphics.
+Ultimately, the different formats used on different hardware are variations on bitdepth and the arrangement of bitplanes/pixels. A tile encoding used by chrgfx is a "map" of this arrangement, used to decode/encode the tile graphics.
 
 ### Color Data
 RGB colors are stored in as many bytes as it takes to contain all the data bits for each component; this is between 1 and 3 bytes.

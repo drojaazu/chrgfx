@@ -29,6 +29,9 @@ struct runtime_config
 	std::string chrdef_id;
 	std::string coldef_id;
 	std::string paldef_id;
+	bool list_gfxdefs;
+
+	runtime_config();
 };
 
 class def_helper
@@ -39,6 +42,8 @@ public:
 	chrgfx::paldef const * paldef;
 
 	def_helper(runtime_config & cfg);
+
+	void list_gfxdefs(std::ostream & os);
 
 private:
 	def_collection m_defs;

@@ -16,7 +16,8 @@ class paldef : public gfxdef
 public:
 	paldef(std::string const & id, ushort const entry_datasize,
 				 ushort const pal_length,
-				 std::optional<ushort const> const pal_datasize = std::nullopt);
+				 std::optional<ushort const> const pal_datasize = std::nullopt,
+				 std::string const & description = "");
 
 	/**
 	 * @return number of entries in the palette

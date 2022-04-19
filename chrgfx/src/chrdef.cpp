@@ -7,8 +7,8 @@ namespace chrgfx
 chrdef::chrdef(string const & id, ushort const width, ushort const height,
 							 ushort const bitdepth, vector<ushort> const & planeoffset,
 							 vector<ushort> const & pixeloffset,
-							 vector<ushort> const & rowoffset) :
-		gfxdef(id),
+							 vector<ushort> const & rowoffset, string const & description) :
+		gfxdef(id, description),
 		m_width(width), m_height(height), m_bitdepth(bitdepth),
 		m_datasize(width * height * bitdepth), m_planeoffsets(planeoffset),
 		m_pixeloffsets(pixeloffset), m_rowoffsets(rowoffset) {};

@@ -18,7 +18,8 @@ public:
 	chrdef(std::string const & id, ushort const width, ushort const height,
 				 ushort const bitdepth, std::vector<ushort> const & planeoffset,
 				 std::vector<ushort> const & pixeloffset,
-				 std::vector<ushort> const & rowoffset);
+				 std::vector<ushort> const & rowoffset,
+				 std::string const & description = "");
 
 	/**
 	 * @return ushort Width of the tile in pixels

@@ -6,10 +6,18 @@ using namespace std;
 string const CONFIG_PATH { "/etc/chrgfx" };
 string const GFXDEF_PATH { CONFIG_PATH + "/gfxdefs" };
 
+runtime_config::runtime_config() : list_gfxdefs(false) {};
+
 def_helper::def_helper(runtime_config & cfg) :
 		m_defs(
 				load_gfxdefs(cfg.gfxdefs_path.empty() ? GFXDEF_PATH : cfg.gfxdefs_path))
 {
+	if(cfg.list_gfxdefs)
+	{
+		list_gfxdefs(cout);
+		exit(0);
+	}
+
 	string chrdef_id, coldef_id, paldef_id;
 
 	// configure from gfxprofile if specified
@@ -77,15 +85,57 @@ def_helper::def_helper(runtime_config & cfg) :
 	paldef = &i_find_paldef->second;
 }
 
-// command line argument processing
+void def_helper::list_gfxdefs(ostream & os)
+{
+	for(auto const & profile : m_defs.profiles)
+	{
+		os << "profile " << profile.second.id();
+		if(!profile.second.description().empty())
+			os << " (" << profile.second.description() << ')';
+		os << endl;
+	}
 
-string short_opts { ":G:T:C:L:P:h" };
+	for(auto const & chrdef : m_defs.chrdefs)
+	{
+		os << "chrdef " << chrdef.second.id();
+		if(!chrdef.second.description().empty())
+			os << " (" << chrdef.second.description() << ')';
+		os << endl;
+	}
+
+	for(auto const & paldef : m_defs.paldefs)
+	{
+		os << "paldef " << paldef.second.id();
+		if(!paldef.second.description().empty())
+			os << " (" << paldef.second.description() << ')';
+		os << endl;
+	}
+
+	for(auto const & rgbcoldef : m_defs.rgbcoldefs)
+	{
+		os << "coldef " << rgbcoldef.second.id();
+		if(!rgbcoldef.second.description().empty())
+			os << " (" << rgbcoldef.second.description() << ')';
+		os << endl;
+	}
+	for(auto const & refcoldef : m_defs.refcoldefs)
+	{
+		os << "coldef " << refcoldef.second.id();
+		if(!refcoldef.second.description().empty())
+			os << " (" << refcoldef.second.description() << ')';
+		os << endl;
+	}
+}
+
+// command line argument processing
+string short_opts { ":G:P:T:C:L:lh" };
 
 vector<option> long_opts { { "gfx-def", required_argument, nullptr, 'G' },
 													 { "profile", required_argument, nullptr, 'P' },
 													 { "chr-def", required_argument, nullptr, 'T' },
 													 { "col-def", required_argument, nullptr, 'C' },
 													 { "pal-def", required_argument, nullptr, 'L' },
+													 { "list-gfxdefs", no_argument, nullptr, 'l' },
 													 { "help", no_argument, nullptr, 'h' } };
 
 vector<option_details> opt_details {
@@ -101,8 +151,9 @@ vector<option_details> opt_details {
 		nullptr },
 	{ false,
 		L"Palette encoding to use; overrides palette encoding in "
-		L"graphics profile (if speci,fied)",
+		L"graphics profile (if specified)",
 		nullptr },
+	{ false, L"List all available encodings in gfxdefs file", nullptr },
 	{ false, L"Display program usage", nullptr }
 };
 
@@ -132,6 +183,10 @@ bool shared_args(char this_opt, runtime_config & cfg)
 
 		case 'P':
 			cfg.profile = optarg;
+			break;
+
+		case 'l':
+			cfg.list_gfxdefs = true;
 			break;
 
 		case 'h':

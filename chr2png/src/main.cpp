@@ -36,10 +36,10 @@ int main(int argc, char ** argv)
 #endif
 		process_args(argc, argv);
 
+		def_helper defs(cfg);
+
 		// see if we have good input before moving on
 		ifstream chrdata { ifstream_checked(cfg.chrdata_name.c_str()) };
-
-		def_helper defs(cfg);
 
 #ifdef DEBUG
 		chrono::high_resolution_clock::time_point t2 =
@@ -173,6 +173,8 @@ int main(int argc, char ** argv)
 void process_args(int argc, char ** argv)
 {
 	// add chr2png specific options
+	short_opts.append("c:p:ti:br:o:");
+
 	long_opts.push_back({ "chr-data", required_argument, nullptr, 'c' });
 	long_opts.push_back({ "pal-data", required_argument, nullptr, 'p' });
 	long_opts.push_back({ "trns", no_argument, nullptr, 't' });
@@ -181,7 +183,6 @@ void process_args(int argc, char ** argv)
 	long_opts.push_back({ "row-size", required_argument, nullptr, 'r' });
 	long_opts.push_back({ "output", required_argument, nullptr, 'o' });
 	long_opts.push_back({ 0, 0, 0, 0 });
-	short_opts.append("ti:bd:c:p:s:o:");
 
 	opt_details.push_back({ false, L"Path to input encoded tiles", nullptr });
 	opt_details.push_back({ false, L"Path to input encoded palette", nullptr });
@@ -243,7 +244,7 @@ void process_args(int argc, char ** argv)
 				break;
 
 			// row size
-			case 'd':
+			case 'r':
 				try
 				{
 					cfg.render_cfg.row_size = stoi(optarg);
