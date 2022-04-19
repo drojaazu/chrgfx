@@ -110,32 +110,20 @@ As a chrdef, it looks like this:
 
 `planeoffset` - The offset (in bits) of each bitplane in one pixel; **the number of entries here must match the value of `bpp`.**
 
-`xoffset` - The offset (in bits) of each pixel within a row (x axis); **the number of entries here must match the value of `width`.**
+`pixeloffset` - The offset (in bits) of each row of pixels within a tile; **the number of entries here must match the value of `height`.**
 
-`yoffset` - The offset (in bits) of each pixel row within a tile (y axis); **the number of entries here must match the value of `height`.**
-
-`converter_to`, `converter_from` - (Optional) Specifies the internal conversion functions to use; **this is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
+`rowoffset` - The offset (in bits) of each pixel within a row; **the number of entries here must match the value of `width`.**
 
 ### Palette Definitions (paldef)
-When we think of a palette, we generally envision a structure that contains a list of colors. This is still the case, but in chrgfx we split up the concept of palette structure and color data. If you imagine a carton of a dozen colorful Easter eggs, the eggs are the colors (coldef) while the carton holding them is the palette (paldef). This ,splitting of color data and palette structure gives us more flexibility and less redundancy, which we'll see later when we talk about profiles.
-
-Generally, the graphics hardware holds a finite number of colors from which the tiles on the screen may select a linear subset for use. We call the total group of colors the "system palette" or "full palette" while the subset is called a "subpalette" or "palette line."
-
-Returning to the Sega Mega Drive again as a simple example: its hardware has a system palette of 64 colors, while each subpalette is 16 colors. This means there are 4 subpalettes within the full system palette, and the tile graphics, which are 4 bits per pixel and can thus address a maximum of 16 colors, can use any one of those four subpalettes.
-
-Something to note, however, is that the indexed PNGs (i.e. PNGs using a palette instead of 24bit color) such as those output from `chr2png` have a maximum of 256 colors. This is not a problem for most systems, though there are a few that have a full palette with more than 256 entries (for example, the Neo-Geo hardware, with 256 subpalettes of 16 colors each, making a whopping 4,096 colors!). In such cases, the palette is cut off at the 256 color mark. Instead of a full palette, though, you can specify any subpalette to apply a palette line for entries past the cutoff.
+When we think of a palette, we generally envision a structure that contains a list of colors. This is still the case, but in chrgfx we split up the concept of palette structure and color data. If you imagine a carton of a dozen colorful Easter eggs, the eggs are the colors (coldef) while the carton holding them is the palette (paldef). Splitting of color data and palette structure gives us more flexibility and less redundancy, which we'll see later when we talk about profiles.
 
 ### paldef reference
 
-`subpal_length` - The number of colors in one subpalette
-
-`subpal_count` - The number of subpalettes in the system palette
+`pal_length` - The number of colors in the palette
 
 `entry_datasize` - The size of a single entry within a palette, in bits
 
-`subpal_datasize` - (Optional) The size of a single subpalette, in bits. This should only be needed in very rare circumstances where the size of a subpalette is greater than the sum of the color data. An example of this is the Nintendo Virtual Boy.
-
-`converter_to`, `converter_from` - (Optional) Specifies the internal conversion functions to use; **this is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
+`pal_datasize` - (Optional) The data size of a single palette, in bits. This should only be needed in very rare circumstances where the size of a subpalette is greater than the sum of the color data. An example of this is the Nintendo Virtual Boy.
 
 ### Color Definitions (coldef)
 Colors are derived in one of two ways. The first method calculates a color using RGB values specified by the size and position of each color channel within the data. This works for hardware that natively uses RGB colorspace. For hardware which does not, the second method is used. This involves mapping all possible colors to approximate RGB values in a reference table.
@@ -212,9 +200,7 @@ The first entry will correspond to value 0, the next to value 1, and so on.
 
 big_endian - (Optional) Indicates the original hardware is big endian; if not specified, default is 0 (false). The value should be either 1 (true, big endian) or 0 (false, little endian). This should be specified for hardware where color data is greater than 8 bits in size.
 
-`converter_to`, `converter_from` - (Optional) Specifies the internal conversion functions to use; **this is only necessary for custom conversion functions in non-standard formats, and shouldn't normally be needed.**
-
-#### For RGB based hardware only:
+#### rgbcoldef reference
 
 `bitdepth` - The size of each color component, in bits
 
@@ -232,15 +218,6 @@ big_endian - (Optional) Indicates the original hardware is big endian; if not sp
 
 `blue_size` - As anove, for blue component data
 
-#### For non-RGB based hardware only:
+#### refcoldef reference
 
 `reftab` - A comma delimited list of HTML style RGB colors to represent each possible non-RGB color on the original hardware
-
-## Non-standard formats
-These are formats that use custom conversion functions. The list is small right now, but more are planned.
-
-`tilelayerpro256`,`tilelayerpro128`,`tilelayerpro64`,`tilelayerpro32`,`tilelayerpro16`
-
-Uses a TileLayer Pro .TPL file for the color palette. Only RGB format palette supported. The subpalette size can be modified as needed in the gfxdef file. TPL palettes are officionally only 16, 32, 64, 128 or 256 entries in size. Unfortunately, the file header does not indicate the size, so we have to specify it manually. You can determine this by looking at the size of your file in bytes, subtract 4 (for the header) and divide by 3.
-
-Each of the TPL entries in the default gfxdefs file divides the palette into one subpalette of the total number specified. You can manually subdivide this further to better represent your hardware. For example, if you have a 64 color TPL file, you can change `subpal_count` to 4 and `subpal_length` to 16 to represent a Sega Mega Drive system palette, and then use the `--subpalette` option to select colors as subpalette lines.

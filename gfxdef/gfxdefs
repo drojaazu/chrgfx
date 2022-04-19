@@ -131,22 +131,18 @@ paldef
   comment NEC PC Engine / TurgoGrafx-16
 
   entry_datasize 16
-  subpal_length 16
-  subpal_count 16
+  pal_length 16
+
 }
 
 paldef
 {
   id pal_snk_neogeo
   comment SNK NeoGeo
-
-  # Neo-Geo has 256 palettes of 16 colors each
-  # which means a total system palette size of 4096 colors!
-  # we can only have up to 256 colors in our indexed PNG output
-  # so using the subpalette option while rendering is a must!
+  # Neo-Geo has 256 palettes (!) of 16 colors each
   entry_datasize 16
-  subpal_length 16
-  subpal_count 256
+  pal_length 16
+
 }
 
 paldef
@@ -165,8 +161,8 @@ paldef
   # so the palettes are at 0x91c000
   # length is 0x1800
   entry_datasize 16
-  subpal_length 16
-  subpal_count 192
+  pal_length 16
+
 }
 
 paldef
@@ -177,8 +173,8 @@ paldef
   # 32 colors per palette, 1 byte_t per color
   # 2 subpalettes, 16 colors each
   entry_datasize 8
-  subpal_length 16
-  subpal_count 2
+  pal_length 16
+
 }
 
 paldef
@@ -189,8 +185,8 @@ paldef
   # 32 colors per palette, 2 byte_t per color
   # 2 subpalettes, 16 colors each
   entry_datasize 16
-  subpal_length 16
-  subpal_count 2
+  pal_length 16
+
 }
 
 paldef
@@ -199,15 +195,12 @@ paldef
   comment Nintendo Super Famicom
 
   # 256 colors total
-  # Subpalette length varies by video mode
+  # Palette length varies by video mode
   # Default is 16 palettes of 16 colors each,
   # so that's what we're using here
-  # If you modify the subpal_length to match
-  # a graphics mode, make sure to update
-  # subpal_count as well so length * count = 256!
   entry_datasize 16
-  subpal_length 16
-  subpal_count 16
+  pal_length 16
+
 }
 
 paldef
@@ -218,13 +211,13 @@ paldef
   # palette data is 1 byte; lowest two bits ignored as padding
   # 8 palettes total
   entry_datasize 2
-  subpal_length 4
-  subpal_count 8
+  pal_length 4
 
-  # We manually specify the subpalette data size here since
-  # VB subpalettes are actually word length, with the upper
+
+  # We manually specify the palette data size here since
+  # VB palettes are actually word length, with the upper
   # byte_t ignored
-  subpal_datasize 16
+  pal_datasize 16
 }
 
 paldef
@@ -236,8 +229,8 @@ paldef
   # (color 0 is always transparent)
 
   entry_datasize 8
-  subpal_length 4
-  subpal_count 8
+  pal_length 4
+
 }
 
 paldef
@@ -248,8 +241,8 @@ paldef
   # 2 bits per color, 4 colors, packed (1 byte_t per palette)
   # 3 palettes (3 bytes, stored at 0xFF47 in memory)
   entry_datasize 2
-  subpal_length 4
-  subpal_count 3
+  pal_length 4
+
 }
 
 paldef
@@ -260,8 +253,8 @@ paldef
   # 4 subpalettes of 16 colors each (64 colors total)
   
   entry_datasize 16
-  subpal_length 16
-  subpal_count 4
+  pal_length 16
+
 }
 
 paldef
@@ -281,8 +274,7 @@ paldef
   # length is 0x1800
   
   entry_datasize 16
-  subpal_length 16
-  subpal_count 192
+  pal_length 16
 }
 
 #################################

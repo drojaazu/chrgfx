@@ -24,15 +24,10 @@ char const * CHR_BPP = "bpp";
 char const * CHR_PLANEOFFSET = "planeoffset";
 char const * CHR_PIXELOFFSET = "pixeloffset";
 char const * CHR_ROWOFFSET = "rowoffset";
-char const * CHR_CONVERTER_TO = "converter_to";
-char const * CHR_CONVERTER_FROM = "converter_from";
 
 char const * PAL_ENTRY_DATASIZE = "entry_datasize";
-char const * PAL_SUBPAL_LENGTH = "subpal_length";
-char const * PAL_SUBPAL_COUNT = "subpal_count";
-char const * PAL_SUBPAL_DATASIZE = "subpal_datasize";
-char const * PAL_CONVERTER_TO = "converter_to";
-char const * PAL_CONVERTER_FROM = "converter_from";
+char const * PAL_PAL_LENGTH = "pal_length";
+char const * PAL_PAL_DATASIZE = "pal_datasize";
 
 char const * COL_COLOR_PASSES = "color_passes";
 char const * COL_RED_SHIFT = "red_shift";
@@ -44,8 +39,6 @@ char const * COL_BLUE_SIZE = "blue_size";
 char const * COL_BITDEPTH = "bitdepth";
 char const * COL_REFTAB = "reftab";
 char const * COL_BIG_ENDIAN = "big_endian";
-char const * COL_CONVERTER_TO = "converter_to";
-char const * COL_CONVERTER_FROM = "converter_from";
 
 // prefixes for profile definitions
 char const * PRF_CHRDEF = "chrdef";
@@ -470,17 +463,17 @@ paldef validate_paldef_block(defblock const & def_block)
 
 	// SETTING: subpal_length
 	// RULES: required
-	mapiter = def_block.find(defkeys::PAL_SUBPAL_LENGTH);
+	mapiter = def_block.find(defkeys::PAL_PAL_LENGTH);
 	if(mapiter == def_block.end())
 	{
-		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::PAL_SUBPAL_LENGTH,
+		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::PAL_PAL_LENGTH,
 														 temp_id);
 	}
 	auto temp_pal_length { sto<ushort>(mapiter->second) };
 
 	// SETTING: pal_datasize
 	// RULES: optional
-	mapiter = def_block.find(defkeys::PAL_SUBPAL_DATASIZE);
+	mapiter = def_block.find(defkeys::PAL_PAL_DATASIZE);
 	optional<uint> temp_pal_datasize { nullopt };
 	if(mapiter != def_block.end())
 	{
