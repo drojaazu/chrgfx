@@ -12,6 +12,7 @@ set(HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/builtin_defs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/chrconv.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/chrdef.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/chrgfx.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/colconv.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/coldef.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/custom.hpp
