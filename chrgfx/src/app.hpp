@@ -7,8 +7,8 @@
 namespace APP {
 	static unsigned int const VERSION_MAJOR{2};
 	static unsigned int const VERSION_MINOR{0};
-	static unsigned int const VERSION_PATCH{0};
-	static char const * VERSION{"2.0.0"};
+	static unsigned int const VERSION_PATCH{1};
+	static char const * VERSION{"2.0.1"};
 
 	static char const * NAME{"chrgfx"};
 	static char const * CONTACT{"Damian R (damian@motoi.pro)"};

@@ -5,17 +5,18 @@
  *
  * Updates:
  * 20220410 Initial
+ * 20220420 Added templated size() method
  */
 #ifndef __MOTOI__BUFFER_HPP
 #define __MOTOI__BUFFER_HPP
 
 #include <algorithm>
 #include <cstring>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <memory>
-#include <functional>
 
 template <typename DataT = char> class buffer
 {
@@ -139,6 +140,11 @@ public:
 	size_t size() const
 	{
 		return this->m_size;
+	}
+
+	template <typename SizeT = DataT> size_t size() const
+	{
+		return this->m_datasize / sizeof(SizeT);
 	}
 
 	/**

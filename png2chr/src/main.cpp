@@ -37,7 +37,11 @@ int main(int argc, char ** argv)
 
 		// set up input data
 		ifstream png_fstream;
-		istream & png_data = (cfg.pngdata_name.empty() ? cin : png_fstream);
+		istream & png_data { (cfg.pngdata_name.empty() ? cin : png_fstream) };
+		if(!cfg.pngdata_name.empty())
+		{
+			png_fstream.open(cfg.pngdata_name);
+		}
 
 		def_helper defs(cfg);
 
