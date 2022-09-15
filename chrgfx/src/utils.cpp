@@ -3,7 +3,7 @@
 namespace chrgfx
 {
 
-byte_t reduce_bitdepth(byte_t data, u8 bitdepth)
+u8 reduce_bitdepth(u8 data, u8 bitdepth)
 {
 	// convert color bit depths algo:
 	// (bitdepth_a_value * bitdepth_b_max) / bitdepth_a_max = bitdepth_b_value
@@ -12,7 +12,7 @@ byte_t reduce_bitdepth(byte_t data, u8 bitdepth)
 	return (data * (create_bitmask8(bitdepth) + 1)) / 256;
 }
 
-byte_t expand_bitdepth(byte_t data, u8 bitdepth)
+u8 expand_bitdepth(u8 data, u8 bitdepth)
 {
 	// shamelessly stolen from MAME
 	if(bitdepth == 1)
@@ -123,7 +123,6 @@ palette make_pal_random()
 
 	return outpal;
 }
-
 
 bool is_system_bigendian()
 {

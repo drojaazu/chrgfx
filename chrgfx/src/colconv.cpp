@@ -28,7 +28,7 @@ u32 encode_col(rgbcoldef const & rgbcoldef, color const & color)
 
 	u32 out { 0 };
 	u8 bitdepth = rgbcoldef.bitdepth();
-	byte_t red { reduce_bitdepth(color.red, bitdepth) }, red_pass_shift { 0 },
+	u8 red { reduce_bitdepth(color.red, bitdepth) }, red_pass_shift { 0 },
 			green { reduce_bitdepth(color.green, bitdepth) }, green_pass_shift { 0 },
 			blue { reduce_bitdepth(color.blue, bitdepth) }, blue_pass_shift { 0 };
 

@@ -16,7 +16,7 @@ namespace chrgfx
  * @param data color channel data
  * @param bitcount target bitdepth
  */
-byte_t reduce_bitdepth(byte_t data, u8 bitdepth);
+u8 reduce_bitdepth(u8 data, u8 bitdepth);
 
 /**
  * @brief Increase bitdepth of a color channel to 8 bits
@@ -24,7 +24,7 @@ byte_t reduce_bitdepth(byte_t data, u8 bitdepth);
  * @param data color channel data
  * @param bitdepth bitdepth of the input channel
  */
-byte_t expand_bitdepth(byte_t data, u8 bitdepth);
+u8 expand_bitdepth(u8 data, u8 bitdepth);
 
 /**
  * @brief Returns an 32 bit value with the specified number of bits set

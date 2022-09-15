@@ -14,7 +14,7 @@ set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
 # chrgfx library
-project(chrgfx VERSION 2.0.1 LANGUAGES CXX)
+project(chrgfx VERSION 2.0.2 LANGUAGES CXX)
 add_subdirectory(chrgfx)
 
 # conversion executables
