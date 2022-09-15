@@ -15,6 +15,7 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <functional>
 
 template <typename DataT = char> class buffer
 {
