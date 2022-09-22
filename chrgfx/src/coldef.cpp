@@ -7,17 +7,24 @@ namespace chrgfx
 using namespace std;
 using namespace png;
 
-coldef::coldef(string const & id, coldef_type type, bool const big_endian,
-							 string const & description) :
+coldef::coldef(string const & id,
+	coldef_type const type,
+	bool const big_endian,
+	string const & description) :
 		gfxdef(id, description),
-		m_type(type), m_big_endian(big_endian)
+		m_type(type),
+		m_big_endian(big_endian)
 {
 }
 
-refcoldef::refcoldef(string const & id, palette const & reftab,
-										 bool const big_endian, string const & description) :
+refcoldef::refcoldef(string const & id,
+	palette reftab,
+	bool const big_endian,
+	string const & description) :
 		coldef(id, ref, big_endian, description),
-		m_reftab(reftab) {};
+		m_reftab(std::move(reftab))
+{
+}
 
 color refcoldef::by_value(ushort index) const
 {
@@ -46,7 +53,7 @@ ushort refcoldef::by_color(color rgb) const
 		int this_distance = (abs(this_color.red - rgb.red)) +
 												(abs(this_color.green - rgb.green)) +
 												(abs(this_color.blue - rgb.blue));
-		distances.push_back(pair<int, int>(pal_color_iter, this_distance));
+		distances.emplace_back(pal_color_iter, this_distance);
 		++pal_color_iter;
 	}
 
@@ -79,11 +86,14 @@ coldef_type coldef::type() const
 	return m_type;
 }
 
-rgbcoldef::rgbcoldef(string const & id, ushort const bitdepth,
-										 vector<rgb_layout> const & layout, bool const big_endian,
-										 string const & description) :
+rgbcoldef::rgbcoldef(string const & id,
+	ushort const bitdepth,
+	vector<rgb_layout> const & layout,
+	bool const big_endian,
+	string const & description) :
 		coldef(id, rgb, big_endian, description),
-		m_bitdepth(bitdepth), m_layout(layout) {};
+		m_layout(layout),
+		m_bitdepth(bitdepth) {};
 
 vector<rgb_layout> const & rgbcoldef::layout() const
 {

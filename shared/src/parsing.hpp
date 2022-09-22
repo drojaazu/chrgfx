@@ -5,6 +5,7 @@
  *
  * Updates:
  * 20211214 Initial
+ * 20220921 Small corrections based on clang-tidy suggestions
  */
 
 #ifndef __MOTOI__PARSING_HPP
@@ -21,31 +22,36 @@
 /**
  * @brief Removes the \r (CR) character from a string
  *
- * @param s Mutable string
+ * @param str Mutable string
  */
-template <typename StringT> void strip_cr(std::basic_string<StringT> & s)
+template <typename StringT>
+void strip_cr(std::basic_string<StringT> & str)
 {
-	s.erase(std::remove(s.begin(), s.end(), '\r'), s.end());
+	str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
 }
 
 /**
- * @brief Removes any spaces or tabs on the left side of a string
+ * @brief Removes any spaces, tabs or common inivisible control characters on
+ * the left side of a string
  *
  * @param s Mutable string
  */
-template <typename StringT> void ltrim(std::basic_string<StringT> & s)
+template <typename StringT>
+void ltrim(std::basic_string<StringT> & str)
 {
-	s.erase(0, s.find_first_not_of("\t\n\v\f\r "));
+	str.erase(0, str.find_first_not_of("\t\n\v\f\r "));
 }
 
 /**
- * @brief Removes any spaces or tabs on the right side of a string
+ * @brief Removes any spaces, tabs or common inivisible control characters on
+ * the right side of a string
  *
  * @param s Mutable string
  */
-template <typename StringT> void rtrim(std::basic_string<StringT> & s)
+template <typename StringT>
+void rtrim(std::basic_string<StringT> & str)
 {
-	s.erase(s.find_last_not_of("\t\n\v\f\r ") + 1);
+	str.erase(str.find_last_not_of("\t\n\v\f\r ") + 1);
 }
 
 /**
@@ -53,10 +59,11 @@ template <typename StringT> void rtrim(std::basic_string<StringT> & s)
  *
  * @param s Mutable string
  */
-template <typename StringT> void trim(std::basic_string<StringT> & s)
+template <typename StringT>
+void trim(std::basic_string<StringT> & str)
 {
-	ltrim(s);
-	rtrim(s);
+	ltrim(str);
+	rtrim(str);
 }
 
 /**
@@ -64,9 +71,10 @@ template <typename StringT> void trim(std::basic_string<StringT> & s)
  *
  * @param s Mutable string
  */
-template <typename StringT> void lower(std::basic_string<StringT> & s)
+template <typename StringT>
+void lower(std::basic_string<StringT> & str)
 {
-	std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+	std::transform(str.begin(), str.end(), str.begin(), ::tolower);
 }
 
 /**
@@ -74,9 +82,10 @@ template <typename StringT> void lower(std::basic_string<StringT> & s)
  *
  * @param s Mutable string
  */
-template <typename StringT = char> void upper(std::basic_string<StringT> & s)
+template <typename StringT = char>
+void upper(std::basic_string<StringT> & str)
 {
-	std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+	std::transform(str.begin(), str.end(), str.begin(), ::toupper);
 }
 
 /**
@@ -91,29 +100,31 @@ template <typename StringT = char> void upper(std::basic_string<StringT> & s)
  * @return T value as a numeric type
  */
 template <typename T, typename StringT>
-T sto(std::basic_string<StringT> const & s, int const base = 10)
+T sto(std::basic_string<StringT> const & str, int const base = 10)
 {
 	T value;
-	auto ec = std::from_chars(s.data(), s.data() + s.size(), value, base).ec;
+	auto ec =
+		std::from_chars(str.data(), str.data() + str.size(), value, base).ec;
 	if(ec == std::errc::result_out_of_range)
 	{
 		std::stringstream ss;
-		ss << "Input value \"" << s << "\" too large for specified numeric type";
+		ss << "Input value \"" << str << "\" too large for specified numeric type";
 		throw std::out_of_range(ss.str());
 	}
 	else if(ec == std::errc::invalid_argument)
 	{
 		std::stringstream ss;
-		ss << "Input value \"" << s << "\" could not be parsed to a numeric value";
+		ss << "Input value \"" << str
+			 << "\" could not be parsed to a numeric value";
 		throw std::invalid_argument(ss.str());
 	}
 	return value;
 }
 
 template <typename T, typename StringT>
-T sto_pos(std::basic_string<StringT> const & s, int const base = 10)
+T sto_pos(std::basic_string<StringT> const & str, int const base = 10)
 {
-	T out { sto<T>(s) };
+	T out { sto<T>(str, base) };
 	if(out <= 0)
 	{
 		throw std::out_of_range("Value must be greater than zero");
@@ -122,14 +133,14 @@ T sto_pos(std::basic_string<StringT> const & s, int const base = 10)
 }
 
 /**
- * @brief Converts a delimited list of integer values into a vector
+ * @brief Converts a delimited list of numeric values into a vector
  */
 template <typename T, typename StringT>
-std::vector<T> stovec(std::basic_string<StringT> const & s,
-											char const delim = ',')
+std::vector<T> stovec(
+	std::basic_string<StringT> const & str, char const delim = ',')
 {
 	std::vector<T> out;
-	std::istringstream ss { s };
+	std::istringstream ss { str };
 	std::basic_string<StringT> line;
 
 	while(getline(ss, line, delim))
@@ -146,16 +157,17 @@ std::vector<T> stovec(std::basic_string<StringT> const & s,
  * @note Allowed values: "t", "true", "1", "f", "false", "0" (upper or lower
  * case)
  */
-template <typename StringT> bool stob(std::basic_string<StringT> const & s)
+template <typename StringT>
+bool stob(std::basic_string<StringT> const & str)
 {
-	std::basic_string<StringT> s_work = s;
+	std::basic_string<StringT> s_work = str;
 	lower(s_work);
 	if(s_work == "t" || s_work == "true" || s_work == "1")
 		return true;
 	if(s_work == "f" || s_work == "false" || s_work == "0")
 		return false;
 	std::stringstream ss;
-	ss << "Value \"" << s << "\" could not be interpreted as a boolean";
+	ss << "Value \"" << str << "\" could not be interpreted as a boolean";
 	throw std::invalid_argument(ss.str());
 }
 
@@ -164,11 +176,10 @@ template <typename StringT> bool stob(std::basic_string<StringT> const & s)
  * @note Assumes input string has already been whitespace trimmed
  */
 template <typename StringT>
-std::pair<std::basic_string<StringT>, std::basic_string<StringT>>
-kvsplit(std::basic_string<StringT> const & line, char const delim = ' ')
+std::pair<std::basic_string<StringT>, std::basic_string<StringT>> kvsplit(
+	std::basic_string<StringT> const & line, char const delim = ' ')
 {
-	size_t delim_pos;
-	delim_pos = line.find(delim);
+	auto delim_pos { line.find(delim) };
 	if(delim_pos == std::string::npos)
 	{
 		std::stringstream ss;
@@ -176,7 +187,7 @@ kvsplit(std::basic_string<StringT> const & line, char const delim = ' ')
 		throw std::invalid_argument(ss.str());
 	}
 	return { line.substr(0, delim_pos),
-					 line.substr(delim_pos + 1, std::string::npos) };
+		line.substr(delim_pos + 1, std::string::npos) };
 }
 
 #endif

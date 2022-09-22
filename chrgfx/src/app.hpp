@@ -4,14 +4,15 @@
 /*
 	These values should be set within CMakeLists.txt
 */
-namespace APP {
-	static unsigned int const VERSION_MAJOR{2};
-	static unsigned int const VERSION_MINOR{0};
-	static unsigned int const VERSION_PATCH{2};
-	static char const * VERSION{"2.0.2"};
+namespace APP
+{
+static unsigned int const VERSION_MAJOR { 2 };
+static unsigned int const VERSION_MINOR { 1 };
+static unsigned int const VERSION_PATCH { 0 };
+static char const * VERSION { "2.1.0" };
 
-	static char const * NAME{"chrgfx"};
-	static char const * CONTACT{"Damian R (damian@motoi.pro)"};
-	static char const * WEBSITE{"https://github.com/drojaazu"};
-}
+static wchar_t const * NAME { L"chrgfx" };
+static wchar_t const * CONTACT { L"Damian R (damian@motoi.pro)" };
+static wchar_t const * WEBSITE { L"https://github.com/drojaazu" };
+} // namespace APP
 #endif

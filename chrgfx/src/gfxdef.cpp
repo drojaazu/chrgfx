@@ -7,8 +7,9 @@ using namespace std;
 
 namespace chrgfx
 {
-gfxdef::gfxdef(string const & id, string const & description) :
-		m_id(id), m_desc(description)
+gfxdef::gfxdef(string id, string description) :
+		m_id(std::move(id)),
+		m_desc(std::move(description))
 {
 #ifdef DEBUG
 	cerr << "NEW GFXDEF: " << m_id << endl;

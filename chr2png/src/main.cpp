@@ -1,5 +1,5 @@
 #include "chrgfx.hpp"
-#include "filesys.hpp"
+#include "fstreams.hpp"
 #include "import_defs.hpp"
 #include "parsing.hpp"
 #include "shared.hpp"
@@ -32,20 +32,20 @@ int main(int argc, char ** argv)
 		 *******************************************************/
 #ifdef DEBUG
 		chrono::high_resolution_clock::time_point t1 =
-				chrono::high_resolution_clock::now();
+			chrono::high_resolution_clock::now();
 #endif
 		process_args(argc, argv);
 
 		def_helper defs(cfg);
 
 		// see if we have good input before moving on
-		ifstream chrdata { ifstream_checked(cfg.chrdata_name.c_str()) };
+		ifstream chrdata { ifstream_checked(cfg.chrdata_name) };
 
 #ifdef DEBUG
 		chrono::high_resolution_clock::time_point t2 =
-				chrono::high_resolution_clock::now();
+			chrono::high_resolution_clock::now();
 		auto duration =
-				chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+			chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
 		cerr << "SETUP: " << duration << "ms" << endl;
 		cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << endl;
@@ -62,14 +62,13 @@ int main(int argc, char ** argv)
 #endif
 
 		size_t
-				// byte size of one encoded tile
-				in_chunksize { defs.chrdef->datasize() / (size_t)8 },
-				// byte size of one basic (decoded) tile
-				out_chunksize { (size_t)(defs.chrdef->width() *
-																 defs.chrdef->height()) };
+			// byte size of one encoded tile
+			in_chunksize { defs.chrdef->datasize() / (size_t) 8 },
+			// byte size of one basic (decoded) tile
+			out_chunksize { (size_t) (defs.chrdef->width() * defs.chrdef->height()) };
 
 		// buffer for a single encoded tile, read from the stream
-		char in_tile[in_chunksize];
+		byte_t in_tile[in_chunksize];
 
 		// basic tiles buffer
 		buffer<byte_t> out_buffer(0);
@@ -79,9 +78,9 @@ int main(int argc, char ** argv)
 			on the buffer repeatedly was a bit faster than creating a large
 			temporary buffer and resizing
 		*/
-		while(1)
+		while(true)
 		{
-			chrdata.read(in_tile, in_chunksize);
+			chrdata.read((char *) in_tile, in_chunksize);
 			if(chrdata.eof())
 				break;
 
@@ -103,16 +102,16 @@ int main(int argc, char ** argv)
 #endif
 
 		palette workpal;
-		if(!cfg.paldata_name.empty())
+		if(! cfg.paldata_name.empty())
 		{
-			ifstream paldata { ifstream_checked(cfg.paldata_name.c_str()) };
+			ifstream paldata { ifstream_checked(cfg.paldata_name) };
 
 			size_t pal_size = defs.paldef->datasize() / 8;
 			byte_t palbuffer[pal_size];
-			paldata.read(palbuffer, pal_size);
+			paldata.read((char *) palbuffer, pal_size);
 			if(paldata.gcount() > pal_size)
 				throw invalid_argument(
-						"Input palette data too small to form a valid palette");
+					"Input palette data too small to form a valid palette");
 
 			workpal = decode_pal(*defs.paldef, *defs.coldef, palbuffer);
 		}
@@ -132,9 +131,11 @@ int main(int argc, char ** argv)
 		t1 = chrono::high_resolution_clock::now();
 #endif
 
-		png::image<png::index_pixel> outimg { png_render(
-				defs.chrdef->width(), defs.chrdef->height(), out_buffer, workpal,
-				cfg.render_cfg) };
+		png::image<png::index_pixel> outimg { png_render(defs.chrdef->width(),
+			defs.chrdef->height(),
+			out_buffer,
+			workpal,
+			cfg.render_cfg) };
 
 #ifdef DEBUG
 		t2 = chrono::high_resolution_clock::now();
@@ -182,25 +183,24 @@ void process_args(int argc, char ** argv)
 	long_opts.push_back({ "border", no_argument, nullptr, 'b' });
 	long_opts.push_back({ "row-size", required_argument, nullptr, 'r' });
 	long_opts.push_back({ "output", required_argument, nullptr, 'o' });
-	long_opts.push_back({ 0, 0, 0, 0 });
+	long_opts.push_back({ nullptr, 0, nullptr, 0 });
 
 	opt_details.push_back({ false, L"Path to input encoded tiles", nullptr });
 	opt_details.push_back({ false, L"Path to input encoded palette", nullptr });
 	opt_details.push_back({ false, L"Use palette transparency", nullptr });
 	opt_details.push_back(
-			{ false, L"Palette index to use for transparency", nullptr });
-	opt_details.push_back({ false,
-													L"Draw a 1 pixel border around tiles in output image",
-													nullptr });
+		{ false, L"Palette index to use for transparency", nullptr });
 	opt_details.push_back(
-			{ false, L"Number of tiles per row in output image", nullptr });
+		{ false, L"Draw a 1 pixel border around tiles in output image", nullptr });
+	opt_details.push_back(
+		{ false, L"Number of tiles per row in output image", nullptr });
 	opt_details.push_back({ false, L"Path to output PNG image", nullptr });
 
 	// read/parse arguments
 	while(true)
 	{
 		const auto this_opt =
-				getopt_long(argc, argv, short_opts.data(), long_opts.data(), nullptr);
+			getopt_long(argc, argv, short_opts.data(), long_opts.data(), nullptr);
 		if(this_opt == -1)
 			break;
 

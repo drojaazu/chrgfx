@@ -15,10 +15,11 @@ char constexpr BLOCK_OPENER { '{' };
 char constexpr BLOCK_CLOSER { '}' };
 char constexpr KV_DELIM { ' ' };
 
-defblock_key_error::defblock_key_error(string const & what, string const & key,
-																			 string const & block_id) :
-		m_key(key),
-		m_block_id(block_id), runtime_error(what)
+defblock_key_error::defblock_key_error(
+	string const & what, string key, string block_id) :
+		runtime_error(what),
+		m_key(std::move(key)),
+		m_block_id(std::move(block_id))
 {
 }
 
@@ -33,11 +34,11 @@ string defblock_key_error::block() const
 }
 
 defblock_value_error::defblock_value_error(string const & what,
-																					 string const & key,
-																					 string const & value,
-																					 string const & block_id) :
+	string const & key,
+	string value,
+	string const & block_id) :
 		defblock_key_error(what, key, block_id),
-		m_value(value)
+		m_value(std::move(value))
 {
 }
 
@@ -48,7 +49,7 @@ string defblock_value_error::value() const
 
 defblock parse_defblock(istream & in)
 {
-	if(!in.good())
+	if(! in.good())
 		throw runtime_error("Could not read from defblock stream");
 
 	string opener_check;
@@ -95,7 +96,7 @@ defblock parse_defblock(istream & in)
 
 multimap<string const, defblock const> load_defblocks(istream & in)
 {
-	if(!in.good())
+	if(! in.good())
 		throw runtime_error("Could not read from defblock stream");
 
 	string this_line, cached_line, this_def_name, this_block;

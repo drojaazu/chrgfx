@@ -14,25 +14,26 @@ namespace chrgfx
 class paldef : public gfxdef
 {
 public:
-	paldef(std::string const & id, ushort const entry_datasize,
-				 ushort const pal_length,
-				 std::optional<ushort const> const pal_datasize = std::nullopt,
-				 std::string const & description = "");
+	paldef(std::string const & id,
+		ushort const entry_datasize,
+		ushort const pal_length,
+		std::optional<ushort const> const pal_datasize = std::nullopt,
+		std::string const & description = "");
 
 	/**
 	 * @return number of entries in the palette
 	 */
-	ushort pal_length() const;
+	[[nodiscard]] ushort pal_length() const;
 
 	/**
 	 * @return data size of a single entry *in bits*
 	 */
-	ushort entry_datasize() const;
+	[[nodiscard]] ushort entry_datasize() const;
 
 	/**
 	 * @return data size of the whole palette *in bits*
 	 */
-	ushort datasize() const;
+	[[nodiscard]] ushort datasize() const;
 
 protected:
 	ushort const m_pal_length;

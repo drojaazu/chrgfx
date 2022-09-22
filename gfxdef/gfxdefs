@@ -293,7 +293,7 @@ chrdef
   width 8
   height 8
   bpp 4
-  planeoffset 0,8,128,136
+  planeoffset 0, 8, 128, 136
   pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
   rowoffset 0, 16, 32, 48, 64, 80, 96, 112
 }
@@ -307,7 +307,7 @@ chrdef
   width 16
   height 16
   bpp 4
-  planeoffset 0,256,512,768
+  planeoffset 0, 256, 512, 768
   pixeloffset 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
   rowoffset 0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240
 }
@@ -324,7 +324,7 @@ chrdef
   width 16
   height 16
   bpp 4
-  planeoffset 8,0,24,16
+  planeoffset 8, 0, 24, 16
 
   pixeloffset 519, 518, 517, 516, 515, 514, 513, 512, 7, 6, 5, 4, 3, 2, 1, 0
   rowoffset 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480
@@ -342,7 +342,7 @@ chrdef
   width 16
   height 16
   bpp 4
-  planeoffset 0,8,16,24
+  planeoffset 0, 8, 16, 24
 
   pixeloffset 519, 518, 517, 516, 515, 514, 513, 512, 7, 6, 5, 4, 3, 2, 1, 0
   rowoffset 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480
@@ -359,7 +359,7 @@ chrdef
   height 16
   bpp 4
   #planeoffset 24, 16, 8, 0
-  planeoffset 0,8,16,24
+  planeoffset 0, 8, 16, 24
 
   pixeloffset 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39
   rowoffset 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960
@@ -374,9 +374,9 @@ chrdef
   width 8
   height 8
   bpp 4
-  planeoffset 0,8,16,24
-  pixeloffset 0,1,2,3,4,5,6,7
-  rowoffset 0,32,64,96,128,160,192,224
+  planeoffset 0, 8, 16, 24
+  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
+  rowoffset 0, 32, 64, 96, 128, 160, 192, 224
 }
 
 chrdef
@@ -387,9 +387,9 @@ chrdef
   width 8
   height 8
   bpp 4
-  planeoffset 0,8,128,136
-  pixeloffset 0,1,2,3,4,5,6,7
-  rowoffset 0,16,32,48,64,80,96,112
+  planeoffset 0, 8, 128, 136
+  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
+  rowoffset 0, 16, 32, 48, 64, 80, 96, 112
 }
 
 chrdef
@@ -401,9 +401,9 @@ chrdef
   width 8
   height 8
   bpp 2
-  planeoffset 0,1
-  pixeloffset 6,4,2,0,14,12,10,8
-  rowoffset 0,16,32,48,64,80,96,112
+  planeoffset 0, 1
+  pixeloffset 6, 4, 2, 0, 14, 12, 10, 8
+  rowoffset 0, 16, 32, 48, 64, 80, 96, 112
 }
 
 chrdef
@@ -415,9 +415,9 @@ chrdef
   width 8
   height 8
   bpp 2
-  planeoffset 0,64
-  pixeloffset 0,1,2,3,4,5,6,7
-  rowoffset 0,8,16,24,32,40,48,56
+  planeoffset 0, 64
+  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
+  rowoffset 0, 8, 16, 24, 32, 40, 48, 56
 }
 
 chrdef
@@ -429,7 +429,7 @@ chrdef
   width 8
   height 8
   bpp 2
-  planeoffset 0,8
+  planeoffset 0, 8
   pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
   rowoffset 0, 16, 32, 48, 64, 80, 96, 112
 }
@@ -441,9 +441,9 @@ chrdef
   width 8
   height 8
   bpp 4
-  planeoffset 3,2,1,0
-  pixeloffset 0,4,8,12,16,20,24,28
-  rowoffset 0,32,64,96,128,160,192,224
+  planeoffset 3, 2, 1, 0
+  pixeloffset 0, 4, 8, 12, 16, 20, 24, 28
+  rowoffset 0, 32, 64, 96, 128, 160, 192, 224
 }
 
 chrdef
@@ -456,7 +456,7 @@ chrdef
   height 16
   bpp 4
   #planeoffset 24, 16, 8, 0
-  planeoffset 0,8,16,24
+  planeoffset 0, 8, 16, 24
 
   pixeloffset 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39
   rowoffset 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960
@@ -497,12 +497,12 @@ rgbcoldef
   # D = "dark bit", acts as shared LSB for all color components
   bitdepth 6
   color_passes 3
-  red_shift 15,14,8
-  red_size 1,1,4
-  green_shift 15,13,4
-  green_size 1,1,4
-  blue_shift 15,12,0
-  blue_size 1,1,4
+  red_shift 15, 14, 8
+  red_size 1, 1, 4
+  green_shift 15, 13, 4
+  green_size 1, 1, 4
+  blue_shift 15, 12, 0
+  blue_size 1, 1, 4
   big_endian 1
 }
 
@@ -528,12 +528,12 @@ rgbcoldef
   # from PNG to raw CPS data
   bitdepth 8
   color_passes 2
-  red_shift 12,8
-  red_size 4,4
-  green_shift 12,4
-  green_size 4,4
-  blue_shift 12,0
-  blue_size 4,4
+  red_shift 12, 8
+  red_size 4, 4
+  green_shift 12, 4
+  green_size 4, 4
+  blue_shift 12, 0
+  blue_size 4, 4
 
   big_endian 1
 }

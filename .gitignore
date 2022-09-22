@@ -1,6 +1,5 @@
 build/
-bin/
 etc/
 docs/
 .vscode/
-.clang-format
+.cache/

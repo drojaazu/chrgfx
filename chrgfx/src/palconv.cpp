@@ -7,21 +7,19 @@ namespace chrgfx
 
 using namespace std;
 
-byte_t * encode_pal(paldef const & paldef, coldef const & coldef,
-										png::palette const & palette)
+byte_t * encode_pal(
+	paldef const & paldef, coldef const & coldef, png::palette const & palette)
 {
 	size_t const
-			// size of a single color within a palette, in bits
-			entry_datasize { paldef.entry_datasize() },
-			// as above, in bytes
-			entry_datasize_bytes { ((unsigned)(entry_datasize >> 3)) +
-														 (entry_datasize % 8 > 0 ? 1 : 0) },
-			// total size of a subpalette, in bits
-			subpal_datasize { paldef.datasize() },
-			// as above, in bytes
-			subpal_datasize_bytes { (unsigned)(paldef.datasize() >> 3) },
-			// total number of entries in a subpalette
-			subpal_length { paldef.pal_length() };
+		// size of a single color within a palette, in bits
+		entry_datasize { paldef.entry_datasize() },
+		// as above, in bytes
+		entry_datasize_bytes { ((unsigned) (entry_datasize >> 3)) +
+													 (entry_datasize % 8 > 0 ? 1 : 0) },
+		// as above, in bytes
+		subpal_datasize_bytes { (unsigned) (paldef.datasize() >> 3) },
+		// total number of entries in a subpalette
+		subpal_length { paldef.pal_length() };
 	// total number of subpalettes available in the given palette
 	// subpal_count { basic_palette.size() / subpal_length };
 	/*
@@ -52,65 +50,58 @@ byte_t * encode_pal(paldef const & paldef, coldef const & coldef,
 	}
 
 	size_t
-			// tracks bit position within the paldata
-			bit_align_pos { 0 },
-			byte_align_pos { 0 },
-			// mod 8 of bitpos, indicating number of bits past the last byte_t aligned
-			// boundary at which the read pointer is, and thus the number of bits
-			// that the entry should be shifted in order to bring it to its correct
-			// value
-			bit_align_mod { 0 };
+		// tracks bit position within the paldata
+		bit_align_pos { 0 },
+		byte_align_pos { 0 },
+		// mod 8 of bitpos, indicating number of bits past the last byte_t aligned
+		// boundary at which the read pointer is, and thus the number of bits
+		// that the entry should be shifted in order to bring it to its correct
+		// value
+		bit_align_mod { 0 };
 
-	auto out = new byte_t[subpal_datasize_bytes];
-	// auto out { new u8[subpal_datasize_bytes] };
+	auto out { new byte_t[subpal_datasize_bytes] };
 	std::fill_n(out, subpal_datasize_bytes, 0);
-
-	// prepare space and function for data layout depending on endianness
-	char entry_temp[entry_datasize_bytes];
 
 	// converted color
 	u32 this_entry { 0 };
+	auto out_ptr { out };
+	size_t entry_count { 0 };
 
-	// size_t outdata_bit_ptr { 0 }, byte_offset { 0 }, bit_offset { 0 };
-
-	auto out_ptr = &out[0];
-
-	// auto paldata_iter { basic_palette.begin() +
-	//										(subpal_idx * subpal_datasize_bytes) };
-	auto paldata_iter = palette.begin();
-
-	// for every color in the subpal
-	for(uint this_subpal_entry { 0 }; this_subpal_entry < subpal_length;
-			++this_subpal_entry)
+	for(auto const & color : palette)
 	{
+		// iterate over the colors in the color palette, but only up to the number
+		// of colors in the output format subpal length
+		if(entry_count >= subpal_length)
+			break;
+
 		byte_align_pos = bit_align_pos >> 3;
 		bit_align_mod = bit_align_pos % 8;
 
 		switch(coldef.type())
 		{
 			case rgb:
-				this_entry =
-						encode_col(static_cast<rgbcoldef const &>(coldef), *paldata_iter);
+				this_entry = encode_col(static_cast<rgbcoldef const &>(coldef), color);
 				break;
 			case ref:
-				this_entry =
-						encode_col(static_cast<refcoldef const &>(coldef), *paldata_iter);
+				this_entry = encode_col(static_cast<refcoldef const &>(coldef), color);
 				break;
 			default:
-				// should never happen, but for completeness
+				// should never happen, but for completeness:
 				throw runtime_error("Invalid coldef type");
 		}
+
 		if(bit_align_mod > 0)
 		{
 			this_entry <<= bit_align_mod;
 			this_entry |= out[byte_align_pos];
 		}
 
-		copyfunc((char *)&this_entry, ((char *)&this_entry) + entry_datasize_bytes,
-						 (char *)out_ptr);
+		copyfunc((char *) &this_entry,
+			((char *) &this_entry) + entry_datasize_bytes,
+			(char *) out_ptr);
 
 		out_ptr += entry_datasize_bytes;
-		++paldata_iter;
+		++entry_count;
 
 		byte_align_pos += entry_datasize;
 	}
@@ -118,23 +109,21 @@ byte_t * encode_pal(paldef const & paldef, coldef const & coldef,
 	return out;
 }
 
-palette decode_pal(paldef const & paldef, coldef const & coldef,
-									 byte_t const * palette)
+palette decode_pal(
+	paldef const & paldef, coldef const & coldef, byte_t const * palette)
 {
 
 	// some basic data geometry
 	size_t const
-			// size of a single color within a palette, in bits
-			entry_datasize { paldef.entry_datasize() },
-			// as above, in bytes
-			entry_datasize_bytes { (entry_datasize >> 3) +
-														 (entry_datasize % 8 > 0 ? 1 : 0) },
-			// total size of a subpalette, in bits
-			subpal_datasize { paldef.datasize() },
-			// as above, in bytes
-			subpal_datasize_bytes { (unsigned)(paldef.datasize() >> 3) },
-			// total number of entries in a subpalette
-			subpal_length { paldef.pal_length() };
+		// size of a single color within a palette, in bits
+		entry_datasize { paldef.entry_datasize() },
+		// as above, in bytes
+		entry_datasize_bytes { (entry_datasize >> 3) +
+													 (entry_datasize % 8 > 0 ? 1 : 0) },
+		// total size of a subpalette, in bits
+		subpal_datasize { paldef.datasize() },
+		// total number of entries in a subpalette
+		subpal_length { paldef.pal_length() };
 
 	// used to copy the color entry bytes into a temp array
 	// to be cast as a machine-native u32
@@ -150,18 +139,19 @@ palette decode_pal(paldef const & paldef, coldef const & coldef,
 
 	// processing loop setup
 	size_t
-			// tracks bit position within the paldata
-			bit_align_pos { 0 },
-			// mod 8 of bitpos, indicating number of bits past the last byte_t aligned
-			// boundary at which the read pointer is, and thus the number of bits
-			// that the entry should be shifted in order to bring it to its correct
-			// value
-			bit_align_mod { 0 }, temp_buff_size { entry_datasize_bytes };
+		// tracks bit position within the paldata
+		bit_align_pos { 0 },
+		// mod 8 of bitpos, indicating number of bits past the last byte_t aligned
+		// boundary at which the read pointer is, and thus the number of bits
+		// that the entry should be shifted in order to bring it to its correct
+		// value
+		bit_align_mod { 0 }, byte_offset { 0 },
+		temp_buff_size { entry_datasize_bytes };
 
 	// the temporary buffer will hold the entry value "extracted" from the palette
-	// data byte_t by byte_t before it is copied to another buffer respecting the
+	// data byte by byte before it is copied to another buffer respecting the
 	// endianness of the local machine
-	char temp_buff[temp_buff_size];
+	byte_t temp_buff[temp_buff_size];
 	fill_n(temp_buff, temp_buff_size, 0);
 
 	// the entry buffer will hold the "extracted" palette entry as a native
@@ -182,7 +172,7 @@ palette decode_pal(paldef const & paldef, coldef const & coldef,
 	for(size_t this_subpal_entry { 0 }; this_subpal_entry < subpal_length;
 			++this_subpal_entry)
 	{
-		// byte_offset = bit_align_pos / 8;
+		byte_offset = bit_align_pos / 8;
 		bit_align_mod = bit_align_pos % 8;
 
 		// this is inefficient when working with bit-sized palette entries
@@ -193,8 +183,9 @@ palette decode_pal(paldef const & paldef, coldef const & coldef,
 		// a few times...
 
 		// copy all data for one color entry into the temp buffer
-		copyfunc((char *)paldata_iter, (char *)paldata_iter + temp_buff_size,
-						 temp_buff);
+		copyfunc((char *) paldata_iter + byte_offset,
+			(char *) paldata_iter + byte_offset + temp_buff_size,
+			(char *) temp_buff);
 
 		// recast that buffer (array) as a 32 bit value, shift it into its
 		// correct position, and mask off extraneous upper bits
@@ -208,11 +199,11 @@ palette decode_pal(paldef const & paldef, coldef const & coldef,
 		{
 			case rgb:
 				out[this_subpal_entry] =
-						decode_col(static_cast<rgbcoldef const &>(coldef), entry_buff);
+					decode_col(static_cast<rgbcoldef const &>(coldef), entry_buff);
 				break;
 			case ref:
 				out[this_subpal_entry] =
-						decode_col(static_cast<refcoldef const &>(coldef), entry_buff);
+					decode_col(static_cast<refcoldef const &>(coldef), entry_buff);
 				break;
 			default:
 				// should never happen, but for completeness
@@ -231,7 +222,7 @@ palette decode_pal(paldef const & paldef, coldef const & coldef,
 			bit_align_pos += subpal_datasize - (entry_datasize * subpal_length);
 		}
 
-		paldata_iter += entry_datasize_bytes;
+		// paldata_iter += entry_datasize_bytes;
 	}
 
 	return out;

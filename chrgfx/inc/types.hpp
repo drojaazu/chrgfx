@@ -10,25 +10,28 @@
 #ifndef __MOTOI__TYPES_HPP
 #define __MOTOI__TYPES_HPP
 
+#include <climits>
+#include <cstdint>
 #include <memory>
-#include <stdint.h>
 
-typedef unsigned char uchar;
-typedef unsigned int uint;
-typedef unsigned short ushort;
-typedef unsigned long ulong;
+using uchar = unsigned char;
+using uint = unsigned int;
+using ushort = unsigned short;
+using ulong = unsigned long;
 
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
+using u8 = uint8_t;
+using u16 = uint16_t;
+using u32 = uint32_t;
 
-typedef int8_t s8;
-typedef int16_t s16;
-typedef int32_t s32;
+using s8 = int8_t;
+using s16 = int16_t;
+using s32 = int32_t;
 
-typedef char byte_t;
+using byte_t = uint8_t;
 
-template <typename T> using uptr = std::unique_ptr<T[]>;
-template <typename T> using sptr = std::shared_ptr<T[]>;
+template <typename T>
+using uptr = std::unique_ptr<T>;
+template <typename T>
+using sptr = std::shared_ptr<T>;
 
 #endif

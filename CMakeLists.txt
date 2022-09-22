@@ -14,13 +14,13 @@ set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
 # chrgfx library
-project(chrgfx VERSION 2.0.2 LANGUAGES CXX)
+project(chrgfx VERSION 2.1.0 LANGUAGES CXX)
 add_subdirectory(chrgfx)
 
 # conversion executables
-project(chr2png VERSION 1.2.0 LANGUAGES CXX)
+project(chr2png VERSION 1.3.0 LANGUAGES CXX)
 add_subdirectory(chr2png)
-project(png2chr VERSION 1.2.1 LANGUAGES CXX)
+project(png2chr VERSION 1.3.0 LANGUAGES CXX)
 add_subdirectory(png2chr)
 
 if(NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)

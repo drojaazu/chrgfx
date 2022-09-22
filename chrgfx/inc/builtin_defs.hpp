@@ -5,7 +5,7 @@
 #include "coldef.hpp"
 #include "paldef.hpp"
 
-namespace chrgfx
+namespace chrgfx::gfxdefs
 {
 
 /**
@@ -19,8 +19,6 @@ namespace chrgfx
  * You can add your own built-in definitions here to create a customized
  * library for specific applications.
  */
-namespace gfxdefs
-{
 
 /**
  * @brief Minimal, generic CHR format (1bpp 8x8)
@@ -37,7 +35,6 @@ extern refcoldef basic_8bit_random;
  */
 extern paldef basic_256color;
 
-} // namespace gfxdefs
-} // namespace chrgfx
+} // namespace chrgfx::gfxdefs
 
 #endif

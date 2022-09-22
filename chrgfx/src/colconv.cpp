@@ -28,11 +28,11 @@ u32 encode_col(rgbcoldef const & rgbcoldef, color const & color)
 
 	u32 out { 0 };
 	u8 bitdepth = rgbcoldef.bitdepth();
-	u8 red { reduce_bitdepth(color.red, bitdepth) }, red_pass_shift { 0 },
-			green { reduce_bitdepth(color.green, bitdepth) }, green_pass_shift { 0 },
-			blue { reduce_bitdepth(color.blue, bitdepth) }, blue_pass_shift { 0 };
+	byte_t red { reduce_bitdepth(color.red, bitdepth) }, red_pass_shift { 0 },
+		green { reduce_bitdepth(color.green, bitdepth) }, green_pass_shift { 0 },
+		blue { reduce_bitdepth(color.blue, bitdepth) }, blue_pass_shift { 0 };
 
-	u8 bitmask { 0 };
+	byte_t bitmask;
 	u32 temp;
 
 	for(auto const & this_pass : rgbcoldef.layout())
@@ -76,7 +76,7 @@ psuedo:
  */
 	u8 red { 0 }, green { 0 }, blue { 0 };
 	u8 red_bitcount { 0 }, green_bitcount { 0 }, blue_bitcount { 0 };
-	u8 bitmask { 0 };
+	u8 bitmask;
 	for(rgb_layout const & this_pass : rgbcoldef.layout())
 	{
 		bitmask = create_bitmask8(this_pass.red_size());

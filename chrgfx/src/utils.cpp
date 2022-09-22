@@ -107,8 +107,9 @@ palette make_pal_random()
 
 	for(size_t paliter = 0; paliter < 256;)
 	{
-		color temp_col { (png::byte)(rand() % 255), (png::byte)(rand() % 255),
-										 (png::byte)(rand() % 255) };
+		color temp_col { (png::byte)(rand() % 255),
+			(png::byte)(rand() % 255),
+			(png::byte)(rand() % 255) };
 		// todo: apparently png::color does not implement operator== so we'll need
 		// to extend it someday...
 		/*
@@ -129,10 +130,10 @@ bool is_system_bigendian()
 	// shamelessly stolen from stack overflow
 	// https://stackoverflow.com/questions/1001307/detecting-endianness-programmatically-in-a-c-program/56191401#56191401
 	int const value { 0x01 };
-	void const * address = static_cast<const void *>(&value);
-	unsigned char const * least_significant_address =
-			static_cast<const unsigned char *>(address);
-	return !(*least_significant_address == 0x01);
+	auto const * address = static_cast<void const *>(&value);
+	auto const * least_significant_address =
+		static_cast<unsigned char const *>(address);
+	return ! (*least_significant_address == 0x01);
 }
 
 const bool bigend_sys = is_system_bigendian();

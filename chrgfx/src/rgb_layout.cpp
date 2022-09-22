@@ -6,10 +6,11 @@ namespace chrgfx
 {
 
 rgb_layout::rgb_layout(pair<short, ushort> const & red,
-											 pair<short, ushort> const & green,
-											 pair<short, ushort> const & blue) :
+	pair<short, ushort> const & green,
+	pair<short, ushort> const & blue) :
 		m_red(red),
-		m_green(green), m_blue(blue)
+		m_green(green),
+		m_blue(blue)
 {
 }
 

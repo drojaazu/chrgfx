@@ -1,10 +1,14 @@
 #include "gfxprofile.hpp"
 
-gfxprofile::gfxprofile(string const & id, string const & chrdef_id,
-											 string const & coldef_id, string const & paldef_id,
-											 string const & description) :
+gfxprofile::gfxprofile(string const & id,
+	string chrdef_id,
+	string coldef_id,
+	string paldef_id,
+	string const & description) :
 		gfxdef(id, description),
-		m_chrdef_id(chrdef_id), m_coldef_id(coldef_id), m_paldef_id(paldef_id)
+		m_chrdef_id(std::move(chrdef_id)),
+		m_coldef_id(std::move(coldef_id)),
+		m_paldef_id(std::move(paldef_id))
 {
 }
 

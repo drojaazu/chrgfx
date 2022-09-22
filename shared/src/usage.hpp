@@ -5,6 +5,7 @@
  *
  * Updates:
  * 20220415 Initial
+ * 20220722 Using const in show_usage parameters
  */
 
 #ifndef __MOTOI__USAGE_HPP
@@ -13,6 +14,7 @@
 #include <getopt.h>
 #include <iostream>
 #include <ostream>
+#include <sstream>
 
 struct option_details
 {
@@ -22,6 +24,13 @@ struct option_details
 };
 
 /**
+ * @brief Displays program version
+ *
+ * @param output stream to write the version
+ */
+void show_version(std::wostream & output);
+
+/**
  * @brief Displays program options and usage
  *
  * @param opts array of @c option structs; final entry should be all zero
@@ -29,7 +38,8 @@ struct option_details
  * order as @c opts
  * @param output stream to write the usage
  */
-void show_usage(option * opts, option_details * details,
-								std::wostream & output = std::wcout);
+void show_usage(option const * opts,
+	option_details const * details,
+	std::wostream & output = std::wcout);
 
 #endif

@@ -11,9 +11,9 @@ namespace chrgfx
 {
 
 pixel_buffer<index_pixel> render(size_t const tile_width,
-																 size_t const tile_height,
-																 buffer<byte_t> const & chrdata,
-																 render_config const & rcfg)
+	size_t const tile_height,
+	buffer<byte_t> const & chrdata,
+	render_config const & rcfg)
 {
 
 	if(tile_width == 0 || tile_height == 0)
@@ -25,62 +25,62 @@ pixel_buffer<index_pixel> render(size_t const tile_width,
 		throw invalid_argument("Not enough data in buffer to render a tile");
 
 	size_t const
-			// number of tiles in the final image
-			chr_count { chrdata.size() / chr_datasize },
+		// number of tiles in the final image
+		chr_count { chrdata.size() / chr_datasize },
 
-			// excess tiles in the final row
-			final_chrrow_excess { chr_count % rcfg.row_size },
+		// excess tiles in the final row
+		final_chrrow_excess { chr_count % rcfg.row_size },
 
-			// final image dimensions (in chrs)
-			outimg_chrwidth { rcfg.row_size },
-			outimg_chrheight { chr_count / outimg_chrwidth +
-												 (final_chrrow_excess > 0 ? 1 : 0) },
+		// final image dimensions (in chrs)
+		outimg_chrwidth { rcfg.row_size },
+		outimg_chrheight { chr_count / outimg_chrwidth +
+											 (final_chrrow_excess > 0 ? 1 : 0) },
 
-			// data size of one full row of tiles
-			// (used for pointer offsetting)
-			chrrow_datasize { chr_datasize * outimg_chrwidth },
+		// data size of one full row of tiles
+		// (used for pointer offsetting)
+		chrrow_datasize { chr_datasize * outimg_chrwidth },
 
-			// factor in extra pixels from border, if present
-			border_pxlwidth { rcfg.draw_border ? outimg_chrwidth - 1 : 0 },
-			border_pxlheight { rcfg.draw_border ? outimg_chrheight - 1 : 0 },
+		// factor in extra pixels from border, if present
+		border_pxlwidth { rcfg.draw_border ? outimg_chrwidth - 1 : 0 },
+		border_pxlheight { rcfg.draw_border ? outimg_chrheight - 1 : 0 },
 
-			// final image dimensions (in pixels)
-			// outimg_pxlwidth { (outimg_chrwidth * chr_pxlwidth) + border_pixel_width
-			// }, outimg_pxlheight { (outimg_chrheight * chr_pxlheight) +
-			//									 border_pixel_height };
-			outimg_pxlwidth { (outimg_chrwidth * tile_width) + border_pxlwidth },
-			outimg_pxlheight { (outimg_chrheight * tile_height) + border_pxlheight };
+		// final image dimensions (in pixels)
+		// outimg_pxlwidth { (outimg_chrwidth * chr_pxlwidth) + border_pixel_width
+		// }, outimg_pxlheight { (outimg_chrheight * chr_pxlheight) +
+		//									 border_pixel_height };
+		outimg_pxlwidth { (outimg_chrwidth * tile_width) + border_pxlwidth },
+		outimg_pxlheight { (outimg_chrheight * tile_height) + border_pxlheight };
 
 	pixel_buffer<index_pixel> out_pxlbuffer(outimg_pxlwidth, outimg_pxlheight);
 
 	// iters and cached values and such for processing
 	size_t
-			// the current tile row
-			i_chrrow { 0 },
-			// the current pixel row in the current tile
-			i_chr_pxlrow { 0 },
-			// the current tile within the current tile row
-			i_chrcol { 0 },
-			// the current pixel row in the output image buffer
-			i_out_pxlrow { 0 },
-			// number of tiles in the current chr row; this will be constant until the
-			// final row if there was a final row tile shortage
-			this_chrrow_chrcount { outimg_chrwidth },
-			// offset to start of the pixel row in the next chr from the end of the
-			// previous
-			next_chr { chr_datasize - tile_width };
+		// the current tile row
+		i_chrrow { 0 },
+		// the current pixel row in the current tile
+		i_chr_pxlrow { 0 },
+		// the current tile within the current tile row
+		i_chrcol { 0 },
+		// the current pixel row in the output image buffer
+		i_out_pxlrow { 0 },
+		// number of tiles in the current chr row; this will be constant until the
+		// final row if there was a final row tile shortage
+		this_chrrow_chrcount { outimg_chrwidth },
+		// offset to start of the pixel row in the next chr from the end of the
+		// previous
+		next_chr { chr_datasize - tile_width };
 
 	// the pixel row which will hold the amalgamated tile pixel rows
 	vector<index_pixel> pxlrow_work(outimg_pxlwidth, rcfg.trns_index);
 
 	// input data pointers
 	byte_t const
-			// pointer to start of current tile row
-			*ptr_in_chrrow { chrdata.data() },
-			// pointer to start of the current pixel row within the current tile row
-			*ptr_in_pxlrow { ptr_in_chrrow },
-			// pointer to the start of the current pixel row within the current tile
-			*ptr_in_pxlchr { ptr_in_pxlrow };
+		// pointer to start of current tile row
+		*ptr_in_chrrow { chrdata.data() },
+		// pointer to start of the current pixel row within the current tile row
+		*ptr_in_pxlrow { ptr_in_chrrow },
+		// pointer to the start of the current pixel row within the current tile
+		*ptr_in_pxlchr { ptr_in_pxlrow };
 
 	index_pixel * ptr_pxlrow_work { pxlrow_work.data() };
 
@@ -147,14 +147,15 @@ pixel_buffer<index_pixel> render(size_t const tile_width,
 	return out_pxlbuffer;
 }
 
-image<index_pixel> png_render(size_t const tile_width, size_t const tile_height,
-															buffer<byte_t> const & chrdata,
-															png::palette const & pal,
-															render_config const & rcfg)
+image<index_pixel> png_render(size_t const tile_width,
+	size_t const tile_height,
+	buffer<byte_t> const & chrdata,
+	png::palette const & pal,
+	render_config const & rcfg)
 {
 	if(pal.size() < 256)
 		throw invalid_argument(
-				"Palette must contain a full 256 entries for PNG export");
+			"Palette must contain a full 256 entries for PNG export");
 
 	auto pixbuf { render(tile_width, tile_height, chrdata, rcfg) };
 

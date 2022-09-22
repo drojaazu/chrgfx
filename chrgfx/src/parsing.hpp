@@ -23,40 +23,34 @@
  *
  * @param s Mutable string
  */
-template <typename StringT> void strip_cr(std::basic_string<StringT> & s)
+template <typename StringT>
+void strip_cr(std::basic_string<StringT> & s)
 {
 	s.erase(std::remove(s.begin(), s.end(), '\r'), s.end());
 }
 
 /**
- * @brief Removes any spaces or tabs on the left side of a string
+ * @brief Removes any spaces, tabs or common inivisible control characters on
+ * the left side of a string
  *
  * @param s Mutable string
  */
-template <typename StringT> void ltrim(std::basic_string<StringT> & s)
+template <typename StringT>
+void ltrim(std::basic_string<StringT> & s)
 {
-	size_t at_space = s.find_first_not_of(' ');
-	size_t at_tab = s.find_last_not_of('\t');
-	if(at_space == std::string::npos && at_tab == std::string::npos)
-		return;
-	size_t at = at_space >= at_tab ? at_space : at_tab;
-	s.erase(0, at);
+	s.erase(0, s.find_first_not_of("\t\n\v\f\r "));
 }
 
 /**
- * @brief Removes any spaces or tabs on the right side of a string
+ * @brief Removes any spaces, tabs or common inivisible control characters on
+ * the right side of a string
  *
  * @param s Mutable string
  */
-template <typename StringT> void rtrim(std::basic_string<StringT> & s)
+template <typename StringT>
+void rtrim(std::basic_string<StringT> & s)
 {
-	size_t at_space = s.find_first_not_of(' ');
-	size_t at_tab = s.find_last_not_of('\t');
-	if(at_space == std::string::npos && at_tab == std::string::npos)
-		return;
-	size_t at = at_space <= at_tab ? at_space : at_tab;
-
-	s.erase(at, s.size() - at);
+	s.erase(s.find_last_not_of("\t\n\v\f\r ") + 1);
 }
 
 /**
@@ -64,7 +58,8 @@ template <typename StringT> void rtrim(std::basic_string<StringT> & s)
  *
  * @param s Mutable string
  */
-template <typename StringT> void trim(std::basic_string<StringT> & s)
+template <typename StringT>
+void trim(std::basic_string<StringT> & s)
 {
 	ltrim(s);
 	rtrim(s);
@@ -75,7 +70,8 @@ template <typename StringT> void trim(std::basic_string<StringT> & s)
  *
  * @param s Mutable string
  */
-template <typename StringT> void lower(std::basic_string<StringT> & s)
+template <typename StringT>
+void lower(std::basic_string<StringT> & s)
 {
 	std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 }
@@ -85,7 +81,8 @@ template <typename StringT> void lower(std::basic_string<StringT> & s)
  *
  * @param s Mutable string
  */
-template <typename StringT = char> void upper(std::basic_string<StringT> & s)
+template <typename StringT = char>
+void upper(std::basic_string<StringT> & s)
 {
 	std::transform(s.begin(), s.end(), s.begin(), ::toupper);
 }
@@ -133,18 +130,21 @@ T sto_pos(std::basic_string<StringT> const & s, int const base = 10)
 }
 
 /**
- * @brief Converts a delimited list of integer values into a vector
+ * @brief Converts a delimited list of numeric values into a vector
  */
 template <typename T, typename StringT>
-std::vector<T> stovec(std::basic_string<StringT> const & s,
-											char const delim = ',')
+std::vector<T> stovec(
+	std::basic_string<StringT> const & s, char const delim = ',')
 {
 	std::vector<T> out;
 	std::istringstream ss { s };
 	std::basic_string<StringT> line;
 
 	while(getline(ss, line, delim))
+	{
+		trim(line);
 		out.push_back(sto<T>(line));
+	}
 
 	return out;
 }
@@ -154,7 +154,8 @@ std::vector<T> stovec(std::basic_string<StringT> const & s,
  * @note Allowed values: "t", "true", "1", "f", "false", "0" (upper or lower
  * case)
  */
-template <typename StringT> bool stob(std::basic_string<StringT> const & s)
+template <typename StringT>
+bool stob(std::basic_string<StringT> const & s)
 {
 	std::basic_string<StringT> s_work = s;
 	lower(s_work);
@@ -172,8 +173,8 @@ template <typename StringT> bool stob(std::basic_string<StringT> const & s)
  * @note Assumes input string has already been whitespace trimmed
  */
 template <typename StringT>
-std::pair<std::basic_string<StringT>, std::basic_string<StringT>>
-kvsplit(std::basic_string<StringT> const & line, char const delim = ' ')
+std::pair<std::basic_string<StringT>, std::basic_string<StringT>> kvsplit(
+	std::basic_string<StringT> const & line, char const delim = ' ')
 {
 	size_t delim_pos;
 	delim_pos = line.find(delim);
@@ -184,7 +185,7 @@ kvsplit(std::basic_string<StringT> const & line, char const delim = ' ')
 		throw std::invalid_argument(ss.str());
 	}
 	return { line.substr(0, delim_pos),
-					 line.substr(delim_pos + 1, std::string::npos) };
+		line.substr(delim_pos + 1, std::string::npos) };
 }
 
 #endif

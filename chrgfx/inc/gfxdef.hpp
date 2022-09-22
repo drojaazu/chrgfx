@@ -17,12 +17,12 @@ public:
 	gfxdef & operator=(gfxdef const &) = delete;
 	gfxdef & operator=(gfxdef &&) = delete;
 
-	std::string const & id() const;
+	[[nodiscard]] std::string const & id() const;
 
-	std::string const & description() const;
+	[[nodiscard]] std::string const & description() const;
 
 protected:
-	gfxdef(std::string const & id, std::string const & description = "");
+	gfxdef(std::string id, std::string description = "");
 
 	std::string const m_id;
 	std::string const m_desc;
