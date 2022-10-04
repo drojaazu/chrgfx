@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(PROJECT_CONTACT "Damian R (damian@motoi.pro)")
 set(PROJECT_WEBSITE "https://github.com/drojaazu")
+set(PROJECT_COPYRIGHT "©2017 Motoi Productions / Released under MIT License")
 
 set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx)
 

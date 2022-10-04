@@ -6,6 +6,7 @@
  * Updates:
  * 20220415 Initial
  * 20220722 Using const in show_usage parameters
+ * 20220914 Added show_version
  */
 
 #ifndef __MOTOI__USAGE_HPP
@@ -28,7 +29,7 @@ struct option_details
  *
  * @param output stream to write the version
  */
-void show_version(std::wostream & output);
+void show_version (std::wostream & output);
 
 /**
  * @brief Displays program options and usage
@@ -38,8 +39,6 @@ void show_version(std::wostream & output);
  * order as @c opts
  * @param output stream to write the usage
  */
-void show_usage(option const * opts,
-	option_details const * details,
-	std::wostream & output = std::wcout);
+void show_usage (option const * opts, option_details const * details, std::wostream & output = std::wcout);
 
 #endif

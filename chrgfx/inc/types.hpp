@@ -10,7 +10,7 @@
 #ifndef __MOTOI__TYPES_HPP
 #define __MOTOI__TYPES_HPP
 
-#include <climits>
+//#include <climits>
 #include <cstdint>
 #include <memory>
 

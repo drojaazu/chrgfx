@@ -4,7 +4,7 @@ using namespace std;
 
 namespace chrgfx
 {
-chrdef::chrdef(string const & id,
+chrdef::chrdef (string const & id,
 	ushort const width,
 	ushort const height,
 	ushort const bitdepth,
@@ -12,63 +12,63 @@ chrdef::chrdef(string const & id,
 	vector<ushort> const & pixeloffset,
 	vector<ushort> const & rowoffset,
 	string const & description) :
-		gfxdef(id, description),
-		m_width(width),
-		m_height(height),
-		m_bitdepth(bitdepth),
-		m_datasize(width * height * bitdepth),
-		m_planeoffsets(planeoffset),
-		m_pixeloffsets(pixeloffset),
-		m_rowoffsets(rowoffset)
+		gfxdef (id, description),
+		m_width (width),
+		m_height (height),
+		m_bitdepth (bitdepth),
+		m_datasize (width * height * bitdepth),
+		m_planeoffsets (planeoffset),
+		m_pixeloffsets (pixeloffset),
+		m_rowoffsets (rowoffset)
 {
 }
 
-auto chrdef::width() const -> ushort
+auto chrdef::width () const -> ushort
 {
 	return m_width;
 }
 
-ushort chrdef::height() const
+ushort chrdef::height () const
 {
 	return m_height;
 }
 
-ushort chrdef::bitdepth() const
+ushort chrdef::bitdepth () const
 {
 	return m_bitdepth;
 }
 
-ushort chrdef::datasize() const
+ushort chrdef::datasize () const
 {
 	return m_datasize;
 }
 
-vector<ushort> const & chrdef::plane_offsets() const
+vector<ushort> const & chrdef::plane_offsets () const
 {
 	return m_planeoffsets;
 }
 
-vector<ushort> const & chrdef::pixel_offsets() const
+vector<ushort> const & chrdef::pixel_offsets () const
 {
 	return m_pixeloffsets;
 }
 
-vector<ushort> const & chrdef::row_offsets() const
+vector<ushort> const & chrdef::row_offsets () const
 {
 	return m_rowoffsets;
 }
 
-ushort chrdef::plane_offset_at(ushort const index) const
+ushort chrdef::plane_offset_at (ushort const index) const
 {
 	return m_planeoffsets[index];
 }
 
-ushort chrdef::pixel_offset_at(ushort const index) const
+ushort chrdef::pixel_offset_at (ushort const index) const
 {
 	return m_pixeloffsets[index];
 }
 
-ushort chrdef::row_offset_at(ushort const index) const
+ushort chrdef::row_offset_at (ushort const index) const
 {
 	return m_rowoffsets[index];
 }

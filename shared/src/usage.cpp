@@ -6,57 +6,60 @@
  * Updates:
  * 20220415 Initial
  * 20220722 Using const in show_usage parameters
+ * 20220914 Added show_version
  */
 
 #include "usage.hpp"
 #include "app.hpp"
 
-void show_version(std::wostream & output)
+void show_version (std::wostream & output)
 {
 	std::wstringstream ss;
 	ss << APP::NAME << " - version " << APP::VERSION << std::endl;
 	ss << APP::CONTACT << " / " << APP::WEBSITE << std::endl;
 
-	output << ss.str();
+	output << ss.str ();
 }
 
-void show_usage(
-	option const * opts, option_details const * details, std::wostream & output)
+void show_usage (option const * opts, option_details const * details, std::wostream & output)
 {
-	setlocale(LC_ALL, "");
+	setlocale (LC_ALL, "");
 
-	show_version(output);
+	std::wstringstream ss;
+	ss << APP::NAME << " - version " << APP::VERSION << std::endl;
+	ss << APP::CONTACT << " / " << APP::WEBSITE << std::endl << std::endl;
+	ss << "Usage:" << std::endl;
 
-	output << std::endl << "Usage:" << std::endl;
-
-	while(true)
+	while (true)
 	{
-		if(opts->name == nullptr)
+		if (opts->name == nullptr)
 			break;
 
-		output << " --" << opts->name << ", -" << (char) opts->val;
-		if(opts->has_arg == required_argument)
+		ss << " --" << opts->name << ", -" << (char) opts->val;
+		if (opts->has_arg == required_argument)
 		{
-			if(details->arg_type != nullptr)
-				output << " <" << details->arg_type << ">";
+			if (details->arg_type != nullptr)
+				ss << " <" << details->arg_type << ">";
 			else
-				output << " <value>";
+				ss << " <value>";
 		}
-		if(opts->has_arg == optional_argument)
+		if (opts->has_arg == optional_argument)
 		{
-			if(details->arg_type != nullptr)
-				output << " <optional " << details->arg_type << ">";
+			if (details->arg_type != nullptr)
+				ss << " <optional " << details->arg_type << ">";
 			else
-				output << " <optional value>";
+				ss << " <optional value>";
 		}
-		output << std::endl;
-		output << "    ";
-		if(details->required)
-			output << "[Required] ";
+		ss << std::endl;
+		ss << "    ";
+		if (details->required)
+			ss << "[Required] ";
 
-		output << details->desc << std::endl;
+		ss << details->desc << std::endl;
 
 		++opts;
 		++details;
 	}
+
+	output << ss.str ();
 }

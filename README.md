@@ -8,7 +8,7 @@ Version 2 is primarily a code refactor. The library API is no longer compatible 
 
 There were speed gains in processing, most notatble with PNG rendering.
 
-An optional 1 pixel border around tiles rendered to PNG was added.
+An option for a 1 pixel border around tiles rendered to PNG was added.
 
 ## Building
 chrgfx requires [png++](https://www.nongnu.org/pngpp/) to be installed and uses CMake for the build process. From the root of the project directory:

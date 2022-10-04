@@ -1,6 +1,8 @@
 aux_source_directory("${CMAKE_CURRENT_SOURCE_DIR}/src" SRCFILES)
 aux_source_directory("${PROJECT_SOURCE_DIR}/shared/src" SRCFILES)
 
+set(PROJECT_BRIEF "Convert encoded tile based graphics to indexed PNG")
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/app.hpp.cfg" "${CMAKE_CURRENT_SOURCE_DIR}/src/app.hpp" ESCAPE_QUOTES)
 
 add_executable(chr2png ${SRCFILES})

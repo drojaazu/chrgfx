@@ -24,9 +24,9 @@
  * @param s Mutable string
  */
 template <typename StringT>
-void strip_cr(std::basic_string<StringT> & s)
+void strip_cr (std::basic_string<StringT> & s)
 {
-	s.erase(std::remove(s.begin(), s.end(), '\r'), s.end());
+	s.erase (std::remove (s.begin (), s.end (), '\r'), s.end ());
 }
 
 /**
@@ -36,9 +36,9 @@ void strip_cr(std::basic_string<StringT> & s)
  * @param s Mutable string
  */
 template <typename StringT>
-void ltrim(std::basic_string<StringT> & s)
+void ltrim (std::basic_string<StringT> & s)
 {
-	s.erase(0, s.find_first_not_of("\t\n\v\f\r "));
+	s.erase (0, s.find_first_not_of ("\t\n\v\f\r "));
 }
 
 /**
@@ -48,9 +48,9 @@ void ltrim(std::basic_string<StringT> & s)
  * @param s Mutable string
  */
 template <typename StringT>
-void rtrim(std::basic_string<StringT> & s)
+void rtrim (std::basic_string<StringT> & s)
 {
-	s.erase(s.find_last_not_of("\t\n\v\f\r ") + 1);
+	s.erase (s.find_last_not_of ("\t\n\v\f\r ") + 1);
 }
 
 /**
@@ -59,10 +59,10 @@ void rtrim(std::basic_string<StringT> & s)
  * @param s Mutable string
  */
 template <typename StringT>
-void trim(std::basic_string<StringT> & s)
+void trim (std::basic_string<StringT> & s)
 {
-	ltrim(s);
-	rtrim(s);
+	ltrim (s);
+	rtrim (s);
 }
 
 /**
@@ -71,9 +71,9 @@ void trim(std::basic_string<StringT> & s)
  * @param s Mutable string
  */
 template <typename StringT>
-void lower(std::basic_string<StringT> & s)
+void lower (std::basic_string<StringT> & s)
 {
-	std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+	std::transform (s.begin (), s.end (), s.begin (), ::tolower);
 }
 
 /**
@@ -82,9 +82,9 @@ void lower(std::basic_string<StringT> & s)
  * @param s Mutable string
  */
 template <typename StringT = char>
-void upper(std::basic_string<StringT> & s)
+void upper (std::basic_string<StringT> & s)
 {
-	std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+	std::transform (s.begin (), s.end (), s.begin (), ::toupper);
 }
 
 /**
@@ -99,32 +99,32 @@ void upper(std::basic_string<StringT> & s)
  * @return T value as a numeric type
  */
 template <typename T, typename StringT>
-T sto(std::basic_string<StringT> const & s, int const base = 10)
+T sto (std::basic_string<StringT> const & s, int const base = 10)
 {
 	T value;
-	auto ec = std::from_chars(s.data(), s.data() + s.size(), value, base).ec;
-	if(ec == std::errc::result_out_of_range)
+	auto ec = std::from_chars (s.data (), s.data () + s.size (), value, base).ec;
+	if (ec == std::errc::result_out_of_range)
 	{
 		std::stringstream ss;
 		ss << "Input value \"" << s << "\" too large for specified numeric type";
-		throw std::out_of_range(ss.str());
+		throw std::out_of_range (ss.str ());
 	}
-	else if(ec == std::errc::invalid_argument)
+	else if (ec == std::errc::invalid_argument)
 	{
 		std::stringstream ss;
 		ss << "Input value \"" << s << "\" could not be parsed to a numeric value";
-		throw std::invalid_argument(ss.str());
+		throw std::invalid_argument (ss.str ());
 	}
 	return value;
 }
 
 template <typename T, typename StringT>
-T sto_pos(std::basic_string<StringT> const & s, int const base = 10)
+T sto_pos (std::basic_string<StringT> const & s, int const base = 10)
 {
-	T out { sto<T>(s) };
-	if(out <= 0)
+	T out {sto<T> (s)};
+	if (out <= 0)
 	{
-		throw std::out_of_range("Value must be greater than zero");
+		throw std::out_of_range ("Value must be greater than zero");
 	}
 	return out;
 }
@@ -133,17 +133,16 @@ T sto_pos(std::basic_string<StringT> const & s, int const base = 10)
  * @brief Converts a delimited list of numeric values into a vector
  */
 template <typename T, typename StringT>
-std::vector<T> stovec(
-	std::basic_string<StringT> const & s, char const delim = ',')
+std::vector<T> stovec (std::basic_string<StringT> const & s, char const delim = ',')
 {
 	std::vector<T> out;
-	std::istringstream ss { s };
+	std::istringstream ss {s};
 	std::basic_string<StringT> line;
 
-	while(getline(ss, line, delim))
+	while (getline (ss, line, delim))
 	{
-		trim(line);
-		out.push_back(sto<T>(line));
+		trim (line);
+		out.push_back (sto<T> (line));
 	}
 
 	return out;
@@ -155,17 +154,17 @@ std::vector<T> stovec(
  * case)
  */
 template <typename StringT>
-bool stob(std::basic_string<StringT> const & s)
+bool stob (std::basic_string<StringT> const & s)
 {
 	std::basic_string<StringT> s_work = s;
-	lower(s_work);
-	if(s_work == "t" || s_work == "true" || s_work == "1")
+	lower (s_work);
+	if (s_work == "t" || s_work == "true" || s_work == "1")
 		return true;
-	if(s_work == "f" || s_work == "false" || s_work == "0")
+	if (s_work == "f" || s_work == "false" || s_work == "0")
 		return false;
 	std::stringstream ss;
 	ss << "Value \"" << s << "\" could not be interpreted as a boolean";
-	throw std::invalid_argument(ss.str());
+	throw std::invalid_argument (ss.str ());
 }
 
 /**
@@ -173,19 +172,18 @@ bool stob(std::basic_string<StringT> const & s)
  * @note Assumes input string has already been whitespace trimmed
  */
 template <typename StringT>
-std::pair<std::basic_string<StringT>, std::basic_string<StringT>> kvsplit(
+std::pair<std::basic_string<StringT>, std::basic_string<StringT>> kvsplit (
 	std::basic_string<StringT> const & line, char const delim = ' ')
 {
 	size_t delim_pos;
-	delim_pos = line.find(delim);
-	if(delim_pos == std::string::npos)
+	delim_pos = line.find (delim);
+	if (delim_pos == std::string::npos)
 	{
 		std::stringstream ss;
 		ss << "Delimiter '" << delim << "' not found in string \"" << line << "\"";
-		throw std::invalid_argument(ss.str());
+		throw std::invalid_argument (ss.str ());
 	}
-	return { line.substr(0, delim_pos),
-		line.substr(delim_pos + 1, std::string::npos) };
+	return {line.substr (0, delim_pos), line.substr (delim_pos + 1, std::string::npos)};
 }
 
 #endif

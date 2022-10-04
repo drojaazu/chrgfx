@@ -2,10 +2,12 @@ Language: Cpp
 BasedOnStyle: LLVM
 
 AlignAfterOpenBracket: DontAlign
+AlignEscapedNewlines: DontAlign
 AlignOperands: Align
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
+AlignArrayOfStructures: None
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Empty
@@ -13,15 +15,14 @@ AllowShortLoopsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: Never
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: Yes
-BreakConstructorInitializers: AfterColon
 BreakBeforeBraces: Allman
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: AfterColon
 BinPackArguments: false
 BinPackParameters: false
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ColumnLimit: 120
 ContinuationIndentWidth: 2
-Cpp11BracedListStyle: false
+Cpp11BracedListStyle: true
 Language: Cpp
 MaxEmptyLinesToKeep: 1
 IndentCaseLabels: true
@@ -37,7 +38,7 @@ SpaceBeforeCpp11BracedList: true
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeRangeBasedForLoopColon: true
-SpaceBeforeParens: Never
+SpaceBeforeParens: Always
 SpacesInAngles: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false

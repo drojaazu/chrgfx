@@ -17,8 +17,7 @@ namespace chrgfx
  * @param palette palette data
  * @return byte_t* pointer to output encoded palette
  */
-byte_t * encode_pal(
-	paldef const & paldef, coldef const & coldef, png::palette const & palette);
+byte_t * encode_pal (paldef const & paldef, coldef const & coldef, png::palette const & palette);
 
 /**
  * @brief Decode an encoded palette with the given paldef
@@ -28,8 +27,7 @@ byte_t * encode_pal(
  * @param palette palette data
  * @return png::palette
  */
-png::palette decode_pal(
-	paldef const & paldef, coldef const & coldef, byte_t const * palette);
+png::palette decode_pal (paldef const & paldef, coldef const & coldef, byte_t const * palette);
 
 } // namespace chrgfx
 
