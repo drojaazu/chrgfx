@@ -27,7 +27,7 @@ template <typename DataT = char>
 class buffer
 {
 public:
-	buffer () = delete;
+	buffer() = delete;
 	buffer & operator= (buffer const &) = delete;
 	buffer & operator= (buffer &&) = delete;
 
@@ -38,7 +38,7 @@ public:
 	explicit buffer (size_t const size, char const initial = 0) :
 			m_size {size},
 			m_datasize {sizeof (DataT) * size},
-			m_buffer {(DataT *) malloc (this->m_datasize)}
+			m_buffer {(DataT *) malloc (sizeof (DataT) * size)}
 	{
 		if (this->m_buffer == nullptr)
 			throw std::runtime_error ("Failed to allocate buffer space");
@@ -59,7 +59,7 @@ public:
 	buffer (DataT * data, size_t const size) :
 			m_size {size},
 			m_datasize {sizeof (DataT) * size},
-			m_buffer {(DataT *) malloc (this->m_datasize)}
+			m_buffer {(DataT *) malloc (sizeof (DataT) * size)}
 	{
 		if (this->m_buffer == nullptr)
 			throw std::runtime_error ("Failed to allocate buffer space");
@@ -112,11 +112,11 @@ public:
 	 * @param vector Vector of data
 	 */
 	buffer (std::vector<DataT> & vec) :
-			buffer (vec.data (), vec.size ())
+			buffer (vec.data(), vec.size())
 	{
 	}
 
-	~buffer ()
+	~buffer()
 	{
 		if (this->m_buffer != nullptr)
 		{
@@ -131,7 +131,7 @@ public:
 	/**
 	 * @return size_t size of the buffer *in bytes*
 	 */
-	[[nodiscard]] size_t datasize () const
+	[[nodiscard]] size_t datasize() const
 	{
 		return this->m_datasize;
 	}
@@ -139,13 +139,13 @@ public:
 	/**
 	 * @return size_t size of the buffer in type DataT
 	 */
-	[[nodiscard]] size_t size () const
+	[[nodiscard]] size_t size() const
 	{
 		return this->m_size;
 	}
 
 	template <typename SizeT = DataT>
-	[[nodiscard]] size_t size () const
+	[[nodiscard]] size_t size() const
 	{
 		return this->m_datasize / sizeof (SizeT);
 	}
@@ -153,7 +153,7 @@ public:
 	/**
 	 * @return DataT const* pointer to buffer in memory
 	 */
-	[[nodiscard]] DataT const * data () const
+	[[nodiscard]] DataT const * data() const
 	{
 		return this->m_buffer;
 	}
@@ -161,7 +161,7 @@ public:
 	/**
 	 * @return DataT const* pointer to buffer in memory
 	 */
-	[[nodiscard]] DataT * data ()
+	[[nodiscard]] DataT * data()
 	{
 		return this->m_buffer;
 	}
@@ -184,7 +184,7 @@ public:
 		size_t new_size_bytes = new_size * sizeof (DataT);
 		this->m_buffer = (DataT *) realloc (this->m_buffer, new_size_bytes);
 		if (this->m_buffer == nullptr)
-			throw std::bad_alloc ();
+			throw std::bad_alloc();
 
 		this->m_datasize = new_size_bytes;
 		this->m_size = new_size;
@@ -205,7 +205,7 @@ public:
 		size_t additional_bytes = size * sizeof (DataT);
 		this->m_buffer = (DataT *) realloc (this->m_buffer, (this->m_datasize + additional_bytes));
 		if (this->m_buffer == nullptr)
-			throw std::bad_alloc ();
+			throw std::bad_alloc();
 
 		std::memset (this->m_buffer + this->m_datasize, additional_bytes, initial);
 
@@ -221,7 +221,7 @@ public:
 
 	size_t append (buffer const & other)
 	{
-		if (other.size () == 0)
+		if (other.size() == 0)
 			return this->m_size;
 
 #ifdef DEBUG
@@ -231,7 +231,7 @@ public:
 
 		this->m_buffer = (DataT *) realloc (this->m_buffer, this->m_datasize + other.m_datasize);
 		if (this->m_buffer == nullptr)
-			throw std::bad_alloc ();
+			throw std::bad_alloc();
 
 		std::memcpy ((char *) (this->m_buffer) + this->m_datasize, (char *) other.m_buffer, other.m_datasize);
 
@@ -253,7 +253,7 @@ public:
 
 		this->m_buffer = (DataT *) realloc (this->m_buffer, this->m_datasize + size);
 		if (this->m_buffer == nullptr)
-			throw std::bad_alloc ();
+			throw std::bad_alloc();
 
 		std::memcpy ((char *) (this->m_buffer) + this->m_datasize, (char *) other, size);
 
@@ -265,7 +265,7 @@ public:
 
 	friend std::ostream & operator<< (std::ostream & out, const buffer & buffer)
 	{
-		std::copy (buffer.begin (), buffer.end (), std::ostream_iterator<DataT> (out));
+		std::copy (buffer.begin(), buffer.end(), std::ostream_iterator<DataT> (out));
 		return out;
 	}
 
@@ -307,9 +307,9 @@ public:
 		{
 		}
 
-		iterator () = default;
+		iterator() = default;
 
-		~iterator () = default;
+		~iterator() = default;
 
 		iterator (iterator const & other) = default;
 
@@ -320,7 +320,7 @@ public:
 			ptr = &other;
 		};
 
-		self_type & operator++ ()
+		self_type & operator++()
 		{
 			++ptr;
 			return *this;
@@ -343,21 +343,21 @@ public:
 			return ptr != other.ptr;
 		}
 
-		reference operator* () const
+		reference operator*() const
 		{
 			if (ptr == nullptr)
-				throw std::bad_function_call ();
+				throw std::bad_function_call();
 			return *(ptr);
 		}
 
 		pointer operator->() const
 		{
 			if (ptr == nullptr)
-				throw std::bad_function_call ();
+				throw std::bad_function_call();
 			return *(ptr);
 		}
 
-		self_type & operator-- ()
+		self_type & operator--()
 		{
 			--ptr;
 			return *this;
@@ -449,10 +449,10 @@ public:
 		{
 			ptr = &other;
 		};
-		const_iterator () = default;
-		~const_iterator () = default;
+		const_iterator() = default;
+		~const_iterator() = default;
 
-		self_type & operator++ ()
+		self_type & operator++()
 		{
 			++ptr;
 			return *this;
@@ -475,21 +475,21 @@ public:
 			return ptr != other.ptr;
 		}
 
-		reference operator* () const
+		reference operator*() const
 		{
 			if (ptr == nullptr)
-				throw std::bad_function_call ();
+				throw std::bad_function_call();
 			return *(ptr);
 		}
 
 		reference operator->() const
 		{
 			if (ptr == nullptr)
-				throw std::bad_function_call ();
+				throw std::bad_function_call();
 			return *(ptr);
 		}
 
-		self_type & operator-- ()
+		self_type & operator--()
 		{
 			--ptr;
 			return *this;
@@ -563,7 +563,7 @@ public:
 	buffer (iterator<DataT> start, iterator<DataT> end) :
 			m_size {end - start},
 			m_datasize {sizeof (DataT) * m_size},
-			m_buffer {(DataT *) malloc (this->m_datasize)}
+			m_buffer {(DataT *) malloc (sizeof (DataT) * m_size)}
 	{
 		if (this->m_buffer == nullptr)
 			throw std::runtime_error ("Failed to allocate buffer space");
@@ -577,46 +577,46 @@ public:
 	}
 
 	template <typename IterT>
-	iterator<IterT> begin () const
+	iterator<IterT> begin() const
 	{
 		return iterator<IterT> ((IterT *) this->m_buffer);
 	}
 
 	template <typename IterT>
-	const_iterator<IterT> cbegin () const
+	const_iterator<IterT> cbegin() const
 	{
 		return const_iterator<IterT> ((IterT *) this->m_buffer);
 	}
 
 	template <typename IterT>
-	iterator<IterT> end () const
+	iterator<IterT> end() const
 	{
 		// the end iter should be divisible by the size of the iter type
 		return iterator<IterT> ((IterT *) (((char *) this->m_buffer) + (m_datasize - (m_datasize % sizeof (IterT)))));
 	}
 
 	template <typename IterT>
-	const_iterator<IterT> cend () const
+	const_iterator<IterT> cend() const
 	{
 		return const_iterator<IterT> ((IterT *) (((char *) this->m_buffer) + (m_datasize - (m_datasize % sizeof (IterT)))));
 	}
 
-	iterator<DataT> begin () const
+	iterator<DataT> begin() const
 	{
 		return iterator<DataT> (this->m_buffer);
 	}
 
-	const_iterator<DataT> cbegin () const
+	const_iterator<DataT> cbegin() const
 	{
 		return const_iterator<DataT> (this->m_buffer);
 	}
 
-	iterator<DataT> end () const
+	iterator<DataT> end() const
 	{
 		return iterator<DataT> ((DataT *) (((char *) this->m_buffer) + m_datasize));
 	}
 
-	const_iterator<DataT> cend () const
+	const_iterator<DataT> cend() const
 	{
 		return const_iterator<DataT> ((DataT *) (((char *) this->m_buffer) + m_datasize));
 	}
@@ -668,7 +668,7 @@ protected:
 	void stream_in (std::istream & in, std::streamsize const block_size)
 	{
 
-		if (in.bad () || in.eof ())
+		if (in.bad() || in.eof())
 			throw std::runtime_error ("Input stream is in a bad state");
 
 		char * block_buff;
@@ -681,13 +681,13 @@ protected:
 
 			size_t bytes_read;
 
-			while (! in.eof ())
+			while (! in.eof())
 			{
 				in.read (block_buff, block_size);
-				if (in.bad ())
+				if (in.bad())
 					throw std::runtime_error ("Error reading data");
 
-				bytes_read = in.gcount ();
+				bytes_read = in.gcount();
 
 				this->m_buffer = (DataT *) realloc (this->m_buffer, (this->m_datasize + bytes_read));
 				if (this->m_buffer == nullptr)
