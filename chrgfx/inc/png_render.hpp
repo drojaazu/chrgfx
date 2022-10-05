@@ -42,7 +42,7 @@ public:
 	 */
 	u8 trns_index;
 
-	render_config () :
+	render_config() :
 			row_size (DEFAULT_ROW_SIZE),
 			draw_border (DEFAULT_DRAW_BORDER),
 			use_trns (DEFAULT_USE_TRNS),
@@ -52,9 +52,15 @@ public:
 };
 
 /**
+ * @brief Renders a collection of basic (unencoded) tiles to a byte buffer
+ */
+buffer<byte_t> render (
+	size_t const tile_width, size_t const tile_height, buffer<byte_t> const & chrdata, render_config const & rcfg);
+
+/**
  * @brief Renders a collection of basic (unencoded) tiles to a pixel buffer
  */
-png::pixel_buffer<png::index_pixel> render (
+png::pixel_buffer<png::index_pixel> pixbuf_render (
 	size_t const tile_width, size_t const tile_height, buffer<byte_t> const & chrdata, render_config const & rcfg);
 
 /**
