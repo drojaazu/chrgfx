@@ -90,7 +90,15 @@ buffer<byte_t> render (
 		if (iter_chrrow == (outimg_chrheight - 1) && chr_excess_count > 0)
 		{
 			this_chrrow_chrcount = chr_excess_count;
-			next_row = (outimg_pxlwidth - (chr_excess_count * (tile_width + 1))) + 1;
+			// clang-format off
+			next_row =
+				(outimg_pxlwidth - 
+					(chr_excess_count *
+						(tile_width + (rcfg.draw_border ? 1 : 0))
+					)
+				)
+				+ (rcfg.draw_border ? 1 : 0);
+			// clang-format on
 		}
 
 		// add border if enabled
