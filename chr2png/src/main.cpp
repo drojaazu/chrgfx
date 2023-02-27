@@ -31,7 +31,7 @@ int main (int argc, char ** argv)
 		 *            SETUP & SANITY CHECKING
 		 *******************************************************/
 #ifdef DEBUG
-		chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now ();
+		chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
 #endif
 		process_args (argc, argv);
 
@@ -41,31 +41,38 @@ int main (int argc, char ** argv)
 		ifstream chrdata {ifstream_checked (cfg.chrdata_name)};
 
 #ifdef DEBUG
-		chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now ();
-		auto duration = chrono::duration_cast<chrono::milliseconds> (t2 - t1).count ();
+		chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
+		auto duration = chrono::duration_cast<chrono::milliseconds> (t2 - t1).count();
 
 		cerr << "SETUP: " << duration << "ms" << endl;
 		cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << endl;
-		cerr << "\tUsing chrdef '" << defs.chrdef->id () << "'" << endl;
-		cerr << "\tUsing colrdef '" << defs.coldef->id () << "'" << endl;
-		cerr << "\tUsing paldef '" << defs.paldef->id () << "'" << endl;
+		cerr << "\tUsing chrdef '" << defs.chrdef->id() << "'" << endl;
+		cerr << "\tUsing colrdef '" << defs.coldef->id() << "'" << endl;
+		cerr << "\tUsing paldef '" << defs.paldef->id() << "'" << endl;
 #endif
 
 /*******************************************************
  *             TILE CONVERSION
  *******************************************************/
 #ifdef DEBUG
-		t1 = chrono::high_resolution_clock::now ();
+		t1 = chrono::high_resolution_clock::now();
 #endif
 
 		size_t
 			// byte size of one encoded tile
-			in_chunksize {defs.chrdef->datasize () / (size_t) 8},
+			in_chunksize {defs.chrdef->datasize() / (size_t) 8},
 			// byte size of one basic (decoded) tile
-			out_chunksize {(size_t) (defs.chrdef->width () * defs.chrdef->height ())};
+			out_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())};
 
 		// buffer for a single encoded tile, read from the stream
 		byte_t in_tile[in_chunksize];
+
+		// *** NEW we'll read the whole file into memory since the types of data we'll be working
+		// with are quite small relative to modern hardware
+		// it is unlikely that any input will ever surprass more than a couple hundred megabytes
+		// at the most
+		// this should improve speed by reducing IO calls anyway
+		buffer inFile (chrdata);
 
 		// basic tiles buffer
 		buffer<byte_t> out_buffer (0);
@@ -78,15 +85,15 @@ int main (int argc, char ** argv)
 		while (true)
 		{
 			chrdata.read ((char *) in_tile, in_chunksize);
-			if (chrdata.eof ())
+			if (chrdata.eof())
 				break;
 
 			out_buffer.append (decode_chr (*defs.chrdef, in_tile), out_chunksize);
 		}
 
 #ifdef DEBUG
-		t2 = chrono::high_resolution_clock::now ();
-		duration = chrono::duration_cast<chrono::milliseconds> (t2 - t1).count ();
+		t2 = chrono::high_resolution_clock::now();
+		duration = chrono::duration_cast<chrono::milliseconds> (t2 - t1).count();
 
 		cerr << "TILE CONVERSION: " << to_string (duration) << "ms" << endl;
 #endif
@@ -95,52 +102,52 @@ int main (int argc, char ** argv)
  *                PALETTE CONVERSION
  *******************************************************/
 #ifdef DEBUG
-		t1 = chrono::high_resolution_clock::now ();
+		t1 = chrono::high_resolution_clock::now();
 #endif
 
 		palette workpal;
-		if (! cfg.paldata_name.empty ())
+		if (! cfg.paldata_name.empty())
 		{
 			ifstream paldata {ifstream_checked (cfg.paldata_name)};
 
-			size_t pal_size = defs.paldef->datasize () / 8;
+			size_t pal_size = defs.paldef->datasize() / 8;
 			byte_t palbuffer[pal_size];
 			paldata.read ((char *) palbuffer, pal_size);
-			if (paldata.gcount () > pal_size)
+			if (paldata.gcount() > pal_size)
 				throw invalid_argument ("Input palette data too small to form a valid palette");
 
 			workpal = decode_pal (*defs.paldef, *defs.coldef, palbuffer);
 		}
 		else
 		{
-			workpal = make_pal_random ();
+			workpal = make_pal_random();
 		}
 
 #ifdef DEBUG
-		t2 = chrono::high_resolution_clock::now ();
-		duration = chrono::duration_cast<chrono::milliseconds> (t2 - t1).count ();
+		t2 = chrono::high_resolution_clock::now();
+		duration = chrono::duration_cast<chrono::milliseconds> (t2 - t1).count();
 
 		cerr << "PALETTE GENERATION: " << duration << "ms" << endl;
 #endif
 
 #ifdef DEBUG
-		t1 = chrono::high_resolution_clock::now ();
+		t1 = chrono::high_resolution_clock::now();
 #endif
 
 		png::image<png::index_pixel> outimg {
-			png_render (defs.chrdef->width (), defs.chrdef->height (), out_buffer, workpal, cfg.render_cfg)};
+			png_render (defs.chrdef->width(), defs.chrdef->height(), out_buffer, workpal, cfg.render_cfg)};
 
 #ifdef DEBUG
-		t2 = chrono::high_resolution_clock::now ();
-		duration = chrono::duration_cast<chrono::milliseconds> (t2 - t1).count ();
+		t2 = chrono::high_resolution_clock::now();
+		duration = chrono::duration_cast<chrono::milliseconds> (t2 - t1).count();
 		cerr << "PNG RENDER: " << duration << "ms" << endl;
 #endif
 
 #ifdef DEBUG
-		t1 = chrono::high_resolution_clock::now ();
+		t1 = chrono::high_resolution_clock::now();
 #endif
 
-		if (cfg.out_path.empty ())
+		if (cfg.out_path.empty())
 		{
 			outimg.write_stream (cout);
 		}
@@ -149,8 +156,8 @@ int main (int argc, char ** argv)
 			outimg.write (cfg.out_path);
 		}
 #ifdef DEBUG
-		t2 = chrono::high_resolution_clock::now ();
-		duration = chrono::duration_cast<chrono::milliseconds> (t2 - t1).count ();
+		t2 = chrono::high_resolution_clock::now();
+		duration = chrono::duration_cast<chrono::milliseconds> (t2 - t1).count();
 		cerr << "OUTPUT TO STREAM: " << duration << "ms" << endl;
 #endif
 
@@ -159,7 +166,7 @@ int main (int argc, char ** argv)
 	}
 	catch (exception const & e)
 	{
-		cerr << "Error: " << e.what () << endl;
+		cerr << "Error: " << e.what() << endl;
 		return -1;
 	}
 }
@@ -189,7 +196,7 @@ void process_args (int argc, char ** argv)
 	// read/parse arguments
 	while (true)
 	{
-		const auto this_opt = getopt_long (argc, argv, short_opts.data (), long_opts.data (), nullptr);
+		const auto this_opt = getopt_long (argc, argv, short_opts.data(), long_opts.data(), nullptr);
 		if (this_opt == -1)
 			break;
 
