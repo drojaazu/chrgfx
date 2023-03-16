@@ -13,4 +13,4 @@ target_include_directories(chr2png
 	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 
-target_link_libraries(chr2png LINK_PUBLIC chrgfx)
+target_link_libraries(chr2png LINK_PUBLIC chrgfx tbb)

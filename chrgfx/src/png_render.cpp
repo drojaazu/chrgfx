@@ -10,8 +10,8 @@ using namespace png;
 namespace chrgfx
 {
 
-buffer<byte_t> render (
-	size_t const tile_width, size_t const tile_height, buffer<byte_t> const & chrdata, render_config const & rcfg)
+motoi::blob<byte_t> render (
+	size_t const tile_width, size_t const tile_height, motoi::blob<byte_t> const & chrdata, render_config const & rcfg)
 {
 
 	if (tile_width == 0 || tile_height == 0)
@@ -46,7 +46,7 @@ buffer<byte_t> render (
 		outimg_pxlwidth {(outimg_chrwidth * tile_width) + border_pxlwidth},
 		outimg_pxlheight {(outimg_chrheight * tile_height) + border_pxlheight};
 
-	buffer<byte_t> out_buffer (outimg_pxlwidth * outimg_pxlheight, rcfg.trns_index);
+	motoi::blob<byte_t> out_buffer (outimg_pxlwidth * outimg_pxlheight, rcfg.trns_index);
 
 	// iters and cached values and such for processing
 	size_t
@@ -136,7 +136,7 @@ buffer<byte_t> render (
 }
 
 png::pixel_buffer<png::index_pixel> pixbuf_render (
-	size_t const tile_width, size_t const tile_height, buffer<byte_t> const & chrdata, render_config const & rcfg)
+	size_t const tile_width, size_t const tile_height, motoi::blob<byte_t> const & chrdata, render_config const & rcfg)
 {
 	size_t const
 		// size of a single chr in bytes
@@ -176,7 +176,7 @@ png::pixel_buffer<png::index_pixel> pixbuf_render (
 
 image<index_pixel> png_render (size_t const tile_width,
 	size_t const tile_height,
-	buffer<byte_t> const & chrdata,
+	motoi::blob<byte_t> const & chrdata,
 	png::palette const & pal,
 	render_config const & rcfg)
 {

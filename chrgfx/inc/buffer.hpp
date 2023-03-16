@@ -1,8 +1,8 @@
 /**
- * @file buffer.hpp
+ * @file blob.hpp
  * @author Damian Rogers / damian@motoi.pro
- * @brief Data buffer wrapper with templated iterators
- * @copyright ©2020 Motoi Productions / Released under MIT License
+ * @brief Data blob wrapper with templated iterators
+ * @copyright ©2022 Motoi Productions / Released under MIT License
  *
  * Updates:
  * 20220410 Initial
@@ -10,9 +10,13 @@
  * 20220921 Added vector constructor; changed pointer constructor to copy;
  * consolidated similar constructors; corrected bug with append; a number of
  * changes based on clang-tidy suggestions
+ * 20221015 Fixed misrepresentation of problem when streaming input to buffer
+ * and 0 bytes read  (e.g. stream in a bad state)
+ * 20230305 Added iteration by stride; added namespace; bugfixes
  */
-#ifndef __MOTOI__BUFFER_HPP
-#define __MOTOI__BUFFER_HPP
+
+#ifndef __MOTOI__BLOB_HPP
+#define __MOTOI__BLOB_HPP
 
 #include <cstring>
 #include <functional>
@@ -23,27 +27,37 @@
 #include <stdexcept>
 #include <vector>
 
+namespace motoi
+{
 template <typename DataT = char>
-class buffer
+class blob
 {
 public:
-	buffer() = delete;
-	buffer & operator= (buffer const &) = delete;
-	buffer & operator= (buffer &&) = delete;
+	blob() = delete;
+	blob & operator=(blob const &) = delete;
+	blob & operator=(blob &&) = delete;
 
 	/**
 	 * @brief Create an empty buffer with optional initial value
 	 * @param size Number of DataT elements
 	 */
-	explicit buffer (size_t const size, char const initial = 0) :
+	explicit blob(size_t const size, DataT const initial = 0) :
 			m_size {size},
-			m_datasize {sizeof (DataT) * size},
-			m_buffer {(DataT *) malloc (sizeof (DataT) * size)}
+			m_datasize {sizeof(DataT) * size},
+			m_buffer {(DataT *) malloc(this->m_datasize)}
 	{
 		if (this->m_buffer == nullptr)
-			throw std::runtime_error ("Failed to allocate buffer space");
+			throw std::runtime_error("Failed to allocate buffer space");
 
-		std::memset (m_buffer, initial, m_size);
+		if (initial == 0)
+			std::memset(m_buffer, 0, m_datasize);
+		else
+		{
+			auto p_begin = m_buffer;
+			auto p_end = p_begin + m_size;
+			while (p_begin < p_end)
+				*p_begin++ = initial;
+		}
 
 #ifdef DEBUG
 		std::cerr << __func__ << ": Created empty buffer at " << std::showbase << std::hex << (std::size_t) this->m_buffer
@@ -56,15 +70,15 @@ public:
 	 * @param data Pointer to data
 	 * @param size Size of existing data
 	 */
-	buffer (DataT * data, size_t const size) :
+	blob(DataT * data, size_t const size) :
 			m_size {size},
-			m_datasize {sizeof (DataT) * size},
-			m_buffer {(DataT *) malloc (sizeof (DataT) * size)}
+			m_datasize {sizeof(DataT) * size},
+			m_buffer {(DataT *) malloc(this->m_datasize)}
 	{
 		if (this->m_buffer == nullptr)
-			throw std::runtime_error ("Failed to allocate buffer space");
+			throw std::runtime_error("Failed to allocate buffer space");
 
-		std::memcpy (this->m_buffer, data, m_datasize);
+		std::memcpy(this->m_buffer, data, m_datasize);
 #ifdef DEBUG
 		std::cerr << __func__ << ": Copying existing buffer from " << std::showbase << std::hex << (std::size_t) data
 							<< " to " << (std::size_t) this->m_buffer << ", datasize " << this->m_datasize << std::endl;
@@ -74,18 +88,18 @@ public:
 	/**
 	 * @brief Copy constructor
 	 */
-	buffer (buffer const & other) :
-			buffer (other.m_buffer, other.m_size)
+	blob(blob const & other) :
+			blob(other.m_buffer, other.m_size)
 	{
 	}
 
 	/**
 	 * @brief Move constructor
 	 */
-	buffer (buffer && other) noexcept :
+	blob(blob && other) noexcept :
 			m_size {other.m_size},
 			m_datasize {other.m_datasize},
-			m_buffer {std::move (other.m_buffer)}
+			m_buffer {std::move(other.m_buffer)}
 	{
 #ifdef DEBUG
 		std::cerr << __func__ << ": Moving existing buffer at " << std::showbase << std::hex << (std::size_t) other.m_buffer
@@ -98,25 +112,25 @@ public:
 	 * @param data Input stream
 	 * @param block_size Stream read buffer (default 128kKiB)
 	 */
-	explicit buffer (std::istream & data, size_t const block_size = DEFAULT_BLOCK_SZ)
+	explicit blob(std::istream & data, size_t const block_size = DEFAULT_BLOCK_SZ)
 	{
 #ifdef DEBUG
 		std::cerr << __func__ << ": Reading data from input stream in " << std::showbase << std::hex
 							<< (std::size_t) block_size << "byte blocks" << std::endl;
 #endif
-		stream_in (data, block_size);
+		stream_in(data, block_size);
 	}
 
 	/**
 	 * @brief Vector constructor
 	 * @param vector Vector of data
 	 */
-	buffer (std::vector<DataT> & vec) :
-			buffer (vec.data(), vec.size())
+	blob(std::vector<DataT> & vec) :
+			blob(vec.data(), vec.size())
 	{
 	}
 
-	~buffer()
+	~blob()
 	{
 		if (this->m_buffer != nullptr)
 		{
@@ -124,7 +138,7 @@ public:
 			std::cerr << __func__ << ": Freeing buffer at " << std::showbase << std::hex << (std::size_t) this->m_buffer
 								<< ", datasize " << this->m_datasize << std::endl;
 #endif
-			free (this->m_buffer);
+			free(this->m_buffer);
 		}
 	}
 
@@ -147,7 +161,7 @@ public:
 	template <typename SizeT = DataT>
 	[[nodiscard]] size_t size() const
 	{
-		return this->m_datasize / sizeof (SizeT);
+		return this->m_datasize / sizeof(SizeT);
 	}
 
 	/**
@@ -166,23 +180,23 @@ public:
 		return this->m_buffer;
 	}
 
-	size_t resize (size_t const new_size)
+	size_t resize(size_t const new_size)
 	{
 		if (new_size == 0)
-			throw std::invalid_argument ("Cannot resize buffer to 0");
+			throw std::invalid_argument("Cannot resize buffer to 0");
 
 		if (new_size == this->m_size)
 			return this->m_size;
 
 		if (new_size > this->m_size)
-			return append (new_size);
+			return append(new_size);
 
 #ifdef DEBUG
 		size_t prev_datasize = this->m_datasize;
 #endif
 
-		size_t new_size_bytes = new_size * sizeof (DataT);
-		this->m_buffer = (DataT *) realloc (this->m_buffer, new_size_bytes);
+		size_t new_size_bytes = new_size * sizeof(DataT);
+		this->m_buffer = (DataT *) realloc(this->m_buffer, new_size_bytes);
 		if (this->m_buffer == nullptr)
 			throw std::bad_alloc();
 
@@ -197,17 +211,25 @@ public:
 		return this->m_size;
 	}
 
-	size_t append (size_t const size, char const initial = 0)
+	size_t append(size_t const size, DataT const initial = 0)
 	{
 		if (size == 0)
 			return this->m_size;
 
-		size_t additional_bytes = size * sizeof (DataT);
-		this->m_buffer = (DataT *) realloc (this->m_buffer, (this->m_datasize + additional_bytes));
+		size_t additional_bytes = size * sizeof(DataT);
+		this->m_buffer = (DataT *) realloc(this->m_buffer, (this->m_datasize + additional_bytes));
 		if (this->m_buffer == nullptr)
 			throw std::bad_alloc();
 
-		std::memset (this->m_buffer + this->m_datasize, additional_bytes, initial);
+		if (initial == 0)
+			std::memset(this->m_buffer + this->m_datasize, 0, additional_bytes);
+		else
+		{
+			auto p_begin = this->m_buffer + this->m_datasize;
+			auto p_end = p_begin + size;
+			while (p_begin < p_end)
+				*p_begin++ = initial;
+		}
 
 		this->m_datasize += additional_bytes;
 		this->m_size += size;
@@ -219,7 +241,7 @@ public:
 		return this->m_size;
 	}
 
-	size_t append (buffer const & other)
+	size_t append(blob const & other)
 	{
 		if (other.size() == 0)
 			return this->m_size;
@@ -229,11 +251,11 @@ public:
 							<< (std::size_t) other.m_buffer << ", datasize " << other.m_datasize << std::endl;
 #endif
 
-		this->m_buffer = (DataT *) realloc (this->m_buffer, this->m_datasize + other.m_datasize);
+		this->m_buffer = (DataT *) realloc(this->m_buffer, this->m_datasize + other.m_datasize);
 		if (this->m_buffer == nullptr)
 			throw std::bad_alloc();
 
-		std::memcpy ((char *) (this->m_buffer) + this->m_datasize, (char *) other.m_buffer, other.m_datasize);
+		std::memcpy((char *) (this->m_buffer) + this->m_datasize, (char *) other.m_buffer, other.m_datasize);
 
 		this->m_datasize += other.m_datasize;
 		this->m_size += other.m_size;
@@ -241,7 +263,7 @@ public:
 		return this->m_size;
 	}
 
-	size_t append (DataT * const other, size_t size)
+	size_t append(DataT * const other, size_t size)
 	{
 		if (size == 0)
 			return this->m_size;
@@ -251,47 +273,47 @@ public:
 							<< ", datasize " << size << std::endl;
 #endif
 
-		this->m_buffer = (DataT *) realloc (this->m_buffer, this->m_datasize + size);
+		this->m_buffer = (DataT *) realloc(this->m_buffer, this->m_datasize + size);
 		if (this->m_buffer == nullptr)
 			throw std::bad_alloc();
 
-		std::memcpy ((char *) (this->m_buffer) + this->m_datasize, (char *) other, size);
+		std::memcpy((char *) (this->m_buffer) + this->m_datasize, (char *) other, size);
 
 		this->m_datasize += size;
-		this->m_size += size / sizeof (DataT);
+		this->m_size += size / sizeof(DataT);
 
 		return this->m_size;
 	}
 
-	friend std::ostream & operator<< (std::ostream & out, const buffer & buffer)
+	friend std::ostream & operator<<(std::ostream & out, const blob & buffer)
 	{
-		std::copy (buffer.begin(), buffer.end(), std::ostream_iterator<DataT> (out));
+		std::copy(buffer.begin(), buffer.end(), std::ostream_iterator<DataT>(out));
 		return out;
 	}
 
-	friend std::istream & operator>> (std::istream & in, buffer & buffer)
+	friend std::istream & operator>>(std::istream & in, blob & buffer)
 	{
-		buffer->stream_in (in, DEFAULT_BLOCK_SZ);
+		buffer->stream_in(in, DEFAULT_BLOCK_SZ);
 		return in;
 	}
 
-	DataT & operator[] (size_t const index)
+	DataT & operator[](size_t const index)
 	{
 		if (index > this->m_size)
-			throw std::out_of_range ("Specified subscript out of range");
+			throw std::out_of_range("Specified subscript out of range");
 
 		return this->m_buffer[index];
 	}
 
-	DataT const & operator[] (size_t const index) const
+	DataT const & operator[](size_t const index) const
 	{
 		if (index > this->m_size)
-			throw std::out_of_range ("Specified subscript out of range");
+			throw std::out_of_range("Specified subscript out of range");
 
 		return this->m_buffer[index];
 	}
 
-	template <typename IterT = DataT>
+	template <typename IterT>
 	struct iterator
 	{
 	public:
@@ -302,43 +324,49 @@ public:
 		using pointer = IterT *;
 		using reference = IterT &;
 
-		explicit iterator (pointer ptr) :
-				ptr (ptr)
-		{
-		}
+	protected:
+		size_t m_stride;
+		pointer ptr {nullptr};
 
-		iterator() = default;
+	public:
+		iterator() = delete;
 
 		~iterator() = default;
 
-		iterator (iterator const & other) = default;
+		explicit iterator(pointer ptr, size_t stride = 1) :
+				ptr(ptr),
+				m_stride(stride)
+		{
+		}
 
-		iterator & operator= (self_type const & other) = default;
+		iterator(iterator const & other) = default;
 
-		iterator & operator= (IterT const & other)
+		iterator & operator=(self_type const & other) = default;
+
+		iterator & operator=(IterT const & other)
 		{
 			ptr = &other;
-		};
+		}
 
 		self_type & operator++()
 		{
-			++ptr;
+			ptr += m_stride;
 			return *this;
 		}
 
-		self_type operator++ (int)
+		self_type operator++(int)
 		{
 			self_type tmp = *this;
 			++*this;
 			return tmp;
 		}
 
-		bool operator== (self_type const & other) const
+		bool operator==(self_type const & other) const
 		{
-			return ptr == other.ptre;
+			return ptr == other.ptr;
 		}
 
-		bool operator!= (self_type const & other) const
+		bool operator!=(self_type const & other) const
 		{
 			return ptr != other.ptr;
 		}
@@ -347,44 +375,44 @@ public:
 		{
 			if (ptr == nullptr)
 				throw std::bad_function_call();
-			return *(ptr);
+			return *ptr;
 		}
 
 		pointer operator->() const
 		{
 			if (ptr == nullptr)
 				throw std::bad_function_call();
-			return *(ptr);
+			return *ptr;
 		}
 
 		self_type & operator--()
 		{
-			--ptr;
+			ptr -= m_stride;
 			return *this;
 		}
 
-		self_type operator-- (int)
+		self_type operator--(int)
 		{
 			self_type tmp = *this;
 			--*this;
 			return tmp;
 		}
 
-		self_type operator+ (difference_type offset) const
+		self_type operator+(difference_type offset) const
 		{
 			self_type tmp = *this;
 			return tmp += offset;
 		}
 
-		self_type operator- (difference_type offset) const
+		self_type operator-(difference_type offset) const
 		{
 			self_type tmp = *this;
-			return tmp -= offset;
+			return (tmp -= offset) / m_stride;
 		}
 
-		difference_type operator- (self_type const & other) const
+		difference_type operator-(self_type const & other) const
 		{
-			return (ptr - other.ptr);
+			return (ptr - other.ptr) / m_stride;
 		}
 
 		bool operator<(self_type const & other) const
@@ -392,43 +420,40 @@ public:
 			return ptr < other.ptr;
 		}
 
-		bool operator> (self_type const & other) const
+		bool operator>(self_type const & other) const
 		{
 			return ptr > other.ptr;
 		}
 
-		bool operator>= (self_type const & other) const
+		bool operator>=(self_type const & other) const
 		{
 			return ptr >= other.ptr;
 		}
 
-		bool operator<= (self_type const & other) const
+		bool operator<=(self_type const & other) const
 		{
 			return ptr <= other.ptr;
 		}
 
-		self_type & operator+= (difference_type const offset)
+		self_type & operator+=(difference_type const offset)
 		{
-			ptr += offset;
+			ptr += (offset * m_stride);
 			return *this;
 		}
 
-		self_type & operator-= (difference_type const offset)
+		self_type & operator-=(difference_type const offset)
 		{
-			ptr -= offset;
+			ptr -= (offset * m_stride);
 			return *this;
 		}
 
-		value_type & operator[] (difference_type const offset) const
+		value_type & operator[](difference_type const offset) const
 		{
-			return ptr[offset];
+			return ptr[offset * m_stride];
 		}
-
-	private:
-		pointer ptr {nullptr};
 	};
 
-	template <typename IterT = DataT>
+	template <typename IterT>
 	struct const_iterator
 	{
 	public:
@@ -439,38 +464,49 @@ public:
 		using pointer = IterT const *;
 		using reference = IterT const &;
 
-		explicit const_iterator (pointer ptr) :
-				ptr (ptr)
+	protected:
+		pointer ptr {nullptr};
+		size_t m_stride;
+
+	public:
+		const_iterator() = default;
+
+		~const_iterator() = default;
+
+		const_iterator(pointer ptr, size_t stride = 1) :
+				ptr(ptr),
+				m_stride(stride)
 		{
 		}
-		const_iterator (const_iterator const & other) = default;
-		const_iterator & operator= (const_iterator const & other) = default;
-		const_iterator & operator= (IterT const & other)
+
+		const_iterator(const_iterator const & other) = default;
+
+		const_iterator & operator=(const_iterator const & other) = default;
+
+		const_iterator & operator=(IterT const & other)
 		{
 			ptr = &other;
 		};
-		const_iterator() = default;
-		~const_iterator() = default;
 
 		self_type & operator++()
 		{
-			++ptr;
+			ptr += m_stride;
 			return *this;
 		}
 
-		self_type operator++ (int)
+		self_type operator++(int)
 		{
 			self_type tmp = *this;
 			++*this;
 			return tmp;
 		}
 
-		bool operator== (self_type const & other) const
+		bool operator==(self_type const & other) const
 		{
-			return ptr == other.ptre;
+			return ptr == other.ptr;
 		}
 
-		bool operator!= (self_type const & other) const
+		bool operator!=(self_type const & other) const
 		{
 			return ptr != other.ptr;
 		}
@@ -479,44 +515,44 @@ public:
 		{
 			if (ptr == nullptr)
 				throw std::bad_function_call();
-			return *(ptr);
+			return *ptr;
 		}
 
 		reference operator->() const
 		{
 			if (ptr == nullptr)
 				throw std::bad_function_call();
-			return *(ptr);
+			return *ptr;
 		}
 
 		self_type & operator--()
 		{
-			--ptr;
+			ptr -= m_stride;
 			return *this;
 		}
 
-		self_type operator-- (int)
+		self_type operator--(int)
 		{
 			self_type tmp = *this;
 			--*this;
 			return tmp;
 		}
 
-		self_type operator+ (difference_type offset) const
+		self_type operator+(difference_type offset) const
 		{
 			self_type tmp = *this;
 			return tmp += offset;
 		}
 
-		self_type operator- (difference_type offset) const
+		self_type operator-(difference_type offset) const
 		{
 			self_type tmp = *this;
-			return tmp -= offset;
+			return (tmp -= offset) / m_stride;
 		}
 
-		difference_type operator- (self_type const & other) const
+		difference_type operator-(self_type const & other) const
 		{
-			return (ptr - other.ptr);
+			return (ptr - other.ptr) / m_stride;
 		}
 
 		bool operator<(self_type const & other) const
@@ -524,51 +560,48 @@ public:
 			return ptr < other.ptr;
 		}
 
-		bool operator> (self_type const & other) const
+		bool operator>(self_type const & other) const
 		{
 			return ptr > other.ptr;
 		}
 
-		bool operator>= (self_type const & other) const
+		bool operator>=(self_type const & other) const
 		{
 			return ptr >= other.ptr;
 		}
 
-		bool operator<= (self_type const & other) const
+		bool operator<=(self_type const & other) const
 		{
 			return ptr <= other.ptr;
 		}
 
-		self_type & operator+= (difference_type const offset)
+		self_type & operator+=(difference_type const offset)
 		{
-			ptr += offset;
+			ptr += (offset * m_stride);
 			return *this;
 		}
 
-		self_type & operator-= (difference_type const offset)
+		self_type & operator-=(difference_type const offset)
 		{
-			ptr -= offset;
+			ptr -= (offset * m_stride);
 			return *this;
 		}
 
-		value_type & operator[] (difference_type const offset) const
+		value_type & operator[](difference_type const offset) const
 		{
-			return ptr[offset];
+			return ptr[offset * m_stride];
 		}
-
-	private:
-		pointer ptr {nullptr};
 	};
 
-	buffer (iterator<DataT> start, iterator<DataT> end) :
+	blob(iterator<DataT> start, iterator<DataT> end) :
 			m_size {end - start},
-			m_datasize {sizeof (DataT) * m_size},
-			m_buffer {(DataT *) malloc (sizeof (DataT) * m_size)}
+			m_datasize {sizeof(DataT) * m_size},
+			m_buffer {(DataT *) malloc(this->m_datasize)}
 	{
 		if (this->m_buffer == nullptr)
-			throw std::runtime_error ("Failed to allocate buffer space");
+			throw std::runtime_error("Failed to allocate buffer space");
 
-		std::copy (start, end, this->m_buffer);
+		std::copy(start, end, this->m_buffer);
 
 #ifdef DEBUG
 		std::cerr << __func__ << ": Copied portion of existing buffer to" << std::showbase << std::hex
@@ -577,51 +610,54 @@ public:
 	}
 
 	template <typename IterT>
-	iterator<IterT> begin() const
+	iterator<IterT> begin(size_t stride = 1) const
 	{
-		return iterator<IterT> ((IterT *) this->m_buffer);
+		return iterator<IterT>((IterT *) this->m_buffer, stride);
 	}
 
 	template <typename IterT>
-	const_iterator<IterT> cbegin() const
+	const_iterator<IterT> cbegin(size_t stride = 1) const
 	{
-		return const_iterator<IterT> ((IterT *) this->m_buffer);
+		return const_iterator<IterT>((IterT *) this->m_buffer, stride);
 	}
 
 	template <typename IterT>
-	iterator<IterT> end() const
+	iterator<IterT> end(size_t stride = 1) const
 	{
-		// the end iter should be divisible by the size of the iter type
-		return iterator<IterT> ((IterT *) (((char *) this->m_buffer) + (m_datasize - (m_datasize % sizeof (IterT)))));
+		// determine the end iterator by considering the requested type and block size to ensure
+		// it does not exceed the allocated space
+		return iterator<IterT>(
+			(IterT *) (((char *) this->m_buffer) + (m_datasize - (m_datasize % (sizeof(IterT) * stride)))), stride);
 	}
 
 	template <typename IterT>
-	const_iterator<IterT> cend() const
+	const_iterator<IterT> cend(size_t stride = 1) const
 	{
-		return const_iterator<IterT> ((IterT *) (((char *) this->m_buffer) + (m_datasize - (m_datasize % sizeof (IterT)))));
+		return const_iterator<IterT>(
+			(IterT *) (((char *) this->m_buffer) + (m_datasize - (m_datasize % (sizeof(IterT) * stride)))), stride);
 	}
 
-	iterator<DataT> begin() const
+	iterator<DataT> begin(size_t stride = 1) const
 	{
-		return iterator<DataT> (this->m_buffer);
+		return iterator<DataT>(this->m_buffer, stride);
 	}
 
-	const_iterator<DataT> cbegin() const
+	const_iterator<DataT> cbegin(size_t stride = 1) const
 	{
-		return const_iterator<DataT> (this->m_buffer);
+		return const_iterator<DataT>(this->m_buffer, stride);
 	}
 
-	iterator<DataT> end() const
+	iterator<DataT> end(size_t stride = 1) const
 	{
-		return iterator<DataT> ((DataT *) (((char *) this->m_buffer) + m_datasize));
+		return iterator<DataT>((DataT *) (((char *) this->m_buffer) + m_datasize), stride);
 	}
 
-	const_iterator<DataT> cend() const
+	const_iterator<DataT> cend(size_t stride = 1) const
 	{
-		return const_iterator<DataT> ((DataT *) (((char *) this->m_buffer) + m_datasize));
+		return const_iterator<DataT>((DataT *) (((char *) this->m_buffer) + m_datasize), stride);
 	}
 
-	bool operator== (buffer<DataT> const & other) const
+	bool operator==(blob<DataT> const & other) const
 	{
 		if (m_datasize != other.m_datasize)
 			return false;
@@ -638,7 +674,7 @@ public:
 		return true;
 	}
 
-	bool operator!= (buffer<DataT> const & other) const
+	bool operator!=(blob<DataT> const & other) const
 	{
 		return ! (*this == other);
 	}
@@ -665,53 +701,57 @@ protected:
 	 */
 	DataT * m_buffer {nullptr};
 
-	void stream_in (std::istream & in, std::streamsize const block_size)
+	void stream_in(std::istream & in, std::streamsize const block_size)
 	{
 
 		if (in.bad() || in.eof())
-			throw std::runtime_error ("Input stream is in a bad state");
+			throw std::runtime_error("Input stream is in a bad state");
 
 		char * block_buff;
 
 		try
 		{
-			block_buff = (char *) malloc (block_size);
+			block_buff = (char *) malloc(block_size);
 			if (block_buff == nullptr)
-				throw std::runtime_error ("Failed to allocate read buffer");
+				throw std::runtime_error("Failed to allocate read buffer");
 
 			size_t bytes_read;
 
 			while (! in.eof())
 			{
-				in.read (block_buff, block_size);
+				in.read(block_buff, block_size);
 				if (in.bad())
-					throw std::runtime_error ("Error reading data");
+					throw std::runtime_error("Error reading data");
 
 				bytes_read = in.gcount();
 
-				this->m_buffer = (DataT *) realloc (this->m_buffer, (this->m_datasize + bytes_read));
-				if (this->m_buffer == nullptr)
-					throw std::runtime_error ("Failed to reallocate internal buffer");
+				if (bytes_read == 0)
+					throw std::runtime_error("Failed to read data from input stream");
 
-				std::memcpy (((char *) this->m_buffer) + this->m_datasize, block_buff, bytes_read);
+				this->m_buffer = (DataT *) realloc(this->m_buffer, (this->m_datasize + bytes_read));
+				if (this->m_buffer == nullptr)
+					throw std::runtime_error("Failed to reallocate internal buffer");
+
+				std::memcpy(((char *) this->m_buffer) + this->m_datasize, block_buff, bytes_read);
 
 				this->m_datasize += bytes_read;
 			}
 
-			this->m_size = this->m_datasize / sizeof (DataT);
+			this->m_size = this->m_datasize / sizeof(DataT);
 
 #ifdef DEBUG
 			std::cerr << __func__ << ": Created buffer from stream at " << std::showbase << std::hex
 								<< (std::size_t) this->m_buffer << ", size " << this->m_datasize << std::endl;
 #endif
-			free (block_buff);
+			free(block_buff);
 		}
 		catch (...)
 		{
-			free (block_buff);
+			free(block_buff);
 			throw;
 		}
 	}
 };
+} // namespace motoi
 
 #endif

@@ -8,7 +8,8 @@ using namespace png;
 
 namespace chrgfx
 {
-buffer<byte_t> png_chunk (size_t const tile_width, size_t const tile_height, pixel_buffer<index_pixel> const & bitmap)
+motoi::blob<byte_t> png_chunk (
+	size_t const tile_width, size_t const tile_height, pixel_buffer<index_pixel> const & bitmap)
 {
 	// class to chunk an input png into 8x8 chrs
 	// psuedo:
@@ -25,19 +26,19 @@ buffer<byte_t> png_chunk (size_t const tile_width, size_t const tile_height, pix
 	if (tile_width == 0 || tile_height == 0)
 		throw invalid_argument ("Invalid tile dimensions");
 
-	if (bitmap.get_width () < tile_width || bitmap.get_height () < tile_height)
+	if (bitmap.get_width() < tile_width || bitmap.get_height() < tile_height)
 		throw invalid_argument ("Source image too small to form a tile");
 
 	size_t const
 		// chr pixel dimensions
 		chr_datasize {tile_width * tile_height},
 		// input image dimensions (in tiles)
-		img_chrwidth {bitmap.get_width () / tile_width}, img_chrheight {bitmap.get_height () / tile_height},
+		img_chrwidth {bitmap.get_width() / tile_width}, img_chrheight {bitmap.get_height() / tile_height},
 		chr_count {img_chrwidth * img_chrheight},
 
 		chrrow_datasize {chr_datasize * img_chrwidth};
 
-	buffer<byte_t> out (chr_count * chr_datasize);
+	motoi::blob<byte_t> out (chr_count * chr_datasize);
 
 	// iters and counters
 	size_t i_in_pxlrow {0}, // tracks the current pixel row in the source bitmap
@@ -48,7 +49,7 @@ buffer<byte_t> png_chunk (size_t const tile_width, size_t const tile_height, pix
 
 	byte_t
 		// pointer to start of current tile row
-		*ptr_out_chrrow {out.data ()},
+		*ptr_out_chrrow {out.data()},
 		// pointer to start of the current pixel row within the current tile row
 		*ptr_out_pxlrow {ptr_out_chrrow},
 		// pointer to the start of the current pixel row within the current tile
@@ -69,7 +70,7 @@ buffer<byte_t> png_chunk (size_t const tile_width, size_t const tile_height, pix
 		for (i_chr_pxlrow = 0; i_chr_pxlrow < tile_height; ++i_chr_pxlrow)
 		{
 			// point to the next pixel row in the source image
-			ptr_img_pxlrow = bitmap.get_row (i_in_pxlrow++).data ();
+			ptr_img_pxlrow = bitmap.get_row (i_in_pxlrow++).data();
 
 			// for every (chr width) pixels in the pixel row...
 			for (i_chrcol = 0; i_chrcol < img_chrwidth; ++i_chrcol)

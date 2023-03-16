@@ -54,21 +54,21 @@ public:
 /**
  * @brief Renders a collection of basic (unencoded) tiles to a byte buffer
  */
-buffer<byte_t> render (
-	size_t const tile_width, size_t const tile_height, buffer<byte_t> const & chrdata, render_config const & rcfg);
+motoi::blob<byte_t> render (
+	size_t const tile_width, size_t const tile_height, motoi::blob<byte_t> const & chrdata, render_config const & rcfg);
 
 /**
  * @brief Renders a collection of basic (unencoded) tiles to a pixel buffer
  */
 png::pixel_buffer<png::index_pixel> pixbuf_render (
-	size_t const tile_width, size_t const tile_height, buffer<byte_t> const & chrdata, render_config const & rcfg);
+	size_t const tile_width, size_t const tile_height, motoi::blob<byte_t> const & chrdata, render_config const & rcfg);
 
 /**
  * @brief Renders a collection of basic (unencoded) tiles to a PNG image
  */
 png::image<png::index_pixel> png_render (size_t const tile_width,
 	size_t const tile_height,
-	buffer<byte_t> const & chrdata,
+	motoi::blob<byte_t> const & chrdata,
 	png::palette const & pal,
 	render_config const & rcfg);
 
