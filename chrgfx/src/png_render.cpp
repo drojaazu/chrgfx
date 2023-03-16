@@ -10,22 +10,22 @@ using namespace png;
 namespace chrgfx
 {
 
-motoi::blob<byte_t> render (
+motoi::blob<byte_t> render(
 	size_t const tile_width, size_t const tile_height, motoi::blob<byte_t> const & chrdata, render_config const & rcfg)
 {
 
 	if (tile_width == 0 || tile_height == 0)
-		throw invalid_argument ("Invalid tile dimensions");
+		throw invalid_argument("Invalid tile dimensions");
 
 	size_t const chr_datasize {tile_width * tile_height};
 
-	if (chrdata.datasize() < chr_datasize)
-		throw invalid_argument ("Not enough data in buffer to render a tile");
+	if (chrdata.size() < chr_datasize)
+		throw invalid_argument("Not enough data in buffer to render a tile");
 
 	size_t const
 
 		// number of chrs in the final image
-		chr_count {chrdata.datasize() / chr_datasize},
+		chr_count {chrdata.size() / chr_datasize},
 
 		// number of excess chrs to make up the final row
 		chr_excess_count {chr_count % rcfg.row_size},
@@ -46,7 +46,7 @@ motoi::blob<byte_t> render (
 		outimg_pxlwidth {(outimg_chrwidth * tile_width) + border_pxlwidth},
 		outimg_pxlheight {(outimg_chrheight * tile_height) + border_pxlheight};
 
-	motoi::blob<byte_t> out_buffer (outimg_pxlwidth * outimg_pxlheight, rcfg.trns_index);
+	motoi::blob<byte_t> out_buffer(outimg_pxlwidth * outimg_pxlheight, rcfg.trns_index);
 
 	// iters and cached values and such for processing
 	size_t
@@ -75,7 +75,7 @@ motoi::blob<byte_t> render (
 #ifdef DEBUG
 	cerr << dec;
 	cerr << "TILE RENDERING REPORT:" << endl;
-	cerr << "\tUsing border: " << to_string (rcfg.draw_border) << endl;
+	cerr << "\tUsing border: " << to_string(rcfg.draw_border) << endl;
 	cerr << "\tTile count: " << chr_count << endl;
 	cerr << "\tFinal row excess tiles: " << chr_excess_count << endl;
 	cerr << "\tOut tile data size: " << chr_datasize << endl;
@@ -135,7 +135,7 @@ motoi::blob<byte_t> render (
 	return out_buffer;
 }
 
-png::pixel_buffer<png::index_pixel> pixbuf_render (
+png::pixel_buffer<png::index_pixel> pixbuf_render(
 	size_t const tile_width, size_t const tile_height, motoi::blob<byte_t> const & chrdata, render_config const & rcfg)
 {
 	size_t const
@@ -143,7 +143,7 @@ png::pixel_buffer<png::index_pixel> pixbuf_render (
 		chr_datasize {tile_width * tile_height},
 
 		// number of tiles in the final image
-		chr_count {chrdata.size() / chr_datasize},
+		chr_count {chrdata.length() / chr_datasize},
 
 		// excess tiles in the final row
 		final_chrrow_excess {chr_count % rcfg.row_size},
@@ -159,43 +159,43 @@ png::pixel_buffer<png::index_pixel> pixbuf_render (
 		outimg_pxlwidth {(outimg_chrwidth * tile_width) + border_pxlwidth},
 		outimg_pxlheight {(outimg_chrheight * tile_height) + border_pxlheight};
 
-	pixel_buffer<index_pixel> out (outimg_pxlwidth, outimg_pxlheight);
+	pixel_buffer<index_pixel> out(outimg_pxlwidth, outimg_pxlheight);
 
-	auto rawdata {render (tile_width, tile_height, chrdata, rcfg)};
+	auto rawdata {render(tile_width, tile_height, chrdata, rcfg)};
 	byte_t const * ptr_pxlrow {rawdata.data()};
 
 	for (uint pxlrow {0}; pxlrow < outimg_pxlheight; ++pxlrow)
 	{
-		vector<index_pixel> pxlrow_work (ptr_pxlrow, ptr_pxlrow + outimg_pxlwidth);
-		out.put_row (pxlrow, pxlrow_work);
+		vector<index_pixel> pxlrow_work(ptr_pxlrow, ptr_pxlrow + outimg_pxlwidth);
+		out.put_row(pxlrow, pxlrow_work);
 		ptr_pxlrow += outimg_pxlwidth;
 	}
 
 	return out;
 }
 
-image<index_pixel> png_render (size_t const tile_width,
+image<index_pixel> png_render(size_t const tile_width,
 	size_t const tile_height,
 	motoi::blob<byte_t> const & chrdata,
 	png::palette const & pal,
 	render_config const & rcfg)
 {
 	if (pal.size() < 256)
-		throw invalid_argument ("Palette must contain a full 256 entries for PNG export");
+		throw invalid_argument("Palette must contain a full 256 entries for PNG export");
 
-	auto pixbuf {pixbuf_render (tile_width, tile_height, chrdata, rcfg)};
+	auto pixbuf {pixbuf_render(tile_width, tile_height, chrdata, rcfg)};
 
-	image<index_pixel> outimg (pixbuf.get_width(), pixbuf.get_height());
-	outimg.set_pixbuf (pixbuf);
+	image<index_pixel> outimg(pixbuf.get_width(), pixbuf.get_height());
+	outimg.set_pixbuf(pixbuf);
 
-	outimg.set_palette (pal);
+	outimg.set_palette(pal);
 
 	// setup transparency
 	if (rcfg.use_trns)
 	{
-		tRNS trans (256, 255);
+		tRNS trans(256, 255);
 		trans[rcfg.trns_index] = 0;
-		outimg.set_tRNS (trans);
+		outimg.set_tRNS(trans);
 	}
 
 	return outimg;

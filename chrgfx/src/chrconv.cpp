@@ -3,10 +3,10 @@
 namespace chrgfx
 {
 
-byte_t * encode_chr (chrdef const & chrdef, byte_t const * tile, byte_t * out)
+byte_t * encode_chr(chrdef const & chrdef, byte_t const * tile, byte_t * out)
 {
 	if (out == nullptr)
-		out = new byte_t[chrdef.datasize () / 8]();
+		out = new byte_t[chrdef.datasize() / 8]();
 
 	/*
 		-for every line...
@@ -22,15 +22,15 @@ byte_t * encode_chr (chrdef const & chrdef, byte_t const * tile, byte_t * out)
 	*/
 	ushort
 		// tile dimensions
-		chr_height {chrdef.height ()},
-		chr_width {chrdef.width ()}, chr_bitdepth {chrdef.bitdepth ()},
+		chr_height {chrdef.height()},
+		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bitdepth()},
 		// bit offsets in the input tile data
 		bitpos_x, bitpos_y, bitpos;
 
 	ushort const
 		// pointers to bit offset definitions
-		*ptr_row_offset {chrdef.row_offsets ().data ()},
-		*ptr_pxl_offset {chrdef.pixel_offsets ().data ()}, *ptr_plane_offset {chrdef.plane_offsets ().data ()};
+		*ptr_row_offset {chrdef.row_offsets().data()},
+		*ptr_pxl_offset {chrdef.pixel_offsets().data()}, *ptr_plane_offset {chrdef.plane_offsets().data()};
 
 	byte_t const * ptr_in_pxl = tile;
 	byte_t this_pxl;
@@ -63,31 +63,31 @@ byte_t * encode_chr (chrdef const & chrdef, byte_t const * tile, byte_t * out)
 				bitpos = bitpos_y + bitpos_x + *ptr_plane_offset;
 				*(out + (bitpos >> 3)) |= (0x80 >> (bitpos % 8));
 			}
-			ptr_plane_offset = chrdef.plane_offsets ().data ();
+			ptr_plane_offset = chrdef.plane_offsets().data();
 		}
-		ptr_pxl_offset = chrdef.pixel_offsets ().data ();
+		ptr_pxl_offset = chrdef.pixel_offsets().data();
 	}
 
 	return out;
 }
 
-byte_t * decode_chr (chrdef const & chrdef, byte_t const * encoded_chr, byte_t * out)
+byte_t * decode_chr(chrdef const & chrdef, byte_t const * encoded_chr, byte_t * out)
 {
 	if (out == nullptr)
-		out = new byte_t[chrdef.width () * chrdef.height ()]();
+		out = new byte_t[chrdef.width() * chrdef.height()]();
 
 	ushort
 		// tile dimensions
-		chr_height {chrdef.height ()},
-		chr_width {chrdef.width ()}, chr_bitdepth {chrdef.bitdepth ()}, work_byte, work_bit, bitpos_line, bitpos_pixel,
+		chr_height {chrdef.height()},
+		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bitdepth()}, work_byte, work_bit, bitpos_line, bitpos_pixel,
 		bitpos_plane;
 	byte_t this_pxl {0};
 	byte_t * ptr_out_pixel = out;
 
 	ushort const
 		// pointers to bit offset definitions
-		*ptr_row_offset {chrdef.row_offsets ().data ()},
-		*ptr_pixel_offset {chrdef.pixel_offsets ().data ()}, *ptr_plane_offset {chrdef.plane_offsets ().data ()};
+		*ptr_row_offset {chrdef.row_offsets().data()},
+		*ptr_pixel_offset {chrdef.pixel_offsets().data()}, *ptr_plane_offset {chrdef.plane_offsets().data()};
 
 	// for every line...
 	for (ushort i_row {0}; i_row < chr_height; ++i_row)
@@ -117,10 +117,10 @@ byte_t * decode_chr (chrdef const & chrdef, byte_t const * encoded_chr, byte_t *
 			}
 
 			*ptr_out_pixel++ = this_pxl;
-			ptr_plane_offset = chrdef.plane_offsets ().data ();
+			ptr_plane_offset = chrdef.plane_offsets().data();
 		}
 
-		ptr_pixel_offset = chrdef.pixel_offsets ().data ();
+		ptr_pixel_offset = chrdef.pixel_offsets().data();
 	}
 
 	return out;

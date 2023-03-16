@@ -63,74 +63,23 @@ int main(int argc, char ** argv)
 
 		size_t
 			// byte size of one encoded tile
-			in_chunksize {defs.chrdef->datasize() / (size_t) 8},
+			in_chunksize {defs.chrdef->datasize() / 8UL},
 			// byte size of one basic (decoded) tile
 			out_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())};
 
 		// buffer for a single encoded tile, read from the stream
 		byte_t in_tile[in_chunksize];
-
-		// *** NEW we'll read the whole file into memory since the types of data we'll be working
-		// with are quite small relative to modern hardware
-		// it is unlikely that any input will ever surprass more than a couple hundred megabytes
-		// at the most
-		// this should improve speed by reducing IO calls anyway
-		blob<byte_t> inFile(chrdata);
-
 		// basic tiles buffer
-		blob<byte_t> out_buffer((inFile.datasize() / in_chunksize) * out_chunksize);
-		blob<byte_t>::iterator<byte_t> i1 = inFile.begin<byte_t>(in_chunksize);
-		blob<byte_t>::iterator<byte_t> i2 = inFile.end<byte_t>(in_chunksize);
-		auto i4 = i1 + 4;
-		typename blob<byte_t>::iterator i3 = out_buffer.begin(out_chunksize);
-		auto p = i4 - i1;
+		blob<byte_t> out_buffer(0);
 
-		size_t counter = 0;
-
-		/*
-				auto i88 = i1;
-				while (i88 != i4)
-				{
-					cout << (unsigned long) counter++ << " -- " << (unsigned long) &*i88 << endl;
-					++i88;
-				}
-		*/
-
-		try
-		{
-			auto d = distance(i1, i2);
-			auto d2 = i2 - i1;
-			for_each(execution::seq,
-				i1,
-				i2,
-				[&](auto & iter) mutable
-				{
-					const byte_t * b = &iter;
-					decode_chr(*defs.chrdef, b, &*i3);
-					// cout << (unsigned long) &*i3 << endl;
-					// cout << (unsigned long) counter++ << " -- " << (unsigned long) &*i3 << endl;
-					++i3;
-				});
-		}
-		catch (exception & e)
-		{
-			cout << e.what() << endl;
-		}
-		/*
-			Some speed testing was done and, somewhat surprisingly, calling append
-			on the buffer repeatedly was a bit faster than creating a large
-			temporary buffer and resizing
-		*/
-		/*
 		while (true)
 		{
-			chrdata.read ((char *) in_tile, in_chunksize);
+			chrdata.read((char *) in_tile, in_chunksize);
 			if (chrdata.eof())
 				break;
 
-			out_buffer.append (decode_chr (*defs.chrdef, in_tile), out_chunksize);
+			out_buffer.append(decode_chr(*defs.chrdef, in_tile), out_chunksize);
 		}
-		*/
 
 #ifdef DEBUG
 		t2 = chrono::high_resolution_clock::now();

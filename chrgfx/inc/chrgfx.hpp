@@ -3,7 +3,7 @@
 
 #include <png++/png.hpp>
 
-#include "buffer.hpp"
+#include "blob.hpp"
 #include "builtin_defs.hpp"
 #include "chrconv.hpp"
 #include "chrdef.hpp"
