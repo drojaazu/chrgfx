@@ -475,7 +475,7 @@ def_collection load_gfxdefs (string const & def_file)
 	for (auto it = block_iter.first; it != block_iter.second; ++it)
 	{
 		chrdef temp_def = validate_chrdef_block (it->second);
-		chrdefs.insert ({temp_def.id (), move (temp_def)});
+		chrdefs.insert ({temp_def.id (), std::move (temp_def)});
 	}
 	// add library builtin def
 	chrdefs.insert ({string (gfxdefs::basic_8x8_1bpp.id ()), gfxdefs::basic_8x8_1bpp});
@@ -486,7 +486,7 @@ def_collection load_gfxdefs (string const & def_file)
 	for (auto it = block_iter.first; it != block_iter.second; ++it)
 	{
 		rgbcoldef temp_def = validate_rgbcoldef_block (it->second);
-		rgbcoldefs.insert ({temp_def.id (), move (temp_def)});
+		rgbcoldefs.insert ({temp_def.id (), std::move (temp_def)});
 		// block_iter++;
 	}
 
@@ -496,7 +496,7 @@ def_collection load_gfxdefs (string const & def_file)
 	for (auto it = block_iter.first; it != block_iter.second; ++it)
 	{
 		refcoldef temp_def = validate_refcoldef_block (it->second);
-		refcoldefs.insert ({temp_def.id (), move (temp_def)});
+		refcoldefs.insert ({temp_def.id (), std::move (temp_def)});
 		// block_iter++;
 	}
 
@@ -508,7 +508,7 @@ def_collection load_gfxdefs (string const & def_file)
 	for (auto it = block_iter.first; it != block_iter.second; ++it)
 	{
 		paldef temp_def = validate_paldef_block (it->second);
-		paldefs.insert ({temp_def.id (), move (temp_def)});
+		paldefs.insert ({temp_def.id (), std::move (temp_def)});
 		// block_iter++;
 	}
 
