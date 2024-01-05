@@ -5,11 +5,11 @@
 
 using namespace std;
 using namespace png;
+using namespace motoi;
 
 namespace chrgfx
 {
-motoi::blob<byte_t> png_chunk (
-	size_t const tile_width, size_t const tile_height, pixel_buffer<index_pixel> const & bitmap)
+blob<byte_t> png_chunk (size_t const tile_width, size_t const tile_height, pixel_buffer<index_pixel> const & bitmap)
 {
 	// class to chunk an input png into 8x8 chrs
 	// psuedo:
@@ -24,7 +24,7 @@ motoi::blob<byte_t> png_chunk (
 	// ---- read curr pixel row 8 pixels, store into output vector of chrs
 
 	if (tile_width == 0 || tile_height == 0)
-		throw invalid_argument ("Invalid tile dimensions");
+		throw invalid_argument("Invalid tile dimensions");
 
 	if (bitmap.get_width() < tile_width || bitmap.get_height() < tile_height)
 		throw invalid_argument ("Source image too small to form a tile");
@@ -38,7 +38,7 @@ motoi::blob<byte_t> png_chunk (
 
 		chrrow_datasize {chr_datasize * img_chrwidth};
 
-	motoi::blob<byte_t> out (chr_count * chr_datasize);
+	blob<byte_t> out (chr_count * chr_datasize);
 
 	// iters and counters
 	size_t i_in_pxlrow {0}, // tracks the current pixel row in the source bitmap

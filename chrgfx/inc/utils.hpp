@@ -16,7 +16,7 @@ namespace chrgfx
  * @param data color channel data
  * @param bitcount target bitdepth
  */
-u8 reduce_bitdepth (u8 data, u8 bitdepth);
+u8 reduce_bitdepth(u8 data, u8 bitdepth);
 
 /**
  * @brief Increase bitdepth of a color channel to 8 bits
@@ -24,37 +24,37 @@ u8 reduce_bitdepth (u8 data, u8 bitdepth);
  * @param data color channel data
  * @param bitdepth bitdepth of the input channel
  */
-u8 expand_bitdepth (u8 data, u8 bitdepth);
+u8 expand_bitdepth(u8 data, u8 bitdepth);
 
 /**
  * @brief Returns an 32 bit value with the specified number of bits set
  * starting from the LSB
  */
-u32 create_bitmask32 (u8 bitcount);
+u32 create_bitmask32(u8 bitcount);
 
 /**
  * @brief Returns an 16 bit value with the specified number of bits set
  * starting from the LSB
  */
-u16 create_bitmask16 (u8 bitcount);
+u16 create_bitmask16(u8 bitcount);
 
 /**
  * @brief Returns an 8 bit value with the specified number of bits set
  * starting from the LSB
  */
-u8 create_bitmask8 (u8 bitcount);
+u8 create_bitmask8(u8 bitcount);
 
 /**
  * @brief Create an 8 bit palette of randomized colors
  */
-palette make_pal_random ();
+palette make_pal_random();
 
 /**
  * @brief Determines the endianness of the local system
  * @note This is called on initialization of libchrgfx; use the @c
  * bigend_sys variable to quickly check endianness
  */
-bool is_system_bigendian ();
+bool is_system_bigendian();
 
 /**
  * @brief Indicates that the local system uses big endian architecture

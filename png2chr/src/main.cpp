@@ -1,3 +1,4 @@
+#include "blob.hpp"
 #include "chrgfx.hpp"
 #include "fstreams.hpp"
 #include "shared.hpp"
@@ -10,6 +11,7 @@
 
 using namespace std;
 using namespace chrgfx;
+using namespace motoi;
 
 void process_args(int argc, char ** argv);
 
@@ -78,7 +80,7 @@ int main(int argc, char ** argv)
 		// deal with tiles first
 		if (! cfg.chr_outfile.empty())
 		{
-			motoi::blob<byte_t> png_tiles {png_chunk(defs.chrdef->width(), defs.chrdef->height(), in_img.get_pixbuf())};
+			blob<byte_t> png_tiles {png_chunk(defs.chrdef->width(), defs.chrdef->height(), in_img.get_pixbuf())};
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();

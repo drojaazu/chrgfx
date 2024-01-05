@@ -14,6 +14,8 @@
  * and 0 bytes read  (e.g. stream in a bad state)
  * 20230305 Added iteration by stride; added namespace; differentiated blob dimension by "length" (the size of the data
  * buffer by DataT types) and "size" (the size of the data buffer in bytes); bugfixes
+ * 20230416 Corrected bug where istreams with files less than the block size were not having their size set correctly;
+ * changed default block size to 512kb
  */
 
 #ifndef __MOTOI__BLOB_HPP
@@ -699,7 +701,7 @@ public:
 	}
 
 protected:
-	static size_t const DEFAULT_BLOCK_SZ {0x20000};
+	static size_t const DEFAULT_BLOCK_SZ {0x80000};
 
 	/**
 	 * @brief Length of the blob by type
@@ -738,20 +740,21 @@ protected:
 				in.read(block_buff, block_size);
 				if (in.bad())
 					throw std::runtime_error("Error reading data");
-				if (in.eof())
-					break;
 
 				bytes_read = in.gcount();
-
 				if (bytes_read == 0)
-					throw std::runtime_error("Failed to read data from input stream");
+				{
+					if (in.eof())
+						break;
+					else
+						throw std::runtime_error("Failed to read data from input stream");
+				}
 
 				this->m_buffer = (DataT *) realloc(this->m_buffer, (this->m_size + bytes_read));
 				if (this->m_buffer == nullptr)
 					throw std::runtime_error("Failed to reallocate internal buffer");
 
 				std::memcpy(((char *) this->m_buffer) + this->m_size, block_buff, bytes_read);
-
 				this->m_size += bytes_read;
 			}
 

@@ -1,12 +1,11 @@
 
 
+#include "blob.hpp"
 #include "chrgfx.hpp"
 #include "fstreams.hpp"
 #include "shared.hpp"
-#include <execution>
 #include <getopt.h>
 #include <iostream>
-#include <pstl/glue_execution_defs.h>
 
 #ifdef DEBUG
 #include <chrono>
@@ -63,15 +62,21 @@ int main(int argc, char ** argv)
 
 		size_t
 			// byte size of one encoded tile
-			in_chunksize {defs.chrdef->datasize() / 8UL},
+			in_chunksize {defs.chrdef->datasize() / (size_t) 8},
 			// byte size of one basic (decoded) tile
 			out_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())};
 
 		// buffer for a single encoded tile, read from the stream
 		byte_t in_tile[in_chunksize];
+
 		// basic tiles buffer
 		blob<byte_t> out_buffer(0);
 
+		/*
+			Some speed testing was done and, somewhat surprisingly, calling append
+			on the buffer repeatedly was a bit faster than creating a large
+			temporary buffer and resizing
+		*/
 		while (true)
 		{
 			chrdata.read((char *) in_tile, in_chunksize);
