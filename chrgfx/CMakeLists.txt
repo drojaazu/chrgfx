@@ -8,7 +8,7 @@ set_target_properties(chrgfx PROPERTIES SOVERSION 2)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/app.hpp.cfg" "${CMAKE_CURRENT_SOURCE_DIR}/src/app.hpp")
 
 set(HEADERS
-  ${CMAKE_CURRENT_SOURCE_DIR}/inc/buffer.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/blob.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/builtin_defs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/chrconv.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/chrdef.hpp

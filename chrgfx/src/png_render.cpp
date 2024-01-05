@@ -6,12 +6,13 @@
 
 using namespace std;
 using namespace png;
+using namespace motoi;
 
 namespace chrgfx
 {
 
-buffer<byte_t> render (
-	size_t const tile_width, size_t const tile_height, buffer<byte_t> const & chrdata, render_config const & rcfg)
+blob<byte_t> render (
+	size_t const tile_width, size_t const tile_height, blob<byte_t> const & chrdata, render_config const & rcfg)
 {
 
 	if (tile_width == 0 || tile_height == 0)
@@ -19,13 +20,13 @@ buffer<byte_t> render (
 
 	size_t const chr_datasize {tile_width * tile_height};
 
-	if (chrdata.datasize() < chr_datasize)
+	if (chrdata.size() < chr_datasize)
 		throw invalid_argument ("Not enough data in buffer to render a tile");
 
 	size_t const
 
 		// number of chrs in the final image
-		chr_count {chrdata.datasize() / chr_datasize},
+		chr_count {chrdata.size() / chr_datasize},
 
 		// number of excess chrs to make up the final row
 		chr_excess_count {chr_count % rcfg.row_size},
@@ -46,7 +47,7 @@ buffer<byte_t> render (
 		outimg_pxlwidth {(outimg_chrwidth * tile_width) + border_pxlwidth},
 		outimg_pxlheight {(outimg_chrheight * tile_height) + border_pxlheight};
 
-	buffer<byte_t> out_buffer (outimg_pxlwidth * outimg_pxlheight, rcfg.trns_index);
+	blob<byte_t> out_buffer (outimg_pxlwidth * outimg_pxlheight, rcfg.trns_index);
 
 	// iters and cached values and such for processing
 	size_t
@@ -136,7 +137,7 @@ buffer<byte_t> render (
 }
 
 png::pixel_buffer<png::index_pixel> pixbuf_render (
-	size_t const tile_width, size_t const tile_height, buffer<byte_t> const & chrdata, render_config const & rcfg)
+	size_t const tile_width, size_t const tile_height, blob<byte_t> const & chrdata, render_config const & rcfg)
 {
 	size_t const
 		// size of a single chr in bytes
@@ -176,7 +177,7 @@ png::pixel_buffer<png::index_pixel> pixbuf_render (
 
 image<index_pixel> png_render (size_t const tile_width,
 	size_t const tile_height,
-	buffer<byte_t> const & chrdata,
+	blob<byte_t> const & chrdata,
 	png::palette const & pal,
 	render_config const & rcfg)
 {

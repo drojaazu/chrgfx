@@ -33,7 +33,7 @@ struct runtime_config
 	std::string paldef_id;
 	bool list_gfxdefs;
 
-	runtime_config ();
+	runtime_config();
 };
 
 class def_helper
@@ -43,14 +43,14 @@ public:
 	chrgfx::coldef const * coldef;
 	chrgfx::paldef const * paldef;
 
-	def_helper (runtime_config & cfg);
+	def_helper(runtime_config & cfg);
 
-	void list_gfxdefs (std::ostream & os);
+	void list_gfxdefs(std::ostream & os);
 
 private:
 	def_collection m_defs;
 };
 
-bool shared_args (char this_opt, runtime_config & cfg);
+bool shared_args(char this_opt, runtime_config & cfg);
 
 #endif

@@ -12,18 +12,18 @@
 #include "usage.hpp"
 #include "app.hpp"
 
-void show_version (std::wostream & output)
+void show_version(std::wostream & output)
 {
 	std::wstringstream ss;
 	ss << APP::NAME << " - version " << APP::VERSION << std::endl;
 	ss << APP::CONTACT << " / " << APP::WEBSITE << std::endl;
 
-	output << ss.str ();
+	output << ss.str();
 }
 
-void show_usage (option const * opts, option_details const * details, std::wostream & output)
+void show_usage(option const * opts, option_details const * details, std::wostream & output)
 {
-	setlocale (LC_ALL, "");
+	setlocale(LC_ALL, "");
 
 	std::wstringstream ss;
 	ss << APP::NAME << " - version " << APP::VERSION << std::endl;
@@ -61,5 +61,5 @@ void show_usage (option const * opts, option_details const * details, std::wostr
 		++details;
 	}
 
-	output << ss.str ();
+	output << ss.str();
 }

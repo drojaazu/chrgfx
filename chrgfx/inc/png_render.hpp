@@ -1,7 +1,7 @@
 #ifndef CHRGFX__PNG_RENDER_HPP
 #define CHRGFX__PNG_RENDER_HPP
 
-#include "buffer.hpp"
+#include "blob.hpp"
 #include "types.hpp"
 #include <png++/png.hpp>
 
@@ -43,10 +43,10 @@ public:
 	u8 trns_index;
 
 	render_config() :
-			row_size (DEFAULT_ROW_SIZE),
-			draw_border (DEFAULT_DRAW_BORDER),
-			use_trns (DEFAULT_USE_TRNS),
-			trns_index (DEFAULT_TRNS_INDEX)
+			row_size(DEFAULT_ROW_SIZE),
+			draw_border(DEFAULT_DRAW_BORDER),
+			use_trns(DEFAULT_USE_TRNS),
+			trns_index(DEFAULT_TRNS_INDEX)
 	{
 	}
 };
@@ -54,21 +54,21 @@ public:
 /**
  * @brief Renders a collection of basic (unencoded) tiles to a byte buffer
  */
-buffer<byte_t> render (
-	size_t const tile_width, size_t const tile_height, buffer<byte_t> const & chrdata, render_config const & rcfg);
+motoi::blob<byte_t> render(
+	size_t const tile_width, size_t const tile_height, motoi::blob<byte_t> const & chrdata, render_config const & rcfg);
 
 /**
  * @brief Renders a collection of basic (unencoded) tiles to a pixel buffer
  */
-png::pixel_buffer<png::index_pixel> pixbuf_render (
-	size_t const tile_width, size_t const tile_height, buffer<byte_t> const & chrdata, render_config const & rcfg);
+png::pixel_buffer<png::index_pixel> pixbuf_render(
+	size_t const tile_width, size_t const tile_height, motoi::blob<byte_t> const & chrdata, render_config const & rcfg);
 
 /**
  * @brief Renders a collection of basic (unencoded) tiles to a PNG image
  */
-png::image<png::index_pixel> png_render (size_t const tile_width,
+png::image<png::index_pixel> png_render(size_t const tile_width,
 	size_t const tile_height,
-	buffer<byte_t> const & chrdata,
+	motoi::blob<byte_t> const & chrdata,
 	png::palette const & pal,
 	render_config const & rcfg);
 
