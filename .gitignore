@@ -4,3 +4,4 @@ docs/
 .vscode/
 .cache/
 _notes.md
+**/src/app.hpp
