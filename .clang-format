@@ -1,4 +1,5 @@
 Language: Cpp
+Standard: c++17
 BasedOnStyle: LLVM
 
 AlignAfterOpenBracket: DontAlign
@@ -42,6 +43,5 @@ SpacesInAngles: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-Standard: Cpp11
 TabWidth: 2
 UseTab: Always
