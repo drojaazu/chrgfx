@@ -1,4 +1,5 @@
 #include "shared.hpp"
+#include "xdgdirs.hpp"
 
 using namespace std;
 
@@ -9,7 +10,7 @@ runtime_config::runtime_config() :
 		list_gfxdefs(false) {};
 
 def_helper::def_helper(runtime_config & cfg) :
-		m_defs(load_gfxdefs(cfg.gfxdefs_path.empty() ? GFXDEF_PATH : cfg.gfxdefs_path))
+		m_defs(load_gfxdefs(cfg.gfxdefs_path.empty() ? data_filepaths("chrgfx/gfxdefs").front() : cfg.gfxdefs_path))
 {
 	if (cfg.list_gfxdefs)
 	{

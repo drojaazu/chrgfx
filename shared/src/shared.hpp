@@ -1,15 +1,16 @@
 #ifndef CHRGFX__SHARED_SHARED_HPP
 #define CHRGFX__SHARED_SHARED_HPP
 
+#include <getopt.h>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "chrdef.hpp"
 #include "coldef.hpp"
 #include "import_defs.hpp"
 #include "paldef.hpp"
 #include "usage.hpp"
-#include <getopt.h>
-#include <iostream>
-#include <string>
-#include <vector>
 
 /*
 	Hardcoding /etc isn't best practice, I'm sure, but I couldn't find a standard
