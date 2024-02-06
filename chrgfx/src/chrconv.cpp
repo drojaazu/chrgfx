@@ -20,14 +20,14 @@ byte_t * encode_chr(chrdef const & chrdef, byte_t const * tile, byte_t * out)
 		---if bit is zero, no need to do anything
 		---output data |= (input_bit << bit position mod)
 	*/
-	ushort
+	uint
 		// tile dimensions
 		chr_height {chrdef.height()},
 		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bitdepth()},
 		// bit offsets in the input tile data
 		bitpos_x, bitpos_y, bitpos;
 
-	ushort const
+	uint const
 		// pointers to bit offset definitions
 		*ptr_row_offset {chrdef.row_offsets().data()},
 		*ptr_pxl_offset {chrdef.pixel_offsets().data()}, *ptr_plane_offset {chrdef.plane_offsets().data()};
@@ -36,12 +36,12 @@ byte_t * encode_chr(chrdef const & chrdef, byte_t const * tile, byte_t * out)
 	byte_t this_pxl;
 
 	// for every row of pixels...
-	for (ushort i_row {0}; i_row < chr_height; ++i_row)
+	for (uint i_row {0}; i_row < chr_height; ++i_row)
 	{
 		bitpos_y = *ptr_row_offset++;
 
 		// for every pixel in that row...
-		for (ushort i_pxl {0}; i_pxl < chr_width; ++i_pxl, ++ptr_pxl_offset)
+		for (uint i_pxl {0}; i_pxl < chr_width; ++i_pxl, ++ptr_pxl_offset)
 		{
 			this_pxl = *ptr_in_pxl++;
 
@@ -52,7 +52,7 @@ byte_t * encode_chr(chrdef const & chrdef, byte_t const * tile, byte_t * out)
 
 			bitpos_x = *ptr_pxl_offset;
 			// for every bit plane in that pixel...
-			for (ushort i_bitplane {0}; i_bitplane < chr_bitdepth; ++i_bitplane, this_pxl >>= 1, ++ptr_plane_offset)
+			for (uint i_bitplane {0}; i_bitplane < chr_bitdepth; ++i_bitplane, this_pxl >>= 1, ++ptr_plane_offset)
 			{
 				// if the bit is unset, then do not set the equivalent bit in the
 				// output
@@ -76,7 +76,7 @@ byte_t * decode_chr(chrdef const & chrdef, byte_t const * encoded_chr, byte_t * 
 	if (out == nullptr)
 		out = new byte_t[chrdef.width() * chrdef.height()]();
 
-	ushort
+	uint
 		// tile dimensions
 		chr_height {chrdef.height()},
 		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bitdepth()}, work_byte, work_bit, bitpos_line, bitpos_pixel,
@@ -84,23 +84,23 @@ byte_t * decode_chr(chrdef const & chrdef, byte_t const * encoded_chr, byte_t * 
 	byte_t this_pxl {0};
 	byte_t * ptr_out_pixel = out;
 
-	ushort const
+	uint const
 		// pointers to bit offset definitions
 		*ptr_row_offset {chrdef.row_offsets().data()},
 		*ptr_pixel_offset {chrdef.pixel_offsets().data()}, *ptr_plane_offset {chrdef.plane_offsets().data()};
 
 	// for every line...
-	for (ushort i_row {0}; i_row < chr_height; ++i_row)
+	for (uint i_row {0}; i_row < chr_height; ++i_row)
 	{
 		bitpos_line = *ptr_row_offset++;
 
 		// for every pixel in the line...
-		for (ushort i_pxl {0}; i_pxl < chr_width; ++i_pxl, ++ptr_pixel_offset, this_pxl = 0)
+		for (uint i_pxl {0}; i_pxl < chr_width; ++i_pxl, ++ptr_pixel_offset, this_pxl = 0)
 		{
 			bitpos_pixel = bitpos_line + *ptr_pixel_offset;
 
 			// for every bit planee
-			for (ushort i_bitplane {0}; i_bitplane < chr_bitdepth; ++i_bitplane, ++ptr_plane_offset)
+			for (uint i_bitplane {0}; i_bitplane < chr_bitdepth; ++i_bitplane, ++ptr_plane_offset)
 			{
 				bitpos_plane = bitpos_pixel + *ptr_plane_offset;
 

@@ -20,25 +20,10 @@
 struct option_details
 {
 	bool const required;
-	wchar_t const * const desc;
-	wchar_t const * const arg_type;
+	char const * const desc;
+	char const * const arg_type;
 };
 
-/**
- * @brief Displays program version
- *
- * @param output stream to write the version
- */
-void show_version(std::wostream & output);
-
-/**
- * @brief Displays program options and usage
- *
- * @param opts array of @c option structs; final entry should be all zero
- * @param details array of @c option_details structs; must be the same size and
- * order as @c opts
- * @param output stream to write the usage
- */
-void show_usage(option const * opts, option_details const * details, std::wostream & output = std::wcout);
+std::string show_usage(option const * opts, option_details const * details);
 
 #endif

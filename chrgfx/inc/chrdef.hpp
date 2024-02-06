@@ -13,78 +13,76 @@ namespace chrgfx
  */
 class chrdef : public gfxdef
 {
+protected:
+	uint m_width;
+	uint m_height;
+	uint m_bitdepth;
+	uint m_datasize;
+	std::vector<uint> m_planeoffsets;
+	std::vector<uint> m_pixeloffsets;
+	std::vector<uint> m_rowoffsets;
 
 public:
 	chrdef(std::string const & id,
-		ushort width,
-		ushort height,
-		ushort bitdepth,
-		std::vector<ushort> const & planeoffset,
-		std::vector<ushort> const & pixeloffset,
-		std::vector<ushort> const & rowoffset,
+		uint const width,
+		uint const height,
+		uint const bitdepth,
+		std::vector<uint> const & planeoffset,
+		std::vector<uint> const & pixeloffset,
+		std::vector<uint> const & rowoffset,
 		std::string const & description = "");
 
 	/**
-	 * @return ushort Width of the tile in pixels
+	 * @return uint Width of the tile in pixels
 	 */
-	[[nodiscard]] ushort width() const;
+	[[nodiscard]] uint width() const;
 
 	/**
-	 * @return ushort Height of the tile in pixels
+	 * @return uint Height of the tile in pixels
 	 */
-	[[nodiscard]] ushort height() const;
+	[[nodiscard]] uint height() const;
 
 	/**
-	 * @return ushort Bit depth of the tile
+	 * @return uint Bit depth of the tile
 	 */
-	[[nodiscard]] ushort bitdepth() const;
+	[[nodiscard]] uint bitdepth() const;
 
 	/**
-	 * @return ushort Data size of a single tile *in bits*
+	 * @return uint Data size of a single tile *in bits*
 	 */
-	[[nodiscard]] ushort datasize() const;
+	[[nodiscard]] uint datasize() const;
 
 	/**
 	 * @return Reference to the collection of bit offsets to bitplanes within a
 	 * row
 	 */
-	[[nodiscard]] std::vector<ushort> const & plane_offsets() const;
+	[[nodiscard]] std::vector<uint> const & plane_offsets() const;
 
 	/**
 	 * @return Reference to the collection of bit offsets to pixels within a
 	 * row
 	 */
-	[[nodiscard]] std::vector<ushort> const & pixel_offsets() const;
+	[[nodiscard]] std::vector<uint> const & pixel_offsets() const;
 
 	/**
 	 * @return Reference to the collection of bit offsets to rows within a tile
 	 */
-	[[nodiscard]] std::vector<ushort> const & row_offsets() const;
+	[[nodiscard]] std::vector<uint> const & row_offsets() const;
 
 	/**
-	 * @return ushort Bit offset to specified bitplane index within a row
+	 * @return uint Bit offset to specified bitplane index within a row
 	 */
-	[[nodiscard]] ushort plane_offset_at(ushort bitplane_index) const;
+	[[nodiscard]] uint plane_offset_at(uint bitplane_index) const;
 
 	/**
-	 * @return ushort Bit offset to specified pixel index within a row
+	 * @return uint Bit offset to specified pixel index within a row
 	 */
-	[[nodiscard]] ushort pixel_offset_at(ushort pixel_index) const;
+	[[nodiscard]] uint pixel_offset_at(uint pixel_index) const;
 
 	/**
-	 * @return ushort Bit offset to specified row index within a tile
+	 * @return uint Bit offset to specified row index within a tile
 	 */
-	[[nodiscard]] ushort row_offset_at(ushort row_index) const;
-
-protected:
-	ushort const m_width;
-	ushort const m_height;
-	ushort const m_bitdepth;
-	ushort const m_datasize;
-
-	std::vector<ushort> m_planeoffsets;
-	std::vector<ushort> m_pixeloffsets;
-	std::vector<ushort> m_rowoffsets;
+	[[nodiscard]] uint row_offset_at(uint row_index) const;
 };
 
 } // namespace chrgfx

@@ -1,4 +1,4 @@
-#ifndef CHRGFX__PALCONV_HPP
+ #ifndef CHRGFX__PALCONV_HPP
 #define CHRGFX__PALCONV_HPP
 
 #include "coldef.hpp"

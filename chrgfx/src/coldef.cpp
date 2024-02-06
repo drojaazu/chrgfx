@@ -7,25 +7,25 @@ namespace chrgfx
 using namespace std;
 using namespace png;
 
-coldef::coldef (string const & id, coldef_type const type, bool const big_endian, string const & description) :
-		gfxdef (id, description),
-		m_type (type),
-		m_big_endian (big_endian)
+coldef::coldef(string const & id, coldef_type const type, bool const big_endian, string const & description) :
+		gfxdef(id, description),
+		m_type(type),
+		m_big_endian(big_endian)
 {
 }
 
-refcoldef::refcoldef (string const & id, palette reftab, bool const big_endian, string const & description) :
-		coldef (id, ref, big_endian, description),
-		m_reftab (std::move (reftab))
+refcoldef::refcoldef(string const & id, palette reftab, bool const big_endian, string const & description) :
+		coldef(id, ref, big_endian, description),
+		m_reftab(std::move(reftab))
 {
 }
 
-color refcoldef::by_value (ushort index) const
+color refcoldef::by_value(uint index) const
 {
 	return m_reftab[index];
 };
 
-ushort refcoldef::by_color (color rgb) const
+uint refcoldef::by_color(color rgb) const
 {
 	size_t idx {0};
 	for (auto & this_color : m_reftab)
@@ -39,13 +39,13 @@ ushort refcoldef::by_color (color rgb) const
 
 	// this could certainly use some tuning, but it mostly works
 	vector<pair<int, int>> distances;
-	distances.reserve (this->m_reftab.size ());
+	distances.reserve(this->m_reftab.size());
 	int pal_color_iter {0};
 	for (const auto & this_color : this->m_reftab)
 	{
 		int this_distance =
-			(abs (this_color.red - rgb.red)) + (abs (this_color.green - rgb.green)) + (abs (this_color.blue - rgb.blue));
-		distances.emplace_back (pal_color_iter, this_distance);
+			(abs(this_color.red - rgb.red)) + (abs(this_color.green - rgb.green)) + (abs(this_color.blue - rgb.blue));
+		distances.emplace_back(pal_color_iter, this_distance);
 		++pal_color_iter;
 	}
 
@@ -53,7 +53,7 @@ ushort refcoldef::by_color (color rgb) const
 	idx = 0;
 	for (const auto & this_entry : distances)
 	{
-		if (get<1> (this_entry) < dist_check)
+		if (get<1>(this_entry) < dist_check)
 		{
 			dist_check = this_entry.second;
 			idx = this_entry.first;
@@ -63,41 +63,41 @@ ushort refcoldef::by_color (color rgb) const
 	return idx;
 };
 
-png::palette const & refcoldef::reftab () const
+png::palette const & refcoldef::reftab() const
 {
 	return m_reftab;
 }
 
-bool coldef::big_endian () const
+bool coldef::big_endian() const
 {
 	return m_big_endian;
 };
 
-coldef_type coldef::type () const
+coldef_type coldef::type() const
 {
 	return m_type;
 }
 
-rgbcoldef::rgbcoldef (string const & id,
-	ushort const bitdepth,
+rgbcoldef::rgbcoldef(string const & id,
+	uint const bitdepth,
 	vector<rgb_layout> const & layout,
 	bool const big_endian,
 	string const & description) :
-		coldef (id, rgb, big_endian, description),
-		m_layout (layout),
-		m_bitdepth (bitdepth) {};
+		coldef(id, rgb, big_endian, description),
+		m_layout(layout),
+		m_bitdepth(bitdepth) {};
 
-vector<rgb_layout> const & rgbcoldef::layout () const
+vector<rgb_layout> const & rgbcoldef::layout() const
 {
 	return m_layout;
 };
 
-rgb_layout const & rgbcoldef::rgb_pass (ushort pass) const
+rgb_layout const & rgbcoldef::rgb_pass(uint pass) const
 {
 	return m_layout[pass];
 }
 
-ushort rgbcoldef::bitdepth () const
+uint rgbcoldef::bitdepth() const
 {
 	return m_bitdepth;
 };

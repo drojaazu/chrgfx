@@ -15,24 +15,24 @@ namespace chrgfx
 class rgb_layout
 {
 public:
-	rgb_layout(pair<short, ushort> const & red, pair<short, ushort> const & green, pair<short, ushort> const & blue);
+	rgb_layout(pair<short, uint> const & red, pair<short, uint> const & green, pair<short, uint> const & blue);
 
 	[[nodiscard]] short red_shift() const;
 
-	[[nodiscard]] ushort red_size() const;
+	[[nodiscard]] uint red_size() const;
 
 	[[nodiscard]] short green_shift() const;
 
-	[[nodiscard]] ushort green_size() const;
+	[[nodiscard]] uint green_size() const;
 
 	[[nodiscard]] short blue_shift() const;
 
-	[[nodiscard]] ushort blue_size() const;
+	[[nodiscard]] uint blue_size() const;
 
 protected:
-	pair<short, ushort> const m_red;
-	pair<short, ushort> const m_green;
-	pair<short, ushort> const m_blue;
+	pair<short, uint> m_red;
+	pair<short, uint> m_green;
+	pair<short, uint> m_blue;
 };
 
 } // namespace chrgfx

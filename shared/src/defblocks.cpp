@@ -1,6 +1,6 @@
 
 #include "defblocks.hpp"
-#include "parsing.hpp"
+#include "strutil.hpp"
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
@@ -9,6 +9,24 @@
 #include <vector>
 
 using namespace std;
+
+/**
+ * @brief Split a string on the specified char delimiter
+ * @note Assumes input string has already been whitespace trimmed
+ */
+template <typename StringT>
+std::pair<std::basic_string<StringT>, std::basic_string<StringT>> kvsplit(
+	std::basic_string<StringT> const & line, char const delim = ' ')
+{
+	auto delim_pos {line.find(delim)};
+	if (delim_pos == std::string::npos)
+	{
+		std::stringstream ss;
+		ss << "Delimiter '" << delim << "' not found in string \"" << line << "\"";
+		throw std::invalid_argument(ss.str());
+	}
+	return {line.substr(0, delim_pos), line.substr(delim_pos + 1, std::string::npos)};
+}
 
 char constexpr COMMENT_MARKER {'#'};
 char constexpr BLOCK_OPENER {'{'};

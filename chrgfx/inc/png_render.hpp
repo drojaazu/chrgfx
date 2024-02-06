@@ -8,7 +8,7 @@
 namespace chrgfx
 {
 
-ushort const DEFAULT_ROW_SIZE = 16;
+uint const DEFAULT_ROW_SIZE = 16;
 bool const DEFAULT_DRAW_BORDER = false;
 bool const DEFAULT_USE_TRNS = false;
 u8 const DEFAULT_TRNS_INDEX = 0;
@@ -23,7 +23,7 @@ public:
 	 * @brief Number of tiles per row in the output image
 	 *
 	 */
-	ushort row_size;
+	uint row_size;
 
 	/**
 	 * @brief Draw a 1 pixel border around the inner edges of tiles in the

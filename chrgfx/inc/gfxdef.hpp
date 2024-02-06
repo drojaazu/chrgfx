@@ -10,22 +10,21 @@ namespace chrgfx
  */
 class gfxdef
 {
+protected:
+	gfxdef(std::string id, std::string description = "");
+
+	std::string m_id;
+	std::string m_desc;
+
 public:
-	gfxdef() = delete;
 	gfxdef(gfxdef &&) = default;
 	gfxdef(gfxdef const &) = default;
-	gfxdef & operator=(gfxdef const &) = delete;
-	gfxdef & operator=(gfxdef &&) = delete;
+	gfxdef & operator=(gfxdef const &) = default;
+	gfxdef & operator=(gfxdef &&) = default;
 
 	[[nodiscard]] std::string const & id() const;
 
 	[[nodiscard]] std::string const & description() const;
-
-protected:
-	gfxdef(std::string id, std::string description = "");
-
-	std::string const m_id;
-	std::string const m_desc;
 };
 
 } // namespace chrgfx

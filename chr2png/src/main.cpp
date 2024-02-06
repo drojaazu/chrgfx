@@ -1,5 +1,3 @@
-
-
 #include "blob.hpp"
 #include "chrgfx.hpp"
 #include "fstreams.hpp"
@@ -39,8 +37,18 @@ int main(int argc, char ** argv)
 
 		def_helper defs(cfg);
 
-		// see if we have good input before moving on
-		ifstream chrdata {ifstream_checked(cfg.chrdata_name)};
+		istream * chrdata;
+		ifstream ifs;
+		if (cfg.chrdata_name == "-")
+		{
+			chrdata = &cin;
+		}
+		else
+		{
+			// see if we have good input before moving on
+			ifs = ifstream_checked(cfg.chrdata_name);
+			chrdata = &ifs;
+		}
 
 #ifdef DEBUG
 		chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
@@ -48,9 +56,9 @@ int main(int argc, char ** argv)
 
 		cerr << "SETUP: " << duration << "ms" << endl;
 		cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << endl;
-		cerr << "\tUsing chrdef '" << defs.chrdef->id() << "'" << endl;
-		cerr << "\tUsing colrdef '" << defs.coldef->id() << "'" << endl;
-		cerr << "\tUsing paldef '" << defs.paldef->id() << "'" << endl;
+		cerr << "\tUsing chrdef '" << defs.chrdef.id() << "'" << endl;
+		cerr << "\tUsing colrdef '" << defs.coldef.id() << "'" << endl;
+		cerr << "\tUsing paldef '" << defs.paldef.id() << "'" << endl;
 #endif
 
 /*******************************************************
@@ -62,9 +70,9 @@ int main(int argc, char ** argv)
 
 		size_t
 			// byte size of one encoded tile
-			in_chunksize {defs.chrdef->datasize() / (size_t) 8},
+			in_chunksize {defs.chrdef.datasize() / (size_t) 8},
 			// byte size of one basic (decoded) tile
-			out_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())};
+			out_chunksize {(size_t) (defs.chrdef.width() * defs.chrdef.height())};
 
 		// buffer for a single encoded tile, read from the stream
 		byte_t in_tile[in_chunksize];
@@ -79,11 +87,11 @@ int main(int argc, char ** argv)
 		*/
 		while (true)
 		{
-			chrdata.read((char *) in_tile, in_chunksize);
-			if (chrdata.eof())
+			chrdata->read((char *) in_tile, in_chunksize);
+			if (chrdata->eof())
 				break;
 
-			out_buffer.append(decode_chr(*defs.chrdef, in_tile), out_chunksize);
+			out_buffer.append(decode_chr(defs.chrdef, in_tile), out_chunksize);
 		}
 
 #ifdef DEBUG
@@ -105,13 +113,13 @@ int main(int argc, char ** argv)
 		{
 			ifstream paldata {ifstream_checked(cfg.paldata_name)};
 
-			size_t pal_size = defs.paldef->datasize() / 8;
+			size_t pal_size = defs.paldef.datasize() / 8;
 			byte_t palbuffer[pal_size];
 			paldata.read((char *) palbuffer, pal_size);
 			if (paldata.gcount() > pal_size)
 				throw invalid_argument("Input palette data too small to form a valid palette");
 
-			workpal = decode_pal(*defs.paldef, *defs.coldef, palbuffer);
+			workpal = decode_pal(defs.paldef, defs.coldef, palbuffer);
 		}
 		else
 		{
@@ -130,7 +138,7 @@ int main(int argc, char ** argv)
 #endif
 
 		png::image<png::index_pixel> outimg {
-			png_render(defs.chrdef->width(), defs.chrdef->height(), out_buffer, workpal, cfg.render_cfg)};
+			png_render(defs.chrdef.width(), defs.chrdef.height(), out_buffer, workpal, cfg.render_cfg)};
 
 #ifdef DEBUG
 		t2 = chrono::high_resolution_clock::now();
@@ -180,13 +188,13 @@ void process_args(int argc, char ** argv)
 	long_opts.push_back({"output", required_argument, nullptr, 'o'});
 	long_opts.push_back({nullptr, 0, nullptr, 0});
 
-	opt_details.push_back({false, L"Path to input encoded tiles", nullptr});
-	opt_details.push_back({false, L"Path to input encoded palette", nullptr});
-	opt_details.push_back({false, L"Use palette transparency", nullptr});
-	opt_details.push_back({false, L"Palette index to use for transparency", nullptr});
-	opt_details.push_back({false, L"Draw a 1 pixel border around tiles in output image", nullptr});
-	opt_details.push_back({false, L"Number of tiles per row in output image", nullptr});
-	opt_details.push_back({false, L"Path to output PNG image", nullptr});
+	opt_details.push_back({false, "Path to input encoded tiles", nullptr});
+	opt_details.push_back({false, "Path to input encoded palette", nullptr});
+	opt_details.push_back({false, "Use palette transparency", nullptr});
+	opt_details.push_back({false, "Palette index to use for transparency", nullptr});
+	opt_details.push_back({false, "Draw a 1 pixel border around tiles in output image", nullptr});
+	opt_details.push_back({false, "Number of tiles per row in output image", nullptr});
+	opt_details.push_back({false, "Path to output PNG image", nullptr});
 
 	// read/parse arguments
 	while (true)

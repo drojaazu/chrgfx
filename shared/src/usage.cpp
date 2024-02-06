@@ -1,65 +1,49 @@
-/**
- * @file usage.cpp
- * @author Motoi Productions (Damian Rogers damian@motoi.pro)
- * @brief Display program options/usage
- *
- * Updates:
- * 20220415 Initial
- * 20220722 Using const in show_usage parameters
- * 20220914 Added show_version
- */
-
 #include "usage.hpp"
-#include "app.hpp"
 
-void show_version(std::wostream & output)
+/**
+ * @brief Displays program options and usage
+ *
+ * @param opts array of @c option structs; final entry should be all zero
+ * @param details array of @c option_details structs; must be the same size and
+ * order as @c opts
+ * @return std::string
+ */
+std::string show_usage(option const * opts, option_details const * details)
 {
-	std::wstringstream ss;
-	ss << APP::NAME << " - version " << APP::VERSION << std::endl;
-	ss << APP::CONTACT << " / " << APP::WEBSITE << std::endl;
+	std::ostringstream oss;
 
-	output << ss.str();
-}
-
-void show_usage(option const * opts, option_details const * details, std::wostream & output)
-{
-	setlocale(LC_ALL, "");
-
-	std::wstringstream ss;
-	ss << APP::NAME << " - version " << APP::VERSION << std::endl;
-	ss << APP::CONTACT << " / " << APP::WEBSITE << std::endl << std::endl;
-	ss << "Usage:" << std::endl;
+	oss << "Usage:" << std::endl;
 
 	while (true)
 	{
 		if (opts->name == nullptr)
 			break;
 
-		ss << " --" << opts->name << ", -" << (char) opts->val;
+		oss << " --" << opts->name << ", -" << (char) opts->val;
 		if (opts->has_arg == required_argument)
 		{
 			if (details->arg_type != nullptr)
-				ss << " <" << details->arg_type << ">";
+				oss << " <" << details->arg_type << ">";
 			else
-				ss << " <value>";
+				oss << " <value>";
 		}
 		if (opts->has_arg == optional_argument)
 		{
 			if (details->arg_type != nullptr)
-				ss << " <optional " << details->arg_type << ">";
+				oss << " <optional " << details->arg_type << ">";
 			else
-				ss << " <optional value>";
+				oss << " <optional value>";
 		}
-		ss << std::endl;
-		ss << "    ";
+		oss << std::endl;
+		oss << "    ";
 		if (details->required)
-			ss << "[Required] ";
+			oss << "[Required] ";
 
-		ss << details->desc << std::endl;
+		oss << details->desc << std::endl;
 
 		++opts;
 		++details;
 	}
 
-	output << ss.str();
+	return oss.str();
 }

@@ -6,17 +6,13 @@
 #include <string>
 #include <vector>
 
+#include "builtin_defs.hpp"
 #include "chrdef.hpp"
 #include "coldef.hpp"
 #include "import_defs.hpp"
 #include "paldef.hpp"
 #include "usage.hpp"
 
-/*
-	Hardcoding /etc isn't best practice, I'm sure, but I couldn't find a standard
-	way of doing it otherwise. Anyone with a better implementation is certainly
-	welcome to open a PR.
-*/
 extern std::string const CONFIG_PATH;
 extern std::string const GFXDEF_PATH;
 
@@ -32,17 +28,23 @@ struct runtime_config
 	std::string chrdef_id;
 	std::string coldef_id;
 	std::string paldef_id;
-	bool list_gfxdefs;
 
-	runtime_config();
+	std::string chrdef_width;
+	std::string chrdef_height;
+	std::string chrdef_bpp;
+	std::string chrdef_plane_offsets;
+	std::string chrdef_pixel_offsets;
+	std::string chrdef_row_offsets;
+
+	bool list_gfxdefs {false};
 };
 
 class def_helper
 {
 public:
-	chrgfx::chrdef const * chrdef;
-	chrgfx::coldef const * coldef;
-	chrgfx::paldef const * paldef;
+	chrgfx::chrdef chrdef {chrgfx::gfxdefs::basic_8x8_1bpp};
+	chrgfx::coldef coldef {chrgfx::gfxdefs::basic_8bit_random};
+	chrgfx::paldef paldef {chrgfx::gfxdefs::basic_256color};
 
 	def_helper(runtime_config & cfg);
 
