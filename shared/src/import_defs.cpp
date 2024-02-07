@@ -335,7 +335,7 @@ rgbcoldef validate_rgbcoldef_block(defblock const & def_block)
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_RED_SHIFT, temp_id);
 	}
-	auto temp_red_shift {sto_container<vector<int>>(mapiter->second)};
+	auto temp_red_shift {sto_container<vector<short>>(mapiter->second)};
 	if (temp_red_shift.size() != temp_color_passes)
 	{
 		throw "red_shift must have number of entries equal to color_passes";
@@ -359,7 +359,7 @@ rgbcoldef validate_rgbcoldef_block(defblock const & def_block)
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_GREEN_SHIFT, temp_id);
 	}
-	auto temp_green_shift {sto_container<vector<int>>(mapiter->second)};
+	auto temp_green_shift {sto_container<vector<short>>(mapiter->second)};
 	if (temp_green_shift.size() != temp_color_passes)
 	{
 		throw "green_shift must have number of entries equal to color_passes";
@@ -383,7 +383,7 @@ rgbcoldef validate_rgbcoldef_block(defblock const & def_block)
 	{
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_BLUE_SHIFT, temp_id);
 	}
-	auto temp_blue_shift {sto_container<vector<int>>(mapiter->second)};
+	auto temp_blue_shift {sto_container<vector<short>>(mapiter->second)};
 	if (temp_blue_shift.size() != temp_color_passes)
 	{
 		throw "blue_shift must have number of entries equal to color_passes";

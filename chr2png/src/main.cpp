@@ -56,9 +56,9 @@ int main(int argc, char ** argv)
 
 		cerr << "SETUP: " << duration << "ms" << endl;
 		cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << endl;
-		cerr << "\tUsing chrdef '" << defs.chrdef.id() << "'" << endl;
-		cerr << "\tUsing colrdef '" << defs.coldef.id() << "'" << endl;
-		cerr << "\tUsing paldef '" << defs.paldef.id() << "'" << endl;
+		cerr << "\tUsing chrdef '" << defs.chrdef->id() << "'" << endl;
+		cerr << "\tUsing colrdef '" << defs.coldef->id() << "'" << endl;
+		cerr << "\tUsing paldef '" << defs.paldef->id() << "'" << endl;
 #endif
 
 /*******************************************************
@@ -70,9 +70,9 @@ int main(int argc, char ** argv)
 
 		size_t
 			// byte size of one encoded tile
-			in_chunksize {defs.chrdef.datasize() / (size_t) 8},
+			in_chunksize {defs.chrdef->datasize() / (size_t) 8},
 			// byte size of one basic (decoded) tile
-			out_chunksize {(size_t) (defs.chrdef.width() * defs.chrdef.height())};
+			out_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())};
 
 		// buffer for a single encoded tile, read from the stream
 		byte_t in_tile[in_chunksize];
@@ -91,7 +91,7 @@ int main(int argc, char ** argv)
 			if (chrdata->eof())
 				break;
 
-			out_buffer.append(decode_chr(defs.chrdef, in_tile), out_chunksize);
+			out_buffer.append(decode_chr(*defs.chrdef, in_tile), out_chunksize);
 		}
 
 #ifdef DEBUG
@@ -113,13 +113,13 @@ int main(int argc, char ** argv)
 		{
 			ifstream paldata {ifstream_checked(cfg.paldata_name)};
 
-			size_t pal_size = defs.paldef.datasize() / 8;
+			size_t pal_size = defs.paldef->datasize() / 8;
 			byte_t palbuffer[pal_size];
 			paldata.read((char *) palbuffer, pal_size);
 			if (paldata.gcount() > pal_size)
 				throw invalid_argument("Input palette data too small to form a valid palette");
 
-			workpal = decode_pal(defs.paldef, defs.coldef, palbuffer);
+			workpal = decode_pal(*defs.paldef, *defs.coldef, palbuffer);
 		}
 		else
 		{
@@ -138,7 +138,7 @@ int main(int argc, char ** argv)
 #endif
 
 		png::image<png::index_pixel> outimg {
-			png_render(defs.chrdef.width(), defs.chrdef.height(), out_buffer, workpal, cfg.render_cfg)};
+			png_render(defs.chrdef->width(), defs.chrdef->height(), out_buffer, workpal, cfg.render_cfg)};
 
 #ifdef DEBUG
 		t2 = chrono::high_resolution_clock::now();

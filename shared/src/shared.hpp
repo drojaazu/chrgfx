@@ -42,16 +42,21 @@ struct runtime_config
 class def_helper
 {
 public:
-	chrgfx::chrdef chrdef {chrgfx::gfxdefs::basic_8x8_1bpp};
-	chrgfx::coldef coldef {chrgfx::gfxdefs::basic_8bit_random};
-	chrgfx::paldef paldef {chrgfx::gfxdefs::basic_256color};
+	chrgfx::chrdef const * chrdef {&chrgfx::gfxdefs::basic_8x8_1bpp};
+	chrgfx::coldef const * coldef {&chrgfx::gfxdefs::basic_8bit_random};
+	chrgfx::paldef const * paldef {&chrgfx::gfxdefs::basic_256color};
 
 	def_helper(runtime_config & cfg);
+
+	~def_helper();
 
 	void list_gfxdefs(std::ostream & os);
 
 private:
 	def_collection m_defs;
+	bool m_heapallocated_chrdef {false};
+	bool m_heapallocated_coldef {false};
+	bool m_heapallocated_paldef {false};
 };
 
 bool shared_args(char this_opt, runtime_config & cfg);

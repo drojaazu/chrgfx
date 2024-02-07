@@ -50,9 +50,9 @@ int main(int argc, char ** argv)
 
 		cerr << "SETUP: " << duration << "ms" << endl;
 		cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << endl;
-		cerr << "\tUsing chrdef '" << defs.chrdef.id() << "'" << endl;
-		cerr << "\tUsing colrdef '" << defs.coldef.id() << "'" << endl;
-		cerr << "\tUsing paldef '" << defs.paldef.id() << "'" << endl;
+		cerr << "\tUsing chrdef '" << defs.chrdef->id() << "'" << endl;
+		cerr << "\tUsing colrdef '" << defs.coldef->id() << "'" << endl;
+		cerr << "\tUsing paldef '" << defs.paldef->id() << "'" << endl;
 #endif
 
 /*******************************************************
@@ -80,7 +80,7 @@ int main(int argc, char ** argv)
 		// deal with tiles first
 		if (! cfg.chr_outfile.empty())
 		{
-			blob<byte_t> png_tiles {png_chunk(defs.chrdef.width(), defs.chrdef.height(), in_img.get_pixbuf())};
+			blob<byte_t> png_tiles {png_chunk(defs.chrdef->width(), defs.chrdef->height(), in_img.get_pixbuf())};
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
@@ -97,16 +97,16 @@ int main(int argc, char ** argv)
 #endif
 			ofstream chr_outfile {ofstream_checked(cfg.chr_outfile)};
 
-			size_t chunksize {(unsigned) (defs.chrdef.datasize() / 8)};
+			size_t chunksize {(unsigned) (defs.chrdef->datasize() / 8)};
 
 			auto ptr_imgdata = png_tiles.data();
 			auto ptr_imgdata_end = png_tiles.data() + png_tiles.size();
 
 			while (ptr_imgdata != ptr_imgdata_end)
 			{
-				byte_t * temp_chr {encode_chr(defs.chrdef, ptr_imgdata)};
+				byte_t * temp_chr {encode_chr(*defs.chrdef, ptr_imgdata)};
 				copy(temp_chr, temp_chr + chunksize, ostream_iterator<byte_t>(chr_outfile));
-				ptr_imgdata += defs.chrdef.width() * defs.chrdef.height();
+				ptr_imgdata += defs.chrdef->width() * defs.chrdef->height();
 				delete[] temp_chr;
 			}
 		}
@@ -128,7 +128,7 @@ int main(int argc, char ** argv)
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			auto paldef_palette_data {encode_pal(defs.paldef, defs.coldef, in_img.get_palette())};
+			auto paldef_palette_data {encode_pal(*defs.paldef, *defs.coldef, in_img.get_palette())};
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
@@ -150,7 +150,7 @@ int main(int argc, char ** argv)
 			// TODO: consider splitting the palette conversion routine into two
 			// functions, on for subpal and one for full pal so we always know the
 			// size of the data returned
-			size_t filesize {(size_t) (defs.paldef.datasize() / 8)};
+			size_t filesize {(size_t) (defs.paldef->datasize() / 8)};
 
 			pal_outfile.write((char *) (paldef_palette_data), filesize);
 

@@ -24,6 +24,8 @@ add_subdirectory(chr2png)
 project(png2chr VERSION 1.3.0 LANGUAGES CXX)
 add_subdirectory(png2chr)
 
+set(CMAKE_CXX_FLAGS_DEBUG "-g -fstandalone-debug" CACHE STRING "" FORCE)
+
 if(NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
   if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)

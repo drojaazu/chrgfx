@@ -53,7 +53,7 @@ def_helper::def_helper(runtime_config & cfg) :
 			oss << "Could not find specified chrdef: " << chrdef_id;
 			throw invalid_argument(oss.str());
 		}
-		chrdef = iter_find_chrdef->second;
+		chrdef = &iter_find_chrdef->second;
 	}
 
 	if (! coldef_id.empty())
@@ -61,14 +61,14 @@ def_helper::def_helper(runtime_config & cfg) :
 		auto iter_find_rgbcoldef {m_defs.rgbcoldefs.find(coldef_id)};
 		if (iter_find_rgbcoldef != m_defs.rgbcoldefs.end())
 		{
-			coldef = iter_find_rgbcoldef->second;
+			coldef = &iter_find_rgbcoldef->second;
 		}
 		else
 		{
 			auto iter_find_refcoldef {m_defs.refcoldefs.find(coldef_id)};
 			if (iter_find_refcoldef != m_defs.refcoldefs.end())
 			{
-				coldef = iter_find_refcoldef->second;
+				coldef = &iter_find_refcoldef->second;
 			}
 			else
 			{
@@ -84,7 +84,7 @@ def_helper::def_helper(runtime_config & cfg) :
 		auto i_find_paldef {m_defs.paldefs.find(paldef_id)};
 		if (i_find_paldef == m_defs.paldefs.end())
 			throw invalid_argument("Could not find specified palette encoding (paldef)");
-		paldef = i_find_paldef->second;
+		paldef = &i_find_paldef->second;
 	}
 
 	// build def(s) from scratch or override parts of the loaded def(s)
@@ -92,7 +92,7 @@ def_helper::def_helper(runtime_config & cfg) :
 			(! cfg.chrdef_pixel_offsets.empty()) || (! cfg.chrdef_plane_offsets.empty()) ||
 			(! cfg.chrdef_row_offsets.empty()))
 	{
-		chrdef_builder builder(chrdef);
+		chrdef_builder builder(*chrdef);
 		builder.set_id("chrdef_cli_generated");
 		if (! cfg.chrdef_width.empty())
 			builder.set_width(cfg.chrdef_width);
@@ -106,8 +106,19 @@ def_helper::def_helper(runtime_config & cfg) :
 			builder.set_pixel_offsets(cfg.chrdef_pixel_offsets);
 		if (! cfg.chrdef_row_offsets.empty())
 			builder.set_row_offsets(cfg.chrdef_row_offsets);
-		chrdef = builder.build();
+		m_heapallocated_chrdef = true;
+		chrdef = new chrgfx::chrdef(builder.build());
 	}
+}
+
+def_helper::~def_helper()
+{
+	if (m_heapallocated_coldef)
+		delete coldef;
+	if (m_heapallocated_paldef)
+		delete paldef;
+	if (m_heapallocated_chrdef)
+		delete chrdef;
 }
 
 void def_helper::list_gfxdefs(ostream & os)
