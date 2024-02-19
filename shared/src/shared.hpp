@@ -14,7 +14,7 @@
 #include "usage.hpp"
 
 extern std::string const CONFIG_PATH;
-extern std::string const GFXDEF_PATH;
+extern std::string const GFXDEF_SUBDIR;
 
 // these are intentionally mutable
 extern std::string short_opts;

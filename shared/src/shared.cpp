@@ -1,15 +1,21 @@
 #include "shared.hpp"
 #include "gfxdef_builder.hpp"
-#include "strutil.hpp"
 #include "xdgdirs.hpp"
 
 using namespace std;
 
-string const CONFIG_PATH {"/etc/chrgfx"};
-string const GFXDEF_PATH {CONFIG_PATH + "/gfxdefs"};
+string const GFXDEF_SUBDIR {"chrgfx/gfxdefs"};
+
+string get_gfxdefs_path()
+{
+	auto xdg_locations = data_filepaths(GFXDEF_SUBDIR);
+	if (xdg_locations.empty())
+		throw runtime_error("Could not find gfxdef file in any default location");
+	return xdg_locations.front();
+}
 
 def_helper::def_helper(runtime_config & cfg) :
-		m_defs(load_gfxdefs(cfg.gfxdefs_path.empty() ? data_filepaths("chrgfx/gfxdefs").front() : cfg.gfxdefs_path))
+		m_defs {load_gfxdefs(cfg.gfxdefs_path.empty() ? get_gfxdefs_path() : cfg.gfxdefs_path)}
 {
 	if (cfg.list_gfxdefs)
 	{
@@ -35,7 +41,7 @@ def_helper::def_helper(runtime_config & cfg) :
 		paldef_id = i_profile->second.paldef_id();
 	}
 
-	// specific gfxdefs override profile settings
+	// specific gfxdefs will override profile settings
 	if (! cfg.chrdef_id.empty())
 		chrdef_id = cfg.chrdef_id;
 	if (! cfg.coldef_id.empty())
