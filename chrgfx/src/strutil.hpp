@@ -213,7 +213,7 @@ ContainerT sto_container(std::basic_string<CharT> const & str, char const delim 
 template <typename ContainerT,
 	typename CharT,
 	typename = typename std::enable_if<std::is_integral<typename ContainerT::value_type>::value, ContainerT>::type>
-ContainerT sto_range_by_count(std::basic_string<CharT> const & str, char const delim = ',')
+ContainerT sto_range(std::basic_string<CharT> const & str, char const delim = ',')
 {
 	if (str[0] != '[' || str[str.size() - 1] != ']')
 		throw std::runtime_error("invalid range specification");

@@ -94,7 +94,7 @@ public:
 	void set_plane_offsets(string const & plane_offsets)
 	{
 		if (plane_offsets[0] == '[')
-			m_plane_offsets = sto_range_by_count<vector<uint>>(plane_offsets);
+			m_plane_offsets = sto_range<vector<uint>>(plane_offsets);
 		else
 			m_plane_offsets = sto_container<vector<uint>>(plane_offsets);
 	}
@@ -102,7 +102,7 @@ public:
 	void set_pixel_offsets(string const & pixel_offsets)
 	{
 		if (pixel_offsets[0] == '[')
-			m_pixel_offsets = sto_range_by_count<vector<uint>>(pixel_offsets);
+			m_pixel_offsets = sto_range<vector<uint>>(pixel_offsets);
 		else
 			m_pixel_offsets = sto_container<vector<uint>>(pixel_offsets);
 	}
@@ -110,7 +110,7 @@ public:
 	void set_row_offsets(string const & row_offsets)
 	{
 		if (row_offsets[0] == '[')
-			m_row_offsets = sto_range_by_count<vector<uint>>(row_offsets);
+			m_row_offsets = sto_range<vector<uint>>(row_offsets);
 		else
 			m_row_offsets = sto_container<vector<uint>>(row_offsets);
 	}
