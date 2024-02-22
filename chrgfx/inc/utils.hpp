@@ -1,12 +1,8 @@
 #ifndef CHRGFX__UTILS_HPP
 #define CHRGFX__UTILS_HPP
 
+#include "pixbuf.hpp"
 #include "types.hpp"
-#include <algorithm>
-#include <png++/png.hpp>
-
-using png::color;
-using png::palette;
 
 namespace chrgfx
 {
@@ -16,7 +12,7 @@ namespace chrgfx
  * @param data color channel data
  * @param bitcount target bitdepth
  */
-u8 reduce_bitdepth(u8 data, u8 bitdepth);
+uint8 reduce_bitdepth(uint8 data, uint8 bitdepth);
 
 /**
  * @brief Increase bitdepth of a color channel to 8 bits
@@ -24,25 +20,25 @@ u8 reduce_bitdepth(u8 data, u8 bitdepth);
  * @param data color channel data
  * @param bitdepth bitdepth of the input channel
  */
-u8 expand_bitdepth(u8 data, u8 bitdepth);
+uint8 expand_bitdepth(uint8 data, uint8 bitdepth);
 
 /**
  * @brief Returns an 32 bit value with the specified number of bits set
  * starting from the LSB
  */
-u32 create_bitmask32(u8 bitcount);
+uint32 create_bitmask32(uint8 bitcount);
 
 /**
  * @brief Returns an 16 bit value with the specified number of bits set
  * starting from the LSB
  */
-u16 create_bitmask16(u8 bitcount);
+uint16 create_bitmask16(uint8 bitcount);
 
 /**
  * @brief Returns an 8 bit value with the specified number of bits set
  * starting from the LSB
  */
-u8 create_bitmask8(u8 bitcount);
+uint8 create_bitmask8(uint8 bitcount);
 
 /**
  * @brief Create an 8 bit palette of randomized colors

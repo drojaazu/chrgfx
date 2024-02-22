@@ -2,8 +2,8 @@
 #define CHRGFX__COLDEF_HPP
 
 #include "gfxdef.hpp"
+#include "pixbuf.hpp"
 #include "rgb_layout.hpp"
-#include <png++/png.hpp>
 #include <vector>
 
 namespace chrgfx
@@ -39,23 +39,23 @@ protected:
 class refcoldef : public coldef
 {
 public:
-	refcoldef(std::string const & id, png::palette reftab, bool big_endian = false, std::string const & description = "");
+	refcoldef(std::string const & id, palette reftab, bool big_endian = false, std::string const & description = "");
 
 	/**
 	 * @return color color from the reference palette for the given index
 	 */
-	[[nodiscard]] png::color by_value(uint index) const;
+	[[nodiscard]] color by_value(uint const index) const;
 
 	/**
 	 * @return index to the color matching the RGB value provided, or
 	 * the index to the nearest matching color
 	 */
-	[[nodiscard]] uint by_color(png::color rgb) const;
+	[[nodiscard]] uint by_color(color const rgb) const;
 
-	[[nodiscard]] png::palette const & reftab() const;
+	[[nodiscard]] palette const & reftab() const;
 
 protected:
-	png::palette const m_reftab;
+	palette const m_reftab;
 };
 
 /**

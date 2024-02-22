@@ -22,11 +22,8 @@
 #define __MOTOI__BLOB_HPP
 
 #include <cstring>
-#include <functional>
-#include <iomanip>
 #include <iostream>
 #include <iterator>
-#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -51,7 +48,7 @@ public:
 	 * @brief Create a blob with optional initial value
 	 * @param size Number of DataT elements
 	 */
-	explicit blob(length_t const length, DataT const initial = 0) :
+	explicit blob(length_t const length, DataT const initial = static_cast<DataT>(0)) :
 			m_length {length},
 			m_size {sizeof(DataT) * length},
 			m_buffer {(DataT *) malloc(this->m_size)}
@@ -59,7 +56,7 @@ public:
 		if (this->m_buffer == nullptr)
 			throw std::runtime_error("Failed to allocate buffer space");
 
-		if (initial == 0)
+		if (initial == static_cast<DataT>(0))
 			std::memset(m_buffer, 0, m_size);
 		else
 		{
@@ -69,7 +66,7 @@ public:
 				*p_begin++ = initial;
 		}
 
-#ifdef DEBUG_TEMP
+#ifdef MOTOI_DEBUG
 		std::cerr << __func__ << ": Created empty buffer at " << std::showbase << std::hex << (std::size_t) this->m_buffer
 							<< ", " << this->m_bytesize " byte" << std::endl;
 #endif
@@ -80,7 +77,7 @@ public:
 	 * @param data Pointer to data
 	 * @param size Size of existing data
 	 */
-	blob(DataT * data, length_t const length) :
+	blob(DataT const * data, length_t const length) :
 			m_length {length},
 			m_size {sizeof(DataT) * length},
 			m_buffer {(DataT *) malloc(this->m_size)}
@@ -89,7 +86,7 @@ public:
 			throw std::runtime_error("Failed to allocate buffer space");
 
 		std::memcpy(this->m_buffer, data, m_size);
-#ifdef DEBUG_TEMP
+#ifdef MOTOI_DEBUG
 		std::cerr << __func__ << ": Copying existing buffer from " << std::showbase << std::hex << (std::size_t) data
 							<< " to " << (std::size_t) this->m_buffer << ", " << this->m_bytesize << " bytes" << std::endl;
 #endif
@@ -111,7 +108,7 @@ public:
 			m_size {other.m_size},
 			m_buffer {std::move(other.m_buffer)}
 	{
-#ifdef DEBUG_TEMP
+#ifdef MOTOI_DEBUG
 		std::cerr << __func__ << ": Moving existing buffer at " << std::showbase << std::hex << (std::size_t) other.m_buffer
 							<< " to " << (std::size_t) this->m_buffer << ", " << this->m_bytesize " bytes" << std::endl;
 #endif
@@ -124,7 +121,7 @@ public:
 	 */
 	explicit blob(std::istream & data, size_t const block_size = DEFAULT_BLOCK_SZ)
 	{
-#ifdef DEBUG_TEMP
+#ifdef MOTOI_DEBUG
 		std::cerr << __func__ << ": Reading data from input stream in " << std::showbase << std::hex
 							<< (std::size_t) block_size << "byte blocks" << std::endl;
 #endif
@@ -143,7 +140,7 @@ public:
 	{
 		if (this->m_buffer != nullptr)
 		{
-#ifdef DEBUG_TEMP
+#ifdef MOTOI_DEBUG
 			std::cerr << __func__ << ": Freeing buffer at " << std::showbase << std::hex << (std::size_t) this->m_buffer
 								<< ", " << this->m_bytesize << " bytes" << std::endl;
 #endif
@@ -215,7 +212,7 @@ public:
 		if (new_length > this->m_length)
 			return append(new_length, initial);
 
-#ifdef DEBUG_TEMP
+#ifdef MOTOI_DEBUG
 		size_t prev_bytesize = this->m_bytesize;
 #endif
 
@@ -227,7 +224,7 @@ public:
 		this->m_size = new_size_bytes;
 		this->m_length = new_length;
 
-#ifdef DEBUG_TEMP
+#ifdef MOTOI_DEBUG
 		std::cerr << __func__ << ": Shrunk buffer at " << std::showbase << std::hex << (std::size_t) this->m_buffer
 							<< ", prev size " << prev_bytesize << " bytes, new size " << this->m_bytesize << " bytes" << std::dec
 							<< std::endl;
@@ -258,7 +255,7 @@ public:
 
 		this->m_size += additional_bytes;
 		this->m_length += length;
-#ifdef DEBUG_TEMP
+#ifdef MOTOI_DEBUG
 		std::cerr << __func__ << ": Grew buffer at " << std::showbase << std::hex << (std::size_t) this->m_buffer
 							<< ", new size " << this->m_bytesize << " bytes" << std::endl;
 #endif
@@ -271,7 +268,7 @@ public:
 		if (other.length() == 0)
 			return this->m_length;
 
-#ifdef DEBUG_TEMP
+#ifdef MOTOI_DEBUG
 		std::cerr << __func__ << ": Appending data from other buffer at " << std::showbase << std::hex
 							<< (std::size_t) other.m_buffer << ", size " << other.m_bytesize << " bytes" << std::endl;
 #endif
@@ -293,7 +290,7 @@ public:
 		if (length == 0)
 			return this->m_length;
 
-#ifdef DEBUG_TEMP
+#ifdef MOTOI_DEBUG
 		std::cerr << __func__ << ": Appending data via pointer to " << std::showbase << std::hex << (std::size_t) other
 							<< ", datasize " << size << std::endl;
 #endif
@@ -624,7 +621,7 @@ public:
 
 		std::copy(start, end, this->m_buffer);
 
-#ifdef DEBUG_TEMP
+#ifdef MOTOI_DEBUG
 		std::cerr << __func__ << ": Copied portion of existing buffer to" << std::showbase << std::hex
 							<< (std::size_t) this->m_buffer << ", size " << this->m_bytesize << std::endl;
 #endif
@@ -760,7 +757,7 @@ protected:
 
 			this->m_length = this->m_size / sizeof(DataT);
 
-#ifdef DEBUG_TEMP
+#ifdef MOTOI_DEBUG
 			std::cerr << __func__ << ": Created buffer from stream at " << std::showbase << std::hex
 								<< (std::size_t) this->m_buffer << ", size " << this->m_bytesize << std::endl;
 #endif

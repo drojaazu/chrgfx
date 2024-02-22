@@ -2,6 +2,7 @@
 #include "chrgfx.hpp"
 #include "fstreams.hpp"
 #include "shared.hpp"
+#include <cstddef>
 #include <getopt.h>
 #include <iostream>
 
@@ -75,10 +76,10 @@ int main(int argc, char ** argv)
 			out_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())};
 
 		// buffer for a single encoded tile, read from the stream
-		byte_t in_tile[in_chunksize];
+		byte in_tile[in_chunksize];
 
 		// basic tiles buffer
-		blob<byte_t> out_buffer(0);
+		blob<byte> out_buffer;
 
 		/*
 			Some speed testing was done and, somewhat surprisingly, calling append
@@ -114,7 +115,7 @@ int main(int argc, char ** argv)
 			ifstream paldata {ifstream_checked(cfg.paldata_name)};
 
 			size_t pal_size = defs.paldef->datasize() / 8;
-			byte_t palbuffer[pal_size];
+			byte palbuffer[pal_size];
 			paldata.read((char *) palbuffer, pal_size);
 			if (paldata.gcount() > pal_size)
 				throw invalid_argument("Input palette data too small to form a valid palette");
@@ -137,8 +138,8 @@ int main(int argc, char ** argv)
 		t1 = chrono::high_resolution_clock::now();
 #endif
 
-		png::image<png::index_pixel> outimg {
-			png_render(defs.chrdef->width(), defs.chrdef->height(), out_buffer, workpal, cfg.render_cfg)};
+		png::image<png::index_pixel> outimg {png_render(
+			render(defs.chrdef->width(), defs.chrdef->height(), out_buffer, cfg.render_cfg), workpal, cfg.render_cfg)};
 
 #ifdef DEBUG
 		t2 = chrono::high_resolution_clock::now();

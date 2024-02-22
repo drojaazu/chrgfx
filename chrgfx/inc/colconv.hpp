@@ -2,8 +2,8 @@
 #define __CHRGFX__COLCONV_HPP
 
 #include "coldef.hpp"
+#include "pixbuf.hpp"
 #include "types.hpp"
-#include <png++/png.hpp>
 
 namespace chrgfx
 {
@@ -15,7 +15,7 @@ namespace chrgfx
  * @param color color data
  * @return u32 encoded color
  */
-u32 encode_col(rgbcoldef const & rgbcoldef, png::color const & color);
+uint32 encode_col(rgbcoldef const & rgbcoldef, color const & color);
 
 /**
  * @brief Encode a color with the given coldef
@@ -24,25 +24,25 @@ u32 encode_col(rgbcoldef const & rgbcoldef, png::color const & color);
  * @param color color data
  * @return u32 encoded color
  */
-u32 encode_col(refcoldef const & refcoldef, png::color const & color);
+uint32 encode_col(refcoldef const & refcoldef, color const & color);
 
 /**
  * @brief Decode a color with the given coldef
  *
  * @param rgbcoldef RGB color encoding
  * @param color color data
- * @return png::color basic color
+ * @return basic color
  */
-png::color decode_col(rgbcoldef const & rgbcoldef, u32 const color);
+color decode_col(rgbcoldef const & rgbcoldef, uint32 const color);
 
 /**
  * @brief Decode a color with the given coldef
  *
  * @param refcoldef Non-RGB (reftab) color encoding
  * @param color color data
- * @return png::color basic color
+ * @return basic color
  */
-png::color decode_col(refcoldef const & refcoldef, u32 const color);
+color decode_col(refcoldef const & refcoldef, uint32 const color);
 
 } // namespace chrgfx
 

@@ -23,7 +23,7 @@ public:
 	std::map<string const, gfxprofile const> const profiles;
 };
 
-png::palette parse_palette(std::string const & pal);
+chrgfx::palette parse_palette(std::string const & pal);
 
 def_collection load_gfxdefs(string const & def_file);
 

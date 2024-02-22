@@ -3,16 +3,16 @@
 namespace chrgfx
 {
 
-u8 reduce_bitdepth (u8 data, u8 bitdepth)
+uint8 reduce_bitdepth(uint8 data, uint8 bitdepth)
 {
 	// convert color bit depths algo:
 	// (bitdepth_a_value * bitdepth_b_max) / bitdepth_a_max = bitdepth_b_value
 	// (we make max + 1 below, to give it greater range and more accurate
 	// translation)
-	return (data * (create_bitmask8 (bitdepth) + 1)) / 256;
+	return (data * (create_bitmask8(bitdepth) + 1)) / 256;
 }
 
-u8 expand_bitdepth (u8 data, u8 bitdepth)
+uint8 expand_bitdepth(uint8 data, uint8 bitdepth)
 {
 	// shamelessly stolen from MAME
 	if (bitdepth == 1)
@@ -52,7 +52,7 @@ u8 expand_bitdepth (u8 data, u8 bitdepth)
 	return data;
 }
 
-u32 create_bitmask32 (u8 bitcount)
+uint32 create_bitmask32(uint8 bitcount)
 {
 	// max 32 bits
 	if (bitcount > 31)
@@ -60,15 +60,15 @@ u32 create_bitmask32 (u8 bitcount)
 		return 0xffffffff;
 	}
 
-	u32 bitmask {0};
-	for (s16 mask_iter {0}; mask_iter < bitcount; ++mask_iter)
+	uint32 bitmask {0};
+	for (int16 mask_iter {0}; mask_iter < bitcount; ++mask_iter)
 	{
 		bitmask |= (bitmask << 1) | 1;
 	}
 	return bitmask;
 }
 
-u16 create_bitmask16 (u8 bitcount)
+uint16 create_bitmask16(uint8 bitcount)
 {
 	// max 16 bits
 	if (bitcount > 15)
@@ -76,15 +76,15 @@ u16 create_bitmask16 (u8 bitcount)
 		return 0xffff;
 	}
 
-	u16 bitmask {0};
-	for (s16 mask_iter {0}; mask_iter < bitcount; ++mask_iter)
+	uint16 bitmask {0};
+	for (int16 mask_iter {0}; mask_iter < bitcount; ++mask_iter)
 	{
 		bitmask |= (bitmask << 1) | 1;
 	}
 	return bitmask;
 }
 
-u8 create_bitmask8 (u8 bitcount)
+uint8 create_bitmask8(uint8 bitcount)
 {
 	// max 8 bits
 	if (bitcount > 7)
@@ -92,22 +92,23 @@ u8 create_bitmask8 (u8 bitcount)
 		return 0xff;
 	}
 
-	u8 bitmask {0};
-	for (s16 mask_iter {0}; mask_iter < bitcount; ++mask_iter)
+	uint8 bitmask {0};
+	for (int16 mask_iter {0}; mask_iter < bitcount; ++mask_iter)
 	{
 		bitmask |= (bitmask << 1) | 1;
 	}
 	return bitmask;
 }
 
-palette make_pal_random ()
+palette make_pal_random()
 {
 	palette outpal;
-	outpal.reserve (256);
+	outpal.reserve(256);
 
 	for (size_t paliter = 0; paliter < 256;)
 	{
-		color temp_col {(png::byte) (rand () % 255), (png::byte) (rand () % 255), (png::byte) (rand () % 255)};
+		color temp_col {
+			static_cast<uint8>(rand() % 255), static_cast<uint8>(rand() % 255), static_cast<uint8>(rand() % 255)};
 		// todo: apparently png::color does not implement operator== so we'll need
 		// to extend it someday...
 		/*
@@ -117,22 +118,22 @@ palette make_pal_random ()
 		}
 		*/
 		++paliter;
-		outpal.push_back (temp_col);
+		outpal.push_back(temp_col);
 	}
 
 	return outpal;
 }
 
-bool is_system_bigendian ()
+bool is_system_bigendian()
 {
 	// shamelessly stolen from stack overflow
 	// https://stackoverflow.com/questions/1001307/detecting-endianness-programmatically-in-a-c-program/56191401#56191401
 	int const value {0x01};
-	auto const * address = static_cast<void const *> (&value);
-	auto const * least_significant_address = static_cast<unsigned char const *> (address);
+	auto const * address = static_cast<void const *>(&value);
+	auto const * least_significant_address = static_cast<unsigned char const *>(address);
 	return ! (*least_significant_address == 0x01);
 }
 
-const bool bigend_sys = is_system_bigendian ();
+const bool bigend_sys = is_system_bigendian();
 
 } // namespace chrgfx

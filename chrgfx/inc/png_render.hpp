@@ -2,7 +2,9 @@
 #define CHRGFX__PNG_RENDER_HPP
 
 #include "blob.hpp"
+#include "pixbuf.hpp"
 #include "types.hpp"
+#include <cstddef>
 #include <png++/png.hpp>
 
 namespace chrgfx
@@ -11,7 +13,7 @@ namespace chrgfx
 uint const DEFAULT_ROW_SIZE = 16;
 bool const DEFAULT_DRAW_BORDER = false;
 bool const DEFAULT_USE_TRNS = false;
-u8 const DEFAULT_TRNS_INDEX = 0;
+uint8_t const DEFAULT_TRNS_INDEX = 0;
 
 /**
  * @brief Tile rendering settings
@@ -40,7 +42,7 @@ public:
 	 * @brief Palette entry to use for transparency
 	 * Also used as the border color when rendering
 	 */
-	u8 trns_index;
+	uint8 trns_index;
 
 	render_config() :
 			row_size(DEFAULT_ROW_SIZE),
@@ -54,24 +56,33 @@ public:
 /**
  * @brief Renders a collection of basic (unencoded) tiles to a byte buffer
  */
-motoi::blob<byte_t> render(
-	size_t const tile_width, size_t const tile_height, motoi::blob<byte_t> const & chrdata, render_config const & rcfg);
+pixbuf render(size_t const tile_width,
+	size_t const tile_height,
+	motoi::blob<std::byte> const & chrdata,
+	render_config const & rcfg);
 
 /**
  * @brief Renders a collection of basic (unencoded) tiles to a pixel buffer
  */
-png::pixel_buffer<png::index_pixel> pixbuf_render(
-	size_t const tile_width, size_t const tile_height, motoi::blob<byte_t> const & chrdata, render_config const & rcfg);
+/*
+chrgfx::pixbuf pixbuf_render(size_t const tile_width,
+ size_t const tile_height,
+ motoi::blob<std::byte> const & chrdata,
+ render_config const & rcfg);
+*/
 
 /**
  * @brief Renders a collection of basic (unencoded) tiles to a PNG image
  */
-png::image<png::index_pixel> png_render(size_t const tile_width,
-	size_t const tile_height,
-	motoi::blob<byte_t> const & chrdata,
-	png::palette const & pal,
-	render_config const & rcfg);
+/*
+chrgfx::pixbuf png_render(size_t const tile_width,
+ size_t const tile_height,
+ motoi::blob<std::byte> const & chrdata,
+ palette const & pal,
+ render_config const & rcfg);
+*/
 
+png::image<png::index_pixel> png_render(pixbuf const & pixdata, palette const & pal, render_config const & rcfg);
 } // namespace chrgfx
 
 #endif

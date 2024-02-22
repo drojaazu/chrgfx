@@ -1,27 +1,27 @@
 #include "png_render.hpp"
+#include <png++/index_pixel.hpp>
+#include <png++/pixel_buffer.hpp>
 
 #ifdef DEBUG
 #include <iostream>
 #endif
 
 using namespace std;
-using namespace png;
 using namespace motoi;
 
 namespace chrgfx
 {
 
-blob<byte_t> render (
-	size_t const tile_width, size_t const tile_height, blob<byte_t> const & chrdata, render_config const & rcfg)
+pixbuf render(
+	size_t const tile_width, size_t const tile_height, blob<std::byte> const & chrdata, render_config const & rcfg)
 {
-
-	if (tile_width == 0 || tile_height == 0)
-		throw invalid_argument("Invalid tile dimensions");
-
 	size_t const chr_datasize {tile_width * tile_height};
 
+	if (chr_datasize == 0)
+		throw invalid_argument("Invalid tile dimensions");
+
 	if (chrdata.size() < chr_datasize)
-		throw invalid_argument ("Not enough data in buffer to render a tile");
+		throw invalid_argument("Not enough data in buffer to render a tile");
 
 	size_t const
 
@@ -47,7 +47,7 @@ blob<byte_t> render (
 		outimg_pxlwidth {(outimg_chrwidth * tile_width) + border_pxlwidth},
 		outimg_pxlheight {(outimg_chrheight * tile_height) + border_pxlheight};
 
-	blob<byte_t> out_buffer (outimg_pxlwidth * outimg_pxlheight, rcfg.trns_index);
+	pixbuf out_buffer(outimg_pxlwidth, outimg_pxlheight);
 
 	// iters and cached values and such for processing
 	size_t
@@ -62,7 +62,7 @@ blob<byte_t> render (
 		next_row {0};
 
 	// input data pointers
-	byte_t const
+	std::byte const
 		// pointer to start of current tile row
 		*ptr_in_chrrow {chrdata.data()},
 		// pointer to start of the current pixel row within the current tile row
@@ -71,17 +71,17 @@ blob<byte_t> render (
 		*ptr_in_chrpxlrow {ptr_in_pxlrow};
 
 	// output data pointer
-	byte_t * ptr_pxlrow_work {out_buffer.data()};
+	byte * ptr_pxlrow_work {out_buffer.data()};
 
 #ifdef DEBUG
 	cerr << dec;
-	cerr << "TILE RENDERING REPORT:" << endl;
-	cerr << "\tUsing border: " << to_string (rcfg.draw_border) << endl;
-	cerr << "\tTile count: " << chr_count << endl;
-	cerr << "\tFinal row excess tiles: " << chr_excess_count << endl;
-	cerr << "\tOut tile data size: " << chr_datasize << endl;
-	cerr << "\tPixel dimensions: " << outimg_pxlwidth << 'x' << outimg_pxlheight << endl;
-	cerr << "\tTile dimensions: " << outimg_chrwidth << 'x' << outimg_chrheight << endl;
+	cerr << "TILE RENDERING REPORT:\n";
+	cerr << "\tUsing border: " << to_string(rcfg.draw_border) << '\n';
+	cerr << "\tTile count: " << chr_count << '\n';
+	cerr << "\tFinal row excess tiles: " << chr_excess_count << '\n';
+	cerr << "\tOut tile data size: " << chr_datasize << '\n';
+	cerr << "\tPixel dimensions: " << outimg_pxlwidth << 'x' << outimg_pxlheight << '\n';
+	cerr << "\tTile dimensions: " << outimg_chrwidth << 'x' << outimg_chrheight << '\n';
 #endif
 
 	// for each tile row...
@@ -105,7 +105,7 @@ blob<byte_t> render (
 		// add border if enabled
 		if (rcfg.draw_border && iter_chrrow != 0)
 			for (uint i = 0; i < outimg_pxlwidth; ++i)
-				*ptr_pxlrow_work++ = rcfg.trns_index;
+				*ptr_pxlrow_work++ = std::byte(rcfg.trns_index);
 
 		// for each pixel row in the tile row...
 		for (uint iter_chr_pxlrow = 0; iter_chr_pxlrow < tile_height; ++iter_chr_pxlrow)
@@ -117,7 +117,7 @@ blob<byte_t> render (
 			{
 				// add border pixel if enabled
 				if (rcfg.draw_border && iter_chrcol != 0)
-					*ptr_pxlrow_work++ = rcfg.trns_index;
+					*ptr_pxlrow_work++ = std::byte(rcfg.trns_index);
 
 				for (uint i = 0; i < tile_width; ++i)
 					*ptr_pxlrow_work++ = *ptr_in_chrpxlrow++;
@@ -136,8 +136,9 @@ blob<byte_t> render (
 	return out_buffer;
 }
 
-png::pixel_buffer<png::index_pixel> pixbuf_render (
-	size_t const tile_width, size_t const tile_height, blob<byte_t> const & chrdata, render_config const & rcfg)
+/*
+pixbuf pixbuf_render(
+	size_t const tile_width, size_t const tile_height, blob<std::byte> const & chrdata, render_config const & rcfg)
 {
 	size_t const
 		// size of a single chr in bytes
@@ -160,34 +161,37 @@ png::pixel_buffer<png::index_pixel> pixbuf_render (
 		outimg_pxlwidth {(outimg_chrwidth * tile_width) + border_pxlwidth},
 		outimg_pxlheight {(outimg_chrheight * tile_height) + border_pxlheight};
 
-	pixel_buffer<index_pixel> out (outimg_pxlwidth, outimg_pxlheight);
+	pixbuf out(outimg_pxlwidth, outimg_pxlheight);
 
-	auto rawdata {render (tile_width, tile_height, chrdata, rcfg)};
-	byte_t const * ptr_pxlrow {rawdata.data()};
+	auto rawdata {render(tile_width, tile_height, chrdata, rcfg)};
+	std::byte const * ptr_pxlrow {rawdata.data()};
 
 	for (uint pxlrow {0}; pxlrow < outimg_pxlheight; ++pxlrow)
 	{
-		vector<index_pixel> pxlrow_work (ptr_pxlrow, ptr_pxlrow + outimg_pxlwidth);
-		out.put_row (pxlrow, pxlrow_work);
+		vector<byte> pxlrow_work(ptr_pxlrow, ptr_pxlrow + outimg_pxlwidth);
+		out.put_row(pxlrow, pxlrow_work);
+
 		ptr_pxlrow += outimg_pxlwidth;
 	}
 
 	return out;
 }
+*/
 
+/*
 image<index_pixel> png_render(size_t const tile_width,
 	size_t const tile_height,
-	blob<byte_t> const & chrdata,
+	blob<std::byte> const & chrdata,
 	png::palette const & pal,
 	render_config const & rcfg)
 {
 	if (pal.size() < 256)
-		throw invalid_argument ("Palette must contain a full 256 entries for PNG export");
+		throw invalid_argument("Palette must contain a full 256 entries for PNG export");
 
-	auto pixbuf {pixbuf_render (tile_width, tile_height, chrdata, rcfg)};
+	auto pixbuf {pixbuf_render(tile_width, tile_height, chrdata, rcfg)};
 
-	image<index_pixel> outimg (pixbuf.get_width(), pixbuf.get_height());
-	outimg.set_pixbuf (pixbuf);
+	image<index_pixel> outimg(pixbuf.get_width(), pixbuf.get_height());
+	outimg.set_pixbuf(pixbuf);
 
 	outimg.set_palette(pal);
 
@@ -201,4 +205,41 @@ image<index_pixel> png_render(size_t const tile_width,
 
 	return outimg;
 }
+*/
+
+png::image<png::index_pixel> png_render(pixbuf const & pixdata, palette const & pal, render_config const & rcfg)
+{
+	//
+	if (pal.size() < 256)
+		throw invalid_argument("Palette must contain a full 256 entries for PNG export");
+
+	png::pixel_buffer<png::index_pixel> png_pixbuf(pixdata.width(), pixdata.height());
+	for (uint i_pixel_row {0}; i_pixel_row < pixdata.height(); ++i_pixel_row)
+	{
+		png::index_pixel * ptr = (png::index_pixel *) (pixdata.data() + i_pixel_row * pixdata.width());
+		vector<png::index_pixel> pxlrow_work(ptr, ptr + pixdata.width());
+		png_pixbuf.put_row(i_pixel_row, pxlrow_work);
+	}
+	png::image<png::index_pixel> outimg(pixdata.width(), pixdata.height());
+
+	outimg.set_pixbuf(png_pixbuf);
+
+	vector<png::color> png_pal;
+	for (auto const & color : pal)
+	{
+		png_pal.emplace_back(color.red, color.green, color.blue);
+	}
+	outimg.set_palette(png_pal);
+
+	// setup transparency
+	if (rcfg.use_trns)
+	{
+		png::tRNS trans(256, 255);
+		trans[rcfg.trns_index] = 0;
+		outimg.set_tRNS(trans);
+	}
+
+	return outimg;
+}
+
 } // namespace chrgfx

@@ -2,9 +2,8 @@
 #define CHRGFX__PNG_CHUNK_HPP
 
 #include "blob.hpp"
-#include "chrdef.hpp"
-#include "types.hpp"
-#include <png++/png.hpp>
+#include "pixbuf.hpp"
+#include <cstddef>
 
 namespace chrgfx
 {
@@ -13,8 +12,7 @@ namespace chrgfx
  * @brief Returns a collection of tiles in the specified chrdef format using the
  * given bitmap
  */
-motoi::blob<byte_t> png_chunk(
-	size_t const tile_width, size_t const tile_height, png::pixel_buffer<png::index_pixel> const & bitmap);
+motoi::blob<std::byte> png_chunk(size_t const tile_width, size_t const tile_height, pixbuf const & bitmap);
 
 } // namespace chrgfx
 

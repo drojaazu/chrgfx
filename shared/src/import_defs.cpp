@@ -10,7 +10,6 @@
 
 using namespace std;
 using namespace chrgfx;
-using namespace png;
 
 namespace defkeys
 {
@@ -57,7 +56,7 @@ palette parse_palette(string const & pal)
 
 	stringstream ss(value);
 	string this_value;
-	u8 red {0}, green {0}, blue {0};
+	uint8 red {0}, green {0}, blue {0};
 	palette out;
 	while (getline(ss, this_value, ','))
 	{
@@ -71,15 +70,15 @@ palette parse_palette(string const & pal)
 		}
 		try
 		{
-			red = sto<u8>(this_value.substr(0, 2), 16);
-			green = sto<u8>(this_value.substr(2, 2), 16);
-			blue = sto<u8>(this_value.substr(4, 2), 16);
+			red = sto<uint8>(this_value.substr(0, 2), 16);
+			green = sto<uint8>(this_value.substr(2, 2), 16);
+			blue = sto<uint8>(this_value.substr(4, 2), 16);
 		}
 		catch (invalid_argument const &)
 		{
 			throw invalid_argument("Invalid HTML formatted color: '" + this_value + "'");
 		}
-		out.push_back(color {red, green, blue});
+		out.emplace_back(red, green, blue);
 	}
 
 	return out;
@@ -272,7 +271,7 @@ refcoldef validate_refcoldef_block(defblock const & def_block)
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_REFTAB, temp_id);
 	}
 
-	png::palette temp_pal;
+	palette temp_pal;
 	try
 	{
 		temp_pal = parse_palette(mapiter->second);

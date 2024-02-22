@@ -5,7 +5,6 @@
 namespace chrgfx
 {
 using namespace std;
-using namespace png;
 
 coldef::coldef(string const & id, coldef_type const type, bool const big_endian, string const & description) :
 		gfxdef(id, description),
@@ -20,12 +19,12 @@ refcoldef::refcoldef(string const & id, palette reftab, bool const big_endian, s
 {
 }
 
-color refcoldef::by_value(uint index) const
+color refcoldef::by_value(uint const index) const
 {
 	return m_reftab[index];
 };
 
-uint refcoldef::by_color(color rgb) const
+uint refcoldef::by_color(color const rgb) const
 {
 	size_t idx {0};
 	for (auto & this_color : m_reftab)
@@ -63,7 +62,7 @@ uint refcoldef::by_color(color rgb) const
 	return idx;
 };
 
-png::palette const & refcoldef::reftab() const
+palette const & refcoldef::reftab() const
 {
 	return m_reftab;
 }

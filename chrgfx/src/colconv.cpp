@@ -1,12 +1,12 @@
 #include "colconv.hpp"
 #include "utils.hpp"
 
-using namespace png;
+using namespace std;
 
 namespace chrgfx
 {
 
-u32 encode_col(rgbcoldef const & rgbcoldef, color const & color)
+uint32 encode_col(rgbcoldef const & rgbcoldef, color const & color)
 {
 	/*
 		seperate r g b from color
@@ -26,13 +26,13 @@ u32 encode_col(rgbcoldef const & rgbcoldef, color const & color)
 		 as above
 	*/
 
-	u32 out {0};
-	u8 bitdepth = rgbcoldef.bitdepth();
-	byte_t red {reduce_bitdepth(color.red, bitdepth)}, red_pass_shift {0}, green {reduce_bitdepth(color.green, bitdepth)},
+	uint32 out {0};
+	uint8 bitdepth = rgbcoldef.bitdepth();
+	uint8 red {reduce_bitdepth(color.red, bitdepth)}, red_pass_shift {0}, green {reduce_bitdepth(color.green, bitdepth)},
 		green_pass_shift {0}, blue {reduce_bitdepth(color.blue, bitdepth)}, blue_pass_shift {0};
 
-	byte_t bitmask;
-	u32 temp;
+	uint8 bitmask;
+	uint32 temp;
 
 	for (auto const & this_pass : rgbcoldef.layout())
 	{
@@ -55,12 +55,12 @@ u32 encode_col(rgbcoldef const & rgbcoldef, color const & color)
 	return out;
 }
 
-u32 encode_col(refcoldef const & refcoldef, color const & color)
+uint32 encode_col(refcoldef const & refcoldef, color const & color)
 {
 	return refcoldef.by_color(color);
 }
 
-color decode_col(rgbcoldef const & rgbcoldef, u32 const color)
+color decode_col(rgbcoldef const & rgbcoldef, uint32 const color)
 {
 
 	/*
@@ -73,9 +73,9 @@ psuedo:
 -expand R, G, B
 
  */
-	u8 red {0}, green {0}, blue {0};
-	u8 red_bitcount {0}, green_bitcount {0}, blue_bitcount {0};
-	u8 bitmask;
+	uint8 red {0}, green {0}, blue {0};
+	uint8 red_bitcount {0}, green_bitcount {0}, blue_bitcount {0};
+	uint8 bitmask;
 	for (rgb_layout const & this_pass : rgbcoldef.layout())
 	{
 		bitmask = create_bitmask8(this_pass.red_size());
@@ -95,10 +95,10 @@ psuedo:
 	green = expand_bitdepth(green, green_bitcount);
 	blue = expand_bitdepth(blue, blue_bitcount);
 
-	return png::color(red, green, blue);
+	return chrgfx::color(red, green, blue);
 }
 
-color decode_col(refcoldef const & refcoldef, u32 const color)
+color decode_col(refcoldef const & refcoldef, uint32 const color)
 {
 	return refcoldef.by_value(color);
 }
