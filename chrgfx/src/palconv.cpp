@@ -8,7 +8,7 @@ namespace chrgfx
 
 using namespace std;
 
-byte * encode_pal(paldef const & paldef, coldef const & coldef, palette const & palette)
+byte_t * encode_pal(paldef const & paldef, coldef const & coldef, palette const & palette)
 {
 	size_t const
 		// size of a single color within a palette, in bits
@@ -58,8 +58,8 @@ byte * encode_pal(paldef const & paldef, coldef const & coldef, palette const & 
 		// value
 		bit_align_mod {0};
 
-	auto out {new byte[subpal_datasize_bytes]};
-	std::fill_n(out, subpal_datasize_bytes, byte(0));
+	auto out {new byte_t[subpal_datasize_bytes]};
+	std::fill_n(out, subpal_datasize_bytes, 0);
 
 	// converted color
 	uint32 this_entry {0};
@@ -106,7 +106,7 @@ byte * encode_pal(paldef const & paldef, coldef const & coldef, palette const & 
 	return out;
 }
 
-palette decode_pal(paldef const & paldef, coldef const & coldef, byte const * palette)
+palette decode_pal(paldef const & paldef, coldef const & coldef, byte_t const * palette)
 {
 
 	// some basic data geometry
@@ -145,8 +145,8 @@ palette decode_pal(paldef const & paldef, coldef const & coldef, byte const * pa
 	// the temporary buffer will hold the entry value "extracted" from the palette
 	// data byte by byte before it is copied to another buffer respecting the
 	// endianness of the local machine
-	byte temp_buff[temp_buff_size];
-	fill_n(temp_buff, temp_buff_size, byte(0));
+	byte_t temp_buff[temp_buff_size];
+	fill_n(temp_buff, temp_buff_size, 0);
 
 	// the entry buffer will hold the "extracted" palette entry as a native
 	// integer, whereupon bit operations can be performed
@@ -156,7 +156,7 @@ palette decode_pal(paldef const & paldef, coldef const & coldef, byte const * pa
 
 	// auto out = new color[subpal_length];
 	// png++ expects a full 8 bit palette
-	chrgfx::palette out(256, color(0, 0, 0));
+	chrgfx::palette out;
 	// out.reserve(subpal_length);
 
 	auto paldata_iter = palette;

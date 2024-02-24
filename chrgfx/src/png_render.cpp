@@ -12,8 +12,8 @@ using namespace motoi;
 namespace chrgfx
 {
 
-pixbuf render(
-	size_t const tile_width, size_t const tile_height, blob<std::byte> const & chrdata, render_config const & rcfg)
+image render(
+	size_t const tile_width, size_t const tile_height, blob<byte_t> const & chrdata, render_config const & rcfg)
 {
 	size_t const chr_datasize {tile_width * tile_height};
 
@@ -47,7 +47,7 @@ pixbuf render(
 		outimg_pxlwidth {(outimg_chrwidth * tile_width) + border_pxlwidth},
 		outimg_pxlheight {(outimg_chrheight * tile_height) + border_pxlheight};
 
-	pixbuf out_buffer(outimg_pxlwidth, outimg_pxlheight);
+	image out_buffer(outimg_pxlwidth, outimg_pxlheight);
 
 	// iters and cached values and such for processing
 	size_t
@@ -62,7 +62,7 @@ pixbuf render(
 		next_row {0};
 
 	// input data pointers
-	std::byte const
+	byte_t const
 		// pointer to start of current tile row
 		*ptr_in_chrrow {chrdata.data()},
 		// pointer to start of the current pixel row within the current tile row
@@ -71,7 +71,7 @@ pixbuf render(
 		*ptr_in_chrpxlrow {ptr_in_pxlrow};
 
 	// output data pointer
-	byte * ptr_pxlrow_work {out_buffer.data()};
+	byte_t * ptr_pxlrow_work {out_buffer.pixbuf()};
 
 #ifdef DEBUG
 	cerr << dec;
@@ -105,7 +105,7 @@ pixbuf render(
 		// add border if enabled
 		if (rcfg.draw_border && iter_chrrow != 0)
 			for (uint i = 0; i < outimg_pxlwidth; ++i)
-				*ptr_pxlrow_work++ = std::byte(rcfg.trns_index);
+				*ptr_pxlrow_work++ = rcfg.trns_index;
 
 		// for each pixel row in the tile row...
 		for (uint iter_chr_pxlrow = 0; iter_chr_pxlrow < tile_height; ++iter_chr_pxlrow)
@@ -117,7 +117,7 @@ pixbuf render(
 			{
 				// add border pixel if enabled
 				if (rcfg.draw_border && iter_chrcol != 0)
-					*ptr_pxlrow_work++ = std::byte(rcfg.trns_index);
+					*ptr_pxlrow_work++ = rcfg.trns_index;
 
 				for (uint i = 0; i < tile_width; ++i)
 					*ptr_pxlrow_work++ = *ptr_in_chrpxlrow++;
@@ -138,7 +138,7 @@ pixbuf render(
 
 /*
 pixbuf pixbuf_render(
-	size_t const tile_width, size_t const tile_height, blob<std::byte> const & chrdata, render_config const & rcfg)
+	size_t const tile_width, size_t const tile_height, blob<byte_t> const & chrdata, render_config const & rcfg)
 {
 	size_t const
 		// size of a single chr in bytes
@@ -164,7 +164,7 @@ pixbuf pixbuf_render(
 	pixbuf out(outimg_pxlwidth, outimg_pxlheight);
 
 	auto rawdata {render(tile_width, tile_height, chrdata, rcfg)};
-	std::byte const * ptr_pxlrow {rawdata.data()};
+	byte_t const * ptr_pxlrow {rawdata.data()};
 
 	for (uint pxlrow {0}; pxlrow < outimg_pxlheight; ++pxlrow)
 	{
@@ -181,7 +181,7 @@ pixbuf pixbuf_render(
 /*
 image<index_pixel> png_render(size_t const tile_width,
 	size_t const tile_height,
-	blob<std::byte> const & chrdata,
+	blob<byte_t> const & chrdata,
 	png::palette const & pal,
 	render_config const & rcfg)
 {
@@ -207,7 +207,7 @@ image<index_pixel> png_render(size_t const tile_width,
 }
 */
 
-png::image<png::index_pixel> png_render(pixbuf const & pixdata, palette const & pal, render_config const & rcfg)
+png::image<png::index_pixel> png_render(image const & pixdata, palette const & pal, render_config const & rcfg)
 {
 	//
 	if (pal.size() < 256)
@@ -216,7 +216,7 @@ png::image<png::index_pixel> png_render(pixbuf const & pixdata, palette const & 
 	png::pixel_buffer<png::index_pixel> png_pixbuf(pixdata.width(), pixdata.height());
 	for (uint i_pixel_row {0}; i_pixel_row < pixdata.height(); ++i_pixel_row)
 	{
-		png::index_pixel * ptr = (png::index_pixel *) (pixdata.data() + i_pixel_row * pixdata.width());
+		png::index_pixel * ptr = (png::index_pixel *) (pixdata.pixbuf() + i_pixel_row * pixdata.width());
 		vector<png::index_pixel> pxlrow_work(ptr, ptr + pixdata.width());
 		png_pixbuf.put_row(i_pixel_row, pxlrow_work);
 	}

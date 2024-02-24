@@ -14,6 +14,7 @@
 
 #include "blob.hpp"
 #include "types.hpp"
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
@@ -21,35 +22,40 @@
 
 namespace chrgfx
 {
+using pixel_buffer = motoi::blob<uint8_t>;
+
 /**
- * @brief pixel buffer
+ * @brief pixel buffer, intermediate format to be converted into something more useful
+ * such as png, bmp or chunked into tile graphics
+ * pixel format is 8bpp packed
+ * put simply, each byte is an unsigned value that represents an index into the color palette
  *
  */
-class pixbuf
+class image
 {
 private:
 	uint m_width;
 	uint m_height;
 	uint m_datasize;
 	// we represent the data as ints instead of byte as they *are* typed, being the index into the color palette
-	motoi::blob<std::byte> m_pixdata;
+	pixel_buffer m_pixbuf;
 
 public:
-	pixbuf(uint const width, uint const height, std::byte const * pixdata) :
+	image(uint const width, uint const height, uint8_t const * pixel_buffer) :
 			m_width {width},
 			m_height {height},
 			m_datasize {width * height},
-			m_pixdata {pixdata, m_datasize}
+			m_pixbuf {pixel_buffer, m_datasize}
 	{
 		if (m_datasize == 0)
 			throw std::runtime_error("invalid width and/or height specified for pixmap");
 	}
 
-	pixbuf(uint const width, uint const height) :
+	image(uint const width, uint const height) :
 			m_width {width},
 			m_height {height},
 			m_datasize {width * height},
-			m_pixdata(m_datasize, std::byte(0))
+			m_pixbuf(m_datasize, 0)
 	{
 		if (m_datasize == 0)
 			throw std::runtime_error("invalid width and/or height specified for pixmap");
@@ -65,14 +71,14 @@ public:
 		return m_height;
 	}
 
-	auto data()
+	auto pixbuf()
 	{
-		return m_pixdata.data();
+		return m_pixbuf.data();
 	}
 
-	[[nodiscard]] auto const data() const
+	[[nodiscard]] auto const pixbuf() const
 	{
-		return m_pixdata.data();
+		return m_pixbuf.data();
 	}
 };
 
@@ -106,7 +112,7 @@ public:
 	}
 };
 
-using palette = std::vector<color>;
+using palette = std::array<color, 256>;
 
 } // namespace chrgfx
 

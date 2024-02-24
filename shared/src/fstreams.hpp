@@ -5,6 +5,7 @@
  *
  * Updates:
  * 20220916 Initial
+ * 20240224 Changed to basic_streams with data type template options
  */
 
 #ifndef __MOTOI__FSTREAMS_HPP
@@ -15,11 +16,11 @@
 #include <sstream>
 #include <stdexcept>
 
-template <typename StringT>
-std::ifstream ifstream_checked(
+template <typename DataT = char, typename StringT>
+std::basic_ifstream<DataT> ifstream_checked(
 	std::basic_string<StringT> const & path, std::basic_string<StringT> const & purpose = "read")
 {
-	std::ifstream ifs(path);
+	std::basic_ifstream<DataT> ifs(path);
 	if (! ifs.good())
 	{
 		std::basic_ostringstream<StringT> oss;
@@ -29,11 +30,11 @@ std::ifstream ifstream_checked(
 	return ifs;
 }
 
-template <typename StringT>
-std::ofstream ofstream_checked(
+template <typename DataT = char, typename StringT>
+std::basic_ofstream<DataT> ofstream_checked(
 	std::basic_string<StringT> const & path, std::basic_string<StringT> const & purpose = "write")
 {
-	std::ofstream ofs(path);
+	std::basic_ofstream<DataT> ofs(path);
 	if (! ofs.good())
 	{
 		std::basic_ostringstream<StringT> oss;

@@ -48,11 +48,11 @@ int main(int argc, char ** argv)
 		chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
 		auto duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
-		cerr << "SETUP: " << duration << "ms" << endl;
-		cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << endl;
-		cerr << "\tUsing chrdef '" << defs.chrdef->id() << "'" << endl;
-		cerr << "\tUsing colrdef '" << defs.coldef->id() << "'" << endl;
-		cerr << "\tUsing paldef '" << defs.paldef->id() << "'" << endl;
+		cerr << "SETUP: " << duration << "ms\n";
+		cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << '\n';
+		cerr << "\tUsing chrdef '" << defs.chrdef->id() << "'\n";
+		cerr << "\tUsing colrdef '" << defs.coldef->id() << "'\n";
+		cerr << "\tUsing paldef '" << defs.paldef->id() << "'\n";
 #endif
 
 /*******************************************************
@@ -80,13 +80,15 @@ int main(int argc, char ** argv)
 		// deal with tiles first
 		if (! cfg.chr_outfile.empty())
 		{
-			blob<byte> png_tiles {png_chunk(defs.chrdef->width(), defs.chrdef->height(), in_img.get_pixbuf())};
+			blob<byte_t> png_tiles {
+				make_tileset(defs.chrdef->width(), defs.chrdef->height(), make_pixbuf_from_png(in_img.get_pixbuf()))};
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
 			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
 			cerr << "PNG CHUNK: " << to_string(duration) << "ms" << endl;
+			cerr << "tile count: " << (png_tiles.size() / (defs.chrdef->width() * defs.chrdef->height())) << endl;
 #endif
 
 /*******************************************************
@@ -95,7 +97,7 @@ int main(int argc, char ** argv)
 #ifdef DEBUG
 			t1 = chrono::high_resolution_clock::now();
 #endif
-			ofstream chr_outfile {ofstream_checked(cfg.chr_outfile)};
+			auto chr_outfile {ofstream_checked(cfg.chr_outfile)};
 
 			size_t chunksize {(unsigned) (defs.chrdef->datasize() / 8)};
 
@@ -104,8 +106,8 @@ int main(int argc, char ** argv)
 
 			while (ptr_imgdata != ptr_imgdata_end)
 			{
-				byte_t * temp_chr {encode_chr(*defs.chrdef, ptr_imgdata)};
-				copy(temp_chr, temp_chr + chunksize, ostream_iterator<byte_t>(chr_outfile));
+				auto temp_chr {reinterpret_cast<char *>(encode_chr(*defs.chrdef, ptr_imgdata))};
+				copy(temp_chr, temp_chr + chunksize, ostream_iterator<char>(chr_outfile));
 				ptr_imgdata += defs.chrdef->width() * defs.chrdef->height();
 				delete[] temp_chr;
 			}
@@ -128,7 +130,7 @@ int main(int argc, char ** argv)
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			auto paldef_palette_data {encode_pal(*defs.paldef, *defs.coldef, in_img.get_palette())};
+			auto paldef_palette_data {encode_pal(*defs.paldef, *defs.coldef, make_palette_from_png(in_img.get_palette()))};
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();

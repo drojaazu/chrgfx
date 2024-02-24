@@ -103,9 +103,8 @@ uint8 create_bitmask8(uint8 bitcount)
 palette make_pal_random()
 {
 	palette outpal;
-	outpal.reserve(256);
 
-	for (size_t paliter = 0; paliter < 256;)
+	for (size_t paliter = 0; paliter < 256; ++paliter)
 	{
 		color temp_col {
 			static_cast<uint8>(rand() % 255), static_cast<uint8>(rand() % 255), static_cast<uint8>(rand() % 255)};
@@ -117,8 +116,7 @@ palette make_pal_random()
 			++paliter;
 		}
 		*/
-		++paliter;
-		outpal.push_back(temp_col);
+		outpal[paliter] = temp_col;
 	}
 
 	return outpal;

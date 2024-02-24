@@ -4,10 +4,10 @@ namespace chrgfx
 {
 using namespace std;
 
-byte * encode_chr(chrdef const & chrdef, byte const * tile, byte * out)
+byte_t * encode_chr(chrdef const & chrdef, byte_t const * tile, byte_t * out)
 {
 	if (out == nullptr)
-		out = new byte[chrdef.datasize() / 8]();
+		out = new byte_t[chrdef.datasize() / 8]();
 
 	/*
 		-for every line...
@@ -33,8 +33,8 @@ byte * encode_chr(chrdef const & chrdef, byte const * tile, byte * out)
 		*ptr_row_offset {chrdef.row_offsets().data()},
 		*ptr_pxl_offset {chrdef.pixel_offsets().data()}, *ptr_plane_offset {chrdef.plane_offsets().data()};
 
-	byte const * ptr_in_pxl = tile;
-	byte this_pxl;
+	byte_t const * ptr_in_pxl = tile;
+	byte_t this_pxl;
 
 	// for every row of pixels...
 	for (uint i_row {0}; i_row < chr_height; ++i_row)
@@ -48,7 +48,7 @@ byte * encode_chr(chrdef const & chrdef, byte const * tile, byte * out)
 
 			// if all the bitplanes are unset (i.e. the value is zero)
 			// we can skip the bitplane shenanigans altogether
-			if (this_pxl == byte(0))
+			if (this_pxl == byte_t(0))
 				continue;
 
 			bitpos_x = *ptr_pxl_offset;
@@ -57,12 +57,12 @@ byte * encode_chr(chrdef const & chrdef, byte const * tile, byte * out)
 			{
 				// if the bit is unset, then do not set the equivalent bit in the
 				// output
-				if ((this_pxl & byte(1)) == byte(0))
+				if ((this_pxl & byte_t(1)) == byte_t(0))
 					continue;
 
 				// get the position in the output data for this bit
 				bitpos = bitpos_y + bitpos_x + *ptr_plane_offset;
-				*(out + (bitpos >> 3)) |= byte((0x80 >> (bitpos % 8)));
+				*(out + (bitpos >> 3)) |= byte_t((0x80 >> (bitpos % 8)));
 			}
 			ptr_plane_offset = chrdef.plane_offsets().data();
 		}
@@ -72,18 +72,18 @@ byte * encode_chr(chrdef const & chrdef, byte const * tile, byte * out)
 	return out;
 }
 
-byte * decode_chr(chrdef const & chrdef, byte const * encoded_chr, byte * out)
+byte_t * decode_chr(chrdef const & chrdef, byte_t const * encoded_chr, byte_t * out)
 {
 	if (out == nullptr)
-		out = new byte[chrdef.width() * chrdef.height()]();
+		out = new byte_t[chrdef.width() * chrdef.height()]();
 
 	uint
 		// tile dimensions
 		chr_height {chrdef.height()},
 		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bitdepth()}, work_bit, bitpos_line, bitpos_pixel, bitpos_plane;
 
-	byte work_byte {0}, this_pxl {0};
-	byte * ptr_out_pixel = out;
+	byte_t work_byte {0}, this_pxl {0};
+	byte_t * ptr_out_pixel = out;
 
 	uint const
 		// pointers to bit offset definitions
@@ -96,7 +96,7 @@ byte * decode_chr(chrdef const & chrdef, byte const * encoded_chr, byte * out)
 		bitpos_line = *ptr_row_offset++;
 
 		// for every pixel in the line...
-		for (uint i_pxl {0}; i_pxl < chr_width; ++i_pxl, ++ptr_pixel_offset, this_pxl = byte(0))
+		for (uint i_pxl {0}; i_pxl < chr_width; ++i_pxl, ++ptr_pixel_offset, this_pxl = byte_t(0))
 		{
 			bitpos_pixel = bitpos_line + *ptr_pixel_offset;
 
@@ -108,13 +108,13 @@ byte * decode_chr(chrdef const & chrdef, byte const * encoded_chr, byte * out)
 				work_byte = encoded_chr[bitpos_plane >> 3];
 
 				// if work_byte is 0, no bits are set, so no bits will be set in the
-				// output, so let's move to the next byte
-				if (work_byte == byte(0))
+				// output, so let's move to the next byte_t
+				if (work_byte == byte_t(0))
 					continue;
 
 				work_bit = bitpos_plane % 8;
 				// this_pxl |= ((work_byte << work_bit) & 0x80) >> i_bitplane;
-				this_pxl |= ((work_byte << work_bit) & byte(0x80)) >> (7 - i_bitplane);
+				this_pxl |= ((work_byte << work_bit) & byte_t(0x80)) >> (7 - i_bitplane);
 			}
 
 			*ptr_out_pixel++ = this_pxl;

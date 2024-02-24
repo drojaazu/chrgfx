@@ -4,7 +4,7 @@
 #include "coldef.hpp"
 #include "paldef.hpp"
 #include "pixbuf.hpp"
-#include <cstddef>
+#include "types.hpp"
 
 namespace chrgfx
 {
@@ -17,7 +17,7 @@ namespace chrgfx
  * @param palette palette data
  * @return byte_t* pointer to output encoded palette
  */
-std::byte * encode_pal(paldef const & paldef, coldef const & coldef, palette const & palette);
+byte_t * encode_pal(paldef const & paldef, coldef const & coldef, palette const & palette);
 
 /**
  * @brief Decode an encoded palette with the given paldef
@@ -27,7 +27,7 @@ std::byte * encode_pal(paldef const & paldef, coldef const & coldef, palette con
  * @param palette palette data
  * @return png::palette
  */
-palette decode_pal(paldef const & paldef, coldef const & coldef, std::byte const * palette);
+palette decode_pal(paldef const & paldef, coldef const & coldef, byte_t const * palette);
 
 } // namespace chrgfx
 

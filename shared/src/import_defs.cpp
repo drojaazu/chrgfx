@@ -58,6 +58,7 @@ palette parse_palette(string const & pal)
 	string this_value;
 	uint8 red {0}, green {0}, blue {0};
 	palette out;
+	size_t index {0};
 	while (getline(ss, this_value, ','))
 	{
 		if (this_value[0] == '#')
@@ -78,7 +79,7 @@ palette parse_palette(string const & pal)
 		{
 			throw invalid_argument("Invalid HTML formatted color: '" + this_value + "'");
 		}
-		out.emplace_back(red, green, blue);
+		out[index] = color(red, green, blue);
 	}
 
 	return out;

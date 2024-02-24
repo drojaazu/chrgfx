@@ -4,7 +4,6 @@
 #include "blob.hpp"
 #include "pixbuf.hpp"
 #include "types.hpp"
-#include <cstddef>
 #include <png++/png.hpp>
 
 namespace chrgfx
@@ -56,10 +55,8 @@ public:
 /**
  * @brief Renders a collection of basic (unencoded) tiles to a byte buffer
  */
-pixbuf render(size_t const tile_width,
-	size_t const tile_height,
-	motoi::blob<std::byte> const & chrdata,
-	render_config const & rcfg);
+image render(
+	size_t const tile_width, size_t const tile_height, motoi::blob<byte_t> const & chrdata, render_config const & rcfg);
 
 /**
  * @brief Renders a collection of basic (unencoded) tiles to a pixel buffer
@@ -82,7 +79,7 @@ chrgfx::pixbuf png_render(size_t const tile_width,
  render_config const & rcfg);
 */
 
-png::image<png::index_pixel> png_render(pixbuf const & pixdata, palette const & pal, render_config const & rcfg);
+png::image<png::index_pixel> png_render(image const & pixdata, palette const & pal, render_config const & rcfg);
 } // namespace chrgfx
 
 #endif
