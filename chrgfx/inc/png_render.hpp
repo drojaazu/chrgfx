@@ -2,7 +2,7 @@
 #define CHRGFX__PNG_RENDER_HPP
 
 #include "blob.hpp"
-#include "pixbuf.hpp"
+#include "stdgfx.hpp"
 #include "types.hpp"
 #include <png++/png.hpp>
 

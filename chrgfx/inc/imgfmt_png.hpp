@@ -2,7 +2,7 @@
 #define CHRGFX__IMGFMT_PNG_HPP
 
 #include "blob.hpp"
-#include "pixbuf.hpp"
+#include "stdgfx.hpp"
 #include "types.hpp"
 #include <png++/pixel_buffer.hpp>
 #include <png++/png.hpp>

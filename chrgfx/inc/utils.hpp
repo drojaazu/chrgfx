@@ -1,7 +1,7 @@
 #ifndef CHRGFX__UTILS_HPP
 #define CHRGFX__UTILS_HPP
 
-#include "pixbuf.hpp"
+#include "stdgfx.hpp"
 #include "types.hpp"
 
 namespace chrgfx

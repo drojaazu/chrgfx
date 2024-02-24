@@ -2,8 +2,8 @@
 #define CHRGFX__COLDEF_HPP
 
 #include "gfxdef.hpp"
-#include "pixbuf.hpp"
 #include "rgb_layout.hpp"
+#include "stdgfx.hpp"
 #include <vector>
 
 namespace chrgfx
@@ -50,7 +50,7 @@ public:
 	 * @return index to the color matching the RGB value provided, or
 	 * the index to the nearest matching color
 	 */
-	[[nodiscard]] uint by_color(color const rgb) const;
+	[[nodiscard]] uint by_color(color const & rgb) const;
 
 	[[nodiscard]] palette const & reftab() const;
 

@@ -2,9 +2,7 @@
 #include "builtin_defs.hpp"
 #include "fstreams.hpp"
 #include "strutil.hpp"
-#include <cerrno>
 #include <cstring>
-#include <fstream>
 #include <sstream>
 #include <vector>
 

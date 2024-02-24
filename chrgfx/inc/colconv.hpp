@@ -2,7 +2,7 @@
 #define __CHRGFX__COLCONV_HPP
 
 #include "coldef.hpp"
-#include "pixbuf.hpp"
+#include "stdgfx.hpp"
 #include "types.hpp"
 
 namespace chrgfx

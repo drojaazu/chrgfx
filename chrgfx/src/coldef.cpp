@@ -15,7 +15,7 @@ coldef::coldef(string const & id, coldef_type const type, bool const big_endian,
 
 refcoldef::refcoldef(string const & id, palette reftab, bool const big_endian, string const & description) :
 		coldef(id, ref, big_endian, description),
-		m_reftab(std::move(reftab))
+		m_reftab(reftab)
 {
 }
 
@@ -24,7 +24,7 @@ color refcoldef::by_value(uint const index) const
 	return m_reftab[index];
 };
 
-uint refcoldef::by_color(color const rgb) const
+uint refcoldef::by_color(color const & rgb) const
 {
 	size_t idx {0};
 	for (auto & this_color : m_reftab)

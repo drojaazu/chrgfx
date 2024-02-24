@@ -1,7 +1,7 @@
 #ifndef __CHRGFX__CUSTOM_HPP
 #define __CHRGFX__CUSTOM_HPP
 
-#include "pixbuf.hpp"
+#include "stdgfx.hpp"
 #include "types.hpp"
 
 namespace chrgfx::custom

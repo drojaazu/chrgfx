@@ -1,8 +1,6 @@
 #ifndef CHRGFX__CHRGFX_HPP
 #define CHRGFX__CHRGFX_HPP
 
-#include <png++/png.hpp>
-
 #include "blob.hpp"
 #include "builtin_defs.hpp"
 #include "chrconv.hpp"

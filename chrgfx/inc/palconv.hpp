@@ -3,7 +3,7 @@
 
 #include "coldef.hpp"
 #include "paldef.hpp"
-#include "pixbuf.hpp"
+#include "stdgfx.hpp"
 #include "types.hpp"
 
 namespace chrgfx

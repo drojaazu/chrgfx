@@ -67,7 +67,7 @@ int main(int argc, char ** argv)
 		t2 = chrono::high_resolution_clock::now();
 		duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
-		cerr << "LOAD PNG: " << to_string(duration) << "ms" << endl;
+		cerr << "LOAD PNG: " << to_string(duration) << "ms\n";
 #endif
 
 /*******************************************************
@@ -87,8 +87,8 @@ int main(int argc, char ** argv)
 			t2 = chrono::high_resolution_clock::now();
 			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
-			cerr << "PNG CHUNK: " << to_string(duration) << "ms" << endl;
-			cerr << "tile count: " << (png_tiles.size() / (defs.chrdef->width() * defs.chrdef->height())) << endl;
+			cerr << "PNG CHUNK: " << to_string(duration) << "ms\n";
+			cerr << "tile count: " << (png_tiles.size() / (defs.chrdef->width() * defs.chrdef->height())) << '\n';
 #endif
 
 /*******************************************************
@@ -116,7 +116,7 @@ int main(int argc, char ** argv)
 		t2 = chrono::high_resolution_clock::now();
 		duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
-		cerr << "CHR ENCODE & OUTPUT TO STREAM: " << to_string(duration) << "ms" << endl;
+		cerr << "CHR ENCODE & OUTPUT TO STREAM: " << to_string(duration) << "ms\n";
 #endif
 
 		// deal with the palette next
@@ -136,7 +136,7 @@ int main(int argc, char ** argv)
 			t2 = chrono::high_resolution_clock::now();
 			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
-			cerr << "CONVERT PALETTE: " << to_string(duration) << "ms" << endl;
+			cerr << "CONVERT PALETTE: " << to_string(duration) << "ms\n";
 #endif
 
 #ifdef DEBUG
@@ -146,7 +146,7 @@ int main(int argc, char ** argv)
 			ofstream pal_outfile {cfg.pal_outfile};
 			if (! pal_outfile.good())
 			{
-				cerr << "pal-output error: " << strerror(errno) << endl;
+				cerr << "pal-output error: " << strerror(errno) << '\n';
 			}
 
 			// TODO: consider splitting the palette conversion routine into two
@@ -160,7 +160,7 @@ int main(int argc, char ** argv)
 			t2 = chrono::high_resolution_clock::now();
 			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
-			cerr << "PAL OUTPUT TO STREAM: " << to_string(duration) << "ms" << endl;
+			cerr << "PAL OUTPUT TO STREAM: " << to_string(duration) << "ms\n";
 #endif
 		}
 
