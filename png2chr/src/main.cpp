@@ -56,11 +56,12 @@ int main(int argc, char ** argv)
 #endif
 
 /*******************************************************
- *             LOAD PNG
+ *             LOAD IMAGE
  *******************************************************/
 #ifdef DEBUG
 		t1 = chrono::high_resolution_clock::now();
 #endif
+
 		png::image<png::index_pixel> in_img(png_data, png::require_color_space<png::index_pixel>());
 
 #ifdef DEBUG
@@ -80,15 +81,15 @@ int main(int argc, char ** argv)
 		// deal with tiles first
 		if (! cfg.chr_outfile.empty())
 		{
-			blob<byte_t> png_tiles {
-				make_tileset(defs.chrdef->width(), defs.chrdef->height(), make_pixbuf_from_png(in_img.get_pixbuf()))};
+			auto image_data = make_pixbuf_from_png(in_img.get_pixbuf());
+			blob<byte_t> tileset {make_tileset(defs.chrdef->width(), defs.chrdef->height(), image_data)};
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
 			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
 			cerr << "PNG CHUNK: " << to_string(duration) << "ms\n";
-			cerr << "tile count: " << (png_tiles.size() / (defs.chrdef->width() * defs.chrdef->height())) << '\n';
+			cerr << "tile count: " << (tileset.size() / (defs.chrdef->width() * defs.chrdef->height())) << '\n';
 #endif
 
 /*******************************************************
@@ -101,8 +102,8 @@ int main(int argc, char ** argv)
 
 			size_t chunksize {(unsigned) (defs.chrdef->datasize() / 8)};
 
-			auto ptr_imgdata = png_tiles.data();
-			auto ptr_imgdata_end = png_tiles.data() + png_tiles.size();
+			auto ptr_imgdata = tileset.data();
+			auto ptr_imgdata_end = tileset.data() + tileset.size();
 
 			while (ptr_imgdata != ptr_imgdata_end)
 			{

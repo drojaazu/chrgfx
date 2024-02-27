@@ -27,9 +27,9 @@ public:
 		uint const width,
 		uint const height,
 		uint const bitdepth,
-		std::vector<uint> const & planeoffset,
-		std::vector<uint> const & pixeloffset,
-		std::vector<uint> const & rowoffset,
+		std::vector<uint> const & plane_offsets,
+		std::vector<uint> const & pixel_offsets,
+		std::vector<uint> const & row_offsets,
 		std::string const & description = "");
 
 	/**
