@@ -73,11 +73,12 @@ int main(int argc, char ** argv)
 		cerr << "LOAD PNG: " << to_string(duration) << "ms\n";
 #endif
 
-		/*******************************************************
-		 *                 TILE SEGMENTATION
-		 *******************************************************/
 		if (! cfg.chr_outfile.empty())
 		{
+
+			/*******************************************************
+			 *                 TILE SEGMENTATION
+			 *******************************************************/
 
 #ifdef DEBUG
 			t1 = chrono::high_resolution_clock::now();
@@ -102,19 +103,21 @@ int main(int argc, char ** argv)
 #endif
 			auto chr_outfile {ofstream_checked(cfg.chr_outfile)};
 
-			size_t chunksize {(unsigned) (defs.chrdef->datasize() / 8)};
+			size_t in_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())},
+				out_chunksize {(uint) (defs.chrdef->datasize() / 8)};
 
-			auto ptr_imgdata = tileset.data();
+			auto ptr_in_tile = tileset.data();
 			auto ptr_imgdata_end = tileset.data() + tileset.size();
 
-			while (ptr_imgdata != ptr_imgdata_end)
+			auto out_tile = new basic_pixel[in_chunksize];
+			while (ptr_in_tile != ptr_imgdata_end)
 			{
 				// TODO create a cache and use the out pointer on encode_chr
-				auto temp_chr {reinterpret_cast<char *>(encode_chr(*defs.chrdef, ptr_imgdata))};
-				copy(temp_chr, temp_chr + chunksize, ostream_iterator<char>(chr_outfile));
-				ptr_imgdata += defs.chrdef->width() * defs.chrdef->height();
-				delete[] temp_chr;
+				encode_chr(*defs.chrdef, ptr_in_tile, out_tile);
+				copy(out_tile, out_tile + out_chunksize, ostream_iterator<char>(chr_outfile));
+				ptr_in_tile += in_chunksize;
 			}
+			delete[] out_tile;
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
@@ -149,9 +152,7 @@ int main(int argc, char ** argv)
 
 			ofstream pal_outfile {cfg.pal_outfile};
 			if (! pal_outfile.good())
-			{
 				cerr << "pal-output error: " << strerror(errno) << '\n';
-			}
 
 			// TODO consider splitting the palette conversion routine into two
 			// functions, on for subpal and one for full pal so we always know the

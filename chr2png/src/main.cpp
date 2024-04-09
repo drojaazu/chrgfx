@@ -37,8 +37,6 @@ int main(int argc, char ** argv)
 #endif
 		process_args(argc, argv);
 
-		def_helper defs(cfg);
-
 		istream * chrdata;
 		ifstream ifs;
 		if (cfg.chrdata_name == "-")
@@ -52,133 +50,136 @@ int main(int argc, char ** argv)
 			chrdata = &ifs;
 		}
 
+		def_helper defs(cfg);
+
 #ifdef DEBUG
 		chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
 		auto duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
 		cerr << "SETUP: " << duration << "ms" << endl;
-		cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << endl;
-		cerr << "\tUsing chrdef '" << defs.chrdef->id() << "'" << endl;
-		cerr << "\tUsing colrdef '" << defs.coldef->id() << "'" << endl;
-		cerr << "\tUsing paldef '" << defs.paldef->id() << "'" << endl;
+		cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << '\n';
+		cerr << "\tUsing chrdef '" << defs.chrdef->id() << "'\n";
+		cerr << "\tUsing colrdef '" << defs.coldef->id() << "'\n";
+		cerr << "\tUsing paldef '" << defs.paldef->id() << "'\n";
 #endif
+
+		// basic gfx buffer
+		blob<basic_pixel> out_buffer;
 
 		/*******************************************************
 		 *             TILE CONVERSION
 		 *******************************************************/
-
-#ifdef DEBUG
-		t1 = chrono::high_resolution_clock::now();
-#endif
-
-		size_t
-			// byte size of one encoded tile
-			in_chunksize {defs.chrdef->datasize() / (size_t) 8},
-			// byte size of one basic (decoded) tile
-			out_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())};
-
-		// buffer for a single encoded tile, read from the stream
-		byte_t in_tile[in_chunksize];
-
-		// basic tiles buffer
-		blob<byte_t> out_buffer;
-
-		/*
-			Some speed testing was done and, somewhat surprisingly, calling append
-			on the buffer repeatedly was a bit faster than creating a large
-			temporary buffer and resizing
-		*/
-		auto chr_buffer = new byte_t[out_chunksize];
-		while (true)
-		{
-			chrdata->read((char *) in_tile, in_chunksize);
-			if (chrdata->eof())
-				break;
-
-			decode_chr(*defs.chrdef, in_tile, chr_buffer);
-			out_buffer.append(chr_buffer, out_chunksize);
-		}
-		delete[] chr_buffer;
-
-#ifdef DEBUG
-		t2 = chrono::high_resolution_clock::now();
-		duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-
-		cerr << "TILE CONVERSION: " << to_string(duration) << "ms" << endl;
-#endif
-
-		/*******************************************************
-		 *                PALETTE CONVERSION
-		 *******************************************************/
-
-		basic_palette workpal;
-		if (! cfg.paldata_name.empty())
 		{
 #ifdef DEBUG
 			t1 = chrono::high_resolution_clock::now();
 #endif
+			size_t
+				// byte size of one encoded tile
+				in_chunksize {(uint) (defs.chrdef->datasize() / 8)},
+				// byte size of one basic (decoded) tile
+				out_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())};
 
-			ifstream paldata {ifstream_checked(cfg.paldata_name)};
+			// buffer for a single encoded tile, read from the stream
+			auto in_tile = new byte_t[in_chunksize], out_tile = new basic_pixel[out_chunksize];
 
-			size_t pal_size = defs.paldef->datasize() / 8;
-			byte_t palbuffer[pal_size];
-			paldata.read((char *) palbuffer, pal_size);
-			if (paldata.gcount() > pal_size)
-				throw invalid_argument("Input palette data too small to form a valid palette");
+			/*
+				Some speed testing was done and, somewhat surprisingly, calling append
+				on the buffer repeatedly was a bit faster than creating a large
+				temporary buffer and resizing
+			*/
+			while (true)
+			{
+				chrdata->read((char *) in_tile, in_chunksize);
+				if (chrdata->eof())
+					break;
 
-			workpal = decode_pal(*defs.paldef, *defs.coldef, palbuffer);
+				decode_chr(*defs.chrdef, in_tile, out_tile);
+				out_buffer.append(out_tile, out_chunksize);
+			}
+			delete[] out_tile;
+			delete[] in_tile;
+
+#ifdef DEBUG
+			t2 = chrono::high_resolution_clock::now();
+			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+
+			cerr << "TILE CONVERSION: " << to_string(duration) << "ms\n";
+#endif
 		}
-		else
+
+		/*******************************************************
+		 *                PALETTE CONVERSION
+		 *******************************************************/
+		basic_palette workpal;
 		{
-			workpal = make_pal_random();
+#ifdef DEBUG
+			t1 = chrono::high_resolution_clock::now();
+#endif
+			if (! cfg.paldata_name.empty())
+			{
+
+				ifstream paldata {ifstream_checked(cfg.paldata_name)};
+
+				size_t pal_size = defs.paldef->datasize() / 8;
+				byte_t palbuffer[pal_size];
+				paldata.read((char *) palbuffer, pal_size);
+				if (paldata.gcount() > pal_size)
+					throw invalid_argument("Input palette data too small to form a valid palette");
+
+				workpal = decode_pal(*defs.paldef, *defs.coldef, palbuffer);
+			}
+			else
+			{
+				workpal = make_pal_random();
+			}
+
+			/*******************************************************
+			 *              RENDER TILESET & WRITE FILE
+			 *******************************************************/
+			{
+#ifdef DEBUG
+				t2 = chrono::high_resolution_clock::now();
+				duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+
+				cerr << "PALETTE GENERATION: " << duration << "ms\n";
+#endif
+			}
+
+#ifdef DEBUG
+			t1 = chrono::high_resolution_clock::now();
+#endif
+
+			auto rendered_tiles = render_tileset(*defs.chrdef, out_buffer, cfg.render_cfg);
+			rendered_tiles.palette(workpal);
+			png::image<png::index_pixel> outimg {to_png(rendered_tiles, cfg.render_cfg.trns_index)};
+
+#ifdef DEBUG
+			t2 = chrono::high_resolution_clock::now();
+			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+			cerr << "PNG RENDER: " << duration << "ms\n";
+#endif
+
+#ifdef DEBUG
+			t1 = chrono::high_resolution_clock::now();
+#endif
+
+			if (cfg.out_path.empty())
+				outimg.write_stream(cout);
+			else
+				outimg.write(cfg.out_path);
+
+#ifdef DEBUG
+			t2 = chrono::high_resolution_clock::now();
+			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+			cerr << "OUTPUT TO STREAM: " << duration << "ms\n";
+#endif
 		}
 
-#ifdef DEBUG
-		t2 = chrono::high_resolution_clock::now();
-		duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-
-		cerr << "PALETTE GENERATION: " << duration << "ms" << endl;
-#endif
-
-#ifdef DEBUG
-		t1 = chrono::high_resolution_clock::now();
-#endif
-
-		auto a = render_tileset(*defs.chrdef, out_buffer, cfg.render_cfg);
-		a.palette(workpal);
-		auto b = to_png(a, cfg.render_cfg.trns_index);
-		png::image<png::index_pixel> outimg {b};
-
-#ifdef DEBUG
-		t2 = chrono::high_resolution_clock::now();
-		duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-		cerr << "PNG RENDER: " << duration << "ms" << endl;
-#endif
-
-#ifdef DEBUG
-		t1 = chrono::high_resolution_clock::now();
-#endif
-
-		if (cfg.out_path.empty())
-		{
-			outimg.write_stream(cout);
-		}
-		else
-		{
-			outimg.write(cfg.out_path);
-		}
-#ifdef DEBUG
-		t2 = chrono::high_resolution_clock::now();
-		duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-		cerr << "OUTPUT TO STREAM: " << duration << "ms" << endl;
-#endif
-
-		// everything's good, we're outta here
 		return 0;
 	}
 	catch (exception const & e)
 	{
-		cerr << "Error: " << e.what() << endl;
+		cerr << "Error: " << e.what() << '\n';
 		return -1;
 	}
 }
