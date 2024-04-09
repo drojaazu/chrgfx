@@ -29,6 +29,7 @@ int main(int argc, char ** argv)
 		/*******************************************************
 		 *            SETUP & SANITY CHECKING
 		 *******************************************************/
+
 #ifdef DEBUG
 		chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
 #endif
@@ -55,14 +56,15 @@ int main(int argc, char ** argv)
 		cerr << "\tUsing paldef '" << defs.paldef->id() << "'\n";
 #endif
 
-/*******************************************************
- *             LOAD IMAGE
- *******************************************************/
+		/*******************************************************
+		 *             LOAD IMAGE
+		 *******************************************************/
+
 #ifdef DEBUG
 		t1 = chrono::high_resolution_clock::now();
 #endif
 
-		png::image<png::index_pixel> in_img(png_data, png::require_color_space<png::index_pixel>());
+		auto image_data = from_png({png_data, png::require_color_space<png::index_pixel>()});
 
 #ifdef DEBUG
 		t2 = chrono::high_resolution_clock::now();
@@ -71,30 +73,30 @@ int main(int argc, char ** argv)
 		cerr << "LOAD PNG: " << to_string(duration) << "ms\n";
 #endif
 
-/*******************************************************
- *                 PNG CHUNK
- *******************************************************/
-#ifdef DEBUG
-		t1 = chrono::high_resolution_clock::now();
-#endif
-
-		// deal with tiles first
+		/*******************************************************
+		 *                 TILE SEGMENTATION
+		 *******************************************************/
 		if (! cfg.chr_outfile.empty())
 		{
-			auto image_data = make_pixbuf_from_png(in_img.get_pixbuf());
-			blob<byte_t> tileset {make_tileset(defs.chrdef->width(), defs.chrdef->height(), image_data)};
+
+#ifdef DEBUG
+			t1 = chrono::high_resolution_clock::now();
+#endif
+
+			blob<byte_t> tileset {segment_tileset(*defs.chrdef, image_data)};
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
 			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
-			cerr << "PNG CHUNK: " << to_string(duration) << "ms\n";
-			cerr << "tile count: " << (tileset.size() / (defs.chrdef->width() * defs.chrdef->height())) << '\n';
+			cerr << "TILE SEGMENTATION: " << to_string(duration) << "ms\n";
+			cerr << "TILE COUNT: " << (tileset.size() / (defs.chrdef->width() * defs.chrdef->height())) << '\n';
 #endif
 
-/*******************************************************
- *            TILE CONVERSION & OUTPUT
- *******************************************************/
+			/*******************************************************
+			 *            TILE CONVERSION & OUTPUT
+			 *******************************************************/
+
 #ifdef DEBUG
 			t1 = chrono::high_resolution_clock::now();
 #endif
@@ -107,31 +109,32 @@ int main(int argc, char ** argv)
 
 			while (ptr_imgdata != ptr_imgdata_end)
 			{
+				// TODO create a cache and use the out pointer on encode_chr
 				auto temp_chr {reinterpret_cast<char *>(encode_chr(*defs.chrdef, ptr_imgdata))};
 				copy(temp_chr, temp_chr + chunksize, ostream_iterator<char>(chr_outfile));
 				ptr_imgdata += defs.chrdef->width() * defs.chrdef->height();
 				delete[] temp_chr;
 			}
-		}
+
 #ifdef DEBUG
-		t2 = chrono::high_resolution_clock::now();
-		duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+			t2 = chrono::high_resolution_clock::now();
+			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
-		cerr << "CHR ENCODE & OUTPUT TO STREAM: " << to_string(duration) << "ms\n";
+			cerr << "TILE ENCODE/OUTPUT: " << to_string(duration) << "ms\n";
 #endif
+		}
 
-		// deal with the palette next
+		/*******************************************************
+		 *                PALETTE CONVERSION
+		 *******************************************************/
 		if (! cfg.pal_outfile.empty())
 		{
 
-/*******************************************************
- *                PALETTE CONVERSION
- *******************************************************/
 #ifdef DEBUG
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			auto paldef_palette_data {encode_pal(*defs.paldef, *defs.coldef, make_palette_from_png(in_img.get_palette()))};
+			auto paldef_palette_data {encode_pal(*defs.paldef, *defs.coldef, image_data.palette())};
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
@@ -150,7 +153,7 @@ int main(int argc, char ** argv)
 				cerr << "pal-output error: " << strerror(errno) << '\n';
 			}
 
-			// TODO: consider splitting the palette conversion routine into two
+			// TODO consider splitting the palette conversion routine into two
 			// functions, on for subpal and one for full pal so we always know the
 			// size of the data returned
 			size_t filesize {(size_t) (defs.paldef->datasize() / 8)};

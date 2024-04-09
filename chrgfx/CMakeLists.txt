@@ -8,6 +8,7 @@ set_target_properties(chrgfx PROPERTIES SOVERSION 2)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/app.hpp.cfg" "${CMAKE_CURRENT_SOURCE_DIR}/src/app.hpp")
 
 set(HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/basic_gfx.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/blob.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/builtin_defs.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/chrconv.hpp
@@ -16,12 +17,12 @@ set(HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/colconv.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/coldef.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/custom.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/filesys.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/gfxdef.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/imgfmt_png.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/palconv.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/paldef.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/inc/png_chunk.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/inc/png_render.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/inc/rgb_layout.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/rgb_layout.hpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/types.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/utils.hpp
 )

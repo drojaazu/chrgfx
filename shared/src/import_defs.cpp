@@ -46,7 +46,7 @@ char const * PRF_PALDEF = "paldef";
 
 char const * ERR_KEY_NOT_FOUND = "Could not find required key";
 
-palette parse_palette(string const & pal)
+basic_palette parse_palette(string const & pal)
 {
 	string value {pal};
 	// remove any spaces from the value before processing
@@ -55,7 +55,7 @@ palette parse_palette(string const & pal)
 	stringstream ss(value);
 	string this_value;
 	uint8 red {0}, green {0}, blue {0};
-	palette out;
+	basic_palette out;
 	size_t index {0};
 	while (getline(ss, this_value, ','))
 	{
@@ -77,7 +77,7 @@ palette parse_palette(string const & pal)
 		{
 			throw invalid_argument("Invalid HTML formatted color: '" + this_value + "'");
 		}
-		out[index] = color(red, green, blue);
+		out[index] = basic_color(red, green, blue);
 	}
 
 	return out;
@@ -270,7 +270,7 @@ refcoldef validate_refcoldef_block(defblock const & def_block)
 		throw defblock_key_error(ERR_KEY_NOT_FOUND, defkeys::COL_REFTAB, temp_id);
 	}
 
-	palette temp_pal;
+	basic_palette temp_pal;
 	try
 	{
 		temp_pal = parse_palette(mapiter->second);

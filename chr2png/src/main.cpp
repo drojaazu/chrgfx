@@ -1,6 +1,7 @@
 #include "blob.hpp"
 #include "chrgfx.hpp"
 #include "fstreams.hpp"
+#include "imgfmt_png.hpp"
 #include "shared.hpp"
 #include <getopt.h>
 #include <iostream>
@@ -30,6 +31,7 @@ int main(int argc, char ** argv)
 		/*******************************************************
 		 *            SETUP & SANITY CHECKING
 		 *******************************************************/
+
 #ifdef DEBUG
 		chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
 #endif
@@ -61,9 +63,10 @@ int main(int argc, char ** argv)
 		cerr << "\tUsing paldef '" << defs.paldef->id() << "'" << endl;
 #endif
 
-/*******************************************************
- *             TILE CONVERSION
- *******************************************************/
+		/*******************************************************
+		 *             TILE CONVERSION
+		 *******************************************************/
+
 #ifdef DEBUG
 		t1 = chrono::high_resolution_clock::now();
 #endif
@@ -101,16 +104,17 @@ int main(int argc, char ** argv)
 		cerr << "TILE CONVERSION: " << to_string(duration) << "ms" << endl;
 #endif
 
-/*******************************************************
- *                PALETTE CONVERSION
- *******************************************************/
-#ifdef DEBUG
-		t1 = chrono::high_resolution_clock::now();
-#endif
+		/*******************************************************
+		 *                PALETTE CONVERSION
+		 *******************************************************/
 
-		palette workpal;
+		basic_palette workpal;
 		if (! cfg.paldata_name.empty())
 		{
+#ifdef DEBUG
+			t1 = chrono::high_resolution_clock::now();
+#endif
+
 			ifstream paldata {ifstream_checked(cfg.paldata_name)};
 
 			size_t pal_size = defs.paldef->datasize() / 8;
@@ -137,8 +141,10 @@ int main(int argc, char ** argv)
 		t1 = chrono::high_resolution_clock::now();
 #endif
 
-		png::image<png::index_pixel> outimg {png_render(
-			render(defs.chrdef->width(), defs.chrdef->height(), out_buffer, cfg.render_cfg), workpal, cfg.render_cfg)};
+		auto a = render_tileset(*defs.chrdef, out_buffer, cfg.render_cfg);
+		a.palette(workpal);
+		auto b = to_png(a, cfg.render_cfg.trns_index);
+		png::image<png::index_pixel> outimg {b};
 
 #ifdef DEBUG
 		t2 = chrono::high_resolution_clock::now();
@@ -181,7 +187,6 @@ void process_args(int argc, char ** argv)
 
 	long_opts.push_back({"chr-data", required_argument, nullptr, 'c'});
 	long_opts.push_back({"pal-data", required_argument, nullptr, 'p'});
-	long_opts.push_back({"trns", no_argument, nullptr, 't'});
 	long_opts.push_back({"trns-index", required_argument, nullptr, 'i'});
 	long_opts.push_back({"border", no_argument, nullptr, 'b'});
 	long_opts.push_back({"row-size", required_argument, nullptr, 'r'});
@@ -218,11 +223,6 @@ void process_args(int argc, char ** argv)
 			// input palette data path
 			case 'p':
 				cfg.paldata_name = optarg;
-				break;
-
-			// use transparency in output png
-			case 't':
-				cfg.render_cfg.use_trns = true;
 				break;
 
 			// palette entry index for transparency

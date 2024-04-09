@@ -13,9 +13,7 @@
 #define __MOTOI__USAGE_HPP
 
 #include <getopt.h>
-#include <iostream>
-#include <ostream>
-#include <sstream>
+#include <string>
 
 struct option_details
 {

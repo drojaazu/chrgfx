@@ -1,8 +1,8 @@
 #ifndef __CHRGFX__CHRCONV_HPP
 #define __CHRGFX__CHRCONV_HPP
 
+#include "basic_gfx.hpp"
 #include "chrdef.hpp"
-#include "stdgfx.hpp"
 #include "types.hpp"
 
 namespace chrgfx
@@ -16,7 +16,7 @@ namespace chrgfx
  * @param out pointer to output memory space; if null, memory will be allocated
  * @return byte_t* pointer to output encoded tile
  */
-byte_t * encode_chr(chrdef const & chrdef, pixel_t const * tile, byte_t * out = nullptr);
+byte_t * encode_chr(chrdef const & chrdef, basic_pixel const * tile, byte_t * out = nullptr);
 
 /**
  * @brief Decode a tile with the given chrdef
@@ -26,7 +26,7 @@ byte_t * encode_chr(chrdef const & chrdef, pixel_t const * tile, byte_t * out = 
  * @param out Pointer to output memory space; if null, memory will be allocated
  * @return byte_t* pointer to output basic tile
  */
-pixel_t * decode_chr(chrdef const & chrdef, byte_t const * tile, byte_t * out = nullptr);
+basic_pixel * decode_chr(chrdef const & chrdef, byte_t const * tile, byte_t * out = nullptr);
 
 } // namespace chrgfx
 

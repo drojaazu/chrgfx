@@ -1,6 +1,7 @@
 #ifndef CHRGFX__CHRGFX_HPP
 #define CHRGFX__CHRGFX_HPP
 
+#include "basic_gfx.hpp"
 #include "blob.hpp"
 #include "builtin_defs.hpp"
 #include "chrconv.hpp"
@@ -12,7 +13,6 @@
 #include "imgfmt_png.hpp"
 #include "palconv.hpp"
 #include "paldef.hpp"
-#include "png_render.hpp"
 #include "rgb_layout.hpp"
 #include "types.hpp"
 #include "utils.hpp"

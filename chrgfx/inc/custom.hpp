@@ -1,7 +1,7 @@
 #ifndef __CHRGFX__CUSTOM_HPP
 #define __CHRGFX__CUSTOM_HPP
 
-#include "stdgfx.hpp"
+#include "basic_gfx.hpp"
 #include "types.hpp"
 
 namespace chrgfx::custom
@@ -28,22 +28,22 @@ byte_t * decode_chr_nintendo_sfc_3bpp(byte_t const * encoded_chr, byte_t * out =
 /**
  * @brief Converts an RGB TileLayer Pro palette to a basic palette
  */
-palette decode_pal_tilelayerpro(std::istream & tpl_palette);
+basic_palette decode_pal_tilelayerpro(std::istream & tpl_palette);
 
 /**
  * @brief Converts a basic palette to a TileLayer Pro RGB palette
  */
-void encode_pal_tilelayerpro(palette const & palette, std::ostream & output);
+void encode_pal_tilelayerpro(basic_palette const & palette, std::ostream & output);
 
 /**
  * @brief Converts a JASC Paint Shop Pro palette to a basic palette
  */
-palette decode_pal_paintshoppro(std::istream & psp_palette);
+basic_palette decode_pal_paintshoppro(std::istream & psp_palette);
 
 /**
  * @brief Converts a basic palette to a JASC Paint Shop Pro palette
  */
-void encode_pal_paintshoppro(palette const & palette, std::ostream & output);
+void encode_pal_paintshoppro(basic_palette const & palette, std::ostream & output);
 
 } // namespace chrgfx::custom
 

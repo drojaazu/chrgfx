@@ -1,4 +1,7 @@
 #include "usage.hpp"
+#include <iostream>
+#include <ostream>
+#include <sstream>
 
 /**
  * @brief Displays program options and usage

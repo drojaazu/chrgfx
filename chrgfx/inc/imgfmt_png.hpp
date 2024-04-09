@@ -1,24 +1,19 @@
 #ifndef CHRGFX__IMGFMT_PNG_HPP
 #define CHRGFX__IMGFMT_PNG_HPP
 
-#include "blob.hpp"
-#include "stdgfx.hpp"
+#include "basic_gfx.hpp"
 #include "types.hpp"
+#include <optional>
 #include <png++/pixel_buffer.hpp>
 #include <png++/png.hpp>
 
 namespace chrgfx
 {
+chrgfx::basic_image from_png(png::image<png::index_pixel> const & png_image);
 
-/**
- * @brief Returns a collection of tiles in the specified chrdef format using the
- * given bitmap
- */
-motoi::blob<byte_t> make_tileset(size_t const tile_width, size_t const tile_height, image const & bitmap);
+png::image<png::index_pixel> to_png(
+	chrgfx::basic_image const & basic_image, std::optional<uint8> trns_index = std::nullopt);
 
-chrgfx::image make_pixbuf_from_png(png::pixel_buffer<png::index_pixel> const & png_pixbuf);
-
-chrgfx::palette make_palette_from_png(png::palette const & png_pixbuf);
 } // namespace chrgfx
 
 #endif

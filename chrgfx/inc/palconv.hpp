@@ -1,9 +1,9 @@
 #ifndef CHRGFX__PALCONV_HPP
 #define CHRGFX__PALCONV_HPP
 
+#include "basic_gfx.hpp"
 #include "coldef.hpp"
 #include "paldef.hpp"
-#include "stdgfx.hpp"
 #include "types.hpp"
 
 namespace chrgfx
@@ -17,7 +17,7 @@ namespace chrgfx
  * @param palette palette data
  * @return byte_t* pointer to output encoded palette
  */
-byte_t * encode_pal(paldef const & paldef, coldef const & coldef, palette const & palette);
+byte_t * encode_pal(paldef const & paldef, coldef const & coldef, basic_palette const & palette);
 
 /**
  * @brief Decode an encoded palette with the given paldef
@@ -27,7 +27,7 @@ byte_t * encode_pal(paldef const & paldef, coldef const & coldef, palette const 
  * @param palette palette data
  * @return png::palette
  */
-palette decode_pal(paldef const & paldef, coldef const & coldef, byte_t const * palette);
+basic_palette decode_pal(paldef const & paldef, coldef const & coldef, byte_t const * palette);
 
 } // namespace chrgfx
 

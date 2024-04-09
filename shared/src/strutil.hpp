@@ -21,7 +21,7 @@
 #include <vector>
 
 /**
- * @brief Removes a given character from a string
+ * @brief Removes all instances of a given character from a string
  *
  * @param str Mutable string
  */
