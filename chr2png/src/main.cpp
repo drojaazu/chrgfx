@@ -88,14 +88,17 @@ int main(int argc, char ** argv)
 			on the buffer repeatedly was a bit faster than creating a large
 			temporary buffer and resizing
 		*/
+		auto chr_buffer = new byte_t[out_chunksize];
 		while (true)
 		{
 			chrdata->read((char *) in_tile, in_chunksize);
 			if (chrdata->eof())
 				break;
 
-			out_buffer.append(decode_chr(*defs.chrdef, in_tile), out_chunksize);
+			decode_chr(*defs.chrdef, in_tile, chr_buffer);
+			out_buffer.append(chr_buffer, out_chunksize);
 		}
+		delete[] chr_buffer;
 
 #ifdef DEBUG
 		t2 = chrono::high_resolution_clock::now();

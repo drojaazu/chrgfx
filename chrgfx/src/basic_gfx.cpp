@@ -105,7 +105,6 @@ basic_image render_tileset(chrgfx::chrdef const & chrdef, blob<basic_pixel> cons
 		outimg_pxlheight {(outimg_chrheight * tile_height) + border_pxlheight};
 
 	basic_image out_buffer(outimg_pxlwidth, outimg_pxlheight);
-	cerr << "addr: " << (size_t) out_buffer.pixbuf() << endl;
 
 	// iters and cached values and such for processing
 	size_t
