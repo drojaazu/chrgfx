@@ -1,5 +1,12 @@
-#ifndef CHRGFX__RGB_LAYOUT_HPP
-#define CHRGFX__RGB_LAYOUT_HPP
+/**
+ * @file rgb_layout.hpp
+ * @author Damian Rogers / damian@motoi.pro
+ * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief RGB color levels data layout
+ */
+
+#ifndef __CHRGFX__RGB_LAYOUT_HPP
+#define __CHRGFX__RGB_LAYOUT_HPP
 
 #include "types.hpp"
 #include <utility>

@@ -12,7 +12,6 @@
 
 #include "blob.hpp"
 #include "chrdef.hpp"
-#include "paldef.hpp"
 #include "types.hpp"
 #include <array>
 #include <cstdint>

@@ -1,5 +1,12 @@
-#ifndef CHRGFX__COLDEF_HPP
-#define CHRGFX__COLDEF_HPP
+/**
+ * @file coldef.hpp
+ * @author Damian Rogers / damian@motoi.pro
+ * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief Color format definition
+ */
+
+#ifndef __CHRGFX__COLDEF_HPP
+#define __CHRGFX__COLDEF_HPP
 
 #include "basic_gfx.hpp"
 #include "gfxdef.hpp"

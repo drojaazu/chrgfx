@@ -1,5 +1,12 @@
-#ifndef CHRGFX__UTILS_HPP
-#define CHRGFX__UTILS_HPP
+/**
+ * @file utils.hpp
+ * @author Damian Rogers / damian@motoi.pro
+ * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief General purpose utilities
+ */
+
+#ifndef __CHRGFX__UTILS_HPP
+#define __CHRGFX__UTILS_HPP
 
 #include "basic_gfx.hpp"
 #include "types.hpp"

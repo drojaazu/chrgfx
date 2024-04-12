@@ -49,7 +49,7 @@ byte_t * encode_chr(chrdef const & chrdef, basic_pixel const * chr, byte_t * out
 
 			// if all the bitplanes are unset (i.e. the value is zero)
 			// we can skip the bitplane shenanigans altogether
-			if (this_pxl == byte_t(0))
+			if (this_pxl == 0)
 				continue;
 
 			bitpos_x = *ptr_pxl_offset;
@@ -58,12 +58,12 @@ byte_t * encode_chr(chrdef const & chrdef, basic_pixel const * chr, byte_t * out
 			{
 				// if the bit is unset, then do not set the equivalent bit in the
 				// output
-				if ((this_pxl & byte_t(1)) == byte_t(0))
+				if ((this_pxl & 1) == 0)
 					continue;
 
 				// get the position in the output data for this bit
 				bitpos = bitpos_y + bitpos_x + *ptr_plane_offset;
-				*(out + (bitpos >> 3)) |= byte_t((0x80 >> (bitpos % 8)));
+				*(out + (bitpos >> 3)) |= (0x80 >> (bitpos % 8));
 			}
 			ptr_plane_offset = chrdef.plane_offsets().data();
 		}

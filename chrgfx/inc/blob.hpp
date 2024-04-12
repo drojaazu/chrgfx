@@ -1,8 +1,8 @@
 /**
  * @file blob.hpp
  * @author Damian Rogers / damian@motoi.pro
- * @brief Data blob wrapper with templated iterators
  * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief Data blob wrapper with templated iterators
  *
  * Updates:
  * 20220410 Initial
@@ -10,8 +10,8 @@
  * 20220921 Added vector constructor; changed pointer constructor to copy;
  * consolidated similar constructors; corrected bug with append; a number of
  * changes based on clang-tidy suggestions
- * 20221015 Fixed misrepresentation of problem when streaming input to buffer
- * and 0 bytes read  (e.g. stream in a bad state)
+ * 20221015 Fixed misrepresentation of problem when streaming input to buffer and 0 bytes read  (e.g. stream in a bad
+ * state)
  * 20230305 Added iteration by stride; added namespace; differentiated blob dimension by "length" (the size of the data
  * buffer by DataT types) and "size" (the size of the data buffer in bytes); bugfixes
  * 20230416 Corrected bug where istreams with files less than the block size were not having their size set correctly;

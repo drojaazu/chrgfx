@@ -1,5 +1,12 @@
-#ifndef CHRGFX__CHRGFX_HPP
-#define CHRGFX__CHRGFX_HPP
+/**
+ * @file chrgfx.hpp
+ * @author Damian Rogers / damian@motoi.pro
+ * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief libchrgfx global include
+ */
+
+#ifndef __CHRGFX__CHRGFX_HPP
+#define __CHRGFX__CHRGFX_HPP
 
 #include "basic_gfx.hpp"
 #include "blob.hpp"

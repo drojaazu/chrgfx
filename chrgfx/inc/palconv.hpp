@@ -1,5 +1,12 @@
-#ifndef CHRGFX__PALCONV_HPP
-#define CHRGFX__PALCONV_HPP
+/**
+ * @file palconv.hpp
+ * @author Damian Rogers / damian@motoi.pro
+ * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief Palette format conversion functions
+ */
+
+#ifndef __CHRGFX__PALCONV_HPP
+#define __CHRGFX__PALCONV_HPP
 
 #include "basic_gfx.hpp"
 #include "coldef.hpp"

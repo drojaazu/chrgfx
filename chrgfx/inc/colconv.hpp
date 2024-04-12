@@ -1,3 +1,10 @@
+/**
+ * @file colconv.hpp
+ * @author Damian Rogers / damian@motoi.pro
+ * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief Color format conversion functions
+ */
+
 #ifndef __CHRGFX__COLCONV_HPP
 #define __CHRGFX__COLCONV_HPP
 

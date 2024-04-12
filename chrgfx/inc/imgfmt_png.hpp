@@ -1,5 +1,12 @@
-#ifndef CHRGFX__IMGFMT_PNG_HPP
-#define CHRGFX__IMGFMT_PNG_HPP
+/**
+ * @file imgfmt_png.hpp
+ * @author Damian Rogers / damian@motoi.pro
+ * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief Functions for converting to/from PNG format
+ */
+
+#ifndef __CHRGFX__IMGFMT_PNG_HPP
+#define __CHRGFX__IMGFMT_PNG_HPP
 
 #include "basic_gfx.hpp"
 #include "types.hpp"

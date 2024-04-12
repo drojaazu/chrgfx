@@ -1,3 +1,10 @@
+/**
+ * @file builtin_defs.hpp
+ * @author Damian Rogers / damian@motoi.pro
+ * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief Internally defined gfxdefs for custom builds, and simple gfxdefs for fallbacks
+ */
+
 #ifndef __CHRGFX__BUILTIN_DEFS_HPP
 #define __CHRGFX__BUILTIN_DEFS_HPP
 

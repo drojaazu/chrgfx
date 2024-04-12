@@ -1,3 +1,10 @@
+/**
+ * @file chrconv.hpp
+ * @author Damian Rogers / damian@motoi.pro
+ * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief Tile format conversion functions
+ */
+
 #ifndef __CHRGFX__CHRCONV_HPP
 #define __CHRGFX__CHRCONV_HPP
 

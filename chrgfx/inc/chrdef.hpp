@@ -1,5 +1,12 @@
-#ifndef CHRGFX__CHRDEF_HPP
-#define CHRGFX__CHRDEF_HPP
+/**
+ * @file chrdef.hpp
+ * @author Damian Rogers / damian@motoi.pro
+ * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief Tile format definition
+ */
+
+#ifndef __CHRGFX__CHRDEF_HPP
+#define __CHRGFX__CHRDEF_HPP
 
 #include "gfxdef.hpp"
 #include <string>

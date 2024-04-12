@@ -1,5 +1,12 @@
-#ifndef CHRGFX__PALDEF_HPP
-#define CHRGFX__PALDEF_HPP
+/**
+ * @file paldef.hpp
+ * @author Damian Rogers / damian@motoi.pro
+ * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief Palette format definition
+ */
+
+#ifndef __CHRGFX__PALDEF_HPP
+#define __CHRGFX__PALDEF_HPP
 
 #include "gfxdef.hpp"
 #include <optional>

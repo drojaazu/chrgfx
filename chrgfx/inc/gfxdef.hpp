@@ -1,3 +1,10 @@
+/**
+ * @file gfxdef.hpp
+ * @author Damian Rogers / damian@motoi.pro
+ * @copyright ©2022 Motoi Productions / Released under MIT License
+ * @brief Graphics format definition base class
+ */
+
 #ifndef __CHRGFX__GFXDEF_HPP
 #define __CHRGFX__GFXDEF_HPP
 
