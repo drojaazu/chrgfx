@@ -154,11 +154,7 @@ basic_palette decode_pal(paldef const & paldef, coldef const & coldef, byte_t co
 
 	uint32 const entry_buff_bitmask = create_bitmask32(entry_datasize);
 
-	// auto out = new color[subpal_length];
-	// png++ expects a full 8 bit palette
 	chrgfx::basic_palette out;
-	// out.reserve(subpal_length);
-
 	auto paldata_iter = palette;
 
 	// processing loop

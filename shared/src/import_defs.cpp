@@ -77,7 +77,7 @@ basic_palette parse_palette(string const & pal)
 		{
 			throw invalid_argument("Invalid HTML formatted color: '" + this_value + "'");
 		}
-		out[index] = basic_color(red, green, blue);
+		out[index++] = basic_color(red, green, blue);
 	}
 
 	return out;

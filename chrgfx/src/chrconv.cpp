@@ -8,7 +8,7 @@ byte_t * encode_chr(chrdef const & chrdef, basic_pixel const * chr, byte_t * out
 {
 	if (out == nullptr)
 		out = new byte_t[chrdef.datasize() / 8]();
-	std::memset(out, 0, chrdef.datasize() / 8);
+	fill_n(out, chrdef.datasize() / 8, 0);
 
 	/*
 		-for every line...
