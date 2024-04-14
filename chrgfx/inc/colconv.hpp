@@ -18,9 +18,9 @@ namespace chrgfx
 /**
  * @brief Encode a color with the given coldef
  *
- * @param rgbcoldef RGB color encoding
- * @param color color data
- * @return u32 encoded color
+ * @param rgbcoldef RGB Color encoding
+ * @param color Color data
+ * @return u32 Encoded color
  */
 uint32 encode_col(rgbcoldef const & rgbcoldef, basic_color const & color);
 
@@ -28,8 +28,8 @@ uint32 encode_col(rgbcoldef const & rgbcoldef, basic_color const & color);
  * @brief Encode a color with the given coldef
  *
  * @param refcoldef Non-RGB (reftab) color encoding
- * @param color color data
- * @return u32 encoded color
+ * @param color Color data
+ * @return u32 Encoded color
  */
 uint32 encode_col(refcoldef const & refcoldef, basic_color const & color);
 
@@ -37,8 +37,8 @@ uint32 encode_col(refcoldef const & refcoldef, basic_color const & color);
  * @brief Decode a color with the given coldef
  *
  * @param rgbcoldef RGB color encoding
- * @param color color data
- * @return basic color
+ * @param color Color data
+ * @return Basic color
  */
 basic_color decode_col(rgbcoldef const & rgbcoldef, uint32 const color);
 
@@ -46,8 +46,8 @@ basic_color decode_col(rgbcoldef const & rgbcoldef, uint32 const color);
  * @brief Decode a color with the given coldef
  *
  * @param refcoldef Non-RGB (reftab) color encoding
- * @param color color data
- * @return basic color
+ * @param color Color data
+ * @return Basic color
  */
 basic_color decode_col(refcoldef const & refcoldef, uint32 const color);
 

@@ -27,6 +27,7 @@ using int16 = int16_t;
 using int32 = int32_t;
 
 using byte_t = uint8_t;
+using byte = byte_t;
 
 template <typename T>
 using uptr = std::unique_ptr<T>;

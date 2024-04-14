@@ -1,5 +1,11 @@
-#ifndef CHRGFX__GFXDEF_BUILDER_HPP
-#define CHRGFX__GFXDEF_BUILDER_HPP
+/**
+ * @file gfxdef_builder.hpp
+ * @author Motoi Productions (Damian Rogers damian@motoi.pro)
+ * @brief Creates a gfxdef on the fly
+ */
+
+#ifndef __CHRGFX__GFXDEF_BUILDER_HPP
+#define __CHRGFX__GFXDEF_BUILDER_HPP
 
 #include <stdexcept>
 #include <string>

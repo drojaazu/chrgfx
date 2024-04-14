@@ -27,13 +27,13 @@ namespace chrgfx
 using basic_pixel = uint8_t;
 
 /**
- * @brief A chunk of pixel data
+ * @brief Represents 
  *
  */
 using basic_pixel_buffer = motoi::blob<basic_pixel>;
 
 /**
- * @brief An RGB color
+ * @brief Represents an RGB color
  *
  */
 class basic_color
