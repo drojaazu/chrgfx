@@ -48,9 +48,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/app.hpp.cfg" "${CMAKE_CURRENT_SOURCE
 
 set_target_properties(chrgfx PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
-target_include_directories(chrgfx PUBLIC
-  "${PROJECT_SOURCE_DIR}/chrgfx/inc")
-
 find_library(PNG_LIB png)
 
 if(NOT PNG_LIB)
@@ -67,8 +64,7 @@ target_compile_features(chrgfx PUBLIC cxx_std_17)
 target_link_libraries(chrgfx png)
 
 install(TARGETS chrgfx
-  FILE_SET headers
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  FILE_SET headers  
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 )
-
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../gfxdef/gfxdefs
-  DESTINATION /${CMAKE_INSTALL_SYSCONFDIR}/chrgfx)

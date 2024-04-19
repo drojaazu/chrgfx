@@ -4,6 +4,8 @@ target_include_directories(chr2png
 	PRIVATE "${PROJECT_SOURCE_DIR}/src/shared"
 )
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/app.hpp.cfg" "${CMAKE_CURRENT_SOURCE_DIR}/app.hpp" ESCAPE_QUOTES)
+
 target_sources(chr2png
 PRIVATE
 	app.hpp
@@ -20,8 +22,6 @@ PRIVATE
 	${PROJECT_SOURCE_DIR}/src/shared/xdgdirs.hpp
 )
 
-set(PROJECT_BRIEF "Convert encoded graphics to indexed PNG")
-
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/app.hpp.cfg" "${CMAKE_CURRENT_SOURCE_DIR}/app.hpp" ESCAPE_QUOTES)
-
 target_link_libraries(chr2png PRIVATE chrgfx)
+
+install(TARGETS chr2png RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)

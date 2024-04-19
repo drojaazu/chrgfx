@@ -36,10 +36,16 @@ include(CheckIncludeFiles)
 project(chrgfx VERSION 2.1.1 LANGUAGES CXX)
 add_subdirectory(src/chrgfx)
 
-project(chr2png VERSION 1.3.0 LANGUAGES CXX)
+project(chr2png
+  DESCRIPTION "Convert encoded graphics to indexed PNG"
+  VERSION 1.3.0
+  LANGUAGES CXX)
 add_subdirectory(src/chr2png)
 
-project(png2chr VERSION 1.3.0 LANGUAGES CXX)
+project(png2chr
+  DESCRIPTION "Convert indexed PNG input to encoded graphics"
+  VERSION 1.3.0
+  LANGUAGES CXX)
 add_subdirectory(src/png2chr)
 
 
@@ -49,5 +55,7 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
   endif()
 endif()
 
-#install(TARGETS chr2png png2chr
-#  RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+install(FILES src/gfxdef/gfxdefs
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/chrgfx)
+
+#set(CMAKE_VERBOSE_MAKEFILE true)

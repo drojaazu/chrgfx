@@ -4,6 +4,8 @@ target_include_directories(png2chr
 	PUBLIC "${PROJECT_SOURCE_DIR}/src/shared"
 )
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/app.hpp.cfg" "${CMAKE_CURRENT_SOURCE_DIR}/app.hpp" ESCAPE_QUOTES)
+
 target_sources(png2chr
 PRIVATE
 	app.hpp
@@ -20,8 +22,6 @@ PRIVATE
 	${PROJECT_SOURCE_DIR}/src/shared/xdgdirs.hpp
 )
 
-set(PROJECT_BRIEF "Convert indexed PNG input to encoded graphics")
-
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/app.hpp.cfg" "${CMAKE_CURRENT_SOURCE_DIR}/app.hpp" ESCAPE_QUOTES)
-
 target_link_libraries(png2chr PRIVATE chrgfx)
+
+install(TARGETS png2chr RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
