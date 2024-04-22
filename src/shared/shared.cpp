@@ -272,15 +272,15 @@ bool shared_args(char this_opt, runtime_config & cfg)
 			break;
 
 		case 'h':
-			cout << show_usage(long_opts.data(), opt_details.data()) << endl;
+			cout << show_usage(long_opts.data(), opt_details.data()) << '\n';
 			exit(0);
 
 		case ':':
-			cerr << "Missing arg for option: " << to_string(optopt) << endl;
+			cerr << "Missing arg for option: " << to_string(optopt) << '\n';
 			exit(-1);
 
 		case '?':
-			cerr << "Unknown argument" << endl;
+			cerr << "Unknown argument" << '\n';
 			exit(-2);
 
 		default:

@@ -31,8 +31,8 @@ static char const * BRIEF {"Convert encoded graphics to indexed PNG"};
 std::string app_version()
 {
 	std::stringstream ss;
-	ss << APP::NAME << " - version " << APP::VERSION << std::endl;
-	ss << APP::CONTACT << " / " << APP::WEBSITE << std::endl;
+	ss << APP::NAME << " - version " << APP::VERSION << '\n';
+	ss << APP::CONTACT << " / " << APP::WEBSITE << '\n';
 
 	return ss.str();
 }

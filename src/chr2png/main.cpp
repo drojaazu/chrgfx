@@ -57,7 +57,7 @@ int main(int argc, char ** argv)
 		chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
 		auto duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
-		cerr << "SETUP: " << duration << "ms" << endl;
+		cerr << "SETUP: " << duration << "ms\n";
 		cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << '\n';
 		cerr << "\tUsing chrdef '" << defs.chrdef->id() << "'\n";
 		cerr << "\tUsing colrdef '" << defs.coldef->id() << "'\n";

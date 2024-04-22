@@ -159,7 +159,7 @@ int main(int argc, char ** argv)
 			// size of the data returned
 			size_t filesize {(size_t) (defs.paldef->datasize() / 8)};
 
-			pal_outfile.write((char *) (paldef_palette_data), filesize);
+			pal_outfile.write(reinterpret_cast<char *>(paldef_palette_data), filesize);
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
@@ -174,7 +174,7 @@ int main(int argc, char ** argv)
 	}
 	catch (exception const & e)
 	{
-		cerr << "Error: " << e.what() << endl;
+		cerr << "Error: " << e.what() << '\n';
 		return -1;
 	}
 }

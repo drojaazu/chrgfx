@@ -15,7 +15,7 @@ std::string show_usage(option const * opts, option_details const * details)
 {
 	std::ostringstream oss;
 
-	oss << "Usage:" << std::endl;
+	oss << "Usage:" << '\n';
 
 	while (true)
 	{
@@ -37,12 +37,12 @@ std::string show_usage(option const * opts, option_details const * details)
 			else
 				oss << " <optional value>";
 		}
-		oss << std::endl;
+		oss << '\n';
 		oss << "    ";
 		if (details->required)
 			oss << "[Required] ";
 
-		oss << details->desc << std::endl;
+		oss << details->desc << '\n';
 
 		++opts;
 		++details;
