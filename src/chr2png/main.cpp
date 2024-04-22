@@ -22,6 +22,7 @@ struct runtime_config_chr2png : runtime_config
 	string paldata_name;
 	render_config render_cfg;
 	string out_path;
+	uint pal_line {0};
 } cfg;
 
 int main(int argc, char ** argv)
@@ -89,7 +90,7 @@ int main(int argc, char ** argv)
 			*/
 			while (true)
 			{
-				chrdata->read((char *) in_tile, in_chunksize);
+				chrdata->read(reinterpret_cast<char *>(in_tile), in_chunksize);
 				if (chrdata->eof())
 					break;
 
@@ -117,14 +118,14 @@ int main(int argc, char ** argv)
 #endif
 			if (! cfg.paldata_name.empty())
 			{
-
 				ifstream paldata {ifstream_checked(cfg.paldata_name)};
-
-				size_t pal_size = defs.paldef->datasize() / 8;
+				size_t pal_size {defs.paldef->datasize() / 8};
 				byte_t palbuffer[pal_size];
-				paldata.read((char *) palbuffer, pal_size);
-				if (paldata.gcount() > pal_size)
-					throw invalid_argument("Input palette data too small to form a valid palette");
+
+				paldata.seekg(cfg.pal_line * pal_size, ios::beg);
+				paldata.read(reinterpret_cast<char *>(palbuffer), pal_size);
+				if (! paldata.good())
+					throw runtime_error("Cannot read specified palette line index");
 
 				workpal = decode_pal(*defs.paldef, *defs.coldef, palbuffer);
 			}
@@ -191,6 +192,7 @@ void process_args(int argc, char ** argv)
 
 	long_opts.push_back({"chr-data", required_argument, nullptr, 'c'});
 	long_opts.push_back({"pal-data", required_argument, nullptr, 'p'});
+	long_opts.push_back({"pal-line", required_argument, nullptr, 'l'});
 	long_opts.push_back({"trns-index", required_argument, nullptr, 'i'});
 	long_opts.push_back({"border", no_argument, nullptr, 'b'});
 	long_opts.push_back({"row-size", required_argument, nullptr, 'r'});
@@ -199,6 +201,7 @@ void process_args(int argc, char ** argv)
 
 	opt_details.push_back({false, "Path to input encoded tiles", nullptr});
 	opt_details.push_back({false, "Path to input encoded palette", nullptr});
+	opt_details.push_back({false, "Palette line to use for PNG output", nullptr});
 	opt_details.push_back({false, "Use palette transparency", nullptr});
 	opt_details.push_back({false, "Palette index to use for transparency", nullptr});
 	opt_details.push_back({false, "Draw a 1 pixel border around tiles in output image", nullptr});
@@ -229,11 +232,30 @@ void process_args(int argc, char ** argv)
 				cfg.paldata_name = optarg;
 				break;
 
+				// palette line
+			case 'l':
+				try
+				{
+					auto pal_line {stoi(optarg)};
+					if (pal_line < 1)
+						throw invalid_argument("Invalid palette line value");
+					// user input is indexed from 1, convert to 0 index here
+					cfg.pal_line = pal_line - 1;
+				}
+				catch (const invalid_argument & e)
+				{
+					throw invalid_argument("Invalid palette line value");
+				}
+				break;
+
 			// palette entry index for transparency
 			case 'i':
 				try
 				{
-					cfg.render_cfg.trns_index = stoi(optarg);
+					auto trns_index {stoi(optarg)};
+					if (trns_index < 0)
+						throw invalid_argument("Invalid transparency index value");
+					cfg.render_cfg.trns_index = trns_index;
 				}
 				catch (const invalid_argument & e)
 				{

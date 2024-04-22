@@ -180,7 +180,7 @@ vector<option> long_opts {// predefined gfx defs
 	{"chr-def", required_argument, nullptr, 'T'},
 	{"col-def", required_argument, nullptr, 'C'},
 	{"pal-def", required_argument, nullptr, 'L'},
-	{"list-gfxdefs", no_argument, nullptr, 'l'},
+	{"list-gfxdefs", no_argument, nullptr, 'a'},
 	// cli defined gfx defs - chr
 	// (we redirect values for long options into opt_idx so that the return value can never creep up into the print ascii
 	// range for short opts)
@@ -267,7 +267,7 @@ bool shared_args(char this_opt, runtime_config & cfg)
 			cfg.profile = optarg;
 			break;
 
-		case 'l':
+		case 'a':
 			cfg.list_gfxdefs = true;
 			break;
 
