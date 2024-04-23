@@ -194,7 +194,6 @@ void process_args(int argc, char ** argv)
 	long_opts.push_back({"pal-data", required_argument, nullptr, 'p'});
 	long_opts.push_back({"pal-line", required_argument, nullptr, 'l'});
 	long_opts.push_back({"trns-index", required_argument, nullptr, 'i'});
-	long_opts.push_back({"border", no_argument, nullptr, 'b'});
 	long_opts.push_back({"row-size", required_argument, nullptr, 'r'});
 	long_opts.push_back({"output", required_argument, nullptr, 'o'});
 	long_opts.push_back({nullptr, 0, nullptr, 0});
@@ -261,11 +260,6 @@ void process_args(int argc, char ** argv)
 				{
 					throw invalid_argument("Invalid transparency index value");
 				}
-				break;
-
-			// draw border around tiles in output png
-			case 'b':
-				cfg.render_cfg.draw_border = true;
 				break;
 
 			// row size

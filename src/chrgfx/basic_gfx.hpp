@@ -27,7 +27,7 @@ namespace chrgfx
 using basic_pixel = uint8_t;
 
 /**
- * @brief Represents 
+ * @brief Represents
  *
  */
 using basic_pixel_buffer = motoi::blob<basic_pixel>;
@@ -91,7 +91,6 @@ public:
 };
 
 uint const DEFAULT_ROW_SIZE = 16;
-bool const DEFAULT_DRAW_BORDER = false;
 bool const DEFAULT_USE_TRNS = false;
 
 /**
@@ -105,12 +104,6 @@ public:
 	 *
 	 */
 	uint row_size {DEFAULT_ROW_SIZE};
-
-	/**
-	 * @brief Draw a 1 pixel border around the inner edges of tiles in the
-	 * transparent entry color
-	 */
-	bool draw_border {DEFAULT_DRAW_BORDER};
 
 	/**
 	 * @brief Palette entry to use for transparency

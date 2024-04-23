@@ -18,6 +18,7 @@ PRIVATE
   paldef.cpp
   rgb_layout.cpp
   strutil.hpp
+  tilesetconv.cpp
   utils.cpp
 PUBLIC
   FILE_SET headers
@@ -38,6 +39,7 @@ PUBLIC
     palconv.hpp
     paldef.hpp
     rgb_layout.hpp  
+    tilesetconv.hpp
     types.hpp
     utils.hpp
 )

@@ -21,6 +21,7 @@
 #include "palconv.hpp"
 #include "paldef.hpp"
 #include "rgb_layout.hpp"
+#include "tilesetconv.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 
