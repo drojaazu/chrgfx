@@ -1,8 +1,8 @@
 #include "blob.hpp"
-#include "chrgfx.hpp"
 #include "fstreams.hpp"
 #include "imgfmt_png.hpp"
 #include "shared.hpp"
+#include <chrgfx/chrgfx.hpp>
 #include <getopt.h>
 #include <iostream>
 

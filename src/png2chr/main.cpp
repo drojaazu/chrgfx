@@ -1,7 +1,7 @@
 #include "blob.hpp"
-#include "chrgfx.hpp"
 #include "fstreams.hpp"
 #include "shared.hpp"
+#include <chrgfx/chrgfx.hpp>
 #include <getopt.h>
 #include <iostream>
 
