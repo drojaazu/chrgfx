@@ -2,6 +2,7 @@ add_executable(chr2png)
 
 target_include_directories(chr2png
 	PRIVATE "${PROJECT_SOURCE_DIR}/src/shared"
+	PRIVATE "${PROJECT_SOURCE_DIR}/src"
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/app.hpp.cfg" "${CMAKE_CURRENT_SOURCE_DIR}/app.hpp" ESCAPE_QUOTES)
