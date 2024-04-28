@@ -201,7 +201,11 @@ ContainerT sto_container(std::basic_string<CharT> const & str, char const delim 
 }
 
 /**
- * @brief
+ * @brief Creates a container with a range of specified values with the following formats:
+ *
+ * [count] - range from 0 to count with an interval of 1
+ * [start:count] - range from start to count with an interval of 1
+ * [start:count:step] - range from start to count with an interval of step
  *
  * @tparam ContainerT Container type with push_back method and element count constructor
  * @tparam CharT
@@ -218,9 +222,8 @@ ContainerT sto_range(std::basic_string<CharT> const & str, char const delim = ',
 	if (str[0] != '[' || str[str.size() - 1] != ']')
 		throw std::runtime_error("invalid range specification");
 	std::string work_str {str.begin() + 1, str.end() - 1};
-	using int_t = typename ContainerT::value_type;
-	auto vals = sto_container<std::vector<int_t>>(work_str, delim);
-	int_t start, count, step;
+	auto vals = sto_container<std::vector<int>>(work_str, delim);
+	int start, count, step;
 	switch (vals.size())
 	{
 		case 1:
@@ -242,7 +245,7 @@ ContainerT sto_range(std::basic_string<CharT> const & str, char const delim = ',
 			throw std::runtime_error("invalid range specification");
 	}
 
-	ContainerT out;
+	ContainerT out(count, 0);
 	for (int iter {0}, val {start}; iter < count; ++iter, val += step)
 		out.push_back(val);
 
