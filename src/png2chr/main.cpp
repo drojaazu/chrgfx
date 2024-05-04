@@ -35,6 +35,8 @@ int main(int argc, char ** argv)
 #endif
 		process_args(argc, argv);
 
+		def_helper defs(cfg);
+
 		// set up input data
 		ifstream png_fstream;
 		istream & png_data {(cfg.pngdata_name.empty() ? cin : png_fstream)};
@@ -43,17 +45,10 @@ int main(int argc, char ** argv)
 			png_fstream.open(cfg.pngdata_name);
 		}
 
-		def_helper defs(cfg);
-
 #ifdef DEBUG
 		chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
 		auto duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-
-		cerr << "SETUP: " << duration << "ms\n";
-		cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << '\n';
-		cerr << "\tUsing chrdef '" << defs.chrdef->id() << "'\n";
-		cerr << "\tUsing colrdef '" << defs.coldef->id() << "'\n";
-		cerr << "\tUsing paldef '" << defs.paldef->id() << "'\n";
+		cerr << "SETUP TIME: " << duration << "ms\n";
 #endif
 
 		/*******************************************************
@@ -222,4 +217,11 @@ void process_args(int argc, char ** argv)
 				break;
 		}
 	}
+
+	if (cfg.gfxdefs_path.empty())
+		cfg.gfxdefs_path = get_gfxdefs_path();
+
+#ifdef DEBUG
+	cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << '\n';
+#endif
 }

@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g -fstandalone-debug" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_DEBUG "-g -fstandalone-debug -DDEBUG" CACHE STRING "" FORCE)
 
 # Include CCache for compilation caching if available
 find_program(CCACHE_PROGRAM ccache)

@@ -65,7 +65,6 @@ basic_image render_tileset(chrdef const & chrdef, blob<basic_pixel> const & chrd
 #ifdef DEBUG
 	cerr << dec;
 	cerr << "TILE RENDERING REPORT:\n";
-	cerr << "\tUsing border: " << to_string(rcfg.draw_border) << '\n';
 	cerr << "\tTile count: " << chr_count << '\n';
 	cerr << "\tFinal row excess tiles: " << chr_excess_count << '\n';
 	cerr << "\tOut tile data size: " << chr_datasize << '\n';

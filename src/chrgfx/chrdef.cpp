@@ -8,18 +8,18 @@ chrdef::chrdef(string const & id,
 	uint const width,
 	uint const height,
 	uint const bitdepth,
-	vector<uint> const & planeoffset,
 	vector<uint> const & pixeloffset,
 	vector<uint> const & rowoffset,
+	vector<uint> const & planeoffset,
 	string const & description) :
 		gfxdef(id, description),
 		m_width(width),
 		m_height(height),
 		m_bitdepth(bitdepth),
 		m_datasize(width * height * bitdepth),
-		m_planeoffsets(planeoffset),
 		m_pixeloffsets(pixeloffset),
-		m_rowoffsets(rowoffset)
+		m_rowoffsets(rowoffset),
+		m_planeoffsets(planeoffset)
 {
 }
 

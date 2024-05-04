@@ -1,4 +1,5 @@
 #include "shared.hpp"
+#include "builtin_defs.hpp"
 #include "gfxdef_builder.hpp"
 #include "xdgdirs.hpp"
 
@@ -15,7 +16,7 @@ string get_gfxdefs_path()
 }
 
 def_helper::def_helper(runtime_config & cfg) :
-		m_defs {load_gfxdefs(cfg.gfxdefs_path.empty() ? get_gfxdefs_path() : cfg.gfxdefs_path)}
+		m_defs {load_gfxdefs(cfg.gfxdefs_path)}
 {
 	if (cfg.list_gfxdefs)
 	{
@@ -49,25 +50,40 @@ def_helper::def_helper(runtime_config & cfg) :
 	if (! cfg.paldef_id.empty())
 		paldef_id = cfg.paldef_id;
 
-	// load the requests defs
+	// load the requested defs
 	if (! chrdef_id.empty())
 	{
+		auto iter_find_internal_chrdef {chrgfx::gfxdefs::chrdefs.find(chrdef_id)};
 		auto iter_find_chrdef {m_defs.chrdefs.find(chrdef_id)};
-		if (iter_find_chrdef == m_defs.chrdefs.end())
+
+		if (iter_find_chrdef != m_defs.chrdefs.end())
+		{
+			chrdef = &iter_find_chrdef->second;
+		}
+		else if (iter_find_internal_chrdef != chrgfx::gfxdefs::chrdefs.end())
+		{
+			chrdef = &iter_find_internal_chrdef->second;
+		}
+		else
 		{
 			ostringstream oss;
 			oss << "Could not find specified chrdef: " << chrdef_id;
 			throw invalid_argument(oss.str());
 		}
-		chrdef = &iter_find_chrdef->second;
 	}
 
 	if (! coldef_id.empty())
 	{
+		auto iter_find_internal_coldef {chrgfx::gfxdefs::coldefs.find(coldef_id)};
 		auto iter_find_rgbcoldef {m_defs.rgbcoldefs.find(coldef_id)};
+
 		if (iter_find_rgbcoldef != m_defs.rgbcoldefs.end())
 		{
 			coldef = &iter_find_rgbcoldef->second;
+		}
+		else if (iter_find_internal_coldef != chrgfx::gfxdefs::coldefs.end())
+		{
+			coldef = &iter_find_internal_coldef->second;
 		}
 		else
 		{
@@ -87,10 +103,23 @@ def_helper::def_helper(runtime_config & cfg) :
 
 	if (! paldef_id.empty())
 	{
-		auto i_find_paldef {m_defs.paldefs.find(paldef_id)};
-		if (i_find_paldef == m_defs.paldefs.end())
-			throw invalid_argument("Could not find specified palette encoding (paldef)");
-		paldef = &i_find_paldef->second;
+		auto iter_find_internal_paldef {chrgfx::gfxdefs::paldefs.find(paldef_id)};
+		auto iter_find_paldef {m_defs.paldefs.find(paldef_id)};
+
+		if (iter_find_paldef != m_defs.paldefs.end())
+		{
+			paldef = &iter_find_paldef->second;
+		}
+		else if (iter_find_internal_paldef != chrgfx::gfxdefs::paldefs.end())
+		{
+			paldef = &iter_find_internal_paldef->second;
+		}
+		else
+		{
+			ostringstream oss;
+			oss << "Could not find specified paldef: " << paldef_id;
+			throw invalid_argument(oss.str());
+		}
 	}
 
 	// build def(s) from scratch or override parts of the loaded def(s)
@@ -115,6 +144,10 @@ def_helper::def_helper(runtime_config & cfg) :
 		m_heapallocated_chrdef = true;
 		chrdef = new chrgfx::chrdef(builder.build());
 	}
+
+	cerr << "\tUsing chrdef '" << this->chrdef->id() << "'\n";
+	cerr << "\tUsing coldef '" << this->coldef->id() << "'\n";
+	cerr << "\tUsing paldef '" << this->paldef->id() << "'\n";
 }
 
 def_helper::~def_helper()
@@ -129,12 +162,21 @@ def_helper::~def_helper()
 
 void def_helper::list_gfxdefs(ostream & os)
 {
+
 	for (auto const & profile : m_defs.profiles)
 	{
 		os << "profile " << profile.second.id();
 		if (! profile.second.description().empty())
 			os << " (" << profile.second.description() << ')';
-		os << '\n';
+		os << " [External]\n";
+	}
+
+	for (auto const & chrdef : chrgfx::gfxdefs::chrdefs)
+	{
+		os << "chrdef " << chrdef.second.id();
+		if (! chrdef.second.description().empty())
+			os << " (" << chrdef.second.description() << ')';
+		os << " [Internal]\n";
 	}
 
 	for (auto const & chrdef : m_defs.chrdefs)
@@ -142,7 +184,15 @@ void def_helper::list_gfxdefs(ostream & os)
 		os << "chrdef " << chrdef.second.id();
 		if (! chrdef.second.description().empty())
 			os << " (" << chrdef.second.description() << ')';
-		os << '\n';
+		os << " [External]\n";
+	}
+
+	for (auto const & paldef : chrgfx::gfxdefs::paldefs)
+	{
+		os << "paldef " << paldef.second.id();
+		if (! paldef.second.description().empty())
+			os << " (" << paldef.second.description() << ')';
+		os << " [Internal]\n";
 	}
 
 	for (auto const & paldef : m_defs.paldefs)
@@ -150,7 +200,15 @@ void def_helper::list_gfxdefs(ostream & os)
 		os << "paldef " << paldef.second.id();
 		if (! paldef.second.description().empty())
 			os << " (" << paldef.second.description() << ')';
-		os << '\n';
+		os << " [External]\n";
+	}
+
+	for (auto const & rgbcoldef : chrgfx::gfxdefs::coldefs)
+	{
+		os << "coldef " << rgbcoldef.second.id();
+		if (! rgbcoldef.second.description().empty())
+			os << " (" << rgbcoldef.second.description() << ')';
+		os << " [Internal]\n";
 	}
 
 	for (auto const & rgbcoldef : m_defs.rgbcoldefs)
@@ -158,16 +216,16 @@ void def_helper::list_gfxdefs(ostream & os)
 		os << "coldef " << rgbcoldef.second.id();
 		if (! rgbcoldef.second.description().empty())
 			os << " (" << rgbcoldef.second.description() << ')';
-		os << '\n';
+		os << " [External]\n";
 	}
+
 	for (auto const & refcoldef : m_defs.refcoldefs)
 	{
 		os << "coldef " << refcoldef.second.id();
 		if (! refcoldef.second.description().empty())
 			os << " (" << refcoldef.second.description() << ')';
-		os << '\n';
+		os << " [External]\n";
 	}
-	os.flush();
 }
 
 // command line argument processing
@@ -214,9 +272,7 @@ vector<option_details> opt_details {
 
 bool shared_args(char this_opt, runtime_config & cfg)
 {
-
 	bool found = true;
-
 	switch (this_opt)
 	{
 		// non-short options

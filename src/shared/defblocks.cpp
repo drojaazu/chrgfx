@@ -2,11 +2,8 @@
 #include "defblocks.hpp"
 #include "strutil.hpp"
 #include <algorithm>
-#include <cerrno>
 #include <cstring>
-#include <fstream>
 #include <iostream>
-#include <vector>
 
 using namespace std;
 

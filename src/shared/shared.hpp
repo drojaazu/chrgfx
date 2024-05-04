@@ -42,9 +42,9 @@ struct runtime_config
 class def_helper
 {
 public:
-	chrgfx::chrdef const * chrdef {&chrgfx::gfxdefs::basic_8x8_1bpp};
-	chrgfx::coldef const * coldef {&chrgfx::gfxdefs::basic_8bit_random};
-	chrgfx::paldef const * paldef {&chrgfx::gfxdefs::basic_256color};
+	chrgfx::chrdef const * chrdef {&chrgfx::gfxdefs::chr_8x8_4bpp_packed_lsb};
+	chrgfx::coldef const * coldef {&chrgfx::gfxdefs::col_bgr_333_packed};
+	chrgfx::paldef const * paldef {&chrgfx::gfxdefs::pal_16bit_256color};
 
 	def_helper(runtime_config & cfg);
 
@@ -60,5 +60,7 @@ private:
 };
 
 bool shared_args(char this_opt, runtime_config & cfg);
+
+string get_gfxdefs_path();
 
 #endif

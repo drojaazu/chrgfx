@@ -25,18 +25,18 @@ protected:
 	uint m_height;
 	uint m_bitdepth;
 	uint m_datasize;
-	std::vector<uint> m_planeoffsets;
 	std::vector<uint> m_pixeloffsets;
 	std::vector<uint> m_rowoffsets;
+	std::vector<uint> m_planeoffsets;
 
 public:
 	chrdef(std::string const & id,
 		uint const width,
 		uint const height,
 		uint const bitdepth,
-		std::vector<uint> const & plane_offsets,
 		std::vector<uint> const & pixel_offsets,
 		std::vector<uint> const & row_offsets,
+		std::vector<uint> const & plane_offsets,
 		std::string const & description = "");
 
 	/**

@@ -38,6 +38,8 @@ int main(int argc, char ** argv)
 #endif
 		process_args(argc, argv);
 
+		def_helper defs(cfg);
+
 		istream * chrdata;
 		ifstream ifs;
 		if (cfg.chrdata_name == "-")
@@ -51,17 +53,10 @@ int main(int argc, char ** argv)
 			chrdata = &ifs;
 		}
 
-		def_helper defs(cfg);
-
 #ifdef DEBUG
 		chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
 		auto duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-
-		cerr << "SETUP: " << duration << "ms\n";
-		cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << '\n';
-		cerr << "\tUsing chrdef '" << defs.chrdef->id() << "'\n";
-		cerr << "\tUsing colrdef '" << defs.coldef->id() << "'\n";
-		cerr << "\tUsing paldef '" << defs.paldef->id() << "'\n";
+		cerr << "SETUP TIME: " << duration << "ms\n";
 #endif
 
 		// basic gfx buffer
@@ -201,9 +196,7 @@ void process_args(int argc, char ** argv)
 	opt_details.push_back({false, "Path to input encoded tiles", nullptr});
 	opt_details.push_back({false, "Path to input encoded palette", nullptr});
 	opt_details.push_back({false, "Palette line to use for PNG output", nullptr});
-	opt_details.push_back({false, "Use palette transparency", nullptr});
 	opt_details.push_back({false, "Palette index to use for transparency", nullptr});
-	opt_details.push_back({false, "Draw a 1 pixel border around tiles in output image", nullptr});
 	opt_details.push_back({false, "Number of tiles per row in output image", nullptr});
 	opt_details.push_back({false, "Path to output PNG image", nullptr});
 
@@ -280,4 +273,11 @@ void process_args(int argc, char ** argv)
 				break;
 		}
 	}
+
+	if (cfg.gfxdefs_path.empty())
+		cfg.gfxdefs_path = get_gfxdefs_path();
+
+#ifdef DEBUG
+	cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << '\n';
+#endif
 }

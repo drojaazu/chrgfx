@@ -232,7 +232,7 @@ chrdef validate_chrdef_block(defblock const & def_block)
 	}
 
 	return chrdef {
-		temp_id, temp_width, temp_height, temp_bpp, temp_planeoffset, temp_pixeloffset, temp_rowoffset, temp_comment};
+		temp_id, temp_width, temp_height, temp_bpp, temp_pixeloffset, temp_rowoffset, temp_planeoffset, temp_comment};
 }
 
 refcoldef validate_refcoldef_block(defblock const & def_block)
@@ -475,8 +475,6 @@ def_collection load_gfxdefs(string const & def_file)
 		chrdef temp_def = validate_chrdef_block(it->second);
 		chrdefs.insert({temp_def.id(), std::move(temp_def)});
 	}
-	// add library builtin def
-	chrdefs.insert({string(gfxdefs::basic_8x8_1bpp.id()), gfxdefs::basic_8x8_1bpp});
 
 	map<string const, rgbcoldef const> rgbcoldefs;
 	// block_iter = blocks.find("coldef");
@@ -498,8 +496,6 @@ def_collection load_gfxdefs(string const & def_file)
 		// block_iter++;
 	}
 
-	refcoldefs.insert({string(gfxdefs::basic_8bit_random.id()), gfxdefs::basic_8bit_random});
-
 	map<string const, paldef const> paldefs;
 	// block_iter = blocks.find("paldef");
 	block_iter = blocks.equal_range("paldef");
@@ -509,8 +505,6 @@ def_collection load_gfxdefs(string const & def_file)
 		paldefs.insert({temp_def.id(), std::move(temp_def)});
 		// block_iter++;
 	}
-
-	paldefs.insert({string(gfxdefs::basic_256color.id()), gfxdefs::basic_256color});
 
 	map<string const, gfxprofile const> profiles;
 	// block_iter = blocks.find("profile");

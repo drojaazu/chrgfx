@@ -11,36 +11,50 @@
 #include "chrdef.hpp"
 #include "coldef.hpp"
 #include "paldef.hpp"
+#include <map>
 
 namespace chrgfx::gfxdefs
 {
 
-/**
- * This namespace should be used for any gfxdefs to be built in to the final
- * binary
- *
- * The ones defined by default are very simple and are useful for quickly
- * "previewing" output: for example, if palette data/definition is not yet
- * available but we want to see the tile output.
- *
- * You can add your own built-in definitions here to create a customized
- * library for specific applications.
- */
+extern chrdef const basic_8x8_1bpp;
 
-/**
- * @brief Minimal, generic CHR format (1bpp 8x8)
- */
-extern chrdef basic_8x8_1bpp;
+extern chrdef const chr_8x8_2bpp_packed_lsb;
 
-/**
- * @brief Randomized 8 bit color palette
- */
-extern refcoldef basic_8bit_random;
+extern chrdef const chr_8x8_2bpp_packed_msb;
 
-/**
- * @brief Generic 8 bit (256 color) palette
- */
-extern paldef basic_256color;
+extern chrdef const chr_8x8_4bpp_packed_lsb;
+
+extern chrdef const chr_8x8_4bpp_packed_msb;
+
+extern chrdef const chr_8x8_8bpp_packed_lsb;
+
+extern chrdef const chr_8x8_8bpp_packed_msb;
+
+extern chrdef const chr_8x8_4bpp_planar;
+
+extern std::map<std::string, chrdef const &> const chrdefs;
+
+extern rgbcoldef const col_bgr_222_packed;
+
+extern rgbcoldef const col_bgr_333_packed;
+
+extern rgbcoldef const col_bgr_444_packed;
+
+extern rgbcoldef const col_bgr_555_packed;
+
+extern std::map<std::string, rgbcoldef const &> const coldefs;
+
+extern paldef const pal_16bit_8color;
+
+extern paldef const pal_16bit_16color;
+
+extern paldef const pal_16bit_32color;
+
+extern paldef const pal_16bit_64color;
+
+extern paldef const pal_16bit_256color;
+
+extern std::map<std::string, paldef const &> const paldefs;
 
 } // namespace chrgfx::gfxdefs
 

@@ -78,7 +78,13 @@ byte_t * decode_chr(chrdef const & chrdef, byte_t const * chr, byte_t * out)
 	uint
 		// tile dimensions
 		chr_height {chrdef.height()},
-		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bitdepth()}, work_bit, bitpos_line, bitpos_pixel, bitpos_plane;
+		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bitdepth()}, work_bit,
+		// bitwise position for the current row
+		bitpos_row,
+		// bitwise position for the curent pixel
+		bitpos_pixel,
+		// bitwise position for the current plane
+		bitpos_plane;
 
 	if (out == nullptr)
 		out = new byte_t[chr_width * chr_height];
@@ -94,28 +100,30 @@ byte_t * decode_chr(chrdef const & chrdef, byte_t const * chr, byte_t * out)
 	// for every line...
 	for (uint i_row {0}; i_row < chr_height; ++i_row)
 	{
-		bitpos_line = *ptr_row_offset++;
+		bitpos_row = *ptr_row_offset++;
 
 		// for every pixel in the line...
-		for (uint i_pxl {0}; i_pxl < chr_width; ++i_pxl, ++ptr_pixel_offset, this_pxl = byte_t(0))
+		for (uint i_pxl {0}; i_pxl < chr_width; ++i_pxl, ++ptr_pixel_offset, this_pxl = 0)
 		{
-			bitpos_pixel = bitpos_line + *ptr_pixel_offset;
+			bitpos_pixel = bitpos_row + *ptr_pixel_offset;
 
-			// for every bit planee
-			for (uint i_bitplane {0}; i_bitplane < chr_bitdepth; ++i_bitplane, ++ptr_plane_offset)
+			// for every bit plane
+			for (uint i_bitplane {0}; i_bitplane < chr_bitdepth; ++i_bitplane)
 			{
-				bitpos_plane = bitpos_pixel + *ptr_plane_offset;
+				bitpos_plane = bitpos_pixel + *ptr_plane_offset++;
 
+				// reminder: >> 3 is to divide by 8 (since we're getting a byte offset using bits)
 				work_byte = chr[bitpos_plane >> 3];
 
 				// if work_byte is 0, no bits are set, so no bits will be set in the
 				// output, so let's move to the next byte_t
-				if (work_byte == byte_t(0))
+				if (work_byte == 0)
 					continue;
 
 				work_bit = bitpos_plane % 8;
 				// this_pxl |= ((work_byte << work_bit) & 0x80) >> i_bitplane;
-				this_pxl |= ((work_byte << work_bit) & byte_t(0x80)) >> (7 - i_bitplane);
+				// TODO: i_bitplane is only used here, can we work this '7 - ' math  into the loop header?
+				this_pxl |= ((work_byte << work_bit) & 0x80) >> (7 - i_bitplane);
 			}
 
 			*ptr_out_pixel++ = this_pxl;
