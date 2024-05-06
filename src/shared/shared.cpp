@@ -145,9 +145,11 @@ def_helper::def_helper(runtime_config & cfg) :
 		chrdef = new chrgfx::chrdef(builder.build());
 	}
 
+#ifdef DEBUG
 	cerr << "\tUsing chrdef '" << this->chrdef->id() << "'\n";
 	cerr << "\tUsing coldef '" << this->coldef->id() << "'\n";
 	cerr << "\tUsing paldef '" << this->paldef->id() << "'\n";
+#endif
 }
 
 def_helper::~def_helper()
