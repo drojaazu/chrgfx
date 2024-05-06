@@ -123,7 +123,14 @@ public:
 
 	[[nodiscard]] chrdef build() const
 	{
-		return {m_id, m_width, m_height, m_bitdepth, m_plane_offsets, m_pixel_offsets, m_row_offsets, m_desc};
+		// check the validity of the definition
+		if (m_width > m_pixel_offsets.size())
+			throw runtime_error("CHR width must be equal to number of pixel offset entries");
+		if (m_height > m_row_offsets.size())
+			throw runtime_error("CHR height must be equal to number of row offset entries");
+		if (m_bitdepth > m_plane_offsets.size())
+			throw runtime_error("CHR bitdepth must be equal to number of plane offset entries");
+		return {m_id, m_width, m_height, m_bitdepth, m_pixel_offsets, m_row_offsets, m_plane_offsets, m_desc};
 	}
 };
 

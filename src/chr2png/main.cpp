@@ -86,7 +86,7 @@ int main(int argc, char ** argv)
 			while (true)
 			{
 				chrdata->read(reinterpret_cast<char *>(in_tile), in_chunksize);
-				if (chrdata->eof())
+				if (! chrdata->good())
 					break;
 
 				decode_chr(*defs.chrdef, in_tile, out_tile);
