@@ -247,7 +247,7 @@ ContainerT sto_range(std::basic_string<CharT> const & str, char const delim = ':
 
 	ContainerT out(count, 0);
 	for (int iter {0}, val {start}; iter < count; ++iter, val += step)
-		out.push_back(val);
+		out[iter] = val;
 
 	return out;
 }
