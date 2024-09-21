@@ -2,7 +2,6 @@
 #include <png++/image.hpp>
 
 using namespace std;
-using namespace motoi;
 
 namespace chrgfx
 {

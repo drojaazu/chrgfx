@@ -24,7 +24,6 @@ PUBLIC
   FILE_SET headers
   TYPE HEADERS
   FILES
-    blob.hpp  
     basic_gfx.hpp
     builtin_defs.hpp
     chrconv.hpp

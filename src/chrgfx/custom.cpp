@@ -1,12 +1,8 @@
 #include "custom.hpp"
 #include "chrconv.hpp"
 #include "chrdef.hpp"
-#include "strutil.hpp"
-#include <iostream>
-#include <stdexcept>
 
 using namespace std;
-using namespace motoi;
 
 namespace chrgfx::custom
 {

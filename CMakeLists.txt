@@ -26,8 +26,6 @@ check_ipo_supported(RESULT result OUTPUT output)
 if(result)
     message("using interprocedural optimisation")
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-else()
-    message(SEND_ERROR "IPO not available: ${output}")
 endif()
 
 include(GNUInstallDirs)

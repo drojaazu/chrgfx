@@ -60,7 +60,7 @@ int main(int argc, char ** argv)
 #endif
 
 		// basic gfx buffer
-		blob<basic_pixel> out_buffer;
+		blob out_buffer;
 
 		/*******************************************************
 		 *             TILE CONVERSION
@@ -145,7 +145,7 @@ int main(int argc, char ** argv)
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			auto rendered_tiles = render_tileset(*defs.chrdef, out_buffer, cfg.render_cfg);
+			auto rendered_tiles = render_chrset(*defs.chrdef, out_buffer, out_buffer.size(), cfg.render_cfg);
 			rendered_tiles.palette(workpal);
 			png::image<png::index_pixel> outimg {to_png(rendered_tiles, cfg.render_cfg.trns_index)};
 

@@ -79,7 +79,9 @@ int main(int argc, char ** argv)
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			blob<byte_t> tileset {segment_tileset(*defs.chrdef, image_data)};
+			byte_t * tileset_data {nullptr};
+			auto tileset_datasize {make_chrset(&tileset_data, *defs.chrdef, image_data)};
+			blob tileset(tileset_data, tileset_datasize);
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
@@ -101,8 +103,8 @@ int main(int argc, char ** argv)
 			size_t in_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())},
 				out_chunksize {(uint) (defs.chrdef->datasize() / 8)};
 
-			auto ptr_in_tile = tileset.data();
-			auto ptr_imgdata_end = tileset.data() + tileset.size();
+			auto ptr_in_tile = reinterpret_cast<byte_t *>(tileset.data());
+			byte_t * ptr_imgdata_end = ptr_in_tile + tileset.size();
 
 			auto out_tile = new basic_pixel[in_chunksize];
 			while (ptr_in_tile != ptr_imgdata_end)
@@ -155,6 +157,7 @@ int main(int argc, char ** argv)
 			size_t filesize {(size_t) (defs.paldef->datasize() / 8)};
 
 			pal_outfile.write(reinterpret_cast<char *>(paldef_palette_data), filesize);
+			delete[] paldef_palette_data;
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();

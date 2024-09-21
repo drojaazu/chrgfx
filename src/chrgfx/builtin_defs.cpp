@@ -5,7 +5,10 @@
 #include "chrdef.hpp"
 #include "coldef.hpp"
 #include "paldef.hpp"
-#include "utils.hpp"
+#ifdef DEBUG
+// we must include iostream here as cerr is used for debugging when initializing some static variables
+#include <iostream>
+#endif
 
 namespace chrgfx::gfxdefs
 {

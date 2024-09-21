@@ -2,7 +2,7 @@
 #include "colconv.hpp"
 #include "utils.hpp"
 #include <algorithm>
-
+#include <stdexcept>
 namespace chrgfx
 {
 

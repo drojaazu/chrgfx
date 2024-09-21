@@ -9,7 +9,6 @@
 #define __CHRGFX__CHRGFX_HPP
 
 #include "basic_gfx.hpp"
-#include "blob.hpp"
 #include "builtin_defs.hpp"
 #include "chrconv.hpp"
 #include "chrdef.hpp"

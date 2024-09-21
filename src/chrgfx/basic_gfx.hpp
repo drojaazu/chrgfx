@@ -10,12 +10,9 @@
 #ifndef __CHRGFX__STDGFX_HPP
 #define __CHRGFX__STDGFX_HPP
 
-#include "blob.hpp"
-#include "chrdef.hpp"
 #include "types.hpp"
 #include <array>
-#include <cstdint>
-#include <optional>
+#include <string>
 
 namespace chrgfx
 {
@@ -25,12 +22,6 @@ namespace chrgfx
  *
  */
 using basic_pixel = uint8_t;
-
-/**
- * @brief Represents
- *
- */
-using basic_pixel_buffer = motoi::blob<basic_pixel>;
 
 /**
  * @brief Represents an RGB color
@@ -58,7 +49,7 @@ public:
 using basic_palette = std::array<basic_color, 256>;
 
 /**
- * @brief Represents a fully viewable image (pixel data and color table) in a "standard" intermediate format
+ * @brief Represents a self-contained viewable image (pixel data and color table) in a "standard" intermediate format
  *
  * @warning does not do bounds checking on the pixel_buffer for the given width/height
  *
@@ -69,7 +60,7 @@ private:
 	uint m_width;
 	uint m_height;
 	uint m_datasize;
-	basic_pixel_buffer m_pixbuf;
+	basic_pixel * m_pixbuf {nullptr};
 	basic_palette m_palette;
 
 public:
@@ -88,40 +79,9 @@ public:
 	chrgfx::basic_palette palette();
 
 	void palette(basic_palette const & pal);
+
+	~basic_image();
 };
-
-uint const DEFAULT_ROW_SIZE = 16;
-bool const DEFAULT_USE_TRNS = false;
-
-/**
- * @brief Tile rendering settings
- */
-struct render_config
-{
-public:
-	/**
-	 * @brief Number of tiles per row in the output image
-	 *
-	 */
-	uint row_size {DEFAULT_ROW_SIZE};
-
-	/**
-	 * @brief Palette entry to use for transparency
-	 * Also used as the border color when rendering
-	 */
-	std::optional<uint8> trns_index {std::nullopt};
-};
-
-/**
- * @brief Renders a collection of tiles to a basic image
- */
-basic_image render_tileset(
-	chrgfx::chrdef const & chrdef, motoi::blob<byte_t> const & chrdata, render_config const & rcfg);
-
-/**
- * @brief Returns a collection of basic tiles segmented from a given image
- */
-motoi::blob<byte_t> segment_tileset(chrgfx::chrdef const & chrdef, basic_image const & bitmap);
 
 } // namespace chrgfx
 #endif
