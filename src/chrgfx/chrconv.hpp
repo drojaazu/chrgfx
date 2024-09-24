@@ -16,28 +16,24 @@ namespace chrgfx
 {
 
 /**
- * @brief Encode a tile with the given chrdef
+ * @brief Encode a basic tile with the given tile definition
  *
- * @param chrdef Tile encoding
- * @param tile Pointer to basic tile data
- * @param out Pointer to output memory space; if null, memory will be allocated
- * @return byte_t* pointer to output encoded tile
+ * @param chrdef Tile encoding definition
+ * @param in_tile Pointer to input basic tile
+ * @param out_tile Pointer to output encoded tile
  *
- * @warning Memory allocated by this function when /c out is null will be owned by the caller!
  */
-byte_t * encode_chr(chrdef const & chrdef, basic_pixel const * tile, byte_t * out = nullptr);
+void encode_chr(chrdef const & chrdef, basic_pixel const * in_tile, byte_t * out_tile);
 
 /**
- * @brief Decode a tile with the given chrdef
+ * @brief Decode an encoded tile with the given tile definition
  *
- * @param chrdef Tile encoding
- * @param tile Pointer to encoded tile data
- * @param out Pointer to output memory space; if null, memory will be allocated
- * @return byte_t* pointer to output basic tile
+ * @param chrdef Tile encoding definition
+ * @param in_tile Pointer to input encoded tile
+ * @param out_tile Pointer to output basic tile
  *
- * @warning Memory allocated by this function when /c out is null will be owned by the caller!
  */
-basic_pixel * decode_chr(chrdef const & chrdef, byte_t const * tile, byte_t * out = nullptr);
+void decode_chr(chrdef const & chrdef, byte_t const * in_tile, basic_pixel * out_tile);
 
 } // namespace chrgfx
 

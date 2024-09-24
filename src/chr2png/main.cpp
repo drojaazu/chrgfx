@@ -122,7 +122,7 @@ int main(int argc, char ** argv)
 				if (! paldata.good())
 					throw runtime_error("Cannot read specified palette line index");
 
-				workpal = decode_pal(*defs.paldef, *defs.coldef, palbuffer);
+				decode_pal(*defs.paldef, *defs.coldef, palbuffer, &workpal);
 			}
 			else
 			{

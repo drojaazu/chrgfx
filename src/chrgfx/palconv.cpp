@@ -8,14 +8,14 @@ namespace chrgfx
 
 using namespace std;
 
-byte_t * encode_pal(paldef const & paldef, coldef const & coldef, basic_palette const & palette)
+void encode_pal(paldef const & paldef, coldef const & coldef, basic_palette const & in_palette, byte_t * out_palette)
 {
 	size_t const
 		// size of a single color within a palette, in bits
 		entry_datasize {paldef.entry_datasize()},
 		// as above, in bytes
 		entry_datasize_bytes {((unsigned) (entry_datasize >> 3)) + (entry_datasize % 8 > 0 ? 1 : 0)},
-		// as above, in bytes
+		// subpalette size, in bytes
 		subpal_datasize_bytes {(unsigned) (paldef.datasize() >> 3)},
 		// total number of entries in a subpalette
 		subpal_length {paldef.pal_length()};
@@ -58,15 +58,14 @@ byte_t * encode_pal(paldef const & paldef, coldef const & coldef, basic_palette 
 		// value
 		bit_align_mod {0};
 
-	auto out {new byte_t[subpal_datasize_bytes]};
-	std::fill_n(out, subpal_datasize_bytes, 0);
+	std::fill_n(out_palette, subpal_datasize_bytes, 0);
 
 	// converted color
-	uint32 this_entry {0};
-	auto out_ptr {out};
+
+	auto out_ptr {out_palette};
 	size_t entry_count {0};
 
-	for (auto const & color : palette)
+	for (auto const & color : in_palette)
 	{
 		// iterate over the colors in the color palette, but only up to the number
 		// of colors in the output format subpal length
@@ -76,13 +75,14 @@ byte_t * encode_pal(paldef const & paldef, coldef const & coldef, basic_palette 
 		byte_align_pos = bit_align_pos >> 3;
 		bit_align_mod = bit_align_pos % 8;
 
+		uint32 this_entry {0};
 		switch (coldef.type())
 		{
 			case rgb:
-				this_entry = encode_col(static_cast<rgbcoldef const &>(coldef), color);
+				encode_col(static_cast<rgbcoldef const &>(coldef), &color, &this_entry);
 				break;
 			case ref:
-				this_entry = encode_col(static_cast<refcoldef const &>(coldef), color);
+				encode_col(static_cast<refcoldef const &>(coldef), &color, &this_entry);
 				break;
 			default:
 				// should never happen, but for completeness:
@@ -92,7 +92,7 @@ byte_t * encode_pal(paldef const & paldef, coldef const & coldef, basic_palette 
 		if (bit_align_mod > 0)
 		{
 			this_entry <<= bit_align_mod;
-			this_entry |= static_cast<uint8>(out[byte_align_pos]);
+			this_entry |= static_cast<uint8>(out_palette[byte_align_pos]);
 		}
 
 		copyfunc((char *) &this_entry, ((char *) &this_entry) + entry_datasize_bytes, (char *) out_ptr);
@@ -102,11 +102,8 @@ byte_t * encode_pal(paldef const & paldef, coldef const & coldef, basic_palette 
 
 		byte_align_pos += entry_datasize;
 	}
-
-	return out;
 }
-
-basic_palette decode_pal(paldef const & paldef, coldef const & coldef, byte_t const * palette)
+void decode_pal(paldef const & paldef, coldef const & coldef, byte_t const * in_palette, basic_palette * out_palette)
 {
 
 	// some basic data geometry
@@ -154,8 +151,7 @@ basic_palette decode_pal(paldef const & paldef, coldef const & coldef, byte_t co
 
 	uint32 const entry_buff_bitmask = create_bitmask32(entry_datasize);
 
-	chrgfx::basic_palette out;
-	auto paldata_iter = palette;
+	auto paldata_iter = in_palette;
 
 	// processing loop
 	// for every color in the subpal
@@ -186,10 +182,10 @@ basic_palette decode_pal(paldef const & paldef, coldef const & coldef, byte_t co
 		switch (coldef.type())
 		{
 			case rgb:
-				out[this_subpal_entry] = decode_col(static_cast<rgbcoldef const &>(coldef), entry_buff);
+				decode_col(static_cast<rgbcoldef const &>(coldef), &entry_buff, &out_palette->at(this_subpal_entry));
 				break;
 			case ref:
-				out[this_subpal_entry] = decode_col(static_cast<refcoldef const &>(coldef), entry_buff);
+				decode_col(static_cast<refcoldef const &>(coldef), &entry_buff, &out_palette->at(this_subpal_entry));
 				break;
 			default:
 				// should never happen, but for completeness
@@ -210,8 +206,6 @@ basic_palette decode_pal(paldef const & paldef, coldef const & coldef, byte_t co
 
 		// paldata_iter += entry_datasize_bytes;
 	}
-
-	return out;
 }
 
 } // namespace chrgfx

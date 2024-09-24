@@ -134,7 +134,8 @@ int main(int argc, char ** argv)
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			auto paldef_palette_data {encode_pal(*defs.paldef, *defs.coldef, image_data.palette())};
+			auto paldef_palette_data {new byte_t[defs.paldef->datasize() >> 3]};
+			encode_pal(*defs.paldef, *defs.coldef, image_data.palette(), paldef_palette_data);
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();

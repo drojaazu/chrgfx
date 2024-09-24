@@ -4,11 +4,9 @@ namespace chrgfx
 {
 using namespace std;
 
-byte_t * encode_chr(chrdef const & chrdef, basic_pixel const * chr, byte_t * out)
+void encode_chr(chrdef const & chrdef, basic_pixel const * in_tile, byte_t * out_tile)
 {
-	if (out == nullptr)
-		out = new byte_t[chrdef.datasize() / 8]();
-	fill_n(out, chrdef.datasize() / 8, 0);
+	fill_n(out_tile, chrdef.datasize() / 8, 0);
 
 	/*
 		-for every line...
@@ -34,7 +32,7 @@ byte_t * encode_chr(chrdef const & chrdef, basic_pixel const * chr, byte_t * out
 		*ptr_row_offset {chrdef.row_offsets().data()},
 		*ptr_pxl_offset {chrdef.pixel_offsets().data()}, *ptr_plane_offset {chrdef.plane_offsets().data()};
 
-	byte_t const * ptr_in_pxl = chr;
+	byte_t const * ptr_in_pxl = in_tile;
 	byte_t this_pxl;
 
 	// for every row of pixels...
@@ -63,17 +61,15 @@ byte_t * encode_chr(chrdef const & chrdef, basic_pixel const * chr, byte_t * out
 
 				// get the position in the output data for this bit
 				bitpos = bitpos_y + bitpos_x + *ptr_plane_offset;
-				*(out + (bitpos >> 3)) |= (0x80 >> (bitpos % 8));
+				*(out_tile + (bitpos >> 3)) |= (0x80 >> (bitpos % 8));
 			}
 			ptr_plane_offset = chrdef.plane_offsets().data();
 		}
 		ptr_pxl_offset = chrdef.pixel_offsets().data();
 	}
-
-	return out;
 }
 
-byte_t * decode_chr(chrdef const & chrdef, byte_t const * chr, byte_t * out)
+void decode_chr(chrdef const & chrdef, byte_t const * in_tile, basic_pixel * out_tile)
 {
 	uint
 		// tile dimensions
@@ -86,11 +82,8 @@ byte_t * decode_chr(chrdef const & chrdef, byte_t const * chr, byte_t * out)
 		// bitwise position for the current plane
 		bitpos_plane;
 
-	if (out == nullptr)
-		out = new byte_t[chr_width * chr_height];
-
 	byte_t work_byte {0}, this_pxl {0};
-	byte_t * ptr_out_pixel = out;
+	byte_t * ptr_out_pixel = out_tile;
 
 	uint const
 		// pointers to bit offset definitions
@@ -113,7 +106,7 @@ byte_t * decode_chr(chrdef const & chrdef, byte_t const * chr, byte_t * out)
 				bitpos_plane = bitpos_pixel + *ptr_plane_offset++;
 
 				// reminder: >> 3 is to divide by 8 (since we're getting a byte offset using bits)
-				work_byte = chr[bitpos_plane >> 3];
+				work_byte = in_tile[bitpos_plane >> 3];
 
 				// if work_byte is 0, no bits are set, so no bits will be set in the
 				// output, so let's move to the next byte_t
@@ -132,8 +125,6 @@ byte_t * decode_chr(chrdef const & chrdef, byte_t const * chr, byte_t * out)
 
 		ptr_pixel_offset = chrdef.pixel_offsets().data();
 	}
-
-	return out;
 }
 
 } // namespace chrgfx
