@@ -231,7 +231,7 @@ void def_helper::list_gfxdefs(ostream & os)
 }
 
 // command line argument processing
-string short_opts {":G:P:T:C:L:lh"};
+string short_opts {":G:P:T:C:L:ah"};
 
 int longopt_idx {0};
 vector<option> long_opts {// predefined gfx defs

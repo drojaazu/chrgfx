@@ -183,8 +183,6 @@ int main(int argc, char ** argv)
 void process_args(int argc, char ** argv)
 {
 	// add chr2png specific options
-	short_opts.append("c:p:ti:br:o:");
-
 	long_opts.push_back({"chr-data", required_argument, nullptr, 'c'});
 	long_opts.push_back({"pal-data", required_argument, nullptr, 'p'});
 	long_opts.push_back({"pal-line", required_argument, nullptr, 'l'});
@@ -192,6 +190,7 @@ void process_args(int argc, char ** argv)
 	long_opts.push_back({"row-size", required_argument, nullptr, 'r'});
 	long_opts.push_back({"output", required_argument, nullptr, 'o'});
 	long_opts.push_back({nullptr, 0, nullptr, 0});
+	short_opts.append("c:p:l:i:r:o:");
 
 	opt_details.push_back({false, "Path to input encoded tiles", nullptr});
 	opt_details.push_back({false, "Path to input encoded palette", nullptr});
@@ -244,7 +243,8 @@ void process_args(int argc, char ** argv)
 			case 'i':
 				try
 				{
-					auto trns_index {stoi(optarg)};
+					string s = optarg;
+					auto trns_index {stoi(s)};
 					if (trns_index < 0)
 						throw invalid_argument("Invalid transparency index value");
 					cfg.render_cfg.trns_index = trns_index;
