@@ -12,6 +12,7 @@
 #include "builtin_defs.hpp"
 #include "chrconv.hpp"
 #include "chrdef.hpp"
+#include "chrsetconv.hpp"
 #include "colconv.hpp"
 #include "coldef.hpp"
 #include "custom.hpp"
@@ -20,7 +21,6 @@
 #include "palconv.hpp"
 #include "paldef.hpp"
 #include "rgb_layout.hpp"
-#include "tilesetconv.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 

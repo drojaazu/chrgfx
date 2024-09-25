@@ -1,9 +1,9 @@
-#include "blob.hpp"
 #include "fstreams.hpp"
 #include "shared.hpp"
 #include <chrgfx/chrgfx.hpp>
 #include <getopt.h>
 #include <iostream>
+#include <iterator>
 
 #ifdef DEBUG
 #include <chrono>
@@ -11,7 +11,6 @@
 
 using namespace std;
 using namespace chrgfx;
-using namespace motoi;
 
 void process_args(int argc, char ** argv);
 
@@ -79,16 +78,19 @@ int main(int argc, char ** argv)
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			byte_t * tileset_data {nullptr};
-			auto tileset_datasize {make_chrset(&tileset_data, *defs.chrdef, image_data)};
-			blob tileset(tileset_data, tileset_datasize);
+			auto tile_width {image_data.width() / defs.chrdef->width()},
+				tile_height {image_data.height() / defs.chrdef->height()},
+				chr_datasize {defs.chrdef->width() * defs.chrdef->height()},
+				chrset_datasize {tile_width * tile_height * chr_datasize};
+			vector<byte_t> tileset_data(chrset_datasize);
+			make_chrset(*defs.chrdef, image_data, tileset_data.data());
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
 			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
 			cerr << "TILE SEGMENTATION: " << to_string(duration) << "ms\n";
-			cerr << "TILE COUNT: " << (tileset.size() / (defs.chrdef->width() * defs.chrdef->height())) << '\n';
+			cerr << "TILE COUNT: " << (tileset_data.size() / (defs.chrdef->width() * defs.chrdef->height())) << '\n';
 #endif
 
 			/*******************************************************
@@ -103,8 +105,8 @@ int main(int argc, char ** argv)
 			size_t in_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())},
 				out_chunksize {(uint) (defs.chrdef->datasize() / 8)};
 
-			auto ptr_in_tile = reinterpret_cast<byte_t *>(tileset.data());
-			byte_t * ptr_imgdata_end = ptr_in_tile + tileset.size();
+			auto ptr_in_tile = tileset_data.data();
+			byte_t * ptr_imgdata_end = ptr_in_tile + tileset_data.size();
 
 			auto out_tile = new basic_pixel[in_chunksize];
 			while (ptr_in_tile != ptr_imgdata_end)

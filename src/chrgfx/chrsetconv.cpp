@@ -1,4 +1,4 @@
-#include "tilesetconv.hpp"
+#include "chrsetconv.hpp"
 #include <iostream>
 #ifdef DEBUG
 #include <stdexcept>
@@ -10,7 +10,7 @@ namespace chrgfx
 {
 
 basic_image render_chrset(
-	chrdef const & chrdef, byte_t const * chrset_data, size_t chrset_datasize, render_config const & rcfg)
+	chrdef const & chrdef, byte_t const * in_chrset, size_t const in_chrset_datasize, render_config const & render_cfg)
 {
 	auto const chr_width {chrdef.width()}, chr_height {chrdef.height()};
 	size_t const chr_datasize {chr_width * chr_height};
@@ -18,19 +18,20 @@ basic_image render_chrset(
 	if (chr_datasize == 0)
 		throw invalid_argument("Invalid tile dimension(s)");
 
-	if (chrset_datasize < chr_datasize)
+	if (in_chrset_datasize < chr_datasize)
 		throw invalid_argument("Not enough data in buffer to render a single tile");
 
 	size_t const
 
 		// number of chrs in the final image
-		chr_count {chrset_datasize / chr_datasize},
+		chr_count {in_chrset_datasize / chr_datasize},
 
 		// number of excess chrs to make up the final row
-		chr_excess_count {chr_count % rcfg.row_size},
+		chr_excess_count {chr_count % render_cfg.row_size},
 
 		// final image dimensions (in chrs)
-		outimg_chrwidth {rcfg.row_size}, outimg_chrheight {chr_count / outimg_chrwidth + (chr_excess_count > 0 ? 1 : 0)},
+		outimg_chrwidth {render_cfg.row_size},
+		outimg_chrheight {chr_count / outimg_chrwidth + (chr_excess_count > 0 ? 1 : 0)},
 
 		// data size of one full row of chrs
 		// (used for pointer offsetting)
@@ -40,7 +41,7 @@ basic_image render_chrset(
 		// (for processing purposes, outimg_pxlwidth is synonymous with stride)
 		outimg_pxlwidth {outimg_chrwidth * chr_width}, outimg_pxlheight {outimg_chrheight * chr_height};
 
-	basic_image out_buffer(outimg_pxlwidth, outimg_pxlheight);
+	basic_image out_image(outimg_pxlwidth, outimg_pxlheight);
 
 	// iters and cached values and such for processing
 	size_t
@@ -57,14 +58,14 @@ basic_image render_chrset(
 	// input data pointers
 	basic_pixel const
 		// pointer to start of current tile row
-		*ptr_in_chrrow {chrset_data},
+		*ptr_in_chrrow {in_chrset},
 		// pointer to start of the current pixel row within the current tile row
 		*ptr_in_pxlrow {ptr_in_chrrow},
 		// pointer to the start of the current pixel row within the current tile
 		*ptr_in_chrpxlrow {ptr_in_pxlrow};
 
 	// output data pointer
-	basic_pixel * ptr_pxlrow_work {out_buffer.pixbuf()};
+	basic_pixel * ptr_pxlrow_work {out_image.pixbuf()};
 
 #ifdef DEBUG
 	cerr << dec;
@@ -107,10 +108,10 @@ basic_image render_chrset(
 		ptr_in_chrpxlrow = ptr_in_pxlrow = ptr_in_chrrow += chrrow_datasize;
 	}
 
-	return out_buffer;
+	return out_image;
 }
 
-size_t make_chrset(byte_t ** out, chrdef const & chrdef, basic_image const & bitmap)
+size_t make_chrset(chrdef const & chrdef, basic_image const & in_bitmap, byte_t * out_chrset)
 {
 	// class to chunk a bitmap into tiles
 	// psuedo:
@@ -128,19 +129,19 @@ size_t make_chrset(byte_t ** out, chrdef const & chrdef, basic_image const & bit
 	if (tile_width == 0 || tile_height == 0)
 		throw invalid_argument("Invalid tile dimensions");
 
-	if (bitmap.width() < tile_width || bitmap.height() < tile_height)
+	if (in_bitmap.width() < tile_width || in_bitmap.height() < tile_height)
 		throw invalid_argument("Source image too small to form a tile");
 
 	size_t const
 		// chr pixel dimensions
 		chr_datasize {tile_width * tile_height},
 		// input image dimensions (in tiles)
-		img_chrwidth {bitmap.width() / tile_width}, img_chrheight {bitmap.height() / tile_height},
+		img_chrwidth {in_bitmap.width() / tile_width}, img_chrheight {in_bitmap.height() / tile_height},
 		chr_count {img_chrwidth * img_chrheight},
 
 		chrrow_datasize {chr_datasize * img_chrwidth}, out_datasize {chr_count * chr_datasize};
 
-	*out = new byte_t[out_datasize];
+	// out = new byte_t[out_datasize];
 
 	// iters and counters
 	size_t i_in_pxlrow {0}, // tracks the current pixel row in the source bitmap
@@ -151,7 +152,7 @@ size_t make_chrset(byte_t ** out, chrdef const & chrdef, basic_image const & bit
 
 	byte_t
 		// pointer to start of current tile row
-		*ptr_out_chrrow {*out},
+		*ptr_out_chrrow {out_chrset},
 		// pointer to start of the current pixel row within the current tile row
 		*ptr_out_pxlrow {ptr_out_chrrow},
 		// pointer to the start of the current pixel row within the current tile
@@ -172,7 +173,7 @@ size_t make_chrset(byte_t ** out, chrdef const & chrdef, basic_image const & bit
 		for (i_chr_pxlrow = 0; i_chr_pxlrow < tile_height; ++i_chr_pxlrow)
 		{
 			// point to the next pixel row in the source image
-			ptr_img_pxlrow = bitmap.pixbuf() + (bitmap.width() * i_in_pxlrow++);
+			ptr_img_pxlrow = in_bitmap.pixbuf() + (in_bitmap.width() * i_in_pxlrow++);
 
 			// for every (chr width) pixels in the pixel row...
 			for (i_chrcol = 0; i_chrcol < img_chrwidth; ++i_chrcol)
