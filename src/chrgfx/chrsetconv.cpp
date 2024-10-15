@@ -90,8 +90,7 @@ basic_image render_chrset(
 		// for each pixel row in the tile row...
 		for (uint iter_chr_pxlrow = 0; iter_chr_pxlrow < chr_height; ++iter_chr_pxlrow)
 		{
-			// for each tile in the row...
-			// copy its current pixel row to output
+			// for every (chr width) pixels in the pixel row...
 			for (uint iter_chrcol = 0; iter_chrcol < this_chrrow_chrcount; ++iter_chrcol)
 			{
 				for (uint i = 0; i < chr_width; ++i)
@@ -111,86 +110,72 @@ basic_image render_chrset(
 	return out_image;
 }
 
-size_t make_chrset(chrdef const & chrdef, basic_image const & in_bitmap, byte_t * out_chrset)
+void make_chrset(chrdef const & chrdef, basic_image const & in_bitmap, byte_t * out_chrset)
 {
 	// class to chunk a bitmap into tiles
 	// psuedo:
-	// - get dimensions, divide by 8
+	// - get dimensions, divide by tile width
 	// - width in chrs, height in chrs
 	// - chrw * chrh = total tile count, provision vector<chr>
 	// - src image pixel row counter = 0
 	// - for each chr row
-	// -- for each pixel row (8 pixel rows)
+	// -- for each pixel row (tile height pixel rows)
 	// --- curr pixel row = get_row(src image pixel row counter ++)
 	// --- for each chr column
 	// ---- read curr pixel row 8 pixels, store into output vector of chrs
-	auto const tile_width {chrdef.width()}, tile_height {chrdef.height()};
+	auto const chr_width {chrdef.width()}, chr_height {chrdef.height()}, bmp_width {in_bitmap.width()},
+		bmp_height {in_bitmap.height()};
 
-	if (tile_width == 0 || tile_height == 0)
+	if (chr_width == 0 || chr_height == 0)
 		throw invalid_argument("Invalid tile dimensions");
 
-	if (in_bitmap.width() < tile_width || in_bitmap.height() < tile_height)
+	if (bmp_width < chr_width || bmp_height < chr_height)
 		throw invalid_argument("Source image too small to form a tile");
 
-	size_t const
-		// chr pixel dimensions
-		chr_datasize {tile_width * tile_height},
+	size_t const chr_datasize {chr_width * chr_height},
 		// input image dimensions (in tiles)
-		img_chrwidth {in_bitmap.width() / tile_width}, img_chrheight {in_bitmap.height() / tile_height},
-		chr_count {img_chrwidth * img_chrheight},
-
-		chrrow_datasize {chr_datasize * img_chrwidth}, out_datasize {chr_count * chr_datasize};
-
-	// out = new byte_t[out_datasize];
+		img_chrwidth {bmp_width / chr_width}, img_chrheight {bmp_height / chr_height},
+		chrrow_datasize {chr_datasize * img_chrwidth},
+		// offset to start of the pixel row in the next chr
+		// from the end of the previous
+		next_chr {chr_datasize - chr_width};
 
 	// iters and counters
-	size_t i_in_pxlrow {0}, // tracks the current pixel row in the source bitmap
-		i_chrrow {0}, i_chr_pxlrow {0}, i_chrcol {0},
-		// offset to start of the pixel row in the next chr from the end of the
-		// previous
-		next_chr {chr_datasize - tile_width};
+	size_t i_chrrow {0}, i_chr_pxlrow {0}, i_chrcol {0};
 
+	// input ptrs
+	byte_t const
+		// pointer to start of current pixel row
+		//*ptr_in_pxlrow {in_bitmap.pixbuf()},
+		// pointer to current pixel
+		* ptr_in_pxl {in_bitmap.pixbuf()};
+
+	// output ptrs
 	byte_t
 		// pointer to start of current tile row
 		*ptr_out_chrrow {out_chrset},
 		// pointer to start of the current pixel row within the current tile row
 		*ptr_out_pxlrow {ptr_out_chrrow},
-		// pointer to the start of the current pixel row within the current tile
-		*ptr_out_pxlchr {ptr_out_pxlrow};
-
-	byte_t const
-		// pointer to start of the currect pixel row
-		// TODO the underlying structure holding the rows in pixerl_buffer is a
-		// std::vector so the data should be contiguous, shouldn't need to call
-		// get_row and can just advance the pointer
-		* ptr_img_pxlrow {nullptr};
+		// pointer to current pixel
+		*ptr_out_pxl {ptr_out_pxlrow};
 
 	// for each tile row...
 	for (i_chrrow = 0; i_chrrow < img_chrheight; ++i_chrrow)
 	{
-
 		// for each pixel row in the tile row...
-		for (i_chr_pxlrow = 0; i_chr_pxlrow < tile_height; ++i_chr_pxlrow)
+		for (i_chr_pxlrow = 0; i_chr_pxlrow < chr_height; ++i_chr_pxlrow)
 		{
-			// point to the next pixel row in the source image
-			ptr_img_pxlrow = in_bitmap.pixbuf() + (in_bitmap.width() * i_in_pxlrow++);
-
 			// for every (chr width) pixels in the pixel row...
 			for (i_chrcol = 0; i_chrcol < img_chrwidth; ++i_chrcol)
 			{
-				// TODO use memcpy here?
-				for (auto i {0}; i < tile_width; ++i)
-					*ptr_out_pxlchr++ = *ptr_img_pxlrow++;
-				ptr_out_pxlchr += next_chr;
+				for (auto i {0}; i < chr_width; ++i)
+					*ptr_out_pxl++ = *ptr_in_pxl++;
+				ptr_out_pxl += next_chr;
 			}
-
-			ptr_out_pxlchr = ptr_out_pxlrow += tile_width;
+			ptr_out_pxl = ptr_out_pxlrow += chr_width;
 		}
-
-		ptr_out_pxlchr = ptr_out_pxlrow = ptr_out_chrrow += chrrow_datasize;
+		ptr_out_pxl = ptr_out_pxlrow = ptr_out_chrrow += chrrow_datasize;
 	}
-
-	return out_datasize;
 }
 
 } // namespace chrgfx

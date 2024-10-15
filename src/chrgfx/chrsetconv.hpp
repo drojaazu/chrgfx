@@ -55,7 +55,7 @@ basic_image render_chrset(
  * @param out_chrset Pointer to output basic tileset
  *
  */
-size_t make_chrset(chrdef const & chrdef, basic_image const & in_bitmap, byte_t * out_chrset);
+void make_chrset(chrdef const & chrdef, basic_image const & in_bitmap, byte_t * out_chrset);
 
 } // namespace chrgfx
 
