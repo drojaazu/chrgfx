@@ -22,24 +22,21 @@ basic_image render_chrset(
 		throw invalid_argument("Not enough data in buffer to render a single tile");
 
 	size_t const
-
-		// number of chrs in the final image
+		// number of tiles in the final image
 		chr_count {in_chrset_datasize / chr_datasize},
-
-		// number of excess chrs to make up the final row
+		// number of excess chrs that make up the final row
 		chr_excess_count {chr_count % render_cfg.row_size},
-
-		// final image dimensions (in chrs)
-		outimg_chrwidth {render_cfg.row_size},
-		outimg_chrheight {chr_count / outimg_chrwidth + (chr_excess_count > 0 ? 1 : 0)},
-
+		// final image dimensions (in tiles)
+		// we don't consider the excess tile row, if present, when calculating the
+		// outimg_chrheight value so that it can be used in the first processing loop
+		outimg_chrwidth {render_cfg.row_size}, outimg_chrheight {chr_count / outimg_chrwidth},
 		// data size of one full row of chrs
 		// (used for pointer offsetting)
 		chrrow_datasize {chr_datasize * outimg_chrwidth},
-
 		// final image dimensions (in pixels)
 		// (for processing purposes, outimg_pxlwidth is synonymous with stride)
-		outimg_pxlwidth {outimg_chrwidth * chr_width}, outimg_pxlheight {outimg_chrheight * chr_height};
+		outimg_pxlwidth {outimg_chrwidth * chr_width},
+		outimg_pxlheight {(outimg_chrheight + (chr_excess_count > 0 ? 1 : 0)) * chr_height};
 
 	basic_image out_image(outimg_pxlwidth, outimg_pxlheight);
 
@@ -50,12 +47,9 @@ basic_image render_chrset(
 		this_chrrow_chrcount {outimg_chrwidth},
 		// offset to start of the pixel row in the next chr from the end of the
 		// previous
-		next_chr {chr_datasize - chr_width},
-		// offset to start of the next pixel row in the output
-		// will be zero until the final row if there was a chr excess
-		next_row {0};
+		next_chr {chr_datasize - chr_width};
 
-	// input data pointers
+	// input ptrs
 	basic_pixel const
 		// pointer to start of current tile row
 		*ptr_in_chrrow {in_chrset},
@@ -64,8 +58,8 @@ basic_image render_chrset(
 		// pointer to the start of the current pixel row within the current tile
 		*ptr_in_chrpxlrow {ptr_in_pxlrow};
 
-	// output data pointer
-	basic_pixel * ptr_pxlrow_work {out_image.pixbuf()};
+	// output ptrs
+	basic_pixel * ptr_out_pxl {out_image.pixbuf()};
 
 #ifdef DEBUG
 	cerr << dec;
@@ -78,33 +72,40 @@ basic_image render_chrset(
 #endif
 
 	// for each tile row...
-	for (uint iter_chrrow = 0; iter_chrrow < outimg_chrheight; ++iter_chrrow)
+	for (uint i_chrrow = 0; i_chrrow < outimg_chrheight; ++i_chrrow)
 	{
-		// check for last row
-		if (iter_chrrow == (outimg_chrheight - 1) && chr_excess_count > 0)
+		// for each pixel row within the tile row...
+		for (auto i_chr_pxlrow = 0; i_chr_pxlrow < chr_height; ++i_chr_pxlrow)
 		{
-			this_chrrow_chrcount = chr_excess_count;
-			next_row = (outimg_pxlwidth - (chr_excess_count * chr_width));
-		}
-
-		// for each pixel row in the tile row...
-		for (uint iter_chr_pxlrow = 0; iter_chr_pxlrow < chr_height; ++iter_chr_pxlrow)
-		{
-			// for every (chr width) pixels in the pixel row...
-			for (uint iter_chrcol = 0; iter_chrcol < this_chrrow_chrcount; ++iter_chrcol)
+			// for each tile within the pixel row...
+			for (auto i_chrcol = 0; i_chrcol < this_chrrow_chrcount; ++i_chrcol)
 			{
-				for (uint i = 0; i < chr_width; ++i)
-					*ptr_pxlrow_work++ = *ptr_in_chrpxlrow++;
-
+				// for each [tile-width] pixel...
+				for (auto i = 0; i < chr_width; ++i)
+					*ptr_out_pxl++ = *ptr_in_chrpxlrow++;
 				ptr_in_chrpxlrow += next_chr;
 			}
-
-			// next_row will be zero unless there are excess chrs in the final row
-			ptr_pxlrow_work += next_row;
 			ptr_in_chrpxlrow = ptr_in_pxlrow += chr_width;
 		}
-
 		ptr_in_chrpxlrow = ptr_in_pxlrow = ptr_in_chrrow += chrrow_datasize;
+	}
+
+	// output the remaining row if there are excess tiles
+	// TODO maybe someday: Do Not Repeat Yourself with this code and the above, somehow
+	if (chr_excess_count > 0)
+	{
+		auto next_row = (outimg_pxlwidth - (chr_excess_count * chr_width));
+		for (auto i_chr_pxlrow = 0; i_chr_pxlrow < chr_height; ++i_chr_pxlrow)
+		{
+			for (auto i_chrcol = 0; i_chrcol < chr_excess_count; ++i_chrcol)
+			{
+				for (auto i = 0; i < chr_width; ++i)
+					*ptr_out_pxl++ = *ptr_in_chrpxlrow++;
+				ptr_in_chrpxlrow += next_chr;
+			}
+			ptr_out_pxl += next_row;
+			ptr_in_chrpxlrow = ptr_in_pxlrow += chr_width;
+		}
 	}
 
 	return out_image;
@@ -162,12 +163,13 @@ void make_chrset(chrdef const & chrdef, basic_image const & in_bitmap, byte_t * 
 	// for each tile row...
 	for (i_chrrow = 0; i_chrrow < img_chrheight; ++i_chrrow)
 	{
-		// for each pixel row in the tile row...
+		// for each pixel row within the tile row...
 		for (i_chr_pxlrow = 0; i_chr_pxlrow < chr_height; ++i_chr_pxlrow)
 		{
-			// for every (chr width) pixels in the pixel row...
+			// for each tile within the pixel row...
 			for (i_chrcol = 0; i_chrcol < img_chrwidth; ++i_chrcol)
 			{
+				// for each [tile-width] pixel...
 				for (auto i {0}; i < chr_width; ++i)
 					*ptr_out_pxl++ = *ptr_in_pxl++;
 				ptr_out_pxl += next_chr;
