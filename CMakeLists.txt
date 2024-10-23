@@ -35,13 +35,13 @@ project(chrgfx VERSION 2.1.1 LANGUAGES CXX)
 add_subdirectory(src/chrgfx)
 
 project(chr2png
-  DESCRIPTION "Convert encoded graphics to indexed PNG"
+  DESCRIPTION "Convert encoded tile graphics to PNG image"
   VERSION 1.3.0
   LANGUAGES CXX)
 add_subdirectory(src/chr2png)
 
 project(png2chr
-  DESCRIPTION "Convert indexed PNG input to encoded graphics"
+  DESCRIPTION "Convert PNG image input to encoded tile graphics"
   VERSION 1.3.0
   LANGUAGES CXX)
 add_subdirectory(src/png2chr)
@@ -53,7 +53,7 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
   endif()
 endif()
 
-install(FILES src/gfxdef/gfxdefs
+install(FILES share/gfxdef/gfxdefs
   DESTINATION ${CMAKE_INSTALL_DATADIR}/chrgfx)
 
 #set(CMAKE_VERBOSE_MAKEFILE true)
