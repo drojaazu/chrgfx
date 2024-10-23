@@ -48,7 +48,7 @@ chrdef const chr_8x8_2bpp_packed_lsb {
 	{STEP8(0, 2)},
 	{STEP8(0, 2 * 8)},
 	{STEP2(1, -1)},
-	"Size: 8x8, Depth: 2 bit, Arrangement: Packed (LSB)"
+	"Size: 8x8, Depth: 2 bit, Layout: Packed (LSB)"
 };
 
 
@@ -60,7 +60,7 @@ chrdef const chr_8x8_2bpp_packed_msb {
 	{STEP8(0, 2)},
 	{STEP8(0, 2 * 8)},
 	{STEP2(0, 1)},
-	"Size: 8x8, Depth: 2 bit, Arrangement: Packed (MSB)"
+	"Size: 8x8, Depth: 2 bit, Layout: Packed (MSB)"
 };
 
 chrdef const chr_8x8_4bpp_packed_lsb {
@@ -71,7 +71,7 @@ chrdef const chr_8x8_4bpp_packed_lsb {
 	{STEP8(0, 4)},
 	{STEP8(0, 4 * 8)},
 	{STEP4(3, -1)},
-	"Size: 8x8, Depth: 4 bit, Arrangement: Packed (LSB)"
+	"Size: 8x8, Depth: 4 bit, Layout: Packed (LSB)"
 };
 
 chrdef const chr_8x8_4bpp_packed_msb {
@@ -82,7 +82,7 @@ chrdef const chr_8x8_4bpp_packed_msb {
 	{STEP8(0, 4)},
 	{STEP8(0, 4 * 8)},
 	{STEP4(0, 1)},
-	"Size: 8x8, Depth: 4 bit, Arrangement: Packed (MSB)"
+	"Size: 8x8, Depth: 4 bit, Layout: Packed (MSB)"
 };
 
 chrdef const chr_8x8_8bpp_packed_lsb {
@@ -93,7 +93,7 @@ chrdef const chr_8x8_8bpp_packed_lsb {
 	{STEP8(0, 8)},
 	{STEP8(0, 8 * 8)},
 	{STEP8(7, -1)},
-	"Size: 8x8, Depth: 8 bit, Arrangement: Packed (LSB)"
+	"Size: 8x8, Depth: 8 bit, Layout: Packed (LSB)"
 };
 
 chrdef const chr_8x8_8bpp_packed_msb {
@@ -104,7 +104,7 @@ chrdef const chr_8x8_8bpp_packed_msb {
 	{STEP8(0, 8)},
 	{STEP8(0, 8 * 8)},
 	{STEP8(0, 1)},
-	"Size: 8x8, Depth: 8 bit, Arrangement: Packed (MSB)"
+	"Size: 8x8, Depth: 8 bit, Layout: Packed (MSB)"
 };
 
 chrdef const chr_8x8_2bpp_planar {
@@ -115,7 +115,7 @@ chrdef const chr_8x8_2bpp_planar {
 	{STEP8(0, 1)},
 	{STEP8(0, 2 * 8)},
 	{STEP2(0, 8)},
-	"Size: 8x8, Depth: 2 bit, Arrangement: Planar"
+	"Size: 8x8, Depth: 2 bit, Layout: Planar"
 };
 
 chrdef const chr_8x8_4bpp_planar {
@@ -126,7 +126,7 @@ chrdef const chr_8x8_4bpp_planar {
 	{STEP8(0, 1)},
 	{STEP8(0, 4 * 8)},
 	{STEP4(0, 8)},
-	"Size: 8x8, Depth: 4 bit, Arrangement: Planar"
+	"Size: 8x8, Depth: 4 bit, Layout: Planar"
 };
 
 map<string, chrdef const &> const chrdefs {
