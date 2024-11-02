@@ -50,7 +50,7 @@ profile
   comment Sega Master System
   chrdef chr_8x8_4bpp_planar
   paldef pal_sega_ms
-  coldef col_sega_ms
+  coldef col_bgr_222_packed
 }
 
 profile
@@ -427,41 +427,6 @@ rgbcoldef
   blue_size 4
 
   big_endian 1
-}
-
-rgbcoldef
-{
-  id col_sega_ms
-  comment Sega Master System
-
-  # 8|      |0
-  #  xxBBGGRR
-  bitdepth 2
-  red_shift 0
-  red_size 2
-  green_shift 2
-  green_size 2
-  blue_shift 4
-  blue_size 2
-}
-
-rgbcoldef
-{
-  id col_nintendo_sfc
-  comment Nintendo Super Famicom
-
-  # 15|               |0
-  #   xBBBBBGG GGGRRRRR
-  bitdepth 5
-  color_passes 1
-  red_shift 0
-  red_size 5
-  green_shift 5
-  green_size 5
-  blue_shift 10
-  blue_size 5
-
-  big_endian 0
 }
 
 rgbcoldef
