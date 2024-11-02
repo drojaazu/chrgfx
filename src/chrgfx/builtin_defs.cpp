@@ -154,7 +154,7 @@ rgbcoldef const col_bgr_222_packed {
 		{{0, 2}, {2, 2}, {4, 2}}
 	},
 	false,
-	"BGR 222 (LSB aligned)"
+	"BGR 222 (LSB)"
 };
 
 /**
@@ -169,7 +169,7 @@ rgbcoldef const col_bgr_333_packed {
 		{{0, 3}, {3, 3}, {3, 3}}
 	},
 	false,
-	"BGR 333 (LSB aligned)"
+	"BGR 333 (LSB)"
 };
 
 /**
@@ -184,7 +184,7 @@ rgbcoldef const col_bgr_444_packed {
 		{{0, 4}, {4, 4}, {8, 4}}
 	},
 	false,
-	"BGR 444 (LSB aligned)"
+	"BGR 444 (LSB)"
 };
 
 /**
@@ -199,7 +199,7 @@ rgbcoldef const col_bgr_555_packed {
 		{{0, 5}, {5, 5}, {10, 5}}
 	},
 	false,
-	"BGR 555 (LSB aligned)"
+	"BGR 555 (LSB)"
 };
 
 map<string, rgbcoldef const &> const coldefs {
