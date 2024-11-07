@@ -53,12 +53,66 @@ public:
 	}
 };
 
+class rgbcoldef_builder : public gfxdef_builder
+{
+private:
+	uint m_bitdepth {0};
+	std::vector<rgb_layout> m_layout;
+	bool m_big_endian {false};
+
+public:
+	rgbcoldef_builder() = default;
+	rgbcoldef_builder(rgbcoldef const & coldef)
+	{
+		from_rgbcoldef(coldef);
+	}
+
+	void from_rgbcoldef(rgbcoldef const & coldef)
+	{
+		set_id(coldef.id());
+		set_desc(coldef.description());
+		m_bitdepth = coldef.bitdepth();
+		m_layout = coldef.layout();
+	}
+
+	void set_bitdepth(string const & bitdepth)
+	{
+		m_bitdepth = sto<uint>(bitdepth);
+	}
+
+	void set_layout(string const & layout)
+	{
+		auto layout_raw = sto_container<vector<uint>>(layout);
+		if (layout_raw.size() != 6)
+			throw runtime_error("invalid rgb layout for coldef, must have exactly 6 entries");
+		m_layout.clear();
+		rgb_layout rgblayout {
+			{layout_raw[0], layout_raw[1]}, {layout_raw[2], layout_raw[3]}, {layout_raw[4], layout_raw[5]}};
+		m_layout.emplace_back(rgblayout);
+	}
+
+	void set_big_endian(string const & big_endian)
+	{
+		m_big_endian = sto_bool(big_endian);
+	}
+
+	[[nodiscard]] rgbcoldef build() const
+	{
+		// check the validity of the definition
+		if (m_bitdepth == 0)
+			throw runtime_error("Bitdepth must be greater than zero");
+		if (m_layout.size() == 0)
+			throw runtime_error("rgb_layout list cannot be empty");
+		return {m_id, m_bitdepth, m_layout, m_big_endian, m_desc};
+	}
+};
+
 class chrdef_builder : public gfxdef_builder
 {
 private:
-	uint m_width;
-	uint m_height;
-	uint m_bitdepth;
+	uint m_width {0};
+	uint m_height {0};
+	uint m_bitdepth {0};
 	vector<uint> m_plane_offsets;
 	vector<uint> m_pixel_offsets;
 	vector<uint> m_row_offsets;
@@ -124,6 +178,8 @@ public:
 	[[nodiscard]] chrdef build() const
 	{
 		// check the validity of the definition
+		if (m_bitdepth == 0)
+			throw runtime_error("Bitdepth must be greater than zero");
 		if (m_width > m_pixel_offsets.size())
 			throw runtime_error("CHR width must be equal to number of pixel offset entries");
 		if (m_height > m_row_offsets.size())

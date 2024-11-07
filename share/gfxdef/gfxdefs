@@ -110,7 +110,7 @@ profile
 profile
 {
   id sega_md
-  comment Sega Megadrive
+  comment Sega Mega Drive
   chrdef chr_8x8_4bpp_packed_lsb
   paldef pal_16bit_16color
   coldef col_sega_md

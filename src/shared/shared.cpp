@@ -1,5 +1,6 @@
 #include "shared.hpp"
 #include "builtin_defs.hpp"
+#include "coldef.hpp"
 #include "gfxdef_builder.hpp"
 #include "xdgdirs.hpp"
 
@@ -15,31 +16,94 @@ string get_gfxdefs_path()
 	return xdg_locations.front();
 }
 
+gfxprofile const & def_helper::find_gfxprofile(string const & gfxprofile_id)
+{
+	auto iter_find_gfxprofile {m_defs.profiles.find(gfxprofile_id)};
+	if (iter_find_gfxprofile != m_defs.profiles.end())
+		return iter_find_gfxprofile->second;
+
+	ostringstream oss;
+	oss << "Could not find gfxprofile: " << gfxprofile_id;
+	throw invalid_argument(oss.str());
+}
+
+chrdef const * def_helper::find_chrdef(string const & chrdef_id)
+{
+	auto iter_find_external_chrdef {m_defs.chrdefs.find(chrdef_id)};
+	if (iter_find_external_chrdef != m_defs.chrdefs.end())
+		return &iter_find_external_chrdef->second;
+
+	auto iter_find_internal_chrdef {chrgfx::gfxdefs::chrdefs.find(chrdef_id)};
+	if (iter_find_internal_chrdef != chrgfx::gfxdefs::chrdefs.end())
+		return &iter_find_internal_chrdef->second;
+
+	ostringstream oss;
+	oss << "Could not find specified chrdef: " << chrdef_id;
+	throw invalid_argument(oss.str());
+}
+
+coldef const * def_helper::find_coldef(string const & coldef_id)
+{
+	auto iter_find_external_rgbcoldef {m_defs.rgbcoldefs.find(coldef_id)};
+	if (iter_find_external_rgbcoldef != m_defs.rgbcoldefs.end())
+		return &iter_find_external_rgbcoldef->second;
+
+	auto iter_find_external_refcoldef {m_defs.refcoldefs.find(coldef_id)};
+	if (iter_find_external_refcoldef != m_defs.refcoldefs.end())
+		return &iter_find_external_refcoldef->second;
+
+	auto iter_find_internal_rgbcoldef {chrgfx::gfxdefs::rgbcoldefs.find(coldef_id)};
+	if (iter_find_internal_rgbcoldef != chrgfx::gfxdefs::rgbcoldefs.end())
+		return &iter_find_internal_rgbcoldef->second;
+
+	ostringstream oss;
+	oss << "Could not find specified coldef: " << coldef_id;
+	throw invalid_argument(oss.str());
+}
+
+paldef const * def_helper::find_paldef(string const & paldef_id)
+{
+
+	auto iter_find_external_paldef {m_defs.paldefs.find(paldef_id)};
+	if (iter_find_external_paldef != m_defs.paldefs.end())
+		return &iter_find_external_paldef->second;
+
+	auto iter_find_internal_paldef {chrgfx::gfxdefs::paldefs.find(paldef_id)};
+	if (iter_find_internal_paldef != chrgfx::gfxdefs::paldefs.end())
+		return &iter_find_internal_paldef->second;
+
+	ostringstream oss;
+	oss << "Could not find specified paldef: " << paldef_id;
+	throw invalid_argument(oss.str());
+}
+
+bool def_helper::use_chrdefbuilder(runtime_config & cfg)
+{
+	return (! cfg.chrdef_bpp.empty()) || (! cfg.chrdef_width.empty()) || (! cfg.chrdef_height.empty()) ||
+				 (! cfg.chrdef_pixel_offsets.empty()) || (! cfg.chrdef_plane_offsets.empty()) ||
+				 (! cfg.chrdef_row_offsets.empty());
+}
+
+bool def_helper::use_rgbcoldefbuilder(runtime_config & cfg)
+{
+	return (! cfg.rgbcoldef_big_endian.empty()) || (! cfg.rgbcoldef_rgblayout.empty()) ||
+				 (! cfg.rgbcoldef_bitdepth.empty());
+}
+
 def_helper::def_helper(runtime_config & cfg) :
 		m_defs {load_gfxdefs(cfg.gfxdefs_path)}
 {
-	if (cfg.list_gfxdefs)
-	{
-		list_gfxdefs(cout);
-		exit(0);
-	}
 
+	// identify defs by id
 	string chrdef_id, coldef_id, paldef_id;
 
 	// configure from gfxprofile if specified
 	if (! cfg.profile.empty())
 	{
-		auto i_profile {m_defs.profiles.find(cfg.profile)};
-		if (i_profile == m_defs.profiles.end())
-		{
-			ostringstream oss;
-			oss << "Could not find specified gfx profile: " << cfg.profile;
-			throw invalid_argument(oss.str());
-		}
-
-		chrdef_id = i_profile->second.chrdef_id();
-		coldef_id = i_profile->second.coldef_id();
-		paldef_id = i_profile->second.paldef_id();
+		auto profile = find_gfxprofile(cfg.profile);
+		chrdef_id = profile.chrdef_id();
+		coldef_id = profile.coldef_id();
+		paldef_id = profile.paldef_id();
 	}
 
 	// specific gfxdefs will override profile settings
@@ -52,83 +116,19 @@ def_helper::def_helper(runtime_config & cfg) :
 
 	// load the requested defs
 	if (! chrdef_id.empty())
-	{
-		auto iter_find_internal_chrdef {chrgfx::gfxdefs::chrdefs.find(chrdef_id)};
-		auto iter_find_chrdef {m_defs.chrdefs.find(chrdef_id)};
-
-		if (iter_find_chrdef != m_defs.chrdefs.end())
-		{
-			chrdef = &iter_find_chrdef->second;
-		}
-		else if (iter_find_internal_chrdef != chrgfx::gfxdefs::chrdefs.end())
-		{
-			chrdef = &iter_find_internal_chrdef->second;
-		}
-		else
-		{
-			ostringstream oss;
-			oss << "Could not find specified chrdef: " << chrdef_id;
-			throw invalid_argument(oss.str());
-		}
-	}
-
+		chrdef = find_chrdef(chrdef_id);
 	if (! coldef_id.empty())
-	{
-		auto iter_find_internal_coldef {chrgfx::gfxdefs::coldefs.find(coldef_id)};
-		auto iter_find_rgbcoldef {m_defs.rgbcoldefs.find(coldef_id)};
-
-		if (iter_find_rgbcoldef != m_defs.rgbcoldefs.end())
-		{
-			coldef = &iter_find_rgbcoldef->second;
-		}
-		else if (iter_find_internal_coldef != chrgfx::gfxdefs::coldefs.end())
-		{
-			coldef = &iter_find_internal_coldef->second;
-		}
-		else
-		{
-			auto iter_find_refcoldef {m_defs.refcoldefs.find(coldef_id)};
-			if (iter_find_refcoldef != m_defs.refcoldefs.end())
-			{
-				coldef = &iter_find_refcoldef->second;
-			}
-			else
-			{
-				ostringstream oss;
-				oss << "Could not find specified coldef: " << coldef_id;
-				throw invalid_argument(oss.str());
-			}
-		}
-	}
-
+		coldef = find_coldef(coldef_id);
 	if (! paldef_id.empty())
-	{
-		auto iter_find_internal_paldef {chrgfx::gfxdefs::paldefs.find(paldef_id)};
-		auto iter_find_paldef {m_defs.paldefs.find(paldef_id)};
-
-		if (iter_find_paldef != m_defs.paldefs.end())
-		{
-			paldef = &iter_find_paldef->second;
-		}
-		else if (iter_find_internal_paldef != chrgfx::gfxdefs::paldefs.end())
-		{
-			paldef = &iter_find_internal_paldef->second;
-		}
-		else
-		{
-			ostringstream oss;
-			oss << "Could not find specified paldef: " << paldef_id;
-			throw invalid_argument(oss.str());
-		}
-	}
+		paldef = find_paldef(paldef_id);
 
 	// build def(s) from scratch or override parts of the loaded def(s)
-	if ((! cfg.chrdef_bpp.empty()) || (! cfg.chrdef_width.empty()) || (! cfg.chrdef_height.empty()) ||
-			(! cfg.chrdef_pixel_offsets.empty()) || (! cfg.chrdef_plane_offsets.empty()) ||
-			(! cfg.chrdef_row_offsets.empty()))
+	if (use_chrdefbuilder(cfg))
 	{
 		chrdef_builder builder(*chrdef);
+		builder.from_chrdef(*chrdef);
 		builder.set_id("chrdef_cli_generated");
+		builder.set_desc("CHRDEF generated from CLI");
 		if (! cfg.chrdef_width.empty())
 			builder.set_width(cfg.chrdef_width);
 		if (! cfg.chrdef_height.empty())
@@ -143,6 +143,23 @@ def_helper::def_helper(runtime_config & cfg) :
 			builder.set_row_offsets(cfg.chrdef_row_offsets);
 		m_heapallocated_chrdef = true;
 		chrdef = new chrgfx::chrdef(builder.build());
+	}
+
+	if (use_rgbcoldefbuilder(cfg))
+	{
+		rgbcoldef_builder builder;
+		if (coldef->type() == coldef_type::rgb)
+			builder.from_rgbcoldef(*static_cast<rgbcoldef const *>(coldef));
+		builder.set_id("rgbcoldef_cli_generated");
+		builder.set_desc("COLDEF generated from CLI");
+		if (! cfg.rgbcoldef_bitdepth.empty())
+			builder.set_bitdepth(cfg.rgbcoldef_bitdepth);
+		if (! cfg.rgbcoldef_rgblayout.empty())
+			builder.set_layout(cfg.rgbcoldef_rgblayout);
+		if (! cfg.rgbcoldef_big_endian.empty())
+			builder.set_big_endian(cfg.rgbcoldef_big_endian);
+		m_heapallocated_coldef = true;
+		coldef = new chrgfx::rgbcoldef(builder.build());
 	}
 
 #ifdef DEBUG
@@ -205,7 +222,7 @@ void def_helper::list_gfxdefs(ostream & os)
 		os << " [External]\n";
 	}
 
-	for (auto const & rgbcoldef : chrgfx::gfxdefs::coldefs)
+	for (auto const & rgbcoldef : chrgfx::gfxdefs::rgbcoldefs)
 	{
 		os << "coldef " << rgbcoldef.second.id();
 		if (! rgbcoldef.second.description().empty())
@@ -250,6 +267,9 @@ vector<option> long_opts {// predefined gfx defs
 	{"chr-plane-offsets", required_argument, &longopt_idx, 3},
 	{"chr-pixel-offsets", required_argument, &longopt_idx, 4},
 	{"chr-row-offsets", required_argument, &longopt_idx, 5},
+	{"col-bitdepth", required_argument, &longopt_idx, 6},
+	{"col-layout", required_argument, &longopt_idx, 7},
+	{"col-big-endian", required_argument, &longopt_idx, 8},
 
 	{"help", no_argument, nullptr, 'h'}};
 
@@ -298,6 +318,15 @@ bool shared_args(char this_opt, runtime_config & cfg)
 					break;
 				case 5:
 					cfg.chrdef_row_offsets = optarg;
+					break;
+				case 6:
+					cfg.rgbcoldef_bitdepth = optarg;
+					break;
+				case 7:
+					cfg.rgbcoldef_rgblayout = optarg;
+					break;
+				case 8:
+					cfg.rgbcoldef_big_endian = optarg;
 					break;
 				default:
 					break;

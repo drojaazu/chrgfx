@@ -42,7 +42,7 @@ extern rgbcoldef const col_bgr_444_packed;
 
 extern rgbcoldef const col_bgr_555_packed;
 
-extern std::map<std::string, rgbcoldef const &> const coldefs;
+extern std::map<std::string, rgbcoldef const &> const rgbcoldefs;
 
 extern paldef const pal_16bit_8color;
 

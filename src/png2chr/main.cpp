@@ -36,6 +36,12 @@ int main(int argc, char ** argv)
 
 		def_helper defs(cfg);
 
+		if (cfg.list_gfxdefs)
+		{
+			defs.list_gfxdefs(cout);
+			exit(0);
+		}
+
 		// set up input data
 		ifstream png_fstream;
 		istream & png_data {(cfg.pngdata_name.empty() ? cin : png_fstream)};

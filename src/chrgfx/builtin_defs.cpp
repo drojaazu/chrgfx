@@ -202,7 +202,7 @@ rgbcoldef const col_bgr_555_packed {
 	"BGR 555 (LSB)"
 };
 
-map<string, rgbcoldef const &> const coldefs {
+map<string, rgbcoldef const &> const rgbcoldefs {
 	{col_bgr_222_packed.id(), col_bgr_222_packed},
 	{col_bgr_333_packed.id(), col_bgr_333_packed},
 	{col_bgr_444_packed.id(), col_bgr_444_packed},

@@ -122,7 +122,7 @@ basic_palette make_pal_random()
 	return outpal;
 }
 
-bool is_system_bigendian()
+bool is_system_big_endian()
 {
 	// shamelessly stolen from stack overflow
 	// https://stackoverflow.com/questions/1001307/detecting-endianness-programmatically-in-a-c-program/56191401#56191401
@@ -132,6 +132,6 @@ bool is_system_bigendian()
 	return ! (*least_significant_address == 0x01);
 }
 
-const bool bigend_sys = is_system_bigendian();
+const bool bigend_sys = is_system_big_endian();
 
 } // namespace chrgfx

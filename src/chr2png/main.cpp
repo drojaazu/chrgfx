@@ -40,6 +40,12 @@ int main(int argc, char ** argv)
 
 		def_helper defs(cfg);
 
+		if (cfg.list_gfxdefs)
+		{
+			defs.list_gfxdefs(cout);
+			exit(0);
+		}
+
 		istream * chrdata;
 		ifstream ifs;
 		if (cfg.chrdata_name == "-")

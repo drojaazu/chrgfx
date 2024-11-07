@@ -18,25 +18,54 @@ chrgfx requires [png++](https://www.nongnu.org/pngpp/) to be installed and uses 
     make
     sudo make install
 
-# Utilities Usage
+# chr2png / png2chr Utilities
 There are two support utilities included: `chr2png` and `png2chr`. The former will convert encoded tile and/or palette data to a PNG image, while the latter will take a sufficiently compatible PNG and output encoded tile/palette data.
+
+## Graphics Definitions
 
 The conversion routines rely on graphics definitions (gfxdef), which describe the format of the data for encoding and decoding. There are three kinds of definitions: tile (chrdef), palette (paldef) and color (coldef).
 
-Moreover, for convenience, there are also profiles, which are groupings of one chrdef, paldef and coldef to represent the graphics system of a certain piece of hardware. In this way, we reduce redundancies for hardware that may share one type of definition, but not others. For example, the Sega Master System and Game Gear have the same tile format, but the palette and color encodings are different. We can make a different profile for each system, with both using the same tile encoding but seperate palette and color encodings. Another example is the original Gameboy and the later Gameboy Pocket. They are exactly the same in hardware, but the original has a more green tint while the Pocket is more gray. We can create profiles for both, with the same tile and palette formats, but with a different color list to simulate their different perceived colors.
+Graphics definitions can be mixed and modified at run time. With this system, chrgfx is extensible and can support practically any tile-based hardware.
 
-With this system, chrgfx is extensible and can support practically any tile-based hardware.
+## Hardware Profiles
 
-The project comes with a number of definitions for many common hardware systems already created in a gfxdefs file. Please [see the readme in the gfxdef directory](gfxdef/README.md) and [the actual definitions file](gfxdef/gfxdefs) for more details.
+For convenience, there are profiles, which are groupings of a single chrdef, paldef and coldef to represent the graphics subsystem of a certain piece of hardware. In this way, we reduce redundancies for hardware that may share one type of definition, but not others.
 
-## chr2png - Usage
+For example, the Sega Master System and Game Gear have the same tile format, but the palette and color encodings are different. We can make a different profile for each system, with both using the same tile encoding but seperate palette and color encodings. Another example is the original Gameboy and the later Gameboy Pocket. They are exactly the same in hardware, but the original has a more green tint while the Pocket is more gray. We can create profiles for both, with the same tile and palette formats, but with a different color list to simulate their different perceived colors.
+
+## gfxdefs File
+
+Graphics definitions are stored in a `gfxdefs` file. The project comes with a number of definitions for many common hardware systems already created in a gfxdefs file.
+
+Please [see the readme in the gfxdef directory](share/gfxdef/README.md) and [the actual definitions file](share/gfxdef/gfxdefs) for more details.
+
+## CLI Definitions
+
+Graphics definitions can also be defined on the command line. This is useful for testing or dealing with dynamic formats (for example, perhaps tile sizes are not consistent across multiple files).
+
+## Definition Order
+
+Because definitions can be sourced/created from multiple places, there is an ordering for loading/processing to determine what definition is finally used.
+
+1. gfxdefs file is loaded first
+2. If a hardware profile is specified, the definitions listed within are referenced
+3. If a tile, color or palette definition id is specified on the command line, that definition overrides the one listedin the profile
+4. If a tile or color definition option is specified on the command line, that modifes the definition
+
+##  - Shared Concepts and Usage
+
+The following options are available in both chr2png and png2chr.
+
 `--gfx-def <filepath>`, `-G <filepath>`
 
-Path to gfxdef file; if not specified, defaults to `/etc/chrgfx/gfxdefs`
+Path to gfxdef file. If not specified, it checks for:
+
+ - `${XDG_DATA_HOME}/chrgfx/gfxdefs`
+ - `${XDG_DATA_DIRS}/chrgfx/gfxdefs`
 
 `--profile <gfx_profile>`, `-P <gfx_profile_id>`
 
-Specify graphics profile to use
+Specify hardware profile to use
 
 `--chr-def <tile_encoding_id>`, `-T <tile_encoding_id>`
 
@@ -45,6 +74,37 @@ Specify graphics profile to use
 `--pal-def <palette_encoding_id>`, `-L <palette_encoding_id>`
 
 These arguments specify the tile, color and palette encoding, respectively. They are only required if a graphics profile was not specified. If they are used in conjunction with a graphics profile, they will override that particular encoding. (For example, using `--chr-def` will override the tile encoding that was specified in the profile.)
+
+
+### Graphics Definitions
+
+In addition to "hardcoding" graphics definitions in the gfxdefs file, pixel and color layouts can be specified at the command line.
+
+`--chr-width`
+
+`--chr-height`
+
+`--chr-bpp`
+
+`--chr-plane-offsets`
+
+`--chr-pixel-offsets`
+
+`--chr-row-offsets`
+
+`--col-bitdepth`
+
+`--col-layout`
+
+`--col-big-endian`
+
+
+## chr2png - Usage
+
+
+
+
+
 
 `--chr-data <filepath>`, `-c <filepath>`
 
@@ -86,21 +146,8 @@ Display built in program usage
     chr2png --profile sega_md --chr-data sonic1_sprite.chr --pal-data sonic1.cram --trns --row-size 32 > sonic1_sprite.png
 
 ## png2chr - Usage
-`--gfx-def <filepath>`, `-G <filepath>`
 
-Path to gfxdef file; if not specified, defaults to `/etc/chrgfx/gfxdefs`
 
-`--profile <gfx_profile>`, `-P <gfx_profile_id>`
-
-Specify graphics profile to use
-
-`--chr-def <tile_encoding_id>`, `-T <tile_encoding_id>`
-
-`--col-def <color_encoding_id>`, `-C <color_encoding_id>`
-
-`--pal-def <palette_encoding_id>`, `-L <palette_encoding_id>`
-
-These arguments specify the tile, color and palette encoding, respectively. They are only required if a graphics profile was not specified. If they are used in conjunction with a graphics profile, they will override that particular encoding. (For example, using `--chr-def` will override the tile encoding that was specified in the profile.)
 
 `--png-data <filepath>`, `-b <filepath>` 
 

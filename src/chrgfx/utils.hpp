@@ -57,7 +57,7 @@ basic_palette make_pal_random();
  * @note This is called on initialization of libchrgfx; use the @c
  * bigend_sys variable to quickly check endianness
  */
-bool is_system_bigendian();
+bool is_system_big_endian();
 
 /**
  * @brief Indicates that the local system uses big endian architecture

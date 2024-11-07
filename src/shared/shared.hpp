@@ -36,6 +36,10 @@ struct runtime_config
 	std::string chrdef_pixel_offsets;
 	std::string chrdef_row_offsets;
 
+	std::string rgbcoldef_big_endian;
+	std::string rgbcoldef_rgblayout;
+	std::string rgbcoldef_bitdepth;
+
 	bool list_gfxdefs {false};
 };
 
@@ -57,6 +61,13 @@ private:
 	bool m_heapallocated_chrdef {false};
 	bool m_heapallocated_coldef {false};
 	bool m_heapallocated_paldef {false};
+
+	gfxprofile const & find_gfxprofile(std::string const & gfxprofile_id);
+	chrgfx::chrdef const * find_chrdef(std::string const & chrdef_id);
+	chrgfx::coldef const * find_coldef(std::string const & coldef_id);
+	chrgfx::paldef const * find_paldef(std::string const & paldef_id);
+	bool use_chrdefbuilder(runtime_config & cfg);
+	bool use_rgbcoldefbuilder(runtime_config & cfg);
 };
 
 bool shared_args(char this_opt, runtime_config & cfg);
