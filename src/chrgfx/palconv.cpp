@@ -18,7 +18,7 @@ void encode_pal(paldef const & paldef, coldef const & coldef, basic_palette cons
 		// subpalette size, in bytes
 		subpal_datasize_bytes {(unsigned) (paldef.datasize() >> 3)},
 		// total number of entries in a subpalette
-		subpal_length {paldef.pal_length()};
+		subpal_length {paldef.length()};
 	// total number of subpalettes available in the given palette
 	// subpal_count { basic_palette.size() / subpal_length };
 	/*
@@ -115,7 +115,7 @@ void decode_pal(paldef const & paldef, coldef const & coldef, byte_t const * in_
 		// total size of a subpalette, in bits
 		subpal_datasize {paldef.datasize()},
 		// total number of entries in a subpalette
-		subpal_length {paldef.pal_length()};
+		subpal_length {paldef.length()};
 
 	// used to copy the color entry bytes into a temp array
 	// to be cast as a machine-native u32

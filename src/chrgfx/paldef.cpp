@@ -15,7 +15,7 @@ paldef::paldef(string const & id,
 		m_entry_datasize(entry_datasize),
 		m_subpal_datasize(pal_datasize ? pal_datasize.value() : entry_datasize * pal_length) {};
 
-uint paldef::pal_length() const
+uint paldef::length() const
 {
 	return m_pal_length;
 }

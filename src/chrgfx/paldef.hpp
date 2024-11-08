@@ -30,7 +30,7 @@ public:
 	/**
 	 * @return number of entries in the palette
 	 */
-	[[nodiscard]] uint pal_length() const;
+	[[nodiscard]] uint length() const;
 
 	/**
 	 * @return data size of a single entry *in bits*
