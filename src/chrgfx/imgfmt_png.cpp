@@ -40,7 +40,7 @@ png::image<png::index_pixel> to_png(chrgfx::basic_image const & basic_image, opt
 	png::pixel_buffer<png::index_pixel> png_pixbuf(basic_image.width(), basic_image.height());
 	for (uint i_pixel_row {0}; i_pixel_row < basic_image.height(); ++i_pixel_row)
 	{
-		png::index_pixel * ptr = (png::index_pixel *) (basic_image.pixbuf() + i_pixel_row * basic_image.width());
+		auto * ptr = (png::index_pixel *) (basic_image.pixbuf() + i_pixel_row * basic_image.width());
 		vector<png::index_pixel> pxlrow_work(ptr, ptr + basic_image.width());
 		png_pixbuf.put_row(i_pixel_row, pxlrow_work);
 	}

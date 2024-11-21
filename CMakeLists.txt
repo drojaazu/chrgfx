@@ -46,6 +46,12 @@ project(png2chr
   LANGUAGES CXX)
 add_subdirectory(src/png2chr)
 
+project(palview
+  DESCRIPTION "Visualize an encoded color palette"
+  VERSION 1.0.0
+  LANGUAGES CXX)
+add_subdirectory(src/palview)
+
 
 if(NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
   if(NOT CMAKE_BUILD_TYPE)

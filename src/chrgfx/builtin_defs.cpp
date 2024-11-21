@@ -5,6 +5,7 @@
 #include "chrdef.hpp"
 #include "coldef.hpp"
 #include "paldef.hpp"
+#include "utils.hpp"
 #ifdef DEBUG
 // we must include iostream here as cerr is used for debugging when initializing some static variables
 #include <iostream>
@@ -14,24 +15,6 @@ namespace chrgfx::gfxdefs
 {
 
 using namespace std;
-
-// clang-format off
-// borrowed from MAME
-#define STEP2(START,STEP)       (START),(START)+(STEP)
-#define STEP4(START,STEP)       STEP2(START,STEP),STEP2((START)+2*(STEP),STEP)
-#define STEP8(START,STEP)       STEP4(START,STEP),STEP4((START)+4*(STEP),STEP)
-#define STEP16(START,STEP)      STEP8(START,STEP),STEP8((START)+8*(STEP),STEP)
-#define STEP32(START,STEP)      STEP16(START,STEP),STEP16((START)+16*(STEP),STEP)
-#define STEP64(START,STEP)      STEP32(START,STEP),STEP32((START)+32*(STEP),STEP)
-#define STEP128(START,STEP)     STEP64(START,STEP),STEP64((START)+64*(STEP),STEP)
-#define STEP256(START,STEP)     STEP128(START,STEP),STEP128((START)+128*(STEP),STEP)
-#define STEP512(START,STEP)     STEP256(START,STEP),STEP256((START)+256*(STEP),STEP)
-#define STEP1024(START,STEP)    STEP512(START,STEP),STEP512((START)+512*(STEP),STEP)
-#define STEP2048(START,STEP)    STEP1024(START,STEP),STEP1024((START)+1024*(STEP),STEP)
-
-#define STEP2_INV(START,STEP)   (START)+(STEP),(START)
-#define STEP4_INV(START,STEP)    STEP2_INV(START+2*STEP,STEP),STEP2_INV(START,STEP)
-// clang-format on
 
 // clang-format off
 /**
