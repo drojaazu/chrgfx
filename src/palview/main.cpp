@@ -1,15 +1,11 @@
 #include "blob.hpp"
 #include "fstreams.hpp"
 #include "imgfmt_png.hpp"
-#include "shared.hpp"
+#include "setup.hpp"
 #include <chrgfx/chrgfx.hpp>
-#include <getopt.h>
+
 #include <iostream>
 #include <png++/rgb_pixel.hpp>
-
-#ifdef DEBUG
-#include <chrono>
-#endif
 
 using namespace std;
 using namespace chrgfx;
@@ -19,17 +15,6 @@ uint const swatch_size {32};
 
 chrgfx::coldef const * work_coldef {&chrgfx::gfxdefs::col_bgr_333_packed};
 chrgfx::paldef const * work_paldef {&chrgfx::gfxdefs::pal_16bit_256color};
-
-struct runtime_config_palview : runtime_config
-{
-	string paldata_name;
-	string out_path;
-	uint pal_line {0};
-	bool full_pal {false};
-	render_config render_cfg;
-} cfg;
-
-void process_args(int argc, char ** argv);
 
 void render_palette_line()
 {
@@ -43,8 +28,8 @@ void render_palette_line()
 
 		paldata.seekg(cfg.pal_line * pal_size, ios::beg);
 		paldata.read(reinterpret_cast<char *>(palbuffer), pal_size);
-		// if (! paldata.good())
-		//	throw runtime_error("Cannot read specified palette line index");
+		if (paldata.gcount() != pal_size)
+			throw runtime_error("Could not read enough data for a complete color palette");
 
 		decode_pal(*work_paldef, *work_coldef, palbuffer, &workpal);
 	}
@@ -69,7 +54,7 @@ void render_palette_line()
 		{STEP32(0, 1)},
 	};
 
-	auto rendered_tiles = render_chrset(palview_tiledef, tile_buffer, tile_buffer.size(), cfg.render_cfg);
+	auto rendered_tiles = render_chrset(palview_tiledef, tile_buffer, tile_buffer.size(), {});
 	rendered_tiles.palette(workpal);
 	png::image<png::index_pixel> outimg(to_png(rendered_tiles));
 
@@ -98,26 +83,20 @@ void render_full_palette()
 			// TODO check if we got a full subpal's worth of data!
 			decode_pal(*work_paldef, *work_coldef, palbuffer, &palette_lines.emplace_back());
 		}
+
+		if (palette_lines.empty())
+			throw runtime_error("Could not read enough data for a complete color palette");
 	}
 
-	// each palette line
-
-	// for each palette line
-	// - vector of direct colors for this row
-	// - for each pixel line
-	// -- for each swatch
-	// --- render (swatch width) pixels
-	//
-
 	size_t const image_width {swatch_size * work_paldef->length()}, image_height {swatch_size * palette_lines.size()};
-	size_t full_pixel_row {0};
+	size_t outimg_row_idx {0};
 
-	vector<png::rgb_pixel> pxlrow_work(image_width);
-	png::pixel_buffer<png::rgb_pixel> png_pixbuf(image_width, image_height);
+	vector<png::rgb_pixel> pixel_row(image_width);
+	png::pixel_buffer<png::rgb_pixel> pixbuf(image_width, image_height);
 
 	for (auto const & pal : palette_lines)
 	{
-		auto iter_color = pxlrow_work.begin();
+		auto iter_color = pixel_row.begin();
 		for (auto iter_color_index {0}; iter_color_index < work_paldef->length(); ++iter_color_index)
 		{
 			auto color = pal[iter_color_index];
@@ -126,11 +105,11 @@ void render_full_palette()
 			iter_color += swatch_size;
 		}
 		for (auto iter_pixel_row {0}; iter_pixel_row < swatch_size; ++iter_pixel_row)
-			png_pixbuf.put_row(full_pixel_row++, pxlrow_work);
+			pixbuf.put_row(outimg_row_idx++, pixel_row);
 	}
 
 	png::image<png::rgb_pixel> outimg(image_width, image_height);
-	outimg.set_pixbuf(png_pixbuf);
+	outimg.set_pixbuf(pixbuf);
 
 	if (cfg.out_path.empty())
 		outimg.write_stream(cout);
@@ -142,13 +121,7 @@ int main(int argc, char ** argv)
 {
 	try
 	{
-		/*******************************************************
-		 *            SETUP & SANITY CHECKING
-		 *******************************************************/
 
-#ifdef DEBUG
-		chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
-#endif
 		process_args(argc, argv);
 
 		def_helper defs(cfg);
@@ -162,37 +135,10 @@ int main(int argc, char ** argv)
 			exit(0);
 		}
 
-#ifdef DEBUG
-		chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
-		auto duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-		cerr << "SETUP TIME: " << duration << "ms\n";
-#endif
-
 		if (cfg.full_pal)
-		{
-#ifdef DEBUG
-			t1 = chrono::high_resolution_clock::now();
-#endif
-
 			render_full_palette();
-#ifdef DEBUG
-			t2 = chrono::high_resolution_clock::now();
-			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-			cerr << "RENDER FULL PALETTE: " << to_string(duration) << "ms\n";
-#endif
-		}
 		else
-		{
-#ifdef DEBUG
-			t1 = chrono::high_resolution_clock::now();
-#endif
 			render_palette_line();
-#ifdef DEBUG
-			t2 = chrono::high_resolution_clock::now();
-			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-			cerr << "RENDER PALETTE LINE: " << to_string(duration) << "ms\n";
-#endif
-		}
 
 		return 0;
 	}
@@ -201,87 +147,4 @@ int main(int argc, char ** argv)
 		cerr << "Error: " << e.what() << '\n';
 		return -1;
 	}
-}
-
-void process_args(int argc, char ** argv)
-{
-	// add palview specific options
-	long_opts.push_back({"pal-data", required_argument, nullptr, 'p'});
-	long_opts.push_back({"pal-line", required_argument, nullptr, 'l'});
-	long_opts.push_back({"full-pal", no_argument, nullptr, 'f'});
-	long_opts.push_back({"row-size", required_argument, nullptr, 'r'});
-	long_opts.push_back({"output", required_argument, nullptr, 'o'});
-	long_opts.push_back({nullptr, 0, nullptr, 0});
-	short_opts.append("p:l:fr:o:");
-
-	opt_details.push_back({false, "Path to input encoded palette", nullptr});
-	opt_details.push_back({false, "Palette line to render", nullptr});
-	opt_details.push_back({false, "Render all palette data instead of a single palette line", nullptr});
-	opt_details.push_back({false, "Number of tiles per row in output image", nullptr});
-	opt_details.push_back({false, "Path to output image", nullptr});
-
-	// read/parse arguments
-	while (true)
-	{
-		const auto this_opt = getopt_long(argc, argv, short_opts.data(), long_opts.data(), nullptr);
-		if (this_opt == -1)
-			break;
-
-		// handle shared arguments
-		if (shared_args(this_opt, cfg))
-			continue;
-
-		// handle chr2png specific arguments
-		switch (this_opt)
-		{
-			// input palette data path
-			case 'p':
-				cfg.paldata_name = optarg;
-				break;
-
-				// palette line
-			case 'l':
-				try
-				{
-					auto pal_line {stoi(optarg)};
-					if (pal_line < 1)
-						throw invalid_argument("Invalid palette line value");
-					// user input is indexed from 1, convert to 0 index here
-					cfg.pal_line = pal_line - 1;
-				}
-				catch (const invalid_argument & e)
-				{
-					throw invalid_argument("Invalid palette line value");
-				}
-				break;
-
-			case 'f':
-				cfg.full_pal = true;
-				break;
-
-			// row size
-			case 'r':
-				try
-				{
-					cfg.render_cfg.row_size = stoi(optarg);
-				}
-				catch (const invalid_argument & e)
-				{
-					throw invalid_argument("Invalid columns value");
-				}
-				break;
-
-			// png output path
-			case 'o':
-				cfg.out_path = optarg;
-				break;
-		}
-	}
-
-	if (cfg.gfxdefs_path.empty())
-		cfg.gfxdefs_path = get_gfxdefs_path();
-
-#ifdef DEBUG
-	cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << '\n';
-#endif
 }
