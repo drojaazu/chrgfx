@@ -1,7 +1,7 @@
 profile
 {
   id nec_pcengine_sprites
-  comment NEC PC Engine / TurboGrafx-16 (sprites)
+  note NEC PC Engine / TurboGrafx-16 (sprites)
   chrdef chr_nec_pcengine_sprites
   paldef pal_16bit_16color
   coldef col_nec_pcengine
@@ -10,7 +10,7 @@ profile
 profile
 {
   id nec_pcengine_tiles
-  comment NEC PC Engine / TurboGrafx-16 (tiles)
+  note NEC PC Engine / TurboGrafx-16 (tiles)
   chrdef chr_nec_pcengine_tiles
   paldef pal_16bit_16color
   coldef col_nec_pcengine
@@ -19,7 +19,7 @@ profile
 profile
 {
   id snk_neogeocd
-  comment SNK NeoGeo CD
+  note SNK NeoGeo CD
   chrdef chr_snk_neogeocd
   paldef pal_16bit_16color
   coldef col_snk_neogeo
@@ -28,7 +28,7 @@ profile
 profile
 {
   id snk_neogeo
-  comment SNK NeoGeo
+  note SNK NeoGeo
   chrdef chr_snk_neogeo
   paldef pal_16bit_16color
   coldef col_snk_neogeo
@@ -38,7 +38,7 @@ profile
 {
 
   id capcom_cps
-  comment Capcom CPS / CPS 2
+  note Capcom CPS / CPS 2
   chrdef chr_capcom_cps
   paldef pal_16bit_16color
   coldef col_capcom_cps_accurate
@@ -47,7 +47,7 @@ profile
 profile
 {
   id sega_ms
-  comment Sega Master System
+  note Sega Master System
   chrdef chr_8x8_4bpp_planar
   paldef pal_sega_ms
   coldef col_bgr_222_packed
@@ -56,7 +56,7 @@ profile
 profile
 {
   id sega_gg
-  comment Sega Game Gear
+  note Sega Game Gear
   chrdef chr_8x8_4bpp_planar
   paldef pal_16bit_16color
   coldef col_bgr_444_packed
@@ -65,7 +65,7 @@ profile
 profile
 {
   id nintendo_sfc
-  comment Nintendo Super Famicom
+  note Nintendo Super Famicom
   chrdef chr_nintendo_sfc
   paldef pal_16bit_16color
   coldef col_bgr_555_packed
@@ -74,7 +74,7 @@ profile
 profile
 {
   id nintendo_vb
-  comment Nintendo Virtual Boy
+  note Nintendo Virtual Boy
   chrdef chr_nintendo_vb
   paldef pal_nintendo_vb
   coldef col_nintendo_vb
@@ -83,7 +83,7 @@ profile
 profile
 {
   id nintendo_fc
-  comment Nintendo Famicom
+  note Nintendo Famicom
   chrdef chr_nintendo_fc
   paldef pal_nintendo_fc
   coldef col_nintendo_fc
@@ -92,7 +92,7 @@ profile
 profile
 {
   id nintendo_gb
-  comment Nintendo Game Boy
+  note Nintendo Game Boy
   chrdef chr_8x8_2bpp_planar
   paldef pal_nintendo_gb
   coldef col_nintendo_gb
@@ -101,7 +101,7 @@ profile
 profile
 {
   id nintendo_gb_pocket
-  comment Nintendo Game Boy Pocket
+  note Nintendo Game Boy Pocket
   chrdef chr_8x8_2bpp_planar
   paldef pal_nintendo_gb
   coldef col_nintendo_gb_pocket
@@ -110,7 +110,7 @@ profile
 profile
 {
   id sega_md
-  comment Sega Mega Drive
+  note Sega Mega Drive
   chrdef chr_8x8_4bpp_packed_lsb
   paldef pal_16bit_16color
   coldef col_sega_md
@@ -127,7 +127,7 @@ profile
 paldef
 {
   id pal_sega_ms
-  comment Sega Master System
+  note Sega Master System
 
   # 32 colors per palette, 1 byte per color
   # 2 subpalettes, 16 colors each
@@ -139,7 +139,7 @@ paldef
 paldef
 {
   id pal_nintendo_vb
-  comment Nintendo Virtual Boy
+  note Nintendo Virtual Boy
   # 2 bits per color, 3 colors per palette
   # palette data is 1 byte; lowest two bits ignored as padding
   # 8 palettes total
@@ -156,7 +156,7 @@ paldef
 paldef
 {
   id pal_nintendo_fc
-  comment Nintendo Famicom
+  note Nintendo Famicom
 
   # 32 colors, each color is 1 byte; 8 palettes, 4 colors each
   # (color 0 is always transparent)
@@ -169,7 +169,7 @@ paldef
 paldef
 {
   id pal_nintendo_gb
-  comment Nintendo Game Boy
+  note Nintendo Game Boy
 
   # 2 bits per color, 4 colors, packed (1 byte per palette)
   # 3 palettes (3 bytes, stored at 0xFF47 in memory)
@@ -187,139 +187,139 @@ paldef
 chrdef
 {
   id chr_nec_pcengine_tiles
-  comment NEC PC Engine / TurgoGrafx-16 (tiles)
+  note NEC PC Engine / TurgoGrafx-16 (tiles)
 
-  # 8x8 4bpp Planar
+  # 8x8 4bitdepth Planar
   # 2 byte interleaved
   width 8
   height 8
-  bpp 4
-  planeoffset 0, 8, 128, 136
-  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
-  rowoffset 0, 16, 32, 48, 64, 80, 96, 112
+  bitdepth 4
+  plane_offsets 0, 8, 128, 136
+  pixel_offsets 0, 1, 2, 3, 4, 5, 6, 7
+  row_offsets 0, 16, 32, 48, 64, 80, 96, 112
 }
 
 chrdef
 {
   id chr_nec_pcengine_sprites
-  comment NEC PC Engine / TurgoGrafx-16 (sprites)
+  note NEC PC Engine / TurgoGrafx-16 (sprites)
 
-  # 16x16 4bpp Planar
+  # 16x16 4bitdepth Planar
   width 16
   height 16
-  bpp 4
-  planeoffset 0, 256, 512, 768
-  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
-  rowoffset 0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240
+  bitdepth 4
+  plane_offsets 0, 256, 512, 768
+  pixel_offsets 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+  row_offsets 0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240
 }
 
 chrdef
 {
   id chr_snk_neogeocd
-  comment SNK NeoGeo CD
+  note SNK NeoGeo CD
 
-  # 16x16 4bpp Planar
+  # 16x16 4bitdepth Planar
   # basically the same as normal NeoGeo but the 8x8
   # "subtiles" are ordered differently
   # https://wiki.neogeodev.org/index.php?title=Sprite_graphics_format
   width 16
   height 16
-  bpp 4
-  planeoffset 8, 0, 24, 16
+  bitdepth 4
+  plane_offsets 8, 0, 24, 16
 
-  pixeloffset 519, 518, 517, 516, 515, 514, 513, 512, 7, 6, 5, 4, 3, 2, 1, 0
-  rowoffset 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480
+  pixel_offsets 519, 518, 517, 516, 515, 514, 513, 512, 7, 6, 5, 4, 3, 2, 1, 0
+  row_offsets 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480
 }
 
 chrdef
 {
   id chr_snk_neogeo
-  comment SNK NeoGeo
+  note SNK NeoGeo
 
-  # 16x16 4bpp Planar
+  # 16x16 4bitdepth Planar
   # note that your tile data (C ROMs) will need to be
   # interleaved (odd|even|odd|even..., at 2 bytes each) into one file first.
   # see this page: https://wiki.neogeodev.org/index.php?title=Sprite_graphics_format
   width 16
   height 16
-  bpp 4
-  planeoffset 0, 8, 16, 24
+  bitdepth 4
+  plane_offsets 0, 8, 16, 24
 
-  pixeloffset 519, 518, 517, 516, 515, 514, 513, 512, 7, 6, 5, 4, 3, 2, 1, 0
-  rowoffset 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480
+  pixel_offsets 519, 518, 517, 516, 515, 514, 513, 512, 7, 6, 5, 4, 3, 2, 1, 0
+  row_offsets 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480
 }
 
 chrdef
 {
   id chr_capcom_cps
-  comment Capcom CPS 1/2
+  note Capcom CPS 1/2
 
-  # 16x16 4bpp Planar
+  # 16x16 4bitdepth Planar
   width 16
   height 16
-  bpp 4
-  #planeoffset 24, 16, 8, 0
-  planeoffset 0, 8, 16, 24
+  bitdepth 4
+  #plane_offsets 24, 16, 8, 0
+  plane_offsets 0, 8, 16, 24
 
-  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39
-  rowoffset 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960
+  pixel_offsets 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39
+  row_offsets 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960
 }
 
 chrdef
 {
   id chr_nintendo_sfc
-  comment Nintendo Super Famicom, NEC PC Engine
-  # 8x8 4bpp planar
+  note Nintendo Super Famicom, NEC PC Engine
+  # 8x8 4bitdepth planar
   width 8
   height 8
-  bpp 4
-  planeoffset 0, 8, 128, 136
-  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
-  rowoffset 0, 16, 32, 48, 64, 80, 96, 112
+  bitdepth 4
+  plane_offsets 0, 8, 128, 136
+  pixel_offsets 0, 1, 2, 3, 4, 5, 6, 7
+  row_offsets 0, 16, 32, 48, 64, 80, 96, 112
 }
 
 chrdef
 {
   id chr_nintendo_vb
-  comment Nintendo Virtual Boy
+  note Nintendo Virtual Boy
 
-  # 8x8 2bpp Packed
+  # 8x8 2bitdepth Packed
   width 8
   height 8
-  bpp 2
-  planeoffset 0, 1
-  pixeloffset 6, 4, 2, 0, 14, 12, 10, 8
-  rowoffset 0, 16, 32, 48, 64, 80, 96, 112
+  bitdepth 2
+  plane_offsets 0, 1
+  pixel_offsets 6, 4, 2, 0, 14, 12, 10, 8
+  row_offsets 0, 16, 32, 48, 64, 80, 96, 112
 }
 
 chrdef
 {
   id chr_nintendo_fc
-  comment Nintendo Famicom
+  note Nintendo Famicom
 
-  # 8x8 2bpp planar
+  # 8x8 2bitdepth planar
   width 8
   height 8
-  bpp 2
-  planeoffset 0, 64
-  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7
-  rowoffset 0, 8, 16, 24, 32, 40, 48, 56
+  bitdepth 2
+  plane_offsets 0, 64
+  pixel_offsets 0, 1, 2, 3, 4, 5, 6, 7
+  row_offsets 0, 8, 16, 24, 32, 40, 48, 56
 }
 
 chrdef
 {
   id chr_capcom_cps
-  comment Capcom CPS / CPS 2
+  note Capcom CPS / CPS 2
 
-  # 16x16 4bpp Planar
+  # 16x16 4bitdepth Planar
   width 16
   height 16
-  bpp 4
-  #planeoffset 24, 16, 8, 0
-  planeoffset 0, 8, 16, 24
+  bitdepth 4
+  #plane_offsets 24, 16, 8, 0
+  plane_offsets 0, 8, 16, 24
 
-  pixeloffset 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39
-  rowoffset 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960
+  pixel_offsets 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39
+  row_offsets 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960
 }
 
 #################################
@@ -334,7 +334,7 @@ rgbcoldef
   #   xxxxxxxG GGRRRBBB
   # (little endian)
   id col_nec_pcengine
-  comment NEC PC Engine / TurgoGrafx-16
+  note NEC PC Engine / TurgoGrafx-16
 
   bitdepth 3
   red_shift 3
@@ -350,26 +350,29 @@ rgbcoldef
 rgbcoldef
 {
   id col_snk_neogeo
-  comment SNK NeoGeo
+  note SNK NeoGeo
 
   # 15 |                               |0
   #    DDR0G0B0R4R3R2R1 G4G3G2G1B4B3B2B1
   # D = "dark bit", acts as shared LSB for all color components
   bitdepth 6
-  color_passes 3
-  red_shift 15, 14, 8
-  red_size 1, 1, 4
-  green_shift 15, 13, 4
-  green_size 1, 1, 4
-  blue_shift 15, 12, 0
-  blue_size 1, 1, 4
+  # color_passes 3
+  layout 8, 4, 4, 4, 0, 4
+  layout 14, 1, 13, 1, 12, 1
+  layout 15, 1, 15, 1, 15, 1
+  # red_shift 15, 14, 8
+  # red_size 1, 1, 4
+  # green_shift 15, 13, 4
+  # green_size 1, 1, 4
+  # blue_shift 15, 12, 0
+  # blue_size 1, 1, 4
   big_endian 1
 }
 
 rgbcoldef
 {
   id col_capcom_cps
-  comment Capcom CPS 1/2
+  note Capcom CPS 1/2
 
   # CPS 1/2 color format 
   # 15 |                  |0
@@ -401,7 +404,7 @@ rgbcoldef
 rgbcoldef
 {
   id col_capcom_cps_accurate
-  comment Capcom CPS 1/2 (more accurate colors)
+  note Capcom CPS 1/2 (more accurate colors)
 
   # CPS 1/2 color format 
   # 15 |                  |0
@@ -419,12 +422,7 @@ rgbcoldef
   # raw CPS data to PNG images
   bitdepth 4
   color_passes 1
-  red_shift 8
-  red_size 4
-  green_shift 4
-  green_size 4
-  blue_shift 0
-  blue_size 4
+  layout 8, 4, 4, 4, 0, 4
 
   big_endian 1
 }
@@ -432,25 +430,20 @@ rgbcoldef
 rgbcoldef
 {
   id col_sega_md
-  comment Sega Megadrive
+  note Sega Megadrive
 
   # 3 bit BGR
   # 15|               |0
   #   xxxxBBBx GGGxRRRx
   bitdepth 3
-  red_shift 1
-  red_size 3
-  green_shift 5
-  green_size 3
-  blue_shift 9
-  blue_size 3
+  layout 1, 3, 5, 3, 9, 3
   big_endian 1
 }
 
 refcoldef
 {
   id col_nintendo_vb
-  comment Nintendo Virtual Boy
+  note Nintendo Virtual Boy
 
   # VB "colors" are based on four levels of intensity
   # The first level is always black, but the other
@@ -459,24 +452,24 @@ refcoldef
   # reference palette. The values below were sampled
   # from Tetris 3D, which has a nice middle ground
   # (based on output from MAME)
-  reftab #000000,#2f0000,#8f0000,#cf0000
+  refpal #000000,#2f0000,#8f0000,#cf0000
 
   # alternatively, here is a reference palette based
   # on the Wario Land VB title screen, which leans a
   # bit brighter
-  # reftab #000000,#3f0000,#df0000,#ff0000
+  # refpal #000000,#3f0000,#df0000,#ff0000
 }
 
 refcoldef
 {
   id col_nintendo_fc
-  comment Nintendo Famicom
+  note Nintendo Famicom
 
   big_endian 0
 
   # a 'standard' 2C02 PPU palette, from:
   # https://wiki.nesdev.com/w/index.php/PPU_palettes
-  reftab #545454,#001E74,#08102C,#300088,#440064,#5C0030,#540400,#3C1800,#202A00,#083A00,#004000,#003C00,#00323C,#000000,#000000,#000000,#989698,#084CC4,#3032EC,#5C1EE4,#8814B0,#A01464,#982220,#783C00,#545A00,#287200,#087C00,#007628,#006678,#000000,#000000,#000000,#ECEEEC,#4C9AEC,#787CEC,#B062EC,#E454EC,#EC58B4,#EC6A64,#D48820,#A0AA00,#74C400,#4CD020,#38CC6C,#38B4CC,#3C3C3C,#000000,#000000,#ECEEEC,#A8CCEC,#BCBCEC,#D4B2EC,#ECAEEC,#ECAED4,#ECB4B0,#E4C490,#CCD278,#B4DE78,#A8E290,#98E2B4,#A0D6E4,#A0A2A0,#000000,#000000
+  refpal #545454,#001E74,#08102C,#300088,#440064,#5C0030,#540400,#3C1800,#202A00,#083A00,#004000,#003C00,#00323C,#000000,#000000,#000000,#989698,#084CC4,#3032EC,#5C1EE4,#8814B0,#A01464,#982220,#783C00,#545A00,#287200,#087C00,#007628,#006678,#000000,#000000,#000000,#ECEEEC,#4C9AEC,#787CEC,#B062EC,#E454EC,#EC58B4,#EC6A64,#D48820,#A0AA00,#74C400,#4CD020,#38CC6C,#38B4CC,#3C3C3C,#000000,#000000,#ECEEEC,#A8CCEC,#BCBCEC,#D4B2EC,#ECAEEC,#ECAED4,#ECB4B0,#E4C490,#CCD278,#B4DE78,#A8E290,#98E2B4,#A0D6E4,#A0A2A0,#000000,#000000
 
   # Some other palette examples: http://emulation.gametechwiki.com/index.php/Famicom_Color_Palette
 }
@@ -484,19 +477,19 @@ refcoldef
 refcoldef
 {
   id col_nintendo_gb
-  comment Nintendo Game Boy
+  note Nintendo Game Boy
 
   # black & white "colors" are based on luminance only
   # so we need an RGB equivalent palette
   # this is based on the yellow-green tint on the original system
-  reftab #fffb87,#b1ae4e,#84804e,#4e4e4e
+  refpal #fffb87,#b1ae4e,#84804e,#4e4e4e
 }
 
 refcoldef
 {
   id col_nintendo_gb_pocket
-  comment Nintendo Game Boy Pocket
+  note Nintendo Game Boy Pocket
 
   # this is based on the light gray/black tint of the GB Pocket screen
-  reftab #c4cfa1,#8b956d,#6b7353,#414141
+  refpal #c4cfa1,#8b956d,#6b7353,#414141
 }

@@ -36,6 +36,8 @@ public:
 
 	basic_color() = default;
 	basic_color(basic_color const & other) = default;
+	basic_color(std::string_view color);
+	basic_color(std::string const & color);
 
 	explicit basic_color(uint8_t red, uint8_t green, uint8_t blue);
 

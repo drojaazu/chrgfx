@@ -27,7 +27,7 @@ std::basic_string<typename StringT::value_type> concat_paths(StringT const & bas
 	oss << base_path;
 	if (base_path.back() != '/')
 		oss << '/';
-	
+
 	size_t path_count = sizeof...(paths);
 	size_t u = 0;
 	for (auto const & path : {paths...})

@@ -1,15 +1,34 @@
 #include "basic_gfx.hpp"
+#include "strutil.hpp"
 #include <stdexcept>
 
 namespace chrgfx
 {
 
 using namespace std;
+using namespace motoi;
 
 basic_color::basic_color(uint8_t red, uint8_t green, uint8_t blue) :
 		red {red},
 		green {green},
 		blue {blue}
+{
+}
+
+basic_color::basic_color(string_view color)
+{
+	if (color[0] == '#')
+		color = color.begin() + 1;
+	if (color.length() != 6)
+		throw runtime_error("invalid hex triplet specified for color (shorthand format not supported)");
+
+	red = sto<uint8_t>(color.substr(0, 2), 16);
+	green = sto<uint8_t>(color.substr(2, 2), 16);
+	blue = sto<uint8_t>(color.substr(4, 2), 16);
+}
+
+basic_color::basic_color(string const & color) :
+		basic_color::basic_color(string_view(color))
 {
 }
 

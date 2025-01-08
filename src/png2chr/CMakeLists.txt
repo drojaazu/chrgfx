@@ -11,6 +11,7 @@ target_sources(png2chr
 PRIVATE
 	app.hpp
 	main.cpp
+	${PROJECT_SOURCE_DIR}/src/shared/cfgload.cpp
 	${PROJECT_SOURCE_DIR}/src/shared/defblocks.cpp
 	${PROJECT_SOURCE_DIR}/src/shared/filesys.hpp
 	${PROJECT_SOURCE_DIR}/src/shared/fstreams.hpp

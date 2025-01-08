@@ -7,12 +7,14 @@
  * Updates:
  * 20211214 Initial
  * 20230215 Addition of to_hex
+ * 20250103 Added string_view to a number of functions; added sto_array; added split_container; added split_array
  */
 
 #ifndef __MOTOI__STRUTIL_HPP
 #define __MOTOI__STRUTIL_HPP
 
 #include <algorithm>
+#include <array>
 #include <charconv>
 #include <iomanip>
 #include <sstream>
@@ -20,6 +22,8 @@
 #include <type_traits>
 #include <vector>
 
+namespace motoi
+{
 /**
  * @brief Removes all instances of a given character from a string
  *
@@ -90,6 +94,20 @@ inline void trim(std::basic_string<CharT> & str)
 	rtrim(str);
 }
 
+constexpr auto WHITESPACE {"\t\n\v\f\r "};
+
+template <typename CharT>
+inline std::basic_string_view<CharT> trim_view(std::basic_string<CharT> const & str)
+{
+	return std::string_view(str).substr(str.find_first_not_of(WHITESPACE), str.find_last_not_of(WHITESPACE) + 1);
+}
+
+template <typename CharT>
+inline std::basic_string_view<CharT> trim_view(std::basic_string_view<CharT> str)
+{
+	return str.substr(str.find_first_not_of(WHITESPACE), str.find_last_not_of(WHITESPACE) + 1);
+}
+
 /**
  * @brief Converts alphabetic characters within a string to lower case
  *
@@ -112,21 +130,10 @@ inline void upper(std::basic_string<CharT> & str)
 	std::transform(str.begin(), str.end(), str.begin(), ::toupper);
 }
 
-/**
- * @brief Converts a string to an arbitrary numeric type
- *
- * @note Uses @c std::from_chars, please see documentation on this function
- * for details regarding valid input patterns
- *
- * @tparam T numeric type
- * @param s string to interpret
- * @param base interpret number with the given base
- * @return T value as a numeric type
- */
-template <typename T, typename CharT>
-T sto(std::basic_string<CharT> const & str, int const base = 10)
+template <typename NumT, typename CharT>
+NumT sto(std::basic_string_view<CharT> const & str, int const base = 10)
 {
-	T value;
+	NumT value;
 	auto ec = std::from_chars(str.data(), str.data() + str.size(), value, base).ec;
 	if (ec == std::errc::result_out_of_range)
 	{
@@ -143,10 +150,27 @@ T sto(std::basic_string<CharT> const & str, int const base = 10)
 	return value;
 }
 
-template <typename T>
-T sto(char const * str, int const base = 10)
+/**
+ * @brief Converts a string to an arbitrary numeric type
+ *
+ * @note Uses @c std::from_chars, please see documentation on this function
+ * for details regarding valid input patterns
+ *
+ * @tparam NumT numeric type
+ * @param s string to interpret
+ * @param base interpret number with the given base
+ * @return T value as a numeric type
+ */
+template <typename NumT, typename CharT>
+NumT sto(std::basic_string<CharT> const & str, int const base = 10)
 {
-	return sto<T>(std::string(str), base);
+	return sto<NumT>(std::basic_string_view<CharT>(str), base);
+}
+
+template <typename NumT>
+NumT sto(char const * str, int const base = 10)
+{
+	return sto<NumT>(std::string(str), base);
 }
 
 /**
@@ -155,24 +179,82 @@ T sto(char const * str, int const base = 10)
  * @note Uses @c std::from_chars, please see documentation on this function
  * for details regarding valid input patterns
  *
- * @tparam T numeric type
+ * @tparam NumT numeric type
  * @param s string to interpret
  * @param base interpret number with the given base
  * @return T value as a numeric type
  */
-template <typename T, typename CharT>
-T sto_pos(std::basic_string<CharT> const & str, int const base = 10)
+template <typename NumT, typename CharT>
+NumT sto_pos(std::basic_string<CharT> const & str, int const base = 10)
 {
-	T out {sto<T>(str, base)};
+	NumT out {sto<NumT>(str, base)};
 	if (out <= 0)
 		throw std::out_of_range("Value must be greater than zero");
 	return out;
 }
 
-template <typename T>
-T sto_pos(char const * str, int const base = 10)
+template <typename NumT>
+NumT sto_pos(char const * str, int const base = 10)
 {
-	return sto_pos<T>(std::string(str), base);
+	return sto_pos<NumT>(std::string(str), base);
+}
+
+template <typename ContainerT, typename CharT>
+ContainerT split_container(std::basic_string_view<CharT> str, char const delim = ',')
+{
+	ContainerT out;
+	size_t start {0}, len {0};
+	for (size_t i {0}; i < str.size(); ++i)
+	{
+		if (str[i] == delim && len > 0)
+		{
+			out.push_back(trim_view(std::string_view(str.begin() + start, len)));
+			len = 0;
+			start = i + 1;
+			continue;
+		}
+		++len;
+	}
+
+	if (len > 0)
+		out.push_back(trim_view(std::string_view(str.begin() + start, len)));
+
+	return out;
+}
+
+template <typename ContainerT, typename CharT>
+ContainerT split_container(std::basic_string<CharT> const & str, char const delim = ',')
+{
+	return split_container<ContainerT>(std::basic_string_view<CharT>(str));
+}
+
+template <typename ArrayT, size_t Size, typename CharT>
+std::array<ArrayT, Size> split_array(std::basic_string_view<CharT> str, char const delim = ',')
+{
+	std::array<ArrayT, Size> out;
+	size_t start {0}, len {0}, index {0};
+	for (size_t i {0}; i < str.size(); ++i)
+	{
+		if (str[i] == delim && len > 0)
+		{
+			out[index++] = trim_view(std::string_view(str.begin() + start, len));
+			len = 0;
+			start = i + 1;
+			continue;
+		}
+		++len;
+	}
+
+	if (len > 0)
+		out[index++] = trim_view(std::string_view(str.begin() + start, len));
+
+	return out;
+}
+
+template <typename ArrayT, size_t Size, typename CharT>
+std::array<ArrayT, Size> split_array(std::basic_string<CharT> const & str, char const delim = ',')
+{
+	return split_array<ArrayT, Size>(std::basic_string_view<CharT>(str));
 }
 
 /**
@@ -185,27 +267,98 @@ T sto_pos(char const * str, int const base = 10)
  * @return ContainerT
  */
 template <typename ContainerT, typename CharT>
-ContainerT sto_container(std::basic_string<CharT> const & str, char const delim = ',')
+ContainerT sto_container(std::basic_string_view<CharT> str, char const delim = ',')
 {
 	ContainerT out;
-	std::istringstream ss {str};
-	std::basic_string<CharT> line;
-
-	while (getline(ss, line, delim))
+	size_t start {0}, len {0};
+	for (size_t i {0}; i < str.size(); ++i)
 	{
-		trim(line);
-		out.push_back(sto<typename ContainerT::value_type>(line));
+		if (str[i] == delim && len > 0)
+		{
+			out.push_back(sto<typename ContainerT::value_type>(trim_view(std::string_view(str.begin() + start, len))));
+			len = 0;
+			start = i + 1;
+			continue;
+		}
+		++len;
 	}
+
+	if (len > 0)
+		out.push_back(sto<typename ContainerT::value_type>(trim_view(std::string_view(str.begin() + start, len))));
 
 	return out;
 }
+
+template <typename ContainerT, typename CharT>
+ContainerT sto_container(std::basic_string<CharT> const & str, char const delim = ',')
+{
+	return sto_container<ContainerT>(std::basic_string_view<CharT>(str));
+}
+
+/**
+ * @brief
+ *
+ * @tparam ContainerT Container type with push_back method
+ * @tparam NumT Numeric type
+ * @tparam Size Size of the array
+ * @tparam CharT Char type in string
+ * @param str
+ * @param delim
+ * @return ContainerT
+ */
+template <typename NumT, size_t Size, typename CharT>
+std::array<NumT, Size> sto_array(std::basic_string_view<CharT> str, char const delim = ',')
+{
+	std::array<NumT, Size> out;
+	out.fill(0);
+	size_t start {0}, len {0}, index {0};
+	for (size_t i {0}; i < str.size(); ++i)
+	{
+		if (str[i] == delim && len > 0)
+		{
+			out[index++] = sto<NumT>(trim_view(std::string_view(str.begin() + start, len)));
+			len = 0;
+			start = i + 1;
+			continue;
+		}
+		++len;
+	}
+
+	if (len > 0)
+		out[index++] = sto<NumT>(trim_view(std::string_view(str.begin() + start, len)));
+
+	return out;
+}
+
+template <typename NumT, size_t Size, typename CharT>
+std::array<NumT, Size> sto_array(std::basic_string<CharT> const & str, char const delim = ',')
+{
+	return sto_array<NumT, Size>(std::basic_string_view<CharT>(str));
+}
+
+/**
+ * @brief
+ *
+ * @tparam ContainerT Container type with push_back method
+ * @tparam CharT
+ * @param str
+ * @param delim
+ * @return ContainerT
+ */
+/*
+template <typename ContainerT, typename CharT>
+ContainerT sto_container(std::basic_string<CharT> const & str, char const delim = ',')
+{
+ return sto_container(std::basic_string_view<CharT>(str), delim);
+}
+*/
 
 /**
  * @brief Creates a container with a range of specified values with the following formats:
  *
  * [count] - range from 0 to count with an interval of 1
  * [start:count] - range from start to count with an interval of 1
- * [start:count:step] - range from start to count with an interval of step
+ * [start:count:interval] - range from start to count with the specified interval
  *
  * @tparam ContainerT Container type with push_back method and element count constructor
  * @tparam CharT
@@ -254,7 +407,7 @@ ContainerT sto_range(std::basic_string<CharT> const & str, char const delim = ':
 
 /**
  * @brief Parse a string as a boolean
- * @note Allowed values: "t", "true", "1" for true, "f", "false", "0" for false(upper or lower
+ * @note Allowed values: "t", "true", "1" for true, "f", "false", "0" for false (upper or lower
  * case)
  */
 template <typename CharT>
@@ -280,5 +433,57 @@ std::basic_string<CharT> to_hex(const char * data, size_t const len)
 		oss << std::hex << std::setfill('0') << std::setw(2) << (int) (unsigned char) data[iter];
 	return oss.str();
 }
+
+/**
+ * @brief Split a string on the specified char delimiter
+ * @note Assumes input string has already been whitespace trimmed
+ */
+template <typename CharT>
+std::pair<std::basic_string<CharT>, std::basic_string<CharT>> kvsplit(
+	std::basic_string<CharT> const & line, std::string const & delim = " ")
+{
+	auto delim_pos {line.find_first_of(delim)};
+	if (delim_pos == std::string::npos)
+	{
+		std::stringstream ss;
+		ss << "Delimiter '" << delim << "' not found in string \"" << line << "\"";
+		throw std::invalid_argument(ss.str());
+	}
+	return {line.substr(0, delim_pos), line.substr(delim_pos + 1, std::string::npos)};
+}
+
+template <typename CharT>
+class basic_wsstring : std::basic_string<CharT>
+{
+public:
+	using std::basic_string<CharT>::operator[];
+
+	basic_wsstring<CharT>(CharT const * c) :
+			std::basic_string<CharT>(c) {};
+
+	bool operator==(std::string const & other) const
+	{
+		size_t other_index {0}, this_index {0};
+		while (other[other_index] == ' ' || other[other_index] == '\t')
+			++other_index;
+
+		while (this_index < this->size())
+			if ((*this)[this_index++] != other[other_index++])
+				return false;
+
+		if (other_index == other.size())
+			return true;
+		while (other[other_index] == ' ' || other[other_index] == '\t')
+			++other_index;
+		if (other_index == other.size())
+			return true;
+
+		return false;
+	}
+};
+
+using wsstring = basic_wsstring<char>;
+
+} // namespace motoi
 
 #endif

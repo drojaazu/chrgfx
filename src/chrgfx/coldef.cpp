@@ -13,21 +13,21 @@ coldef::coldef(string const & id, coldef_type const type, bool const big_endian,
 {
 }
 
-refcoldef::refcoldef(string const & id, basic_palette reftab, bool const big_endian, string const & description) :
+refcoldef::refcoldef(string const & id, basic_palette refpal, bool const big_endian, string const & description) :
 		coldef(id, ref, big_endian, description),
-		m_reftab(reftab)
+		m_refpal(refpal)
 {
 }
 
 basic_color refcoldef::by_value(uint const index) const
 {
-	return m_reftab[index];
+	return m_refpal[index];
 };
 
 uint refcoldef::by_color(basic_color const & rgb) const
 {
 	size_t idx {0};
-	for (auto & this_color : m_reftab)
+	for (auto & this_color : m_refpal)
 	{
 		if (this_color.red == rgb.red && this_color.green == rgb.green && this_color.blue == rgb.blue)
 		{
@@ -38,9 +38,9 @@ uint refcoldef::by_color(basic_color const & rgb) const
 
 	// this could certainly use some tuning, but it mostly works
 	vector<pair<int, int>> distances;
-	distances.reserve(this->m_reftab.size());
+	distances.reserve(this->m_refpal.size());
 	int pal_color_iter {0};
-	for (const auto & this_color : this->m_reftab)
+	for (const auto & this_color : this->m_refpal)
 	{
 		int this_distance =
 			(abs(this_color.red - rgb.red)) + (abs(this_color.green - rgb.green)) + (abs(this_color.blue - rgb.blue));
@@ -62,9 +62,9 @@ uint refcoldef::by_color(basic_color const & rgb) const
 	return idx;
 };
 
-basic_palette const & refcoldef::reftab() const
+basic_palette const & refcoldef::refpal() const
 {
-	return m_reftab;
+	return m_refpal;
 }
 
 bool coldef::big_endian() const

@@ -11,6 +11,7 @@
 
 using namespace std;
 using namespace chrgfx;
+using namespace motoi;
 
 void process_args(int argc, char ** argv);
 
@@ -35,12 +36,6 @@ int main(int argc, char ** argv)
 		process_args(argc, argv);
 
 		def_helper defs(cfg);
-
-		if (cfg.list_gfxdefs)
-		{
-			defs.list_gfxdefs(cout);
-			exit(0);
-		}
 
 		// set up input data
 		ifstream png_fstream;

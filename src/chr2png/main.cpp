@@ -1,5 +1,6 @@
 #include "blob.hpp"
 #include "fstreams.hpp"
+#include "gfxdefman.hpp"
 #include "imgfmt_png.hpp"
 #include "shared.hpp"
 #include <chrgfx/chrgfx.hpp>
@@ -38,13 +39,8 @@ int main(int argc, char ** argv)
 #endif
 		process_args(argc, argv);
 
-		def_helper defs(cfg);
-
-		if (cfg.list_gfxdefs)
-		{
-			defs.list_gfxdefs(cout);
-			exit(0);
-		}
+		gfxdef_manager defs;
+		defs.load_gfxdefs(cfg);
 
 		istream * chrdata;
 		ifstream ifs;
@@ -77,9 +73,9 @@ int main(int argc, char ** argv)
 #endif
 			size_t
 				// byte size of one encoded tile
-				in_chunksize {(uint) (defs.chrdef->datasize() / 8)},
+				in_chunksize {(uint) (defs.chrdef()->datasize() / 8)},
 				// byte size of one basic (decoded) tile
-				out_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())};
+				out_chunksize {(size_t) (defs.chrdef()->width() * defs.chrdef()->height())};
 
 			// buffer for a single encoded tile, read from the stream
 			auto in_tile = new byte_t[in_chunksize], out_tile = new basic_pixel[out_chunksize];
@@ -95,7 +91,7 @@ int main(int argc, char ** argv)
 				if (! chrdata->good())
 					break;
 
-				decode_chr(*defs.chrdef, in_tile, out_tile);
+				decode_chr(*defs.chrdef(), in_tile, out_tile);
 				out_buffer.append(out_tile, out_chunksize);
 			}
 			delete[] out_tile;
@@ -120,7 +116,7 @@ int main(int argc, char ** argv)
 			if (! cfg.paldata_name.empty())
 			{
 				ifstream paldata {ifstream_checked(cfg.paldata_name)};
-				size_t pal_size {defs.paldef->datasize() / 8};
+				size_t pal_size {defs.paldef()->datasize() / 8};
 				byte_t palbuffer[pal_size];
 
 				paldata.seekg(cfg.pal_line * pal_size, ios::beg);
@@ -128,7 +124,7 @@ int main(int argc, char ** argv)
 				if (! paldata.good())
 					throw runtime_error("Cannot read specified palette line index");
 
-				decode_pal(*defs.paldef, *defs.coldef, palbuffer, &workpal);
+				decode_pal(*defs.paldef(), *defs.coldef(), palbuffer, &workpal);
 			}
 			else
 			{
@@ -151,7 +147,7 @@ int main(int argc, char ** argv)
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			auto rendered_tiles = render_chrset(*defs.chrdef, out_buffer, out_buffer.size(), cfg.render_cfg);
+			auto rendered_tiles = render_chrset(*defs.chrdef(), out_buffer, out_buffer.size(), cfg.render_cfg);
 			rendered_tiles.palette(workpal);
 			png::image<png::index_pixel> outimg {to_png(rendered_tiles, cfg.render_cfg.trns_index)};
 
@@ -219,7 +215,7 @@ void process_args(int argc, char ** argv)
 		// handle chr2png specific arguments
 		switch (this_opt)
 		{
-				// input tile data path
+			// input tile data path
 			case 'c':
 				cfg.chrdata_name = optarg;
 				break;
@@ -229,7 +225,7 @@ void process_args(int argc, char ** argv)
 				cfg.paldata_name = optarg;
 				break;
 
-				// palette line
+			// palette line
 			case 'l':
 				try
 				{

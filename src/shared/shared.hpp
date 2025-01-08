@@ -23,7 +23,7 @@ extern std::vector<option_details> opt_details;
 
 struct runtime_config
 {
-	std::string profile;
+	std::string profile_id;
 	std::string gfxdefs_path;
 	std::string chrdef_id;
 	std::string coldef_id;
@@ -39,8 +39,6 @@ struct runtime_config
 	std::string rgbcoldef_big_endian;
 	std::string rgbcoldef_rgblayout;
 	std::string rgbcoldef_bitdepth;
-
-	bool list_gfxdefs {false};
 };
 
 class def_helper

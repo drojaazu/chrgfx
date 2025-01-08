@@ -31,7 +31,7 @@ public:
 
 	[[nodiscard]] std::string const & id() const;
 
-	[[nodiscard]] std::string const & description() const;
+	[[nodiscard]] std::string const & note() const;
 };
 
 } // namespace chrgfx

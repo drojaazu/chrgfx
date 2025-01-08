@@ -41,13 +41,13 @@ protected:
 };
 
 /**
- * @brief Non-RGB (reftab based) color encoding
+ * @brief Non-RGB (reference palette based) color encoding
  */
 class refcoldef : public coldef
 {
 public:
 	refcoldef(
-		std::string const & id, basic_palette reftab, bool big_endian = false, std::string const & description = "");
+		std::string const & id, basic_palette refpal, bool big_endian = false, std::string const & description = "");
 
 	/**
 	 * @return color color from the reference palette for the given index
@@ -60,10 +60,10 @@ public:
 	 */
 	[[nodiscard]] uint by_color(basic_color const & rgb) const;
 
-	[[nodiscard]] basic_palette const & reftab() const;
+	[[nodiscard]] basic_palette const & refpal() const;
 
 protected:
-	basic_palette const m_reftab;
+	basic_palette const m_refpal;
 };
 
 /**

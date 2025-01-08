@@ -9,26 +9,24 @@
 class defblock_key_error : public std::runtime_error
 {
 public:
-	defblock_key_error(std::string const & what, std::string key, std::string block_id = nullptr);
+	defblock_key_error(std::string const & what, std::string const & key);
 
 	[[nodiscard]] std::string key() const;
-	[[nodiscard]] std::string block() const;
 
 private:
 	std::string const m_key;
-	std::string const m_block_id;
-	std::string const m_what;
 };
 
-class defblock_value_error : public defblock_key_error
+class defblock_value_error : public std::runtime_error
 {
 public:
-	defblock_value_error(
-		std::string const & what, std::string const & key, std::string value, std::string const & block_id = nullptr);
+	defblock_value_error(std::string const & what, std::string const & key, std::string const & value);
 
+	[[nodiscard]] std::string key() const;
 	[[nodiscard]] std::string value() const;
 
 private:
+	std::string const m_key;
 	std::string const m_value;
 };
 

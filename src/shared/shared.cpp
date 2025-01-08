@@ -98,9 +98,9 @@ def_helper::def_helper(runtime_config & cfg) :
 	string chrdef_id, coldef_id, paldef_id;
 
 	// configure from gfxprofile if specified
-	if (! cfg.profile.empty())
+	if (! cfg.profile_id.empty())
 	{
-		auto profile = find_gfxprofile(cfg.profile);
+		auto profile = find_gfxprofile(cfg.profile_id);
 		chrdef_id = profile.chrdef_id();
 		coldef_id = profile.coldef_id();
 		paldef_id = profile.paldef_id();
@@ -126,9 +126,9 @@ def_helper::def_helper(runtime_config & cfg) :
 	if (use_chrdefbuilder(cfg))
 	{
 		chrdef_builder builder(*chrdef);
-		builder.from_chrdef(*chrdef);
+		builder.from_def(*chrdef);
 		builder.set_id("chrdef_cli_generated");
-		builder.set_desc("CHRDEF generated from CLI");
+		builder.set_note("CHRDEF generated from CLI");
 		if (! cfg.chrdef_width.empty())
 			builder.set_width(cfg.chrdef_width);
 		if (! cfg.chrdef_height.empty())
@@ -142,16 +142,16 @@ def_helper::def_helper(runtime_config & cfg) :
 		if (! cfg.chrdef_row_offsets.empty())
 			builder.set_row_offsets(cfg.chrdef_row_offsets);
 		m_heapallocated_chrdef = true;
-		chrdef = new chrgfx::chrdef(builder.build());
+		chrdef = builder.build();
 	}
 
 	if (use_rgbcoldefbuilder(cfg))
 	{
 		rgbcoldef_builder builder;
 		if (coldef->type() == coldef_type::rgb)
-			builder.from_rgbcoldef(*static_cast<rgbcoldef const *>(coldef));
+			builder.from_def(*static_cast<rgbcoldef const *>(coldef));
 		builder.set_id("rgbcoldef_cli_generated");
-		builder.set_desc("COLDEF generated from CLI");
+		builder.set_note("COLDEF generated from CLI");
 		if (! cfg.rgbcoldef_bitdepth.empty())
 			builder.set_bitdepth(cfg.rgbcoldef_bitdepth);
 		if (! cfg.rgbcoldef_rgblayout.empty())
@@ -159,7 +159,7 @@ def_helper::def_helper(runtime_config & cfg) :
 		if (! cfg.rgbcoldef_big_endian.empty())
 			builder.set_big_endian(cfg.rgbcoldef_big_endian);
 		m_heapallocated_coldef = true;
-		coldef = new chrgfx::rgbcoldef(builder.build());
+		coldef = builder.build();
 	}
 
 #ifdef DEBUG
@@ -185,64 +185,64 @@ void def_helper::list_gfxdefs(ostream & os)
 	for (auto const & profile : m_defs.profiles)
 	{
 		os << "profile " << profile.second.id();
-		if (! profile.second.description().empty())
-			os << " (" << profile.second.description() << ')';
+		if (! profile.second.note().empty())
+			os << " (" << profile.second.note() << ')';
 		os << " [External]\n";
 	}
 
 	for (auto const & chrdef : chrgfx::gfxdefs::chrdefs)
 	{
 		os << "chrdef " << chrdef.second.id();
-		if (! chrdef.second.description().empty())
-			os << " (" << chrdef.second.description() << ')';
+		if (! chrdef.second.note().empty())
+			os << " (" << chrdef.second.note() << ')';
 		os << " [Internal]\n";
 	}
 
 	for (auto const & chrdef : m_defs.chrdefs)
 	{
 		os << "chrdef " << chrdef.second.id();
-		if (! chrdef.second.description().empty())
-			os << " (" << chrdef.second.description() << ')';
+		if (! chrdef.second.note().empty())
+			os << " (" << chrdef.second.note() << ')';
 		os << " [External]\n";
 	}
 
 	for (auto const & paldef : chrgfx::gfxdefs::paldefs)
 	{
 		os << "paldef " << paldef.second.id();
-		if (! paldef.second.description().empty())
-			os << " (" << paldef.second.description() << ')';
+		if (! paldef.second.note().empty())
+			os << " (" << paldef.second.note() << ')';
 		os << " [Internal]\n";
 	}
 
 	for (auto const & paldef : m_defs.paldefs)
 	{
 		os << "paldef " << paldef.second.id();
-		if (! paldef.second.description().empty())
-			os << " (" << paldef.second.description() << ')';
+		if (! paldef.second.note().empty())
+			os << " (" << paldef.second.note() << ')';
 		os << " [External]\n";
 	}
 
 	for (auto const & rgbcoldef : chrgfx::gfxdefs::rgbcoldefs)
 	{
 		os << "coldef " << rgbcoldef.second.id();
-		if (! rgbcoldef.second.description().empty())
-			os << " (" << rgbcoldef.second.description() << ')';
+		if (! rgbcoldef.second.note().empty())
+			os << " (" << rgbcoldef.second.note() << ')';
 		os << " [Internal]\n";
 	}
 
 	for (auto const & rgbcoldef : m_defs.rgbcoldefs)
 	{
 		os << "coldef " << rgbcoldef.second.id();
-		if (! rgbcoldef.second.description().empty())
-			os << " (" << rgbcoldef.second.description() << ')';
+		if (! rgbcoldef.second.note().empty())
+			os << " (" << rgbcoldef.second.note() << ')';
 		os << " [External]\n";
 	}
 
 	for (auto const & refcoldef : m_defs.refcoldefs)
 	{
 		os << "coldef " << refcoldef.second.id();
-		if (! refcoldef.second.description().empty())
-			os << " (" << refcoldef.second.description() << ')';
+		if (! refcoldef.second.note().empty())
+			os << " (" << refcoldef.second.note() << ')';
 		os << " [External]\n";
 	}
 }
@@ -351,11 +351,7 @@ bool shared_args(char this_opt, runtime_config & cfg)
 			break;
 
 		case 'P':
-			cfg.profile = optarg;
-			break;
-
-		case 'a':
-			cfg.list_gfxdefs = true;
+			cfg.profile_id = optarg;
 			break;
 
 		case 'h':

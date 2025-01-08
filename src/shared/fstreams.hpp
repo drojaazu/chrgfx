@@ -1,47 +1,52 @@
 /**
  * @file fstreams.hpp
- * @author Motoi Productions (Damian Rogers damian@motoi.pro)
+ * @author Damian Rogers (damian@motoi.pro)
  * @brief Checked file streams
+ * @copyright Motoi Productions / Released under MIT License
  *
  * Updates:
  * 20220916 Initial
- * 20240224 Changed to basic_streams with data type template options
+ * 20221118 Changed exception to std::system_error
+ * 20230415 Added default string type; removed extraneous errno message
  */
 
 #ifndef __MOTOI__FSTREAMS_HPP
 #define __MOTOI__FSTREAMS_HPP
 
-#include <cstring>
 #include <fstream>
 #include <sstream>
-#include <stdexcept>
+#include <system_error>
 
-template <typename DataT = char, typename StringT>
-std::basic_ifstream<DataT> ifstream_checked(
+namespace motoi
+{
+
+template <typename StringT = char>
+std::ifstream ifstream_checked(
 	std::basic_string<StringT> const & path, std::basic_string<StringT> const & purpose = "read")
 {
-	std::basic_ifstream<DataT> ifs(path);
+	std::ifstream ifs(path);
 	if (! ifs.good())
 	{
 		std::basic_ostringstream<StringT> oss;
-		oss << "Could not open input path \"" << path << "\" for " << purpose << ": " << strerror(errno);
-		throw std::runtime_error(oss.str());
+		oss << "Could not open \"" << path << "\" for " << purpose;
+		throw std::system_error(errno, std::system_category(), oss.str());
 	}
 	return ifs;
 }
 
-template <typename DataT = char, typename StringT>
-std::basic_ofstream<DataT> ofstream_checked(
+template <typename StringT = char>
+std::ofstream ofstream_checked(
 	std::basic_string<StringT> const & path, std::basic_string<StringT> const & purpose = "write")
 {
-	std::basic_ofstream<DataT> ofs(path);
+	std::ofstream ofs(path);
 	if (! ofs.good())
 	{
 		std::basic_ostringstream<StringT> oss;
-		oss << "Could not open output path \"" << path << "\" for " << purpose << ": " << strerror(errno);
-		throw std::runtime_error(oss.str());
+		oss << "Could not open \"" << path << "\" for " << purpose;
+		throw std::system_error(errno, std::system_category(), oss.str());
 	}
 	return ofs;
 }
+} // namespace motoi
 
 #endif

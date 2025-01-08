@@ -128,13 +128,7 @@ int main(int argc, char ** argv)
 
 		work_coldef = defs.coldef;
 		work_paldef = defs.paldef;
-
-		if (cfg.list_gfxdefs)
-		{
-			defs.list_gfxdefs(cout);
-			exit(0);
-		}
-
+		
 		if (cfg.full_pal)
 			render_full_palette();
 		else

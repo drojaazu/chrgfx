@@ -189,7 +189,7 @@ Reference tables are much easier to understand and define. As an example, the or
 
       # a 'standard' 2C02 PPU palette, from:
       # https://wiki.nesdev.com/w/index.php/PPU_palettes
-      reftab #545454,#001E74,#08102C,#300088,#440064,#5C0030,#540400,...
+      refpal #545454,#001E74,#08102C,#300088,#440064,#5C0030,#540400,...
     }
 
 (The full list of 64 colors was abridged here for readability.)
@@ -220,4 +220,4 @@ big_endian - (Optional) Indicates the original hardware is big endian; if not sp
 
 #### refcoldef reference
 
-`reftab` - A comma delimited list of HTML style RGB colors to represent each possible non-RGB color on the original hardware
+`refpal` - A comma delimited list of HTML style RGB colors to represent each possible non-RGB color on the original hardware
