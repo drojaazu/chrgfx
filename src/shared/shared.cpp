@@ -1,5 +1,4 @@
 #include "shared.hpp"
-#include "xdgdirs.hpp"
 #include <iostream>
 
 using namespace std;
