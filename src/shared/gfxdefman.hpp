@@ -8,34 +8,19 @@
 #include "gfxdef_builder.hpp"
 #include "paldef.hpp"
 #include "shared.hpp"
+#include "xdgdirs.hpp"
 #include <map>
 #include <vector>
 
-struct gfxdef_config
-{
-	std::string gfxdefs_path;
-	std::string profile_id;
-	std::string chrdef_id;
-	std::string coldef_id;
-	std::string paldef_id;
-};
+static auto constexpr GFXDEF_SUBDIR {"chrgfx/gfxdefs"};
 
-struct chrdef_build_config
+std::string get_gfxdefs_path()
 {
-	std::string chrdef_width;
-	std::string chrdef_height;
-	std::string chrdef_bpp;
-	std::string chrdef_plane_offsets;
-	std::string chrdef_pixel_offsets;
-	std::string chrdef_row_offsets;
-};
-
-struct rgbcoldef_build_config
-{
-	std::string rgbcoldef_big_endian;
-	std::string rgbcoldef_rgblayout;
-	std::string rgbcoldef_bitdepth;
-};
+	auto xdg_locations {data_filepaths(GFXDEF_SUBDIR)};
+	if (xdg_locations.empty())
+		throw runtime_error("Could not find gfxdef file in any default location");
+	return xdg_locations.front();
+}
 
 class gfxdef_manager
 {
@@ -49,15 +34,9 @@ private:
 	std::string m_target_paldef;
 	std::string m_target_coldef;
 
-	gfxdef_config const * m_gfxdef_cfg {nullptr};
-	chrdef_build_config const * m_chrdef_build_cfg {nullptr};
-	rgbcoldef_build_config const * m_rgbcoldef_build_cfg {nullptr};
-
 	std::vector<chrgfx::gfxdef const *> m_allocated_gfxdefs;
 
 	std::vector<std::string_view> m_errors;
-
-	static auto constexpr GFXDEF_SUBDIR {"chrgfx/gfxdefs"};
 
 	enum class def_type
 	{

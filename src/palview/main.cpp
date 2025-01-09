@@ -1,5 +1,6 @@
 #include "blob.hpp"
 #include "fstreams.hpp"
+#include "gfxdefman.hpp"
 #include "imgfmt_png.hpp"
 #include "setup.hpp"
 #include <chrgfx/chrgfx.hpp>
@@ -124,11 +125,12 @@ int main(int argc, char ** argv)
 
 		process_args(argc, argv);
 
-		def_helper defs(cfg);
+		gfxdef_manager defs;
+		defs.load_gfxdefs(cfg);
 
-		work_coldef = defs.coldef;
-		work_paldef = defs.paldef;
-		
+		work_coldef = defs.coldef();
+		work_paldef = defs.paldef();
+
 		if (cfg.full_pal)
 			render_full_palette();
 		else

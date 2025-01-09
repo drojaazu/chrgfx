@@ -2,19 +2,10 @@
 #define CHRGFX__SHARED_SHARED_HPP
 
 #include <getopt.h>
-#include <iostream>
 #include <string>
 #include <vector>
 
-#include "builtin_defs.hpp"
-#include "chrdef.hpp"
-#include "coldef.hpp"
-#include "import_defs.hpp"
-#include "paldef.hpp"
 #include "usage.hpp"
-
-extern std::string const CONFIG_PATH;
-extern std::string const GFXDEF_SUBDIR;
 
 // these are intentionally mutable
 extern std::string short_opts;
@@ -41,35 +32,8 @@ struct runtime_config
 	std::string rgbcoldef_bitdepth;
 };
 
-class def_helper
-{
-public:
-	chrgfx::chrdef const * chrdef {&chrgfx::gfxdefs::chr_8x8_4bpp_packed_lsb};
-	chrgfx::coldef const * coldef {&chrgfx::gfxdefs::col_bgr_333_packed};
-	chrgfx::paldef const * paldef {&chrgfx::gfxdefs::pal_16bit_256color};
-
-	def_helper(runtime_config & cfg);
-
-	~def_helper();
-
-	void list_gfxdefs(std::ostream & os);
-
-private:
-	def_collection m_defs;
-	bool m_heapallocated_chrdef {false};
-	bool m_heapallocated_coldef {false};
-	bool m_heapallocated_paldef {false};
-
-	gfxprofile const & find_gfxprofile(std::string const & gfxprofile_id);
-	chrgfx::chrdef const * find_chrdef(std::string const & chrdef_id);
-	chrgfx::coldef const * find_coldef(std::string const & coldef_id);
-	chrgfx::paldef const * find_paldef(std::string const & paldef_id);
-	bool use_chrdefbuilder(runtime_config & cfg);
-	bool use_rgbcoldefbuilder(runtime_config & cfg);
-};
-
 bool shared_args(char this_opt, runtime_config & cfg);
 
-string get_gfxdefs_path();
+std::string get_gfxdefs_path();
 
 #endif

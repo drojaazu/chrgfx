@@ -1,4 +1,5 @@
 #include "fstreams.hpp"
+#include "gfxdefman.hpp"
 #include "shared.hpp"
 #include <chrgfx/chrgfx.hpp>
 #include <getopt.h>
@@ -35,7 +36,8 @@ int main(int argc, char ** argv)
 #endif
 		process_args(argc, argv);
 
-		def_helper defs(cfg);
+		gfxdef_manager defs;
+		defs.load_gfxdefs(cfg);
 
 		// set up input data
 		ifstream png_fstream;
@@ -79,19 +81,19 @@ int main(int argc, char ** argv)
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			auto tile_width {image_data.width() / defs.chrdef->width()},
-				tile_height {image_data.height() / defs.chrdef->height()},
-				chr_datasize {defs.chrdef->width() * defs.chrdef->height()},
+			auto tile_width {image_data.width() / defs.chrdef()->width()},
+				tile_height {image_data.height() / defs.chrdef()->height()},
+				chr_datasize {defs.chrdef()->width() * defs.chrdef()->height()},
 				chrset_datasize {tile_width * tile_height * chr_datasize};
 			vector<byte_t> tileset_data(chrset_datasize);
-			make_chrset(*defs.chrdef, image_data, tileset_data.data());
+			make_chrset(*defs.chrdef(), image_data, tileset_data.data());
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
 			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
 
 			cerr << "TILE SEGMENTATION: " << to_string(duration) << "ms\n";
-			cerr << "TILE COUNT: " << (tileset_data.size() / (defs.chrdef->width() * defs.chrdef->height())) << '\n';
+			cerr << "TILE COUNT: " << (tileset_data.size() / (defs.chrdef()->width() * defs.chrdef()->height())) << '\n';
 #endif
 
 			/*******************************************************
@@ -103,8 +105,8 @@ int main(int argc, char ** argv)
 #endif
 			auto chr_outfile {ofstream_checked(cfg.chr_outfile)};
 
-			size_t in_chunksize {(size_t) (defs.chrdef->width() * defs.chrdef->height())},
-				out_chunksize {(uint) (defs.chrdef->datasize() / 8)};
+			size_t in_chunksize {(size_t) (defs.chrdef()->width() * defs.chrdef()->height())},
+				out_chunksize {(uint) (defs.chrdef()->datasize() / 8)};
 
 			auto ptr_in_tile = tileset_data.data();
 			byte_t * ptr_imgdata_end = ptr_in_tile + tileset_data.size();
@@ -113,7 +115,7 @@ int main(int argc, char ** argv)
 			while (ptr_in_tile != ptr_imgdata_end)
 			{
 				// TODO create a cache and use the out pointer on encode_chr
-				encode_chr(*defs.chrdef, ptr_in_tile, out_tile);
+				encode_chr(*defs.chrdef(), ptr_in_tile, out_tile);
 				copy(out_tile, out_tile + out_chunksize, ostream_iterator<char>(chr_outfile));
 				ptr_in_tile += in_chunksize;
 			}
@@ -137,8 +139,8 @@ int main(int argc, char ** argv)
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			auto paldef_palette_data {new byte_t[defs.paldef->datasize() >> 3]};
-			encode_pal(*defs.paldef, *defs.coldef, image_data.palette(), paldef_palette_data);
+			auto paldef_palette_data {new byte_t[defs.paldef()->datasize() >> 3]};
+			encode_pal(*defs.paldef(), *defs.coldef(), image_data.palette(), paldef_palette_data);
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
@@ -158,7 +160,7 @@ int main(int argc, char ** argv)
 			// TODO consider splitting the palette conversion routine into two
 			// functions, on for subpal and one for full pal so we always know the
 			// size of the data returned
-			size_t filesize {(size_t) (defs.paldef->datasize() / 8)};
+			size_t filesize {(size_t) (defs.paldef()->datasize() / 8)};
 
 			pal_outfile.write(reinterpret_cast<char *>(paldef_palette_data), filesize);
 			delete[] paldef_palette_data;

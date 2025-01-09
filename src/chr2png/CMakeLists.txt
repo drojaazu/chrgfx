@@ -12,16 +12,14 @@ PRIVATE
 	app.hpp
 	main.cpp
 	${PROJECT_SOURCE_DIR}/src/shared/cfgload.cpp
-	${PROJECT_SOURCE_DIR}/src/shared/defblocks.cpp
 	${PROJECT_SOURCE_DIR}/src/shared/filesys.hpp
 	${PROJECT_SOURCE_DIR}/src/shared/fstreams.hpp
 	${PROJECT_SOURCE_DIR}/src/shared/gfxdef_builder.hpp
-	${PROJECT_SOURCE_DIR}/src/shared/gfxprofile.cpp
-	${PROJECT_SOURCE_DIR}/src/shared/import_defs.cpp
+	${PROJECT_SOURCE_DIR}/src/shared/gfxdefman.hpp
 	${PROJECT_SOURCE_DIR}/src/shared/shared.cpp
 	${PROJECT_SOURCE_DIR}/src/shared/strutil.hpp
 	${PROJECT_SOURCE_DIR}/src/shared/usage.cpp
-	${PROJECT_SOURCE_DIR}/src/shared/xdgdirs.hpp
+	${PROJECT_SOURCE_DIR}/src/shared/xdgdirs.cpp
 )
 
 target_link_libraries(chr2png PRIVATE chrgfx)
