@@ -132,7 +132,7 @@ paldef
   # 32 colors per palette, 1 byte per color
   # 2 subpalettes, 16 colors each
   entry_datasize 8
-  pal_length 16
+  length 16
 
 }
 
@@ -144,13 +144,13 @@ paldef
   # palette data is 1 byte; lowest two bits ignored as padding
   # 8 palettes total
   entry_datasize 2
-  pal_length 4
+  length 4
 
 
   # We manually specify the palette data size here since
   # VB palettes are actually word length, with the upper
   # byte ignored
-  pal_datasize 16
+  datasize 16
 }
 
 paldef
@@ -162,7 +162,7 @@ paldef
   # (color 0 is always transparent)
 
   entry_datasize 8
-  pal_length 4
+  length 4
 
 }
 
@@ -174,7 +174,7 @@ paldef
   # 2 bits per color, 4 colors, packed (1 byte per palette)
   # 3 palettes (3 bytes, stored at 0xFF47 in memory)
   entry_datasize 2
-  pal_length 4
+  length 4
 
 }
 
@@ -360,12 +360,6 @@ rgbcoldef
   layout 8, 4, 4, 4, 0, 4
   layout 14, 1, 13, 1, 12, 1
   layout 15, 1, 15, 1, 15, 1
-  # red_shift 15, 14, 8
-  # red_size 1, 1, 4
-  # green_shift 15, 13, 4
-  # green_size 1, 1, 4
-  # blue_shift 15, 12, 0
-  # blue_size 1, 1, 4
   big_endian 1
 }
 
@@ -390,13 +384,8 @@ rgbcoldef
   # Use this coldef if you plan to convert
   # from PNG to raw CPS data
   bitdepth 8
-  color_passes 2
-  red_shift 12, 8
-  red_size 4, 4
-  green_shift 12, 4
-  green_size 4, 4
-  blue_shift 12, 0
-  blue_size 4, 4
+  layout 12, 4, 12, 4, 12, 4
+  layout 8, 4, 4, 4, 0, 4
 
   big_endian 1
 }

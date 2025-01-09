@@ -7,9 +7,9 @@
 #ifndef __CHRGFX__GFXDEF_BUILDER_HPP
 #define __CHRGFX__GFXDEF_BUILDER_HPP
 
+#include <optional>
 #include <stdexcept>
 #include <string>
-#include <unordered_map>
 
 #include "cfgload.hpp"
 #include "chrdef.hpp"
@@ -196,7 +196,7 @@ class paldef_builder : public gfxdef_builder
 private:
 	uint m_entry_datasize {0};
 	uint m_length {0};
-	uint m_datasize {0};
+	std::optional<uint> m_datasize {std::nullopt};
 
 public:
 	paldef_builder() = default;
