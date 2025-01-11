@@ -55,6 +55,10 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 
 	void load_from_file(runtime_config & cfg)
 	{
+		// don't even bother loading anything if we already have our defs set up
+		if (m_chrdef != nullptr && m_paldef != nullptr && m_coldef != nullptr)
+			return;
+
 		motoi::config_loader config(cfg.gfxdefs_path);
 
 		std::string_view block_header;
@@ -104,11 +108,11 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 		{
 			block_header = block.first;
 
-			if (! cfg.chrdef_id.empty() && m_chrdef == nullptr && block_header == "chrdef")
+			if (m_chrdef == nullptr && ! cfg.chrdef_id.empty() && block_header == "chrdef")
 			{
 				auto kv = block.second.find("id");
 				if (kv == block.second.end())
-					throw runtime_error("no id found in chrdef block");
+					continue;
 
 				if (kv->second != cfg.chrdef_id)
 					continue;
@@ -119,11 +123,11 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				continue;
 			}
 
-			if (! cfg.paldef_id.empty() && m_paldef == nullptr && block_header == "paldef")
+			if (m_paldef == nullptr && ! cfg.paldef_id.empty() && block_header == "paldef")
 			{
 				auto kv = block.second.find("id");
 				if (kv == block.second.end())
-					throw runtime_error("no id found in paldef block");
+					continue;
 
 				if (kv->second != cfg.paldef_id)
 					continue;
@@ -134,11 +138,11 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				continue;
 			}
 
-			if (! cfg.coldef_id.empty() && m_coldef == nullptr && block_header == "rgbcoldef")
+			if (m_coldef == nullptr && ! cfg.coldef_id.empty() && block_header == "rgbcoldef")
 			{
 				auto kv = block.second.find("id");
 				if (kv == block.second.end())
-					throw runtime_error("no id found in coldef block");
+					continue;
 
 				if (kv->second != cfg.coldef_id)
 					continue;
@@ -149,11 +153,11 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				continue;
 			}
 
-			if (! cfg.coldef_id.empty() && m_coldef == nullptr && block_header == "refcoldef")
+			if (m_coldef == nullptr && ! cfg.coldef_id.empty() && block_header == "refcoldef")
 			{
 				auto kv = block.second.find("id");
 				if (kv == block.second.end())
-					throw runtime_error("no id found in coldef block");
+					continue;
 
 				if (kv->second != cfg.coldef_id)
 					continue;
@@ -285,6 +289,7 @@ public:
 		// if no IDs are specified (i.e. building entirely from command line), skip these steps
 		if (! (cfg.profile_id.empty() && cfg.chrdef_id.empty() && cfg.coldef_id.empty() && cfg.paldef_id.empty()))
 		{
+			// we load from file first to get the profile, if specified
 			load_from_file(cfg);
 			load_from_internal(cfg);
 		}

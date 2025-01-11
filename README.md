@@ -18,43 +18,72 @@ chrgfx requires [png++](https://www.nongnu.org/pngpp/) to be installed and uses 
     make
     sudo make install
 
-# chr2png / png2chr Utilities
-There are two support utilities included: `chr2png` and `png2chr`. The former will convert encoded tile and/or palette data to a PNG image, while the latter will take a sufficiently compatible PNG and output encoded tile/palette data.
+# Utilities
+There are three support utilities included: `chr2png`, `png2chr`, and `palview`.
 
-## Graphics Definitions
+## chr2png
+
+This will convert encoded tile and/or palette data to a PNG image.
+ 
+## png2chr
+
+This will take a sufficiently compatible PNG and output encoded tile/palette data.
+
+Compatible in this case means a PNG in indexed color mode with a 256 color palette.
+
+## palview
+
+This will take a color palette and generate an image of color swatches corresponding to the palette.
+
+## Graphics Definitions (gfxdefs)
 
 The conversion routines rely on graphics definitions (gfxdef), which describe the format of the data for encoding and decoding. There are three kinds of definitions: tile (chrdef), palette (paldef) and color (coldef).
 
+
 Graphics definitions can be mixed and modified at run time. With this system, chrgfx is extensible and can support practically any tile-based hardware.
 
-## Hardware Profiles
+Graphics definitions can come from three possible sources.
 
-For convenience, there are profiles, which are groupings of a single chrdef, paldef and coldef to represent the graphics subsystem of a certain piece of hardware. In this way, we reduce redundancies for hardware that may share one type of definition, but not others.
+### Internal Definitions
 
-For example, the Sega Master System and Game Gear have the same tile format, but the palette and color encodings are different. We can make a different profile for each system, with both using the same tile encoding but seperate palette and color encodings. Another example is the original Gameboy and the later Gameboy Pocket. They are exactly the same in hardware, but the original has a more green tint while the Pocket is more gray. We can create profiles for both, with the same tile and palette formats, but with a different color list to simulate their different perceived colors.
+The chrgfx library has a number of common, generic definitions included. Please see the [builtin_defs.hpp source file](src/chrgfx/builtin_defs.hpp) for a list.
 
-## gfxdefs File
+### gfxdefs File
 
-Graphics definitions are stored in a `gfxdefs` file. The project comes with a number of definitions for many common hardware systems already created in a gfxdefs file.
+External graphics definitions are stored in the `gfxdefs` file. The project comes with a number of definitions for many common hardware systems already created in this file.
 
-Please [see the readme in the gfxdef directory](share/gfxdef/README.md) and [the actual definitions file](share/gfxdef/gfxdefs) for more details.
+Please [see the readme in the gfxdef directory](share/gfxdef/README.md) and [the gfxdefs file itself](share/gfxdef/gfxdefs) for more details on the format.
 
-## CLI Definitions
+### CLI Definitions
 
 Graphics definitions can also be defined on the command line. This is useful for testing or dealing with dynamic formats (for example, perhaps tile sizes are not consistent across multiple files).
 
-## Definition Order
+Definitions specified on the command line override definitions loaded from internal/external sources in a piecemeal fashion. For example, you may load the `col_bgr_222_packed` coldef and then specify `--col-big-endian` on the command line to change the endianness aspect only.
 
-Because definitions can be sourced/created from multiple places, there is an ordering for loading/processing to determine what definition is finally used.
+### Hardware Profiles
 
-1. gfxdefs file is loaded first
-2. If a hardware profile is specified, the definitions listed within are referenced
-3. If a tile, color or palette definition id is specified on the command line, that definition overrides the one listedin the profile
+For convenience, there are also profiles, which are groupings of a single chrdef, paldef and coldef to represent the graphics subsystem of a certain piece of hardware. In this way, it is simple for the user to specify which decoders/encoders to use for certain hardware. Moreover, we reduce redundancies for hardware that may share one type of definition, but not others.
+
+For example, the Sega Master System and Game Gear have the same tile format, but the palette and color encodings are different. We can make a different profile for each system, with both using the same tile encoding but seperate palette and color encodings. Another example is the original Gameboy and the later Gameboy Pocket. They are exactly the same in hardware, but the original has a more green tint while the Pocket is more gray. We can create profiles for both, with the same tile and palette formats, but with a different color list to simulate their different perceived colors.
+
+The entries within the profile can be override by specifying a chrdef, paldef or coldef ID seperately on the command line.
+
+### gfxdef Loading Order
+
+Because definitions can be loaded from multiple sources, there is an ordering for processing to determine what definition is finally used. For any chrdef, paldef, or coldef specified by its ID:
+
+1. If a hardware profile is specified, the external gfxdefs file is checked first to get the target chrdef/paldef/coldef from its list.
+2. The internal list is checked for the target gfxdef.
+3. If not present in the internal list, the gfxdef file is checked for the target gfxdef. If a chrdef/paldef/coldef ID was specified and was not found at this point, an error occurs.
 4. If a tile or color definition option is specified on the command line, that modifes the definition
 
-##  - Shared Concepts and Usage
+NOTE: If a chrdef/paldef/coldef or profile ID was NOT specified, steps 1 to 3 are skipped and it is assumed all required gfxdefs are fully defined on the command line.
 
-The following options are available in both chr2png and png2chr.
+## Usage
+
+### Shared Options
+
+The following options are available for all three utilitiese (`chr2png`, `png2chr`, `palview`)
 
 `--gfx-def <filepath>`, `-G <filepath>`
 
@@ -63,7 +92,7 @@ Path to gfxdef file. If not specified, it checks for:
  - `${XDG_DATA_HOME}/chrgfx/gfxdefs`
  - `${XDG_DATA_DIRS}/chrgfx/gfxdefs`
 
-`--profile <gfx_profile>`, `-P <gfx_profile_id>`
+`--profile <hardware_profile_id>`, `-H <hardware_profile_id>`
 
 Specify hardware profile to use
 
@@ -71,12 +100,11 @@ Specify hardware profile to use
 
 `--col-def <color_encoding_id>`, `-C <color_encoding_id>`
 
-`--pal-def <palette_encoding_id>`, `-L <palette_encoding_id>`
+`--pal-def <palette_encoding_id>`, `-P <palette_encoding_id>`
 
 These arguments specify the tile, color and palette encoding, respectively. They are only required if a graphics profile was not specified. If they are used in conjunction with a graphics profile, they will override that particular encoding. (For example, using `--chr-def` will override the tile encoding that was specified in the profile.)
 
-
-### Graphics Definitions
+## Graphics Definitions
 
 In addition to "hardcoding" graphics definitions in the gfxdefs file, pixel and color layouts can be specified at the command line.
 
@@ -96,10 +124,12 @@ In addition to "hardcoding" graphics definitions in the gfxdefs file, pixel and 
 
 `--col-layout`
 
+Note that, for simplicity's sake, only one layout pass can be done via the command line. If you need to work with a complex color format that requires multiple layout passes, please use an external file (gfxdefs).
+
 `--col-big-endian`
 
 
-## chr2png - Usage
+### chr2png - Usage
 
 
 
@@ -173,7 +203,7 @@ Display built in help
 # libchrgfx
 The core of chrgfx is libchrgfx, which contains all the subroutines and data structures for converting between formats and importing/exporting PNG images. Most of the documentation appears in the source code.
 
-Headers are installed to `/usr/include/chrgfx` and the .so to `/usr/lib`. You can include `chrgfx.hpp` for everything, or pick and choose headers for specific functions.
+You can include the `chrgfx.hpp` header for everything, or pick and choose headers for specific functionality.
 
 Please see the readme in the gfxdefs directory for a high level overview of some of the concepts and data structures.
 
@@ -265,8 +295,13 @@ Note that a color data is only for devices which have colors with RGB components
 A palette is simply an array of all the color values, ordered seqentially. So a palette of 64 entries of 16 bit colors would be 128 bytes in size, with color 0 at offset 0, color 1 at offset 2, and so on. There are some quirks on some systems (such as the Virtual Boy, which only uses 6 bits for a palette yet is stored in 2 bytes...), but they are rare. Palette data is just an array of the color values we previously discussed.
 
 ## Special Thanks
+
 Special thanks to:
 
 - Klarth, for his venerable `consolegfx.txt`, which was my introduction to the data side of tiled graphics and was instrumental in my early development work on Dumpster and now chrgfx.
 
 - The MAME Team, for their work in documenting hardware through source code and for inspiring some solutions that are essential to chrgfx.
+
+- UCC BLACK canned coffee.
+
+- Greetz to dosdemon, mdl, sebmal, lord, eri, freem and the rest of the internet graybeards from the old scenes and IRC.

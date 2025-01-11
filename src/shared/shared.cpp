@@ -4,16 +4,17 @@
 using namespace std;
 
 // command line argument processing
-string short_opts {":G:P:T:C:L:ah"};
+string short_opts {":G:H:T:C:P:h"};
 
 int longopt_idx {0};
 vector<option> long_opts {// predefined gfx defs
 	{"gfx-def", required_argument, nullptr, 'G'},
-	{"profile", required_argument, nullptr, 'P'},
+	{"profile", required_argument, nullptr, 'H'},
 	{"chr-def", required_argument, nullptr, 'T'},
 	{"col-def", required_argument, nullptr, 'C'},
-	{"pal-def", required_argument, nullptr, 'L'},
-	{"list-gfxdefs", no_argument, nullptr, 'a'},
+	{"pal-def", required_argument, nullptr, 'P'},
+	{"help", no_argument, nullptr, 'h'},
+
 	// cli defined gfx defs - chr
 	// (we redirect values for long options into opt_idx so that the return value can never creep up into the print ascii
 	// range for short opts)
@@ -23,11 +24,12 @@ vector<option> long_opts {// predefined gfx defs
 	{"chr-plane-offsets", required_argument, &longopt_idx, 3},
 	{"chr-pixel-offsets", required_argument, &longopt_idx, 4},
 	{"chr-row-offsets", required_argument, &longopt_idx, 5},
-	{"col-bitdepth", required_argument, &longopt_idx, 6},
-	{"col-layout", required_argument, &longopt_idx, 7},
-	{"col-big-endian", required_argument, &longopt_idx, 8},
-
-	{"help", no_argument, nullptr, 'h'}};
+	{"pal-datasize", required_argument, &longopt_idx, 6},
+	{"pal-entry-datasize", required_argument, &longopt_idx, 7},
+	{"pal-length", required_argument, &longopt_idx, 8},
+	{"col-bitdepth", required_argument, &longopt_idx, 9},
+	{"col-layout", required_argument, &longopt_idx, 10},
+	{"col-big-endian", required_argument, &longopt_idx, 11}};
 
 vector<option_details> opt_details {
 	// predefined gfx defs
@@ -37,6 +39,7 @@ vector<option_details> opt_details {
 	{false, "Color encoding to use; overrides color encoding in graphics profile (if specified)", nullptr},
 	{false, "Palette encoding to use; overrides palette encoding in graphics profile (if specified)", nullptr},
 	{false, "List all available encodings in gfxdefs file", nullptr},
+	{false, "Display program usage", nullptr},
 	// cli defined gfx defs - chr
 	{false, "Tile width", nullptr},
 	{false, "Tile height", nullptr},
@@ -44,8 +47,14 @@ vector<option_details> opt_details {
 	{false, "Tile plane offsets", nullptr},
 	{false, "Tile pixel offsets", nullptr},
 	{false, "Tile row offsets", nullptr},
-
-	{false, "Display program usage", nullptr},
+	// cli defined gfx defs - pal
+	{false, "Palette datasize (in bits)", nullptr},
+	{false, "Palette entry datasize (in bits)", nullptr},
+	{false, "Palette length (number of entries)", nullptr},
+	// cli defined gfx defs - rgb color
+	{false, "Color bitdepth", nullptr},
+	{false, "Color channel layout", nullptr},
+	{false, "Color data endianness", nullptr},
 };
 
 bool shared_args(char this_opt, runtime_config & cfg)

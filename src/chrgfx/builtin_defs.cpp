@@ -21,7 +21,7 @@ using namespace std;
  * Minimal, generic CHR format
  * 1bpp 8x8
  */
-chrdef chr_8x8_1bpp {"chr_8x8_1bpp", 8, 8, 1, {0}, {0, 1, 2, 3, 4, 5, 6, 7}, {0, 8, 16, 24, 32, 40, 48, 56}};
+chrdef const chr_8x8_1bpp {"chr_8x8_1bpp", 8, 8, 1, {0}, {0, 1, 2, 3, 4, 5, 6, 7}, {0, 8, 16, 24, 32, 40, 48, 56}};
 
 chrdef const chr_8x8_2bpp_packed_lsb {
 	"chr_8x8_2bpp_packed_lsb",

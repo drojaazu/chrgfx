@@ -16,7 +16,7 @@
 namespace chrgfx::gfxdefs
 {
 
-extern chrdef const basic_8x8_1bpp;
+extern chrdef const chr_8x8_1bpp;
 
 extern chrdef const chr_8x8_2bpp_packed_lsb;
 
