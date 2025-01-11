@@ -34,8 +34,6 @@ private:
 	std::string m_target_paldef;
 	std::string m_target_coldef;
 
-	std::vector<chrgfx::gfxdef const *> m_allocated_gfxdefs;
-
 	std::vector<std::string_view> m_errors;
 
 	enum class def_type
@@ -118,7 +116,6 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				// matched the block, now load it as a gfxdef
 				chrdef_builder builder(block.second);
 				m_chrdef = builder.build();
-				m_allocated_gfxdefs.push_back(m_chrdef);
 				continue;
 			}
 
@@ -134,7 +131,6 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				// matched the block, now load it as a gfxdef
 				paldef_builder builder(block.second);
 				m_paldef = builder.build();
-				m_allocated_gfxdefs.push_back(m_paldef);
 				continue;
 			}
 
@@ -150,7 +146,6 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				// matched the block, now load it as a gfxdef
 				rgbcoldef_builder builder(block.second);
 				m_coldef = builder.build();
-				m_allocated_gfxdefs.push_back(m_coldef);
 				continue;
 			}
 
@@ -166,7 +161,6 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				// matched the block, now load it as a gfxdef
 				refcoldef_builder builder(block.second);
 				m_coldef = builder.build();
-				m_allocated_gfxdefs.push_back(m_coldef);
 				continue;
 			}
 		}
@@ -178,29 +172,97 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 		{
 			auto def = chrgfx::gfxdefs::chrdefs.find(cfg.chrdef_id);
 			if (def != chrgfx::gfxdefs::chrdefs.end())
-				m_chrdef = &def->second;
+				m_chrdef = new class chrdef(def->second);
 		}
 
 		if (m_paldef == nullptr && ! cfg.paldef_id.empty())
 		{
 			auto def = chrgfx::gfxdefs::paldefs.find(cfg.paldef_id);
 			if (def != chrgfx::gfxdefs::paldefs.end())
-				m_paldef = &def->second;
+				m_paldef = new class paldef(def->second);
 		}
 
 		if (m_coldef == nullptr && ! cfg.coldef_id.empty())
 		{
 			auto def = chrgfx::gfxdefs::rgbcoldefs.find(cfg.coldef_id);
 			if (def != chrgfx::gfxdefs::rgbcoldefs.end())
-				m_coldef = &def->second;
+				m_coldef = new class rgbcoldef(def->second);
+		}
+	}
+
+	void load_from_cli(runtime_config & cfg)
+	{
+		// build chrdef from cli
+		if (cfg.chrdef_cli_defined())
+		{
+			chrdef_builder builder;
+			if (m_chrdef != nullptr)
+			{
+				builder.from_def(*m_chrdef);
+				delete m_chrdef;
+			}
+			if (! cfg.chrdef_bpp.empty())
+				builder.set_bitdepth(cfg.chrdef_bpp);
+			if (! cfg.chrdef_width.empty())
+				builder.set_width(cfg.chrdef_width);
+			if (! cfg.chrdef_height.empty())
+				builder.set_height(cfg.chrdef_height);
+			if (! cfg.chrdef_pixel_offsets.empty())
+				builder.set_pixel_offsets(cfg.chrdef_pixel_offsets);
+			if (! cfg.chrdef_plane_offsets.empty())
+				builder.set_plane_offsets(cfg.chrdef_plane_offsets);
+			if (! cfg.chrdef_row_offsets.empty())
+				builder.set_row_offsets(cfg.chrdef_row_offsets);
+
+			m_chrdef = builder.build();
+		}
+
+		// build paldef from cli
+		if (cfg.paldef_cli_defined())
+		{
+			paldef_builder builder;
+			if (m_paldef != nullptr)
+			{
+				builder.from_def(*m_paldef);
+				delete m_paldef;
+			}
+			if (! cfg.paldef_datasize.empty())
+				builder.set_datasize(cfg.paldef_datasize);
+			if (! cfg.paldef_entry_datasize.empty())
+				builder.set_datasize(cfg.paldef_entry_datasize);
+			if (! cfg.paldef_length.empty())
+				builder.set_length(cfg.paldef_length);
+
+			m_paldef = builder.build();
+		}
+
+		// build coldef from cli
+		if (cfg.coldef_cli_defined())
+		{
+			rgbcoldef_builder builder;
+			if (m_coldef != nullptr)
+			{
+				if (m_coldef->type() == coldef_type::rgb)
+					builder.from_def(*static_cast<rgbcoldef const *>(m_coldef));
+				delete m_coldef;
+			}
+			if (! cfg.rgbcoldef_bitdepth.empty())
+				builder.set_bitdepth(cfg.rgbcoldef_bitdepth);
+			if (! cfg.rgbcoldef_big_endian.empty())
+				builder.set_big_endian(cfg.rgbcoldef_big_endian);
+			if (! cfg.rgbcoldef_rgblayout.empty())
+				builder.set_layout(cfg.rgbcoldef_rgblayout);
+
+			m_coldef = builder.build();
 		}
 	}
 
 public:
 	~gfxdef_manager()
 	{
-		for (auto p : m_allocated_gfxdefs)
-			delete p;
+		delete m_chrdef;
+		delete m_paldef;
+		delete m_coldef;
 	}
 
 	auto chrdef()
@@ -220,9 +282,13 @@ public:
 
 	void load_gfxdefs(runtime_config & cfg)
 	{
-
-		load_from_file(cfg);
-		load_from_internal(cfg);
+		// if no IDs are specified (i.e. building entirely from command line), skip these steps
+		if (! (cfg.profile_id.empty() && cfg.chrdef_id.empty() && cfg.coldef_id.empty() && cfg.paldef_id.empty()))
+		{
+			load_from_file(cfg);
+			load_from_internal(cfg);
+		}
+		load_from_cli(cfg);
 	}
 };
 

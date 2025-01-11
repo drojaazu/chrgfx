@@ -27,9 +27,19 @@ struct runtime_config
 	std::string chrdef_pixel_offsets;
 	std::string chrdef_row_offsets;
 
+	std::string paldef_datasize;
+	std::string paldef_entry_datasize;
+	std::string paldef_length;
+
 	std::string rgbcoldef_big_endian;
 	std::string rgbcoldef_rgblayout;
 	std::string rgbcoldef_bitdepth;
+
+	bool chrdef_cli_defined();
+
+	bool paldef_cli_defined();
+
+	bool coldef_cli_defined();
 };
 
 bool shared_args(char this_opt, runtime_config & cfg);

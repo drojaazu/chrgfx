@@ -337,13 +337,7 @@ rgbcoldef
   note NEC PC Engine / TurgoGrafx-16
 
   bitdepth 3
-  red_shift 3
-  red_size 3
-  green_shift 6
-  green_size 3
-  blue_shift 0
-  blue_size 3
-
+  layout 3, 3, 6, 3, 0, 3
   big_endian 0
 }
 
@@ -386,7 +380,6 @@ rgbcoldef
   bitdepth 8
   layout 12, 4, 12, 4, 12, 4
   layout 8, 4, 4, 4, 0, 4
-
   big_endian 1
 }
 
