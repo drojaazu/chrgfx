@@ -91,7 +91,7 @@ int main(int argc, char ** argv)
 				if (! chrdata->good())
 					break;
 
-				decode_chr(*defs.chrdef(), in_tile, out_tile);
+				decode_chr(defs.chrdef(), in_tile, out_tile);
 				out_buffer.append(out_tile, out_chunksize);
 			}
 			delete[] out_tile;
@@ -124,7 +124,7 @@ int main(int argc, char ** argv)
 				if (! paldata.good())
 					throw runtime_error("Cannot read specified palette line index");
 
-				decode_pal(*defs.paldef(), *defs.coldef(), palbuffer, &workpal);
+				decode_pal(defs.paldef(), defs.coldef(), palbuffer, &workpal);
 			}
 			else
 			{

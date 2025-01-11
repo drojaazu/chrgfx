@@ -115,7 +115,7 @@ int main(int argc, char ** argv)
 			while (ptr_in_tile != ptr_imgdata_end)
 			{
 				// TODO create a cache and use the out pointer on encode_chr
-				encode_chr(*defs.chrdef(), ptr_in_tile, out_tile);
+				encode_chr(defs.chrdef(), ptr_in_tile, out_tile);
 				copy(out_tile, out_tile + out_chunksize, ostream_iterator<char>(chr_outfile));
 				ptr_in_tile += in_chunksize;
 			}
@@ -140,7 +140,7 @@ int main(int argc, char ** argv)
 #endif
 
 			auto paldef_palette_data {new byte_t[defs.paldef()->datasize() >> 3]};
-			encode_pal(*defs.paldef(), *defs.coldef(), image_data.palette(), paldef_palette_data);
+			encode_pal(defs.paldef(), defs.coldef(), image_data.palette(), paldef_palette_data);
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();

@@ -32,7 +32,7 @@ void render_palette_line()
 		if (paldata.gcount() != pal_size)
 			throw runtime_error("Could not read enough data for a complete color palette");
 
-		decode_pal(*work_paldef, *work_coldef, palbuffer, &workpal);
+		decode_pal(work_paldef, work_coldef, palbuffer, &workpal);
 	}
 
 	// generate swatch tiles
@@ -82,7 +82,7 @@ void render_full_palette()
 			if (paldata.gcount() != pal_size)
 				break;
 			// TODO check if we got a full subpal's worth of data!
-			decode_pal(*work_paldef, *work_coldef, palbuffer, &palette_lines.emplace_back());
+			decode_pal(work_paldef, work_coldef, palbuffer, &palette_lines.emplace_back());
 		}
 
 		if (palette_lines.empty())

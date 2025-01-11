@@ -3,6 +3,7 @@
 
 #include "shared.hpp"
 #include <getopt.h>
+#include <iostream>
 #include <stdexcept>
 
 using namespace std;

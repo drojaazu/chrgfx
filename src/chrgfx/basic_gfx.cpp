@@ -34,8 +34,10 @@ basic_color::basic_color(string const & color) :
 
 string basic_color::to_html()
 {
-	// TODO
-	return "";
+	std::ostringstream oss;
+	oss << '#' << std::hex << std::setfill('0') << std::setw(2) << (unsigned int) red << std::setw(2)
+			<< (unsigned int) green << std::setw(2) << (unsigned int) blue;
+	return oss.str();
 }
 
 basic_image::basic_image(uint const width, uint const height) :
@@ -69,24 +71,25 @@ basic_pixel * basic_image::pixbuf()
 	return m_pixbuf;
 }
 
-[[nodiscard]] basic_palette const basic_image::palette() const
+[[nodiscard]] basic_palette const * basic_image::palette() const
 {
 	return m_palette;
 }
 
-basic_palette basic_image::palette()
+basic_palette * basic_image::palette()
 {
 	return m_palette;
 }
 
 void basic_image::palette(basic_palette const & pal)
 {
-	m_palette = pal;
+	m_palette = new basic_palette(pal);
 }
 
 basic_image::~basic_image()
 {
 	delete[] m_pixbuf;
+	delete m_palette;
 }
 
 } // namespace chrgfx

@@ -6,7 +6,7 @@ using namespace std;
 namespace chrgfx
 {
 
-void encode_col(rgbcoldef const & rgbcoldef, basic_color const * in_color, uint32 * out_color)
+void encode_col(rgbcoldef const * rgbcoldef, basic_color const * in_color, uint32 * out_color)
 {
 	/*
 		seperate r g b from color
@@ -26,7 +26,7 @@ void encode_col(rgbcoldef const & rgbcoldef, basic_color const * in_color, uint3
 		 as above
 	*/
 
-	uint8 bitdepth = rgbcoldef.bitdepth();
+	uint8 bitdepth = rgbcoldef->bitdepth();
 	uint8 red {reduce_bitdepth(in_color->red, bitdepth)}, red_pass_shift {0},
 		green {reduce_bitdepth(in_color->green, bitdepth)}, green_pass_shift {0},
 		blue {reduce_bitdepth(in_color->blue, bitdepth)}, blue_pass_shift {0};
@@ -34,7 +34,7 @@ void encode_col(rgbcoldef const & rgbcoldef, basic_color const * in_color, uint3
 	uint8 bitmask;
 	uint32 temp;
 
-	for (auto const & this_pass : rgbcoldef.layout())
+	for (auto const & this_pass : rgbcoldef->layout())
 	{
 		bitmask = (create_bitmask8(this_pass.red_size())) << red_pass_shift;
 		temp = ((red & bitmask) >> red_pass_shift) << this_pass.red_shift();
@@ -53,12 +53,12 @@ void encode_col(rgbcoldef const & rgbcoldef, basic_color const * in_color, uint3
 	}
 }
 
-void encode_col(refcoldef const & refcoldef, basic_color const * in_color, uint32 * out_color)
+void encode_col(refcoldef const * refcoldef, basic_color const * in_color, uint32 * out_color)
 {
-	*out_color = refcoldef.by_color(*in_color);
+	*out_color = refcoldef->by_color(*in_color);
 }
 
-void decode_col(rgbcoldef const & rgbcoldef, uint32 const * in_color, basic_color * out_color)
+void decode_col(rgbcoldef const * rgbcoldef, uint32 const * in_color, basic_color * out_color)
 {
 
 	/*
@@ -74,7 +74,7 @@ psuedo:
 	uint8 red {0}, green {0}, blue {0};
 	uint8 red_bitcount {0}, green_bitcount {0}, blue_bitcount {0};
 	uint8 bitmask;
-	for (rgb_layout const & this_pass : rgbcoldef.layout())
+	for (rgb_layout const & this_pass : rgbcoldef->layout())
 	{
 		bitmask = create_bitmask8(this_pass.red_size());
 		red |= ((*in_color >> this_pass.red_shift()) & bitmask) << red_bitcount;
@@ -95,9 +95,9 @@ psuedo:
 	*out_color = chrgfx::basic_color(red, green, blue);
 }
 
-void decode_col(refcoldef const & refcoldef, uint32 const * in_color, basic_color * out_color)
+void decode_col(refcoldef const * refcoldef, uint32 const * in_color, basic_color * out_color)
 {
-	*out_color = refcoldef.by_value(*in_color);
+	*out_color = refcoldef->by_value(*in_color);
 }
 
 } // namespace chrgfx

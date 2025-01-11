@@ -225,7 +225,7 @@ ContainerT split_container(std::basic_string_view<CharT> str, char const delim =
 template <typename ContainerT, typename CharT>
 ContainerT split_container(std::basic_string<CharT> const & str, char const delim = ',')
 {
-	return split_container<ContainerT>(std::basic_string_view<CharT>(str));
+	return split_container<ContainerT>(std::basic_string_view<CharT>(str), delim);
 }
 
 template <typename ArrayT, size_t Size, typename CharT>
@@ -254,7 +254,7 @@ std::array<ArrayT, Size> split_array(std::basic_string_view<CharT> str, char con
 template <typename ArrayT, size_t Size, typename CharT>
 std::array<ArrayT, Size> split_array(std::basic_string<CharT> const & str, char const delim = ',')
 {
-	return split_array<ArrayT, Size>(std::basic_string_view<CharT>(str));
+	return split_array<ArrayT, Size>(std::basic_string_view<CharT>(str), delim);
 }
 
 /**

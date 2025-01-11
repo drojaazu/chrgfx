@@ -19,22 +19,22 @@ namespace chrgfx
 /**
  * @brief Encode a basic palette with the given palette definition
  *
- * @param paldef Palette encoding definition
- * @param coldef Color encoding definition
+ * @param paldef Pointer to palette encoding definition
+ * @param coldef Pointer to color encoding definition
  * @param in_palette Pointer to input basic palette
  * @param out_palette Pointer to output encoded palette
  */
-void encode_pal(paldef const & paldef, coldef const & coldef, basic_palette const & in_palette, byte_t * out_palette);
+void encode_pal(paldef const * paldef, coldef const * coldef, basic_palette const * in_palette, byte_t * out_palette);
 
 /**
  * @brief Decode an encoded palette with the given paldef
  *
- * @param paldef Palette encoding definition
- * @param coldef Color encoding definition
+ * @param paldef Pointer to palette encoding definition
+ * @param coldef Pointer to color encoding definition
  * @param in_palette Pointer to input encoded palette
  * @param out_palette Pointer to output basic palette
  */
-void decode_pal(paldef const & paldef, coldef const & coldef, byte_t const * in_palette, basic_palette * out_palette);
+void decode_pal(paldef const * paldef, coldef const * coldef, byte_t const * in_palette, basic_palette * out_palette);
 
 } // namespace chrgfx
 

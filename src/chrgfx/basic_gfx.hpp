@@ -63,7 +63,7 @@ private:
 	uint m_height;
 	uint m_datasize;
 	basic_pixel * m_pixbuf {nullptr};
-	basic_palette m_palette;
+	basic_palette * m_palette {nullptr};
 
 public:
 	basic_image(uint const width, uint const height);
@@ -76,9 +76,9 @@ public:
 
 	basic_pixel * pixbuf();
 
-	[[nodiscard]] chrgfx::basic_palette const palette() const;
+	[[nodiscard]] chrgfx::basic_palette const * palette() const;
 
-	chrgfx::basic_palette palette();
+	chrgfx::basic_palette * palette();
 
 	void palette(basic_palette const & pal);
 

@@ -13,7 +13,7 @@ byte_t * decode_chr_nintendo_sfc_3bpp(byte_t const * encoded_chr, byte_t * out)
 
 	// decode to 2bpp first, then apply the third bit plane
 	chrdef chrdef_2bpp {"", 8, 8, 2, {0, 8}, {0, 1, 2, 3, 4, 5, 6, 7}, {0, 16, 32, 48, 64, 80, 96, 112}};
-	decode_chr(chrdef_2bpp, encoded_chr, out);
+	decode_chr(&chrdef_2bpp, encoded_chr, out);
 
 	// the last 8 bytes of the data are the third bitplane values for each row
 	byte_t const * ptr_bitplane3_data = encoded_chr + 16;

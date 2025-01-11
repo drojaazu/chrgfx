@@ -32,9 +32,7 @@ chrgfx::basic_image from_png(png::image<png::index_pixel> const & png_image)
 
 png::image<png::index_pixel> to_png(chrgfx::basic_image const & basic_image, optional<uint8> trns_index)
 {
-	auto & pal = basic_image.palette();
-
-	if (pal.size() < 256)
+	if (basic_image.palette()->size() < 256)
 		throw invalid_argument("Palette must contain a full 256 entries for PNG export");
 
 	png::pixel_buffer<png::index_pixel> png_pixbuf(basic_image.width(), basic_image.height());
@@ -45,14 +43,11 @@ png::image<png::index_pixel> to_png(chrgfx::basic_image const & basic_image, opt
 		png_pixbuf.put_row(i_pixel_row, pxlrow_work);
 	}
 	png::image<png::index_pixel> outimg(basic_image.width(), basic_image.height());
-
 	outimg.set_pixbuf(png_pixbuf);
 
 	vector<png::color> png_pal;
-	for (auto const & color : pal)
-	{
+	for (auto const & color : *basic_image.palette())
 		png_pal.emplace_back(color.red, color.green, color.blue);
-	}
 	outimg.set_palette(png_pal);
 
 	// setup transparency
