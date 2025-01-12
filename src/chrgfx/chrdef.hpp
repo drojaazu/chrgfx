@@ -25,6 +25,7 @@ protected:
 	uint m_height;
 	uint m_bitdepth;
 	uint m_datasize;
+	uint m_datasize_bytes;
 	std::vector<uint> m_pixeloffsets;
 	std::vector<uint> m_rowoffsets;
 	std::vector<uint> m_planeoffsets;
@@ -58,6 +59,11 @@ public:
 	 * @return uint Data size of a single tile *in bits*
 	 */
 	[[nodiscard]] uint datasize() const;
+
+	/**
+	 * @return uint Data size of a single tile *in bytes*
+	 */
+	[[nodiscard]] uint datasize_bytes() const;
 
 	/**
 	 * @return Reference to the collection of bit offsets to bitplanes within a

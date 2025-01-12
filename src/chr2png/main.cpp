@@ -73,7 +73,7 @@ int main(int argc, char ** argv)
 #endif
 			size_t
 				// byte size of one encoded tile
-				in_chunksize {(uint) (defs.chrdef()->datasize() / 8)},
+				in_chunksize {(uint) (defs.chrdef()->datasize_bytes())},
 				// byte size of one basic (decoded) tile
 				out_chunksize {(size_t) (defs.chrdef()->width() * defs.chrdef()->height())};
 
@@ -116,7 +116,7 @@ int main(int argc, char ** argv)
 			if (! cfg.paldata_name.empty())
 			{
 				ifstream paldata {ifstream_checked(cfg.paldata_name)};
-				size_t pal_size {defs.paldef()->datasize() / 8};
+				size_t pal_size {defs.paldef()->datasize_bytes()};
 				byte_t palbuffer[pal_size];
 
 				paldata.seekg(cfg.pal_line * pal_size, ios::beg);

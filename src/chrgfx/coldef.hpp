@@ -73,7 +73,7 @@ protected:
 class rgbcoldef : public coldef
 {
 public:
-	rgbcoldef(std::string const &,
+	rgbcoldef(std::string const & id,
 		uint bitdepth,
 		std::vector<rgb_layout> const & layout,
 		bool big_endian = false,

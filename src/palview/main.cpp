@@ -24,7 +24,7 @@ void render_palette_line()
 	{
 
 		ifstream paldata {ifstream_checked(cfg.paldata_name)};
-		size_t pal_size {work_paldef->datasize() / 8};
+		size_t pal_size {work_paldef->datasize_bytes()};
 		byte_t palbuffer[pal_size];
 
 		paldata.seekg(cfg.pal_line * pal_size, ios::beg);
@@ -75,7 +75,7 @@ void render_full_palette()
 
 		while (paldata.good())
 		{
-			size_t pal_size {work_paldef->datasize() / 8};
+			size_t pal_size {work_paldef->datasize_bytes()};
 			byte_t palbuffer[pal_size];
 
 			paldata.read(reinterpret_cast<char *>(palbuffer), pal_size);

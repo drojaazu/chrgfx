@@ -6,7 +6,7 @@ using namespace std;
 
 void encode_chr(chrdef const * chrdef, basic_pixel const * in_tile, byte_t * out_tile)
 {
-	fill_n(out_tile, chrdef->datasize() / 8, 0);
+	fill_n(out_tile, chrdef->datasize_bytes(), 0);
 
 	/*
 		-for every line...

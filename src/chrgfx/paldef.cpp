@@ -7,17 +7,22 @@ namespace chrgfx
 
 paldef::paldef(string const & id,
 	uint const entry_datasize,
-	uint const pal_length,
-	optional<uint const> const pal_datasize,
+	uint const length,
+	optional<uint const> const datasize,
 	string const & description) :
 		gfxdef(id, description),
-		m_pal_length(pal_length),
+		m_length(length),
 		m_entry_datasize(entry_datasize),
-		m_subpal_datasize(pal_datasize ? pal_datasize.value() : entry_datasize * pal_length) {};
+		m_entry_datasize_bytes(m_entry_datasize / 8 + (m_entry_datasize % 8 > 0 ? 1 : 0)),
+		m_datasize(datasize ? datasize.value() : entry_datasize * length),
+		m_datasize_bytes(m_datasize / 8 + (m_datasize % 8 > 0 ? 1 : 0)) {};
+
+paldef::paldef(string const & id, uint const entry_datasize, uint const length, string const & description) :
+		paldef(id, entry_datasize, length, std::nullopt, description) {};
 
 uint paldef::length() const
 {
-	return m_pal_length;
+	return m_length;
 }
 
 uint paldef::entry_datasize() const
@@ -25,9 +30,19 @@ uint paldef::entry_datasize() const
 	return m_entry_datasize;
 }
 
+uint paldef::entry_datasize_bytes() const
+{
+	return m_entry_datasize_bytes;
+}
+
 uint paldef::datasize() const
 {
-	return m_subpal_datasize;
+	return m_datasize;
+}
+
+uint paldef::datasize_bytes() const
+{
+	return m_datasize_bytes;
 }
 
 } // namespace chrgfx

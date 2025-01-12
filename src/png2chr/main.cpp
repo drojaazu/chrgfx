@@ -106,7 +106,7 @@ int main(int argc, char ** argv)
 			auto chr_outfile {ofstream_checked(cfg.chr_outfile)};
 
 			size_t in_chunksize {(size_t) (defs.chrdef()->width() * defs.chrdef()->height())},
-				out_chunksize {(uint) (defs.chrdef()->datasize() / 8)};
+				out_chunksize {(uint) (defs.chrdef()->datasize_bytes())};
 
 			auto ptr_in_tile = tileset_data.data();
 			byte_t * ptr_imgdata_end = ptr_in_tile + tileset_data.size();
@@ -160,7 +160,7 @@ int main(int argc, char ** argv)
 			// TODO consider splitting the palette conversion routine into two
 			// functions, on for subpal and one for full pal so we always know the
 			// size of the data returned
-			size_t filesize {(size_t) (defs.paldef()->datasize() / 8)};
+			size_t filesize {(size_t) (defs.paldef()->datasize_bytes())};
 
 			pal_outfile.write(reinterpret_cast<char *>(paldef_palette_data), filesize);
 			delete[] paldef_palette_data;

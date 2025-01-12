@@ -121,9 +121,9 @@ When we think of a palette, we generally envision a structure that contains a li
 
 `pal_length` - The number of colors in the palette
 
-`entry_datasize` - The size of a single entry within a palette, in bits
+`entry_datasize` - The size of a single entry within a palette *in bits*
 
-`pal_datasize` - (Optional) The data size of a single palette, in bits. This should only be needed in very rare circumstances where the size of a subpalette is greater than the sum of the color data. An example of this is the Nintendo Virtual Boy.
+`pal_datasize` - (Optional) The data size of a single palette *in bits*. This should only be needed in very rare circumstances where the size of a subpalette is greater than the sum of the color data. An example of this is the Nintendo Virtual Boy.
 
 ### Color Definitions (coldef)
 Colors are derived in one of two ways. The first method calculates a color using RGB values specified by the size and position of each color channel within the data. This works for hardware that natively uses RGB colorspace. For hardware which does not, the second method is used. This involves mapping all possible colors to approximate RGB values in a reference table.

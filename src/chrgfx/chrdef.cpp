@@ -17,6 +17,7 @@ chrdef::chrdef(string const & id,
 		m_height(height),
 		m_bitdepth(bitdepth),
 		m_datasize(width * height * bitdepth),
+		m_datasize_bytes(m_datasize / 8 + (m_datasize % 8 > 0 ? 1 : 0)),
 		m_pixeloffsets(pixeloffset),
 		m_rowoffsets(rowoffset),
 		m_planeoffsets(planeoffset)
@@ -41,6 +42,11 @@ uint chrdef::bitdepth() const
 uint chrdef::datasize() const
 {
 	return m_datasize;
+}
+
+uint chrdef::datasize_bytes() const
+{
+	return m_datasize_bytes;
 }
 
 vector<uint> const & chrdef::plane_offsets() const
