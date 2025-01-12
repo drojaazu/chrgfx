@@ -111,11 +111,11 @@ bool shared_args(char this_opt, runtime_config & cfg)
 			cfg.coldef_id = optarg;
 			break;
 
-		case 'L':
+		case 'P':
 			cfg.paldef_id = optarg;
 			break;
 
-		case 'P':
+		case 'H':
 			cfg.profile_id = optarg;
 			break;
 

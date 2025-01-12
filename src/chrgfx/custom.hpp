@@ -10,6 +10,7 @@
 
 #include "basic_gfx.hpp"
 #include "types.hpp"
+#include <map>
 
 namespace chrgfx::custom
 {
@@ -24,33 +25,51 @@ namespace chrgfx::custom
  * file formats such as palettes for graphics editors.
  */
 
+using fp_encode_chr = size_t (*)(basic_pixel const * in_chr, byte_t * out_chr);
+using fp_decode_chr = void (*)(byte_t const * in_chr, size_t datasize, basic_pixel * out_chr);
+
+using fp_encode_pal = size_t (*)(basic_palette const * in_pal, byte_t * out_pal);
+using fp_decode_pal = void (*)(byte_t const * in_pal, size_t datasize, basic_palette * out_pal);
+
+using fp_encode_col = size_t (*)(basic_color const * in_col, byte_t * out_col);
+using fp_decode_col = void (*)(byte_t const * in_col, size_t datasize, basic_color * out_col);
+
 /**
  * @brief Converts the Nintendo Super Famicom 3bpp "quasi format"
  *
  * @param encoded_chr 8x8 encoded tile (24 bytes)
  * @return byte_t* 8x8 basic tile (64 bytes)
  */
-byte_t * decode_chr_nintendo_sfc_3bpp(byte_t const * encoded_chr, byte_t * out = nullptr);
+void decode_chr_nintendo_sfc_3bpp(byte_t const * encoded_chr, size_t datasize, basic_pixel * out);
 
 /**
  * @brief Converts an RGB TileLayer Pro palette to a basic palette
  */
-basic_palette decode_pal_tilelayerpro(std::istream & tpl_palette);
+void decode_pal_tilelayerpro(byte_t const * in_pal, size_t datasize, basic_palette * out_pal);
 
 /**
  * @brief Converts a basic palette to a TileLayer Pro RGB palette
  */
-void encode_pal_tilelayerpro(basic_palette const & palette, std::ostream & output);
+size_t encode_pal_tilelayerpro(basic_palette const * palette, byte_t * out_pal);
 
 /**
  * @brief Converts a JASC Paint Shop Pro palette to a basic palette
  */
-basic_palette decode_pal_paintshoppro(std::istream & psp_palette);
+// void decode_pal_paintshoppro(byte_t const * in_pal, size_t datasize, basic_palette * out_pal);
 
 /**
  * @brief Converts a basic palette to a JASC Paint Shop Pro palette
  */
-void encode_pal_paintshoppro(basic_palette const & palette, std::ostream & output);
+// size_t encode_pal_paintshoppro(basic_palette const * palette, byte_t * out_pal);
+
+std::map<std::string, fp_encode_chr> const custom_chr_encoders;
+std::map<std::string, fp_decode_chr> const custom_chr_decoders {{"sfc_3bpp", decode_chr_nintendo_sfc_3bpp}};
+
+std::map<std::string, fp_encode_pal> const custom_pal_encoders {{"tilelayerpro", encode_pal_tilelayerpro}};
+std::map<std::string, fp_decode_pal> const custom_pal_decoders {{"tilelayerpro", decode_pal_tilelayerpro}};
+
+std::map<std::string, fp_encode_col> const custom_col_encoders;
+std::map<std::string, fp_decode_col> const custom_col_decoders;
 
 } // namespace chrgfx::custom
 

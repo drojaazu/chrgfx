@@ -65,6 +65,7 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 		// get gfxdef IDs from profile first, if specified
 		if (! cfg.profile_id.empty())
 		{
+			bool found {false};
 			for (auto const & block : config)
 			{
 				if (block.first != "profile")
@@ -79,6 +80,7 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				// we have our requested profile
 				// only set gfxdef IDs if they are not set by the user
 				// (allow them to override profile settings)
+				found = true;
 				if (cfg.chrdef_id.empty())
 				{
 					auto chrdef_kv = block.second.find("chrdef");
@@ -101,6 +103,9 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				}
 				break;
 			}
+
+			if (! found)
+				throw runtime_error("could not find specified profile " + cfg.profile_id);
 		}
 
 		// load gfxdefs as specified
@@ -292,6 +297,12 @@ public:
 			// we load from file first to get the profile, if specified
 			load_from_file(cfg);
 			load_from_internal(cfg);
+			if (! cfg.chrdef_id.empty() && m_chrdef == nullptr)
+				throw runtime_error("could not find specified chrdef" + cfg.chrdef_id);
+			if (! cfg.paldef_id.empty() && m_paldef == nullptr)
+				throw runtime_error("could not find specified paldef " + cfg.paldef_id);
+			if (! cfg.coldef_id.empty() && m_coldef == nullptr)
+				throw runtime_error("could not find specified coldef" + cfg.coldef_id);
 		}
 		load_from_cli(cfg);
 	}
