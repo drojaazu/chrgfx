@@ -111,15 +111,14 @@ int main(int argc, char ** argv)
 			auto ptr_in_tile = tileset_data.data();
 			byte_t * ptr_imgdata_end = ptr_in_tile + tileset_data.size();
 
-			auto out_tile = new basic_pixel[in_chunksize];
+			auto out_tile {unique_ptr<basic_pixel>(new basic_pixel[in_chunksize])};
 			while (ptr_in_tile != ptr_imgdata_end)
 			{
 				// TODO create a cache and use the out pointer on encode_chr
-				encode_chr(defs.chrdef(), ptr_in_tile, out_tile);
-				copy(out_tile, out_tile + out_chunksize, ostream_iterator<char>(chr_outfile));
+				encode_chr(defs.chrdef(), ptr_in_tile, out_tile.get());
+				copy(out_tile.get(), out_tile.get() + out_chunksize, ostream_iterator<char>(chr_outfile));
 				ptr_in_tile += in_chunksize;
 			}
-			delete[] out_tile;
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
@@ -139,8 +138,8 @@ int main(int argc, char ** argv)
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			auto paldef_palette_data {new byte_t[defs.paldef()->datasize() >> 3]};
-			encode_pal(defs.paldef(), defs.coldef(), image_data.palette(), paldef_palette_data);
+			auto paldef_palette_data {unique_ptr<byte_t>(new byte_t[defs.paldef()->datasize() >> 3])};
+			encode_pal(defs.paldef(), defs.coldef(), image_data.palette(), paldef_palette_data.get());
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
@@ -162,8 +161,7 @@ int main(int argc, char ** argv)
 			// size of the data returned
 			size_t filesize {(size_t) (defs.paldef()->datasize_bytes())};
 
-			pal_outfile.write(reinterpret_cast<char *>(paldef_palette_data), filesize);
-			delete[] paldef_palette_data;
+			pal_outfile.write(reinterpret_cast<char *>(paldef_palette_data.get()), filesize);
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();

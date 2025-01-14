@@ -25,14 +25,14 @@ void render_palette_line()
 
 		ifstream paldata {ifstream_checked(cfg.paldata_name)};
 		size_t pal_size {work_paldef->datasize_bytes()};
-		byte_t palbuffer[pal_size];
+		auto palbuffer {unique_ptr<byte_t>(new byte_t[pal_size])};
 
 		paldata.seekg(cfg.pal_line * pal_size, ios::beg);
-		paldata.read(reinterpret_cast<char *>(palbuffer), pal_size);
+		paldata.read(reinterpret_cast<char *>(palbuffer.get()), pal_size);
 		if (paldata.gcount() != pal_size)
 			throw runtime_error("Could not read enough data for a complete color palette");
 
-		decode_pal(work_paldef, work_coldef, palbuffer, &workpal);
+		decode_pal(work_paldef, work_coldef, palbuffer.get(), &workpal);
 	}
 
 	// generate swatch tiles
@@ -76,13 +76,13 @@ void render_full_palette()
 		while (paldata.good())
 		{
 			size_t pal_size {work_paldef->datasize_bytes()};
-			byte_t palbuffer[pal_size];
+			auto palbuffer {unique_ptr<byte_t>(new byte_t[pal_size])};
 
-			paldata.read(reinterpret_cast<char *>(palbuffer), pal_size);
+			paldata.read(reinterpret_cast<char *>(palbuffer.get()), pal_size);
 			if (paldata.gcount() != pal_size)
 				break;
 			// TODO check if we got a full subpal's worth of data!
-			decode_pal(work_paldef, work_coldef, palbuffer, &palette_lines.emplace_back());
+			decode_pal(work_paldef, work_coldef, palbuffer.get(), &palette_lines.emplace_back());
 		}
 
 		if (palette_lines.empty())

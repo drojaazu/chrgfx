@@ -1,6 +1,6 @@
 .cache/
 .vscode/
 build/
-work/
+work
 docs/
 **/src/app.hpp

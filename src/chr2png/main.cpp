@@ -6,6 +6,7 @@
 #include <chrgfx/chrgfx.hpp>
 #include <getopt.h>
 #include <iostream>
+#include <memory>
 
 #ifdef DEBUG
 #include <chrono>
@@ -78,7 +79,8 @@ int main(int argc, char ** argv)
 				out_chunksize {(size_t) (defs.chrdef()->width() * defs.chrdef()->height())};
 
 			// buffer for a single encoded tile, read from the stream
-			auto in_tile = new byte_t[in_chunksize], out_tile = new basic_pixel[out_chunksize];
+			auto in_tile {unique_ptr<byte_t>(new byte_t[in_chunksize])},
+				out_tile {unique_ptr<byte_t>(new basic_pixel[out_chunksize])};
 
 			/*
 				Some speed testing was done and, somewhat surprisingly, calling append
@@ -87,15 +89,13 @@ int main(int argc, char ** argv)
 			*/
 			while (true)
 			{
-				chrdata->read(reinterpret_cast<char *>(in_tile), in_chunksize);
+				chrdata->read(reinterpret_cast<char *>(in_tile.get()), in_chunksize);
 				if (! chrdata->good())
 					break;
 
-				decode_chr(defs.chrdef(), in_tile, out_tile);
-				out_buffer.append(out_tile, out_chunksize);
+				decode_chr(defs.chrdef(), in_tile.get(), out_tile.get());
+				out_buffer.append(out_tile.get(), out_chunksize);
 			}
-			delete[] out_tile;
-			delete[] in_tile;
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
@@ -117,14 +117,14 @@ int main(int argc, char ** argv)
 			{
 				ifstream paldata {ifstream_checked(cfg.paldata_name)};
 				size_t pal_size {defs.paldef()->datasize_bytes()};
-				byte_t palbuffer[pal_size];
+				auto palbuffer {unique_ptr<byte_t>(new byte_t[pal_size])};
 
 				paldata.seekg(cfg.pal_line * pal_size, ios::beg);
-				paldata.read(reinterpret_cast<char *>(palbuffer), pal_size);
+				paldata.read(reinterpret_cast<char *>(palbuffer.get()), pal_size);
 				if (! paldata.good())
 					throw runtime_error("Cannot read specified palette line index");
 
-				decode_pal(defs.paldef(), defs.coldef(), palbuffer, &workpal);
+				decode_pal(defs.paldef(), defs.coldef(), palbuffer.get(), &workpal);
 			}
 			else
 			{

@@ -142,8 +142,8 @@ void decode_pal(paldef const * paldef, coldef const * coldef, byte_t const * in_
 	// the temporary buffer will hold the entry value "extracted" from the palette
 	// data byte by byte before it is copied to another buffer respecting the
 	// endianness of the local machine
-	byte_t temp_buff[temp_buff_size];
-	fill_n(temp_buff, temp_buff_size, 0);
+	auto temp_buff = unique_ptr<byte_t>(new byte_t[temp_buff_size]);
+	fill_n(temp_buff.get(), temp_buff_size, 0);
 
 	// the entry buffer will hold the "extracted" palette entry as a native
 	// integer, whereupon bit operations can be performed
@@ -168,12 +168,13 @@ void decode_pal(paldef const * paldef, coldef const * coldef, byte_t const * in_
 		// a few times...
 
 		// copy all data for one color entry into the temp buffer
-		copyfunc(
-			(char *) paldata_iter + byte_offset, (char *) paldata_iter + byte_offset + temp_buff_size, (char *) temp_buff);
+		copyfunc((char *) paldata_iter + byte_offset,
+			(char *) paldata_iter + byte_offset + temp_buff_size,
+			(char *) temp_buff.get());
 
 		// recast that buffer (array) as a 32 bit value, shift it into its
 		// correct position, and mask off extraneous upper bits
-		entry_buff = *reinterpret_cast<uint32 *>(temp_buff);
+		entry_buff = *reinterpret_cast<uint32 *>(temp_buff.get());
 		entry_buff >>= bit_align_mod;
 		entry_buff &= entry_buff_bitmask;
 
