@@ -35,11 +35,11 @@ struct runtime_config
 	std::string rgbcoldef_rgblayout;
 	std::string rgbcoldef_bitdepth;
 
-	bool chrdef_cli_defined();
+	bool chrdef_cli_defined() const;
 
-	bool paldef_cli_defined();
+	bool paldef_cli_defined() const;
 
-	bool coldef_cli_defined();
+	bool coldef_cli_defined() const;
 };
 
 bool shared_args(char this_opt, runtime_config & cfg);

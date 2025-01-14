@@ -1,5 +1,8 @@
 #include "xdgdirs.hpp"
 
+namespace motoi
+{
+
 std::string xdg_data_dirs()
 {
 	auto xdg_data_dirs = getenv("XDG_DATA_DIRS");
@@ -51,3 +54,5 @@ std::vector<std::string> config_filepaths(char const * filename)
 {
 	return config_filepaths(std::string(filename));
 }
+
+} // namespace motoi

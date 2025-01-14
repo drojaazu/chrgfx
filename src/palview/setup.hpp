@@ -77,12 +77,6 @@ void process_args(int argc, char ** argv)
 		}
 	}
 
-	if (cfg.gfxdefs_path.empty())
-		cfg.gfxdefs_path = get_gfxdefs_path();
-
-#ifdef DEBUG
-	cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << '\n';
-#endif
 }
 
 #endif

@@ -36,8 +36,7 @@ int main(int argc, char ** argv)
 #endif
 		process_args(argc, argv);
 
-		gfxdef_manager defs;
-		defs.load_gfxdefs(cfg);
+		gfxdef_manager defs(cfg);
 
 		// set up input data
 		ifstream png_fstream;
@@ -225,10 +224,4 @@ void process_args(int argc, char ** argv)
 		}
 	}
 
-	if (cfg.gfxdefs_path.empty())
-		cfg.gfxdefs_path = get_gfxdefs_path();
-
-#ifdef DEBUG
-	cerr << "\tUsing gfxdefs file: " << cfg.gfxdefs_path << '\n';
-#endif
 }

@@ -138,18 +138,18 @@ bool shared_args(char this_opt, runtime_config & cfg)
 	return found;
 }
 
-bool runtime_config::chrdef_cli_defined()
+bool runtime_config::chrdef_cli_defined() const
 {
 	return ! (chrdef_bpp.empty() && chrdef_width.empty() && chrdef_height.empty() && chrdef_pixel_offsets.empty() &&
 						chrdef_plane_offsets.empty() && chrdef_row_offsets.empty());
 }
 
-bool runtime_config::coldef_cli_defined()
+bool runtime_config::coldef_cli_defined() const
 {
 	return ! (rgbcoldef_big_endian.empty() && rgbcoldef_rgblayout.empty() && rgbcoldef_bitdepth.empty());
 }
 
-bool runtime_config::paldef_cli_defined()
+bool runtime_config::paldef_cli_defined() const
 {
 	return ! (paldef_datasize.empty() && paldef_entry_datasize.empty() && paldef_length.empty());
 }

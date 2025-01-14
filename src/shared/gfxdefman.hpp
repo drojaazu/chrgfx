@@ -11,20 +11,17 @@
 #include "xdgdirs.hpp"
 #include <map>
 #include <vector>
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 static auto constexpr GFXDEF_SUBDIR {"chrgfx/gfxdefs"};
-
-std::string get_gfxdefs_path()
-{
-	auto xdg_locations {data_filepaths(GFXDEF_SUBDIR)};
-	if (xdg_locations.empty())
-		throw runtime_error("Could not find gfxdef file in any default location");
-	return xdg_locations.front();
-}
 
 class gfxdef_manager
 {
 private:
+	runtime_config const & m_cfg;
+
 	chrgfx::chrdef const * m_chrdef {nullptr};
 	chrgfx::paldef const * m_paldef {nullptr};
 	chrgfx::coldef const * m_coldef {nullptr};
@@ -34,38 +31,36 @@ private:
 	std::string m_target_paldef;
 	std::string m_target_coldef;
 
-	std::vector<std::string_view> m_errors;
+	bool profile_found {false};
 
-	enum class def_type
+	std::string get_gfxdefs_xdg_paths()
 	{
-		chrdef,
-		paldef,
-		coldef,
-		profile
-	};
+		auto xdg_locations {data_filepaths(GFXDEF_SUBDIR)};
+		if (xdg_locations.empty())
+			throw runtime_error("Could not find gfxdef file in any default location");
+		return xdg_locations.front();
+	}
 
-	// clang-format off
-std::map<std::string_view, def_type> const def_type_lexemes {
-	{"chrdef", def_type::chrdef},
-	{"paldef", def_type::paldef},
-	{"coldef", def_type::coldef},
-	{"profile", def_type::profile}
-};
-	// clang-format on
-
-	void load_from_file(runtime_config & cfg)
+	void load_from_file(std::string const & path)
 	{
-		// don't even bother loading anything if we already have our defs set up
+		// don't bother loading anything if we already have our defs loaded
 		if (m_chrdef != nullptr && m_paldef != nullptr && m_coldef != nullptr)
-			return;
-
-		motoi::config_loader config(cfg.gfxdefs_path);
-
-		std::string_view block_header;
-		// get gfxdef IDs from profile first, if specified
-		if (! cfg.profile_id.empty())
 		{
-			bool found {false};
+#ifdef DEBUG
+			std::cerr << "gfxdef pointers alreadt set, not loading file\n";
+#endif
+			return;
+		}
+
+		motoi::config_loader config(path);
+		std::string_view block_header;
+
+		// get gfxdef IDs from profile first, if specified
+		if (! m_target_profile.empty())
+		{
+#ifdef DEBUG
+			std::cerr << "Using profile: " << m_target_profile << '\n';
+#endif
 			for (auto const & block : config)
 			{
 				if (block.first != "profile")
@@ -73,39 +68,48 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 
 				auto kv = block.second.find("id");
 				if (kv == block.second.end())
-					throw runtime_error("no id found in profile block");
-				if (kv->second != cfg.profile_id)
+					continue;
+				if (kv->second != m_target_profile)
 					continue;
 
 				// we have our requested profile
 				// only set gfxdef IDs if they are not set by the user
-				// (allow them to override profile settings)
-				found = true;
-				if (cfg.chrdef_id.empty())
+				// (i.e. allow them to override profile settings)
+				profile_found = true;
+				if (m_target_chrdef.empty())
 				{
 					auto chrdef_kv = block.second.find("chrdef");
 					if (chrdef_kv != block.second.end())
-						cfg.chrdef_id = chrdef_kv->second;
+						m_target_chrdef = chrdef_kv->second;
+#ifdef DEBUG
+					std::cerr << "Set target chrdef from profile: " << m_target_chrdef << '\n';
+#endif
 				}
 
-				if (cfg.paldef_id.empty())
+				if (m_target_paldef.empty())
 				{
 					auto paldef_kv = block.second.find("paldef");
 					if (paldef_kv != block.second.end())
-						cfg.paldef_id = paldef_kv->second;
+						m_target_paldef = paldef_kv->second;
+#ifdef DEBUG
+					std::cerr << "Set target paldef from profile: " << m_target_paldef << '\n';
+#endif
 				}
 
-				if (cfg.coldef_id.empty())
+				if (m_target_coldef.empty())
 				{
 					auto coldef_kv = block.second.find("coldef");
 					if (coldef_kv != block.second.end())
-						cfg.coldef_id = coldef_kv->second;
+						m_target_coldef = coldef_kv->second;
+#ifdef DEBUG
+					std::cerr << "Set target coldef from profile: " << m_target_coldef << '\n';
+#endif
 				}
 				break;
 			}
 
-			if (! found)
-				throw runtime_error("could not find specified profile " + cfg.profile_id);
+			if (! profile_found)
+				throw runtime_error("could not find specified profile " + m_target_profile);
 		}
 
 		// load gfxdefs as specified
@@ -113,13 +117,13 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 		{
 			block_header = block.first;
 
-			if (m_chrdef == nullptr && ! cfg.chrdef_id.empty() && block_header == "chrdef")
+			if (m_chrdef == nullptr && ! m_target_chrdef.empty() && block_header == "chrdef")
 			{
 				auto kv = block.second.find("id");
 				if (kv == block.second.end())
 					continue;
 
-				if (kv->second != cfg.chrdef_id)
+				if (kv->second != m_target_chrdef)
 					continue;
 
 				// matched the block, now load it as a gfxdef
@@ -128,13 +132,13 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				continue;
 			}
 
-			if (m_paldef == nullptr && ! cfg.paldef_id.empty() && block_header == "paldef")
+			if (m_paldef == nullptr && ! m_target_paldef.empty() && block_header == "paldef")
 			{
 				auto kv = block.second.find("id");
 				if (kv == block.second.end())
 					continue;
 
-				if (kv->second != cfg.paldef_id)
+				if (kv->second != m_target_paldef)
 					continue;
 
 				// matched the block, now load it as a gfxdef
@@ -143,13 +147,13 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				continue;
 			}
 
-			if (m_coldef == nullptr && ! cfg.coldef_id.empty() && block_header == "rgbcoldef")
+			if (m_coldef == nullptr && ! m_target_coldef.empty() && block_header == "rgbcoldef")
 			{
 				auto kv = block.second.find("id");
 				if (kv == block.second.end())
 					continue;
 
-				if (kv->second != cfg.coldef_id)
+				if (kv->second != m_target_coldef)
 					continue;
 
 				// matched the block, now load it as a gfxdef
@@ -158,13 +162,13 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				continue;
 			}
 
-			if (m_coldef == nullptr && ! cfg.coldef_id.empty() && block_header == "refcoldef")
+			if (m_coldef == nullptr && ! m_target_coldef.empty() && block_header == "refcoldef")
 			{
 				auto kv = block.second.find("id");
 				if (kv == block.second.end())
 					continue;
 
-				if (kv->second != cfg.coldef_id)
+				if (kv->second != m_target_coldef)
 					continue;
 
 				// matched the block, now load it as a gfxdef
@@ -175,34 +179,34 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 		}
 	}
 
-	void load_from_internal(runtime_config & cfg)
+	void load_from_internal()
 	{
-		if (m_chrdef == nullptr && ! cfg.chrdef_id.empty())
+		if (m_chrdef == nullptr && ! m_target_chrdef.empty())
 		{
-			auto def = chrgfx::gfxdefs::chrdefs.find(cfg.chrdef_id);
+			auto def = chrgfx::gfxdefs::chrdefs.find(m_target_chrdef);
 			if (def != chrgfx::gfxdefs::chrdefs.end())
 				m_chrdef = new class chrdef(def->second);
 		}
 
-		if (m_paldef == nullptr && ! cfg.paldef_id.empty())
+		if (m_paldef == nullptr && ! m_target_paldef.empty())
 		{
-			auto def = chrgfx::gfxdefs::paldefs.find(cfg.paldef_id);
+			auto def = chrgfx::gfxdefs::paldefs.find(m_target_paldef);
 			if (def != chrgfx::gfxdefs::paldefs.end())
 				m_paldef = new class paldef(def->second);
 		}
 
-		if (m_coldef == nullptr && ! cfg.coldef_id.empty())
+		if (m_coldef == nullptr && ! m_target_coldef.empty())
 		{
-			auto def = chrgfx::gfxdefs::rgbcoldefs.find(cfg.coldef_id);
+			auto def = chrgfx::gfxdefs::rgbcoldefs.find(m_target_coldef);
 			if (def != chrgfx::gfxdefs::rgbcoldefs.end())
 				m_coldef = new class rgbcoldef(def->second);
 		}
 	}
 
-	void load_from_cli(runtime_config & cfg)
+	void load_from_cli()
 	{
 		// build chrdef from cli
-		if (cfg.chrdef_cli_defined())
+		if (m_cfg.chrdef_cli_defined())
 		{
 			chrdef_builder builder;
 			if (m_chrdef != nullptr)
@@ -210,24 +214,24 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				builder.from_def(*m_chrdef);
 				delete m_chrdef;
 			}
-			if (! cfg.chrdef_bpp.empty())
-				builder.set_bitdepth(cfg.chrdef_bpp);
-			if (! cfg.chrdef_width.empty())
-				builder.set_width(cfg.chrdef_width);
-			if (! cfg.chrdef_height.empty())
-				builder.set_height(cfg.chrdef_height);
-			if (! cfg.chrdef_pixel_offsets.empty())
-				builder.set_pixel_offsets(cfg.chrdef_pixel_offsets);
-			if (! cfg.chrdef_plane_offsets.empty())
-				builder.set_plane_offsets(cfg.chrdef_plane_offsets);
-			if (! cfg.chrdef_row_offsets.empty())
-				builder.set_row_offsets(cfg.chrdef_row_offsets);
+			if (! m_cfg.chrdef_bpp.empty())
+				builder.set_bitdepth(m_cfg.chrdef_bpp);
+			if (! m_cfg.chrdef_width.empty())
+				builder.set_width(m_cfg.chrdef_width);
+			if (! m_cfg.chrdef_height.empty())
+				builder.set_height(m_cfg.chrdef_height);
+			if (! m_cfg.chrdef_pixel_offsets.empty())
+				builder.set_pixel_offsets(m_cfg.chrdef_pixel_offsets);
+			if (! m_cfg.chrdef_plane_offsets.empty())
+				builder.set_plane_offsets(m_cfg.chrdef_plane_offsets);
+			if (! m_cfg.chrdef_row_offsets.empty())
+				builder.set_row_offsets(m_cfg.chrdef_row_offsets);
 
 			m_chrdef = builder.build();
 		}
 
 		// build paldef from cli
-		if (cfg.paldef_cli_defined())
+		if (m_cfg.paldef_cli_defined())
 		{
 			paldef_builder builder;
 			if (m_paldef != nullptr)
@@ -235,18 +239,18 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 				builder.from_def(*m_paldef);
 				delete m_paldef;
 			}
-			if (! cfg.paldef_datasize.empty())
-				builder.set_datasize(cfg.paldef_datasize);
-			if (! cfg.paldef_entry_datasize.empty())
-				builder.set_datasize(cfg.paldef_entry_datasize);
-			if (! cfg.paldef_length.empty())
-				builder.set_length(cfg.paldef_length);
+			if (! m_cfg.paldef_datasize.empty())
+				builder.set_datasize(m_cfg.paldef_datasize);
+			if (! m_cfg.paldef_entry_datasize.empty())
+				builder.set_datasize(m_cfg.paldef_entry_datasize);
+			if (! m_cfg.paldef_length.empty())
+				builder.set_length(m_cfg.paldef_length);
 
 			m_paldef = builder.build();
 		}
 
 		// build coldef from cli
-		if (cfg.coldef_cli_defined())
+		if (m_cfg.coldef_cli_defined())
 		{
 			rgbcoldef_builder builder;
 			if (m_coldef != nullptr)
@@ -255,18 +259,68 @@ std::map<std::string_view, def_type> const def_type_lexemes {
 					builder.from_def(*static_cast<rgbcoldef const *>(m_coldef));
 				delete m_coldef;
 			}
-			if (! cfg.rgbcoldef_bitdepth.empty())
-				builder.set_bitdepth(cfg.rgbcoldef_bitdepth);
-			if (! cfg.rgbcoldef_big_endian.empty())
-				builder.set_big_endian(cfg.rgbcoldef_big_endian);
-			if (! cfg.rgbcoldef_rgblayout.empty())
-				builder.set_layout(cfg.rgbcoldef_rgblayout);
+			if (! m_cfg.rgbcoldef_bitdepth.empty())
+				builder.set_bitdepth(m_cfg.rgbcoldef_bitdepth);
+			if (! m_cfg.rgbcoldef_big_endian.empty())
+				builder.set_big_endian(m_cfg.rgbcoldef_big_endian);
+			if (! m_cfg.rgbcoldef_rgblayout.empty())
+				builder.set_layout(m_cfg.rgbcoldef_rgblayout);
 
 			m_coldef = builder.build();
 		}
 	}
 
 public:
+	gfxdef_manager(runtime_config & cfg) :
+			m_cfg(cfg),
+			m_target_profile(m_cfg.profile_id),
+			m_target_chrdef(m_cfg.chrdef_id),
+			m_target_paldef(m_cfg.paldef_id),
+			m_target_coldef(m_cfg.coldef_id)
+	{
+		// if no IDs are specified (i.e. building entirely from command line), skip these steps
+		if (! (m_target_profile.empty() && m_target_chrdef.empty() && m_target_paldef.empty() && m_target_coldef.empty()))
+		{
+			// we load from file first to get the profile, if specified
+			if (! m_cfg.gfxdefs_path.empty())
+			{
+				// if a gfxdefs file was specified, use that one only
+				load_from_file(m_cfg.gfxdefs_path);
+#ifdef DEBUG
+				std::cerr << "Considering gfxdefs file: " << m_cfg.gfxdefs_path << '\n';
+#endif
+			}
+			else
+			{
+				// otherwise read from XDG location(s)
+				auto xdg_locations {motoi::data_filepaths(GFXDEF_SUBDIR)};
+				if (xdg_locations.empty())
+					throw runtime_error("could not find a gfxdefs file in any default location");
+				for (auto const & path : xdg_locations)
+				{
+#ifdef DEBUG
+					std::cerr << "Considering gfxdefs file: " << path << '\n';
+#endif
+					load_from_file(path);
+				}
+			}
+
+			if (! m_target_profile.empty() && ! profile_found)
+			{
+				throw runtime_error("could not find specified profile " + m_target_profile);
+			}
+
+			load_from_internal();
+			if (! m_target_chrdef.empty() && m_chrdef == nullptr)
+				throw runtime_error("could not find specified chrdef " + m_target_chrdef);
+			if (! m_target_paldef.empty() && m_paldef == nullptr)
+				throw runtime_error("could not find specified paldef " + m_target_paldef);
+			if (! m_target_coldef.empty() && m_coldef == nullptr)
+				throw runtime_error("could not find specified coldef " + m_target_coldef);
+		}
+		load_from_cli();
+	}
+
 	~gfxdef_manager()
 	{
 		delete m_chrdef;
@@ -287,24 +341,6 @@ public:
 	auto coldef()
 	{
 		return m_coldef;
-	}
-
-	void load_gfxdefs(runtime_config & cfg)
-	{
-		// if no IDs are specified (i.e. building entirely from command line), skip these steps
-		if (! (cfg.profile_id.empty() && cfg.chrdef_id.empty() && cfg.coldef_id.empty() && cfg.paldef_id.empty()))
-		{
-			// we load from file first to get the profile, if specified
-			load_from_file(cfg);
-			load_from_internal(cfg);
-			if (! cfg.chrdef_id.empty() && m_chrdef == nullptr)
-				throw runtime_error("could not find specified chrdef" + cfg.chrdef_id);
-			if (! cfg.paldef_id.empty() && m_paldef == nullptr)
-				throw runtime_error("could not find specified paldef " + cfg.paldef_id);
-			if (! cfg.coldef_id.empty() && m_coldef == nullptr)
-				throw runtime_error("could not find specified coldef" + cfg.coldef_id);
-		}
-		load_from_cli(cfg);
 	}
 };
 

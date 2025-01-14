@@ -125,9 +125,7 @@ int main(int argc, char ** argv)
 
 		process_args(argc, argv);
 
-		gfxdef_manager defs;
-		defs.load_gfxdefs(cfg);
-
+		gfxdef_manager defs(cfg);
 		work_coldef = defs.coldef();
 		work_paldef = defs.paldef();
 
