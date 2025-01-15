@@ -1,4 +1,4 @@
-
+project(chrgfx VERSION 3.0 LANGUAGES CXX)
 add_library(chrgfx SHARED)
 
 target_sources(chrgfx
@@ -43,7 +43,7 @@ PUBLIC
     utils.hpp
 )
 
-set_target_properties(chrgfx PROPERTIES SOVERSION 2)
+set_target_properties(chrgfx PROPERTIES SOVERSION 3)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/app.hpp.cfg" "${CMAKE_CURRENT_SOURCE_DIR}/app.hpp")
 
@@ -55,8 +55,8 @@ if(NOT PNG_LIB)
   message(FATAL_ERROR "libpng not found")
 endif()
 
-check_include_files("png++/png.hpp" PNGPP_H)
-
+include(CheckIncludeFileCXX)
+check_include_file_cxx("png++/png.hpp" PNGPP_H)
 if(NOT PNGPP_H)
   message(FATAL_ERROR "png++ not found")
 endif()

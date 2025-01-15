@@ -1,7 +1,7 @@
 /**
  * @author Damian R (damian@motoi.pro)
- * @brief Visualize an encoded color palette
- * @version 1.0.0
+ * @brief 
+ * @version 3.0
  * 
  * @copyright ©2017 Motoi Productions / Released under MIT License
  *
@@ -18,20 +18,22 @@
 */
 namespace APP
 {
-static unsigned int const VERSION_MAJOR {1};
+static unsigned int const VERSION_MAJOR {3};
 static unsigned int const VERSION_MINOR {0};
-static unsigned int const VERSION_PATCH {0};
-static char const * VERSION {"1.0.0"};
+static unsigned int const VERSION_PATCH {};
+static char const * VERSION {"3.0"};
 
-static char const * NAME {"palview"};
+static char const * NAME {"chrgfx"};
+static char const * COPYRIGHT {"©2017 Motoi Productions / Released under MIT License"};
 static char const * CONTACT {"Damian R (damian@motoi.pro)"};
 static char const * WEBSITE {"https://github.com/drojaazu"};
-static char const * BRIEF {"Visualize an encoded color palette"};
+static char const * BRIEF {""};
 
-std::string app_version()
+std::string app_info()
 {
 	std::stringstream ss;
-	ss << APP::NAME << " - version " << APP::VERSION << '\n';
+	ss << APP::NAME << ' ' << APP::VERSION << '\n';
+	ss << APP::COPYRIGHT << '\n';
 	ss << APP::CONTACT << " / " << APP::WEBSITE << '\n';
 
 	return ss.str();

@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
+project(chrgfx)
 
 set(PROJECT_CONTACT "Damian R (damian@motoi.pro)")
 set(PROJECT_WEBSITE "https://github.com/drojaazu")
@@ -21,29 +22,6 @@ if(result)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-include(CheckIncludeFiles)
-
-project(chrgfx VERSION 2.1.1 LANGUAGES CXX)
-add_subdirectory(src/chrgfx)
-
-project(chr2png
-  DESCRIPTION "Convert encoded tile graphics to PNG image"
-  VERSION 1.3.0
-  LANGUAGES CXX)
-add_subdirectory(src/chr2png)
-
-project(png2chr
-  DESCRIPTION "Convert PNG image input to encoded tile graphics"
-  VERSION 1.3.0
-  LANGUAGES CXX)
-add_subdirectory(src/png2chr)
-
-project(palview
-  DESCRIPTION "Visualize an encoded color palette"
-  VERSION 1.0.0
-  LANGUAGES CXX)
-add_subdirectory(src/palview)
-
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -59,6 +37,11 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
   endif()
 endif()
+
+add_subdirectory(lib/chrgfx)
+add_subdirectory(app/chr2png)
+add_subdirectory(app/png2chr)
+add_subdirectory(app/palview)
 
 install(FILES share/gfxdef/gfxdefs
   DESTINATION ${CMAKE_INSTALL_DATADIR}/chrgfx)

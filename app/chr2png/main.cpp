@@ -20,8 +20,8 @@ void process_args(int argc, char ** argv);
 
 struct runtime_config_chr2png : runtime_config
 {
-	string chrdata_name;
-	string paldata_name;
+	string chrdata_path;
+	string paldata_path;
 	render_config render_cfg;
 	string out_path;
 	uint pal_line {0};
@@ -44,14 +44,14 @@ int main(int argc, char ** argv)
 
 		istream * chrdata;
 		ifstream ifs;
-		if (cfg.chrdata_name == "-")
+		if (cfg.chrdata_path == "-")
 		{
 			chrdata = &cin;
 		}
 		else
 		{
 			// see if we have good input before moving on
-			ifs = ifstream_checked(cfg.chrdata_name);
+			ifs = ifstream_checked(cfg.chrdata_path);
 			chrdata = &ifs;
 		}
 
@@ -112,9 +112,9 @@ int main(int argc, char ** argv)
 #ifdef DEBUG
 			t1 = chrono::high_resolution_clock::now();
 #endif
-			if (! cfg.paldata_name.empty())
+			if (! cfg.paldata_path.empty())
 			{
-				ifstream paldata {ifstream_checked(cfg.paldata_name)};
+				ifstream paldata {ifstream_checked(cfg.paldata_path)};
 				size_t pal_size {defs.paldef()->datasize_bytes()};
 				auto palbuffer {unique_ptr<byte_t>(new byte_t[pal_size])};
 
@@ -216,12 +216,12 @@ void process_args(int argc, char ** argv)
 		{
 			// input tile data path
 			case 'c':
-				cfg.chrdata_name = optarg;
+				cfg.chrdata_path = optarg;
 				break;
 
 			// input palette data path
 			case 'p':
-				cfg.paldata_name = optarg;
+				cfg.paldata_path = optarg;
 				break;
 
 			// palette line
@@ -274,6 +274,4 @@ void process_args(int argc, char ** argv)
 				break;
 		}
 	}
-
-
 }

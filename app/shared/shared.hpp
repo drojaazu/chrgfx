@@ -10,7 +10,7 @@
 // these are intentionally mutable
 extern std::string short_opts;
 extern std::vector<option> long_opts;
-extern std::vector<option_details> opt_details;
+extern std::vector<motoi::option_details> opt_details;
 
 struct runtime_config
 {

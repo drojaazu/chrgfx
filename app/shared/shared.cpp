@@ -8,11 +8,11 @@ string short_opts {":G:H:T:C:P:h"};
 
 int longopt_idx {0};
 vector<option> long_opts {// predefined gfx defs
-	{"gfx-def", required_argument, nullptr, 'G'},
+	{"gfxdefs-path", required_argument, nullptr, 'G'},
 	{"profile", required_argument, nullptr, 'H'},
-	{"chr-def", required_argument, nullptr, 'T'},
-	{"col-def", required_argument, nullptr, 'C'},
-	{"pal-def", required_argument, nullptr, 'P'},
+	{"chrdef", required_argument, nullptr, 'T'},
+	{"coldef", required_argument, nullptr, 'C'},
+	{"paldef", required_argument, nullptr, 'P'},
 	{"help", no_argument, nullptr, 'h'},
 
 	// cli defined gfx defs - chr
@@ -31,14 +31,13 @@ vector<option> long_opts {// predefined gfx defs
 	{"col-layout", required_argument, &longopt_idx, 10},
 	{"col-big-endian", required_argument, &longopt_idx, 11}};
 
-vector<option_details> opt_details {
+vector<motoi::option_details> opt_details {
 	// predefined gfx defs
-	{false, "Path to graphics encoding definitions", "path"},
-	{false, "Graphics profile to use", nullptr},
-	{false, "Tile encoding to use; overrides tile encoding in graphics profile (if specified)", nullptr},
-	{false, "Color encoding to use; overrides color encoding in graphics profile (if specified)", nullptr},
-	{false, "Palette encoding to use; overrides palette encoding in graphics profile (if specified)", nullptr},
-	{false, "List all available encodings in gfxdefs file", nullptr},
+	{false, "Filepath to graphics encoding definitions file", "PATH"},
+	{false, "Graphics profile to use", "ID"},
+	{false, "Tile encoding to use; overrides tile encoding in graphics profile (if specified)", "ID"},
+	{false, "Color encoding to use; overrides color encoding in graphics profile (if specified)", "ID"},
+	{false, "Palette encoding to use; overrides palette encoding in graphics profile (if specified)", "ID"},
 	{false, "Display program usage", nullptr},
 	// cli defined gfx defs - chr
 	{false, "Tile width", nullptr},
@@ -120,7 +119,7 @@ bool shared_args(char this_opt, runtime_config & cfg)
 			break;
 
 		case 'h':
-			cout << show_usage(long_opts.data(), opt_details.data()) << '\n';
+			show_usage(long_opts.data(), opt_details.data(), cout);
 			exit(0);
 
 		case ':':
