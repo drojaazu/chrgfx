@@ -68,6 +68,9 @@ int main(int argc, char ** argv)
 		 *             TILE CONVERSION
 		 *******************************************************/
 		{
+			if (defs.chrdef() == nullptr)
+				throw runtime_error("no chrdef loaded");
+
 #ifdef DEBUG
 			t1 = chrono::high_resolution_clock::now();
 #endif
@@ -114,6 +117,11 @@ int main(int argc, char ** argv)
 #endif
 			if (! cfg.paldata_path.empty())
 			{
+				if (defs.paldef() == nullptr)
+					throw runtime_error("no paldef loaded");
+				if (defs.coldef() == nullptr)
+					throw runtime_error("no coldef loaded");
+
 				ifstream paldata {ifstream_checked(cfg.paldata_path)};
 				size_t pal_size {defs.paldef()->datasize_bytes()};
 				auto palbuffer {unique_ptr<byte_t>(new byte_t[pal_size])};

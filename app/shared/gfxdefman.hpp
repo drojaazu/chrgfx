@@ -319,6 +319,9 @@ public:
 				throw runtime_error("could not find specified coldef " + m_target_coldef);
 		}
 		load_from_cli();
+
+		if (m_chrdef == nullptr && m_paldef == nullptr && m_coldef == nullptr)
+			throw runtime_error("no gfxdefs loaded");
 	}
 
 	~gfxdef_manager()

@@ -71,6 +71,8 @@ int main(int argc, char ** argv)
 
 		if (! cfg.chr_outfile.empty())
 		{
+			if (defs.chrdef() == nullptr)
+				throw runtime_error("no chrdef loaded");
 
 			/*******************************************************
 			 *                 TILE SEGMENTATION
@@ -132,6 +134,10 @@ int main(int argc, char ** argv)
 		 *******************************************************/
 		if (! cfg.pal_outfile.empty())
 		{
+			if (defs.paldef() == nullptr)
+				throw runtime_error("no paldef loaded");
+			if (defs.coldef() == nullptr)
+				throw runtime_error("no coldef loaded");
 
 #ifdef DEBUG
 			t1 = chrono::high_resolution_clock::now();
@@ -223,5 +229,4 @@ void process_args(int argc, char ** argv)
 				break;
 		}
 	}
-
 }
