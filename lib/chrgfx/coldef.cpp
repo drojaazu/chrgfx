@@ -13,18 +13,18 @@ coldef::coldef(string const & id, coldef_type const type, bool const big_endian,
 {
 }
 
-refcoldef::refcoldef(string const & id, basic_palette refpal, bool const big_endian, string const & description) :
+refcoldef::refcoldef(string const & id, palette refpal, bool const big_endian, string const & description) :
 		coldef(id, ref, big_endian, description),
 		m_refpal(refpal)
 {
 }
 
-basic_color refcoldef::by_value(uint const index) const
+rgb_color refcoldef::by_value(uint const index) const
 {
 	return m_refpal[index];
 };
 
-uint refcoldef::by_color(basic_color const & rgb) const
+uint refcoldef::by_color(rgb_color const & rgb) const
 {
 	size_t idx {0};
 	for (auto & this_color : m_refpal)
@@ -62,7 +62,7 @@ uint refcoldef::by_color(basic_color const & rgb) const
 	return idx;
 };
 
-basic_palette const & refcoldef::refpal() const
+palette const & refcoldef::refpal() const
 {
 	return m_refpal;
 }

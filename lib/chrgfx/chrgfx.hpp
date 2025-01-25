@@ -8,15 +8,15 @@
 #ifndef __CHRGFX__CHRGFX_HPP
 #define __CHRGFX__CHRGFX_HPP
 
-#include "basic_gfx.hpp"
 #include "builtin_defs.hpp"
 #include "chrconv.hpp"
 #include "chrdef.hpp"
-#include "chrsetconv.hpp"
 #include "colconv.hpp"
 #include "coldef.hpp"
 #include "custom.hpp"
 #include "gfxdef.hpp"
+#include "image.hpp"
+#include "img_process.hpp"
 #include "imgfmt_png.hpp"
 #include "palconv.hpp"
 #include "paldef.hpp"

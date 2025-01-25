@@ -6,7 +6,7 @@ using namespace std;
 namespace chrgfx
 {
 
-void encode_col(rgbcoldef const * rgbcoldef, basic_color const * in_color, uint32 * out_color)
+void encode_col(rgbcoldef const * rgbcoldef, rgb_color const * in_color, uint32 * out_color)
 {
 	/*
 		seperate r g b from color
@@ -53,12 +53,12 @@ void encode_col(rgbcoldef const * rgbcoldef, basic_color const * in_color, uint3
 	}
 }
 
-void encode_col(refcoldef const * refcoldef, basic_color const * in_color, uint32 * out_color)
+void encode_col(refcoldef const * refcoldef, rgb_color const * in_color, uint32 * out_color)
 {
 	*out_color = refcoldef->by_color(*in_color);
 }
 
-void decode_col(rgbcoldef const * rgbcoldef, uint32 const * in_color, basic_color * out_color)
+void decode_col(rgbcoldef const * rgbcoldef, uint32 const * in_color, rgb_color * out_color)
 {
 
 	/*
@@ -92,10 +92,10 @@ psuedo:
 	red = expand_bitdepth(red, red_bitcount);
 	green = expand_bitdepth(green, green_bitcount);
 	blue = expand_bitdepth(blue, blue_bitcount);
-	*out_color = chrgfx::basic_color(red, green, blue);
+	*out_color = rgb_color(red, green, blue);
 }
 
-void decode_col(refcoldef const * refcoldef, uint32 const * in_color, basic_color * out_color)
+void decode_col(refcoldef const * refcoldef, uint32 const * in_color, rgb_color * out_color)
 {
 	*out_color = refcoldef->by_value(*in_color);
 }

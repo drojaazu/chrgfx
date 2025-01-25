@@ -8,8 +8,9 @@
 #ifndef __CHRGFX__COLCONV_HPP
 #define __CHRGFX__COLCONV_HPP
 
-#include "basic_gfx.hpp"
 #include "coldef.hpp"
+#include "image.hpp"
+#include "image_types.hpp"
 #include "types.hpp"
 
 namespace chrgfx
@@ -22,7 +23,7 @@ namespace chrgfx
  * @param in_color Pointer to input basic color
  * @param out_color Pointer to output encoded color
  */
-void encode_col(rgbcoldef const * rgbcoldef, basic_color const * in_color, uint32 * out_color);
+void encode_col(rgbcoldef const * rgbcoldef, rgb_color const * in_color, uint32 * out_color);
 
 /**
  * @brief Encode a basic color with the given reference palette
@@ -31,7 +32,7 @@ void encode_col(rgbcoldef const * rgbcoldef, basic_color const * in_color, uint3
  * @param in_color Pointer to input basic color
  * @param out_color Pointer to output encoded color
  */
-void encode_col(refcoldef const * refcoldef, basic_color const * in_color, uint32 * out_color);
+void encode_col(refcoldef const * refcoldef, rgb_color const * in_color, uint32 * out_color);
 
 /**
  * @brief Decode an encoded color with the given RGB color definition
@@ -40,7 +41,7 @@ void encode_col(refcoldef const * refcoldef, basic_color const * in_color, uint3
  * @param in_color Pointer to input encoded color
  * @param out_color Pointer to output basic color
  */
-void decode_col(rgbcoldef const * rgbcoldef, uint32 const * in_color, basic_color * out_color);
+void decode_col(rgbcoldef const * rgbcoldef, uint32 const * in_color, rgb_color * out_color);
 
 /**
  * @brief Decode an encoded color with the given reference palette
@@ -49,7 +50,7 @@ void decode_col(rgbcoldef const * rgbcoldef, uint32 const * in_color, basic_colo
  * @param in_color Pointer to input encoded color
  * @param out_color Pointer to output basic color
  */
-void decode_col(refcoldef const * refcoldef, uint32 const * in_color, basic_color * out_color);
+void decode_col(refcoldef const * refcoldef, uint32 const * in_color, rgb_color * out_color);
 
 } // namespace chrgfx
 

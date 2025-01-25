@@ -8,15 +8,16 @@
 #ifndef __CHRGFX__COLDEF_HPP
 #define __CHRGFX__COLDEF_HPP
 
-#include "basic_gfx.hpp"
 #include "gfxdef.hpp"
+#include "image.hpp"
+#include "image_types.hpp"
 #include "rgb_layout.hpp"
 #include <vector>
 
 namespace chrgfx
 {
 
-enum coldef_type
+enum coldef_type : uint8_t
 {
 	ref,
 	rgb
@@ -46,24 +47,23 @@ protected:
 class refcoldef : public coldef
 {
 public:
-	refcoldef(
-		std::string const & id, basic_palette refpal, bool big_endian = false, std::string const & description = "");
+	refcoldef(std::string const & id, palette refpal, bool big_endian = false, std::string const & description = "");
 
 	/**
 	 * @return color color from the reference palette for the given index
 	 */
-	[[nodiscard]] basic_color by_value(uint const index) const;
+	[[nodiscard]] rgb_color by_value(uint const index) const;
 
 	/**
 	 * @return index to the color matching the RGB value provided, or
 	 * the index to the nearest matching color
 	 */
-	[[nodiscard]] uint by_color(basic_color const & rgb) const;
+	[[nodiscard]] uint by_color(rgb_color const & rgb) const;
 
-	[[nodiscard]] basic_palette const & refpal() const;
+	[[nodiscard]] palette const & refpal() const;
 
 protected:
-	basic_palette const m_refpal;
+	palette const m_refpal;
 };
 
 /**

@@ -1,16 +1,19 @@
 /**
- * @file chrsetconv.hpp
+ * @file img_process.hpp
  * @author Damian Rogers / damian@motoi.pro
  * @copyright ©2022 Motoi Productions / Released under MIT License
  * @brief Tileset conversion functions
  */
 
-#include "basic_gfx.hpp"
 #include "chrdef.hpp"
+#include "coldef.hpp"
+#include "image_types.hpp"
+#include "palconv.hpp"
+#include "paldef.hpp"
 #include <optional>
 
-#ifndef __CHRGFX__CHRSETCONV_HPP
-#define __CHRGFX__CHRSETCONV_HPP
+#ifndef __CHRGFX__IMG_PROCESS_HPP
+#define __CHRGFX__IMG_PROCESS_HPP
 
 namespace chrgfx
 {
@@ -44,8 +47,13 @@ public:
  * @param in_chrset_datasize Size of input basic tilset in bytes
  * @param render_cfg Tileset rendering options
  */
-basic_image render_chrset(
+image render_tileset(
 	chrdef const & chrdef, byte_t const * in_chrset, size_t const in_chrset_datasize, render_config const & render_cfg);
+
+image render_palette(paldef const & paldef, coldef const & coldef, byte_t const * in_palette);
+
+motoi::image<rgb_color> render_palette_full(
+	paldef const & paldef, coldef const & coldef, byte_t const * in_palette, size_t const in_palette_datasize);
 
 /**
  * @brief Returns a collection of basic tiles (tileset) from the given bitmap image
@@ -55,7 +63,7 @@ basic_image render_chrset(
  * @param out_chrset Pointer to output basic tileset
  *
  */
-void make_chrset(chrdef const & chrdef, basic_image const & in_bitmap, byte_t * out_chrset);
+void make_tileset(chrdef const & chrdef, image const & in_bitmap, byte_t * out_chrset);
 
 } // namespace chrgfx
 

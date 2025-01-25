@@ -4,7 +4,6 @@ add_library(chrgfx SHARED)
 target_sources(chrgfx
 PRIVATE
   app.hpp
-  basic_gfx.cpp
   builtin_defs.cpp
   chrconv.cpp
   chrdef.cpp
@@ -18,13 +17,13 @@ PRIVATE
   paldef.cpp
   rgb_layout.cpp
   strutil.hpp
-  chrsetconv.cpp
+  img_process.cpp
   utils.cpp
 PUBLIC
   FILE_SET headers
   TYPE HEADERS
   FILES
-    basic_gfx.hpp
+    image.hpp
     builtin_defs.hpp
     chrconv.hpp
     chrdef.hpp
@@ -38,7 +37,7 @@ PUBLIC
     palconv.hpp
     paldef.hpp
     rgb_layout.hpp  
-    chrsetconv.hpp
+    img_process.hpp
     types.hpp
     utils.hpp
 )

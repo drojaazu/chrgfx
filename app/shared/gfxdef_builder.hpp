@@ -14,6 +14,7 @@
 #include "cfgload.hpp"
 #include "chrdef.hpp"
 #include "coldef.hpp"
+#include "image_types.hpp"
 #include "paldef.hpp"
 #include "strutil.hpp"
 
@@ -141,7 +142,7 @@ public:
 class refcoldef_builder : public gfxdef_builder
 {
 private:
-	basic_palette m_refpal;
+	palette m_refpal;
 	bool m_big_endian;
 
 public:
@@ -177,7 +178,7 @@ public:
 
 	void set_refpal(string const & refpal)
 	{
-		m_refpal = split_array<basic_color, 256>(refpal);
+		m_refpal = split_array<rgb_color, 256>(refpal);
 	}
 
 	void set_big_endian(string const & big_endian)

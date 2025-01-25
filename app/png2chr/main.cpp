@@ -87,7 +87,7 @@ int main(int argc, char ** argv)
 				chr_datasize {defs.chrdef()->width() * defs.chrdef()->height()},
 				chrset_datasize {tile_width * tile_height * chr_datasize};
 			vector<byte_t> tileset_data(chrset_datasize);
-			make_chrset(*defs.chrdef(), image_data, tileset_data.data());
+			make_tileset(*defs.chrdef(), image_data, tileset_data.data());
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();
@@ -112,7 +112,7 @@ int main(int argc, char ** argv)
 			auto ptr_in_tile = tileset_data.data();
 			byte_t * ptr_imgdata_end = ptr_in_tile + tileset_data.size();
 
-			auto out_tile {unique_ptr<basic_pixel>(new basic_pixel[in_chunksize])};
+			auto out_tile {unique_ptr<pixel>(new pixel[in_chunksize])};
 			while (ptr_in_tile != ptr_imgdata_end)
 			{
 				// TODO create a cache and use the out pointer on encode_chr
@@ -144,7 +144,7 @@ int main(int argc, char ** argv)
 #endif
 
 			auto paldef_palette_data {unique_ptr<byte_t>(new byte_t[defs.paldef()->datasize() >> 3])};
-			encode_pal(defs.paldef(), defs.coldef(), image_data.palette(), paldef_palette_data.get());
+			encode_pal(defs.paldef(), defs.coldef(), image_data.color_map(), paldef_palette_data.get());
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();

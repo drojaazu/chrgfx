@@ -8,7 +8,7 @@
 #ifndef __CHRGFX__UTILS_HPP
 #define __CHRGFX__UTILS_HPP
 
-#include "basic_gfx.hpp"
+#include "image_types.hpp"
 #include "types.hpp"
 
 namespace chrgfx
@@ -69,7 +69,7 @@ uint8 create_bitmask8(uint8 bitcount);
 /**
  * @brief Create an 8 bit palette of randomized colors
  */
-basic_palette make_pal_random();
+palette make_pal_random();
 
 /**
  * @brief Determines the endianness of the local system

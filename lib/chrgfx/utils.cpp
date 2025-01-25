@@ -100,13 +100,13 @@ uint8 create_bitmask8(uint8 bitcount)
 	return bitmask;
 }
 
-basic_palette make_pal_random()
+palette make_pal_random()
 {
-	basic_palette outpal;
+	palette outpal;
 
 	for (size_t paliter = 0; paliter < 256; ++paliter)
 	{
-		basic_color temp_col {
+		rgb_color temp_col {
 			static_cast<uint8>(rand() % 255), static_cast<uint8>(rand() % 255), static_cast<uint8>(rand() % 255)};
 		// todo: apparently png::color does not implement operator== so we'll need
 		// to extend it someday...

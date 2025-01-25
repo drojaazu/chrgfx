@@ -1,14 +1,13 @@
 #include "custom.hpp"
 #include "builtin_defs.hpp"
 #include "chrconv.hpp"
-#include "chrdef.hpp"
 #include <stdexcept>
 
 using namespace std;
 
 namespace chrgfx::custom
 {
-void decode_chr_nintendo_sfc_3bpp(byte_t const * encoded_chr, size_t datasize, basic_pixel * out)
+void decode_chr_nintendo_sfc_3bpp(byte_t const * encoded_chr, size_t datasize, pixel * out)
 {
 	if (datasize != 64)
 		throw runtime_error("invalid allocation for Super Famicom 3bpp tile (need 64 bytes)");
@@ -33,7 +32,7 @@ void decode_chr_nintendo_sfc_3bpp(byte_t const * encoded_chr, size_t datasize, b
 	}
 }
 
-void decode_pal_tilelayerpro(byte_t const * in_pal, size_t datasize, basic_palette * out_pal)
+void decode_pal_tilelayerpro(byte_t const * in_pal, size_t datasize, palette * out_pal)
 {
 	if (datasize < 6)
 		throw runtime_error("not enough data for a valid TileLayer Pro palette");
@@ -46,10 +45,10 @@ void decode_pal_tilelayerpro(byte_t const * in_pal, size_t datasize, basic_palet
 
 	size_t pal_index {0};
 	for (size_t i {5}; i < (datasize - 5); i += 3)
-		(*out_pal)[pal_index++] = basic_color(in_pal[i], in_pal[i + 1], in_pal[i + 2]);
+		(*out_pal)[pal_index++] = rgb_color(in_pal[i], in_pal[i + 1], in_pal[i + 2]);
 };
 
-size_t encode_pal_tilelayerpro(basic_palette const * palette, byte_t * out_pal)
+size_t encode_pal_tilelayerpro(palette const * palette, byte_t * out_pal)
 {
 	// 3 byte header, 1 byte type, 256 RGB entries
 	size_t out_size = 3 + 1 + (256 * 3);

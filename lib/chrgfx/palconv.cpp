@@ -8,7 +8,7 @@ namespace chrgfx
 
 using namespace std;
 
-void encode_pal(paldef const * paldef, coldef const * coldef, basic_palette const * in_palette, byte_t * out_palette)
+void encode_pal(paldef const * paldef, coldef const * coldef, palette const * in_palette, byte_t * out_palette)
 {
 	size_t const
 		// size of a single color within a palette, in bits
@@ -103,7 +103,8 @@ void encode_pal(paldef const * paldef, coldef const * coldef, basic_palette cons
 		byte_align_pos += entry_datasize;
 	}
 }
-void decode_pal(paldef const * paldef, coldef const * coldef, byte_t const * in_palette, basic_palette * out_palette)
+
+void decode_pal(paldef const * paldef, coldef const * coldef, byte_t const * in_palette, palette * out_palette)
 {
 
 	// some basic data geometry

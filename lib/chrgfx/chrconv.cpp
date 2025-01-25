@@ -4,7 +4,7 @@ namespace chrgfx
 {
 using namespace std;
 
-void encode_chr(chrdef const * chrdef, basic_pixel const * in_tile, byte_t * out_tile)
+void encode_chr(chrdef const * chrdef, pixel const * in_tile, byte_t * out_tile)
 {
 	fill_n(out_tile, chrdef->datasize_bytes(), 0);
 
@@ -69,7 +69,7 @@ void encode_chr(chrdef const * chrdef, basic_pixel const * in_tile, byte_t * out
 	}
 }
 
-void decode_chr(chrdef const * chrdef, byte_t const * in_tile, basic_pixel * out_tile)
+void decode_chr(chrdef const * chrdef, byte_t const * in_tile, pixel * out_tile)
 {
 	uint
 		// tile dimensions

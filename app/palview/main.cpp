@@ -1,6 +1,7 @@
 #include "blob.hpp"
 #include "fstreams.hpp"
 #include "gfxdefman.hpp"
+#include "image.hpp"
 #include "imgfmt_png.hpp"
 #include "setup.hpp"
 #include <chrgfx/chrgfx.hpp>
@@ -12,14 +13,16 @@ using namespace std;
 using namespace chrgfx;
 using namespace motoi;
 
-uint const swatch_size {32};
+// uint const swatch_size {32};
 
 chrgfx::coldef const * work_coldef {&chrgfx::gfxdefs::col_bgr_333_packed};
 chrgfx::paldef const * work_paldef {&chrgfx::gfxdefs::pal_16bit_256color};
 
+/**
+
 void render_palette_line()
 {
-	basic_palette workpal;
+	palette workpal;
 	// load palette, check validity of palette line
 	{
 
@@ -55,7 +58,7 @@ void render_palette_line()
 		{STEP32(0, 1)},
 	};
 
-	auto rendered_tiles = render_chrset(palview_tiledef, tile_buffer, tile_buffer.size(), {});
+	auto rendered_tiles = render_tiles(palview_tiledef, tile_buffer, tile_buffer.size(), {});
 	rendered_tiles.palette(workpal);
 	png::image<png::index_pixel> outimg(to_png(rendered_tiles));
 
@@ -68,7 +71,7 @@ void render_palette_line()
 void render_full_palette()
 {
 	// decode each palette line into a list of basic palettes
-	vector<basic_palette> palette_lines;
+	vector<color_map> palette_lines;
 
 	{
 		ifstream paldata {ifstream_checked(cfg.paldata_name)};
@@ -118,6 +121,7 @@ void render_full_palette()
 		outimg.write(cfg.out_path);
 }
 
+ */
 int main(int argc, char ** argv)
 {
 	try
@@ -128,11 +132,35 @@ int main(int argc, char ** argv)
 		gfxdef_manager defs(cfg);
 		work_coldef = defs.coldef();
 		work_paldef = defs.paldef();
+		ifstream is_paldata {ifstream_checked(cfg.paldata_name)};
 
 		if (cfg.full_pal)
-			render_full_palette();
+		{
+			blob paldata {is_paldata};
+			auto image = render_palette_full(*work_paldef, *work_coldef, paldata, paldata.size());
+			png::image<png::rgb_pixel> outimg(image.width(), image.height());
+			for (auto i {0}; i < image.height(); ++i)
+			{
+				auto p = (png::basic_rgb_pixel<byte_t> *) image.pixel_map_row(i);
+				auto c = vector<png::basic_rgb_pixel<byte_t>>(p, p + image.width());
+				outimg.get_pixbuf().put_row(i, c);
+			}
+
+			if (cfg.out_path.empty())
+				outimg.write_stream(cout);
+			else
+				outimg.write(cfg.out_path);
+		}
 		else
-			render_palette_line();
+		{
+			blob paldata {is_paldata};
+			auto image = render_palette(*work_paldef, *work_coldef, paldata);
+			auto outimg {to_png(image)};
+			if (cfg.out_path.empty())
+				outimg.write_stream(cout);
+			else
+				outimg.write(cfg.out_path);
+		}
 
 		return 0;
 	}

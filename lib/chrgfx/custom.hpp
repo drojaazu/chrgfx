@@ -8,8 +8,7 @@
 #ifndef __CHRGFX__CUSTOM_HPP
 #define __CHRGFX__CUSTOM_HPP
 
-#include "basic_gfx.hpp"
-#include "types.hpp"
+#include "image_types.hpp"
 #include <map>
 
 namespace chrgfx::custom
@@ -25,14 +24,14 @@ namespace chrgfx::custom
  * file formats such as palettes for graphics editors.
  */
 
-using fp_encode_chr = size_t (*)(basic_pixel const * in_chr, byte_t * out_chr);
-using fp_decode_chr = void (*)(byte_t const * in_chr, size_t datasize, basic_pixel * out_chr);
+using fp_encode_chr = size_t (*)(pixel const * in_chr, byte_t * out_chr);
+using fp_decode_chr = void (*)(byte_t const * in_chr, size_t datasize, pixel * out_chr);
 
-using fp_encode_pal = size_t (*)(basic_palette const * in_pal, byte_t * out_pal);
-using fp_decode_pal = void (*)(byte_t const * in_pal, size_t datasize, basic_palette * out_pal);
+using fp_encode_pal = size_t (*)(palette const * in_pal, byte_t * out_pal);
+using fp_decode_pal = void (*)(byte_t const * in_pal, size_t datasize, palette * out_pal);
 
-using fp_encode_col = size_t (*)(basic_color const * in_col, byte_t * out_col);
-using fp_decode_col = void (*)(byte_t const * in_col, size_t datasize, basic_color * out_col);
+using fp_encode_col = size_t (*)(rgb_color const * in_col, byte_t * out_col);
+using fp_decode_col = void (*)(byte_t const * in_col, size_t datasize, rgb_color * out_col);
 
 /**
  * @brief Converts the Nintendo Super Famicom 3bpp "quasi format"
@@ -40,17 +39,17 @@ using fp_decode_col = void (*)(byte_t const * in_col, size_t datasize, basic_col
  * @param encoded_chr 8x8 encoded tile (24 bytes)
  * @return byte_t* 8x8 basic tile (64 bytes)
  */
-void decode_chr_nintendo_sfc_3bpp(byte_t const * encoded_chr, size_t datasize, basic_pixel * out);
+void decode_chr_nintendo_sfc_3bpp(byte_t const * encoded_chr, size_t datasize, pixel * out);
 
 /**
  * @brief Converts an RGB TileLayer Pro palette to a basic palette
  */
-void decode_pal_tilelayerpro(byte_t const * in_pal, size_t datasize, basic_palette * out_pal);
+void decode_pal_tilelayerpro(byte_t const * in_pal, size_t datasize, palette * out_pal);
 
 /**
  * @brief Converts a basic palette to a TileLayer Pro RGB palette
  */
-size_t encode_pal_tilelayerpro(basic_palette const * palette, byte_t * out_pal);
+size_t encode_pal_tilelayerpro(palette const * palette, byte_t * out_pal);
 
 /**
  * @brief Converts a JASC Paint Shop Pro palette to a basic palette
