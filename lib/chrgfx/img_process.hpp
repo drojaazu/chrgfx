@@ -50,8 +50,22 @@ public:
 image render_tileset(
 	chrdef const & chrdef, byte_t const * in_chrset, size_t const in_chrset_datasize, render_config const & render_cfg);
 
+/**
+ * @brief Renders a palette as color swatches in an indexed bitmap image
+ *
+ * @param paldef Palette encoding definition
+ * @param coldef Color encoding definition
+ * @param in_palette Pointer to input encoded palette
+ */
 image render_palette(paldef const & paldef, coldef const & coldef, byte_t const * in_palette);
 
+/**
+ * @brief Renders an arbitrary collection of palette lines as color swatches in a direct color bitmap image
+ *
+ * @param paldef Palette encoding definition
+ * @param coldef Color encoding definition
+ * @param in_palette Pointer to input encoded palette
+ */
 motoi::image<rgb_color> render_palette_full(
 	paldef const & paldef, coldef const & coldef, byte_t const * in_palette, size_t const in_palette_datasize);
 

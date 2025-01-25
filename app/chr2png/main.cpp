@@ -76,7 +76,7 @@ int main(int argc, char ** argv)
 				if (! paldata.good())
 					throw runtime_error("Cannot read specified palette line index");
 
-				decode_pal(defs.paldef(), defs.coldef(), palbuffer.get(), &workpal);
+				decode_pal(*defs.paldef(), *defs.coldef(), palbuffer.get(), &workpal);
 			}
 			else
 			{
@@ -92,85 +92,80 @@ int main(int argc, char ** argv)
 #ifdef DEBUG
 			t1 = chrono::high_resolution_clock::now();
 #endif
+		}
 
-			if (! cfg.chrdata_path.empty())
+		/*******************************************************
+		 *             TILE CONVERSION
+		 *******************************************************/
+
+		if (defs.chrdef() == nullptr)
+			throw runtime_error("no chrdef loaded");
+
+		blob out_buffer;
+		{
+#ifdef DEBUG
+			t1 = chrono::high_resolution_clock::now();
+#endif
+			size_t
+				// byte size of one encoded tile
+				in_chunksize {(uint) (defs.chrdef()->datasize_bytes())},
+				// byte size of one basic (decoded) tile
+				out_chunksize {(size_t) (defs.chrdef()->width() * defs.chrdef()->height())};
+
+			// buffer for a single encoded tile, read from the stream
+			auto in_tile {unique_ptr<byte_t>(new byte_t[in_chunksize])},
+				out_tile {unique_ptr<byte_t>(new pixel[out_chunksize])};
+
+			/*
+				Some speed testing was done and, somewhat surprisingly, calling append
+				on the buffer repeatedly was a bit faster than creating a large
+				temporary buffer and resizing
+			*/
+			while (true)
 			{
-				/*******************************************************
-				 *             TILE CONVERSION
-				 *******************************************************/
+				chrdata->read(reinterpret_cast<char *>(in_tile.get()), in_chunksize);
+				if (! chrdata->good())
+					break;
 
-				if (defs.chrdef() == nullptr)
-					throw runtime_error("no chrdef loaded");
-
-				blob out_buffer;
-
-#ifdef DEBUG
-				t1 = chrono::high_resolution_clock::now();
-#endif
-				size_t
-					// byte size of one encoded tile
-					in_chunksize {(uint) (defs.chrdef()->datasize_bytes())},
-					// byte size of one basic (decoded) tile
-					out_chunksize {(size_t) (defs.chrdef()->width() * defs.chrdef()->height())};
-
-				// buffer for a single encoded tile, read from the stream
-				auto in_tile {unique_ptr<byte_t>(new byte_t[in_chunksize])},
-					out_tile {unique_ptr<byte_t>(new pixel[out_chunksize])};
-
-				/*
-					Some speed testing was done and, somewhat surprisingly, calling append
-					on the buffer repeatedly was a bit faster than creating a large
-					temporary buffer and resizing
-				*/
-				while (true)
-				{
-					chrdata->read(reinterpret_cast<char *>(in_tile.get()), in_chunksize);
-					if (! chrdata->good())
-						break;
-
-					decode_chr(defs.chrdef(), in_tile.get(), out_tile.get());
-					out_buffer.append(out_tile.get(), out_chunksize);
-				}
-
-#ifdef DEBUG
-				t2 = chrono::high_resolution_clock::now();
-				duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-
-				cerr << "TILE CONVERSION: " << to_string(duration) << "ms\n";
-#endif
-
-#ifdef DEBUG
-				t1 = chrono::high_resolution_clock::now();
-#endif
-
-				auto rendered_tiles = render_tileset(*defs.chrdef(), out_buffer, out_buffer.size(), cfg.render_cfg);
-				rendered_tiles.color_map(workpal);
-				png::image<png::index_pixel> outimg {to_png(rendered_tiles, cfg.render_cfg.trns_index)};
-
-#ifdef DEBUG
-				t2 = chrono::high_resolution_clock::now();
-				duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-				cerr << "PNG RENDER: " << duration << "ms\n";
-#endif
-
-#ifdef DEBUG
-				t1 = chrono::high_resolution_clock::now();
-#endif
-
-				if (cfg.out_path.empty())
-					outimg.write_stream(cout);
-				else
-					outimg.write(cfg.out_path);
-
-#ifdef DEBUG
-				t2 = chrono::high_resolution_clock::now();
-				duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-				cerr << "OUTPUT TO STREAM: " << duration << "ms\n";
-#endif
+				decode_chr(*defs.chrdef(), in_tile.get(), out_tile.get());
+				out_buffer.append(out_tile.get(), out_chunksize);
 			}
+
+#ifdef DEBUG
+			t2 = chrono::high_resolution_clock::now();
+			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+
+			cerr << "TILE CONVERSION: " << to_string(duration) << "ms\n";
+#endif
+
+#ifdef DEBUG
+			t1 = chrono::high_resolution_clock::now();
+#endif
+
+			auto rendered_tiles = render_tileset(*defs.chrdef(), out_buffer, out_buffer.size(), cfg.render_cfg);
+			rendered_tiles.color_map(workpal);
+			png::image<png::index_pixel> outimg {to_png(rendered_tiles, cfg.render_cfg.trns_index)};
+
+#ifdef DEBUG
+			t2 = chrono::high_resolution_clock::now();
+			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+			cerr << "PNG RENDER: " << duration << "ms\n";
+#endif
+
+#ifdef DEBUG
+			t1 = chrono::high_resolution_clock::now();
+#endif
+
+			if (cfg.out_path.empty())
+				outimg.write_stream(cout);
 			else
-			{
-			}
+				outimg.write(cfg.out_path);
+
+#ifdef DEBUG
+			t2 = chrono::high_resolution_clock::now();
+			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+			cerr << "OUTPUT TO STREAM: " << duration << "ms\n";
+#endif
 		}
 
 		return 0;

@@ -24,7 +24,7 @@ namespace chrgfx
  * @param in_palette Pointer to input basic palette
  * @param out_palette Pointer to output encoded palette
  */
-void encode_pal(paldef const * paldef, coldef const * coldef, palette const * in_palette, byte_t * out_palette);
+void encode_pal(paldef const & paldef, coldef const & coldef, palette const * in_palette, byte_t * out_palette);
 
 /**
  * @brief Decode an encoded palette with the given paldef
@@ -34,7 +34,7 @@ void encode_pal(paldef const * paldef, coldef const * coldef, palette const * in
  * @param in_palette Pointer to input encoded palette
  * @param out_palette Pointer to output basic palette
  */
-void decode_pal(paldef const * paldef, coldef const * coldef, byte_t const * in_palette, palette * out_palette);
+void decode_pal(paldef const & paldef, coldef const & coldef, byte_t const * in_palette, palette * out_palette);
 
 } // namespace chrgfx
 

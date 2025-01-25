@@ -112,28 +112,26 @@ image render_tileset(
 	return out_image;
 }
 
+uint const swatch_size {32};
+
 image render_palette(paldef const & paldef, coldef const & coldef, byte_t const * in_palette)
 {
-	uint const swatch_size {32};
 	palette workpal;
-	size_t pal_size {paldef.datasize_bytes()};
+	decode_pal(paldef, coldef, in_palette, &workpal);
+	auto const row_width {paldef.length() * swatch_size};
+	image out_image(row_width, swatch_size);
 
-	decode_pal(&paldef, &coldef, in_palette, &workpal);
-	size_t const image_width {swatch_size * paldef.length()}, image_height {swatch_size};
-
-	image out_image(image_width, image_height);
-	size_t tile_datasize {(size_t) (swatch_size * swatch_size)}, tile_count {paldef.length()};
-
-	auto pixbuf = out_image.pixel_map();
+	auto ptr_out = out_image.pixel_map();
 	// fill one line...
 	for (auto iter_color_index {0}; iter_color_index < paldef.length(); ++iter_color_index)
-		fill(pixbuf + (swatch_size * iter_color_index),
-			pixbuf + (swatch_size * iter_color_index) + swatch_size,
-			iter_color_index);
+	{
+		auto ptr_swatch_pixel {ptr_out + (swatch_size * iter_color_index)};
+		fill(ptr_swatch_pixel, ptr_swatch_pixel + swatch_size, iter_color_index);
+	}
 	// duplicate that line
 	for (auto iter_pixel_row {1}; iter_pixel_row < swatch_size; ++iter_pixel_row)
 	{
-		copy(pixbuf, pixbuf + paldef.length() * swatch_size, pixbuf + (iter_pixel_row * paldef.length() * swatch_size));
+		copy(ptr_out, ptr_out + row_width, ptr_out + (iter_pixel_row * row_width));
 	}
 	out_image.color_map(workpal);
 
@@ -146,44 +144,31 @@ motoi::image<rgb_color> render_palette_full(
 	if (in_palette_datasize < paldef.entry_datasize_bytes())
 		throw runtime_error("not enough data to render a palette");
 
-	// TOOD should we make swatch_size configurable? Is it that important...?
-	uint const swatch_size {32};
-	// decode each palette line into a list of basic palettes
-	vector<palette> palette_lines;
+	size_t const subpal_count {in_palette_datasize / paldef.datasize_bytes()}, row_width {swatch_size * paldef.length()};
+	auto ptr_in_subpal {in_palette};
+	motoi::image<rgb_color> out_image(row_width, swatch_size * subpal_count);
 
-	size_t const subpal_count = in_palette_datasize / paldef.datasize_bytes();
-
-	size_t const image_width {swatch_size * paldef.length()}, image_height {swatch_size * subpal_count};
-	size_t outimg_row_idx {0};
-
-	byte_t const * ptr_subpal {in_palette};
-
-	motoi::image<rgb_color> out_image(image_width, image_height);
-
-	// vector<png::rgb_pixel> pixel_row(image_width);
-	// png::pixel_buffer<png::rgb_pixel> pixbuf(image_width, image_height);
 	palette workpal;
-
+	auto ptr_out_subpal {out_image.pixel_map()};
+	auto palbuffer {unique_ptr<byte_t>(new byte_t[paldef.datasize_bytes()])};
 	for (size_t subpal_idx {0}; subpal_idx < subpal_count; ++subpal_idx)
 	{
-		size_t pal_size {paldef.datasize_bytes()};
-		auto palbuffer {unique_ptr<byte_t>(new byte_t[pal_size])};
-		decode_pal(&paldef, &coldef, ptr_subpal, &workpal);
+		decode_pal(paldef, coldef, ptr_in_subpal, &workpal);
 
-		auto pixbuf = out_image.pixel_map() + (subpal_idx * paldef.length() * swatch_size * swatch_size);
 		// fill one line...
 		for (auto iter_color_index {0}; iter_color_index < paldef.length(); ++iter_color_index)
 		{
-			auto color = workpal[iter_color_index];
-			fill(pixbuf + (swatch_size * iter_color_index), pixbuf + (swatch_size * iter_color_index) + swatch_size, color);
+			auto ptr_swatch_pixel {ptr_out_subpal + (swatch_size * iter_color_index)};
+			fill(ptr_swatch_pixel, ptr_swatch_pixel + swatch_size, workpal[iter_color_index]);
 		}
 		// duplicate that line
 		for (auto iter_pixel_row {1}; iter_pixel_row < swatch_size; ++iter_pixel_row)
 		{
-			copy(pixbuf, pixbuf + paldef.length() * swatch_size, pixbuf + (iter_pixel_row * paldef.length() * swatch_size));
+			copy(ptr_out_subpal, ptr_out_subpal + row_width, ptr_out_subpal + (iter_pixel_row * row_width));
 		}
 
-		ptr_subpal += paldef.datasize_bytes();
+		ptr_in_subpal += paldef.datasize_bytes();
+		ptr_out_subpal += row_width * swatch_size;
 	}
 
 	return out_image;
