@@ -7,7 +7,8 @@ using namespace std;
 string short_opts {":G:H:T:C:P:h"};
 
 int longopt_idx {0};
-vector<option> long_opts {// predefined gfx defs
+vector<option> long_opts {
+	// predefined gfx defs
 	{"gfxdefs-path", required_argument, nullptr, 'G'},
 	{"profile", required_argument, nullptr, 'H'},
 	{"chrdef", required_argument, nullptr, 'T'},
@@ -29,7 +30,8 @@ vector<option> long_opts {// predefined gfx defs
 	{"pal-length", required_argument, &longopt_idx, 8},
 	{"col-bitdepth", required_argument, &longopt_idx, 9},
 	{"col-layout", required_argument, &longopt_idx, 10},
-	{"col-big-endian", required_argument, &longopt_idx, 11}};
+	{"col-big-endian", required_argument, &longopt_idx, 11},
+};
 
 vector<motoi::option_details> opt_details {
 	// predefined gfx defs
@@ -84,12 +86,21 @@ bool shared_args(char this_opt, runtime_config & cfg)
 					cfg.chrdef_row_offsets = optarg;
 					break;
 				case 6:
-					cfg.rgbcoldef_bitdepth = optarg;
+					cfg.paldef_datasize = optarg;
 					break;
 				case 7:
-					cfg.rgbcoldef_rgblayout = optarg;
+					cfg.paldef_entry_datasize = optarg;
 					break;
 				case 8:
+					cfg.paldef_length = optarg;
+					break;
+				case 9:
+					cfg.rgbcoldef_bitdepth = optarg;
+					break;
+				case 10:
+					cfg.rgbcoldef_rgblayout = optarg;
+					break;
+				case 11:
 					cfg.rgbcoldef_big_endian = optarg;
 					break;
 				default:

@@ -237,7 +237,7 @@ std::array<ArrayT, Size> split_array(std::basic_string_view<CharT> str, char con
 	{
 		if (str[i] == delim && len > 0)
 		{
-			out[index++] = std::string(trim_view(std::string_view(str.begin() + start, len)));
+			out[index++] = trim_view(std::string_view(str.begin() + start, len));
 			len = 0;
 			start = i + 1;
 			continue;

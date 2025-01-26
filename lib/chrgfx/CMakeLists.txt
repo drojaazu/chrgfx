@@ -48,18 +48,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/app.hpp.cfg" "${CMAKE_CURRENT_SOURCE
 
 set_target_properties(chrgfx PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
-find_library(PNG_LIB png)
-
-if(NOT PNG_LIB)
-  message(FATAL_ERROR "libpng not found")
-endif()
-
-include(CheckIncludeFileCXX)
-check_include_file_cxx("png++/png.hpp" PNGPP_H)
-if(NOT PNGPP_H)
-  message(FATAL_ERROR "png++ not found")
-endif()
-
 target_compile_features(chrgfx PUBLIC cxx_std_17)
 target_link_libraries(chrgfx png)
 

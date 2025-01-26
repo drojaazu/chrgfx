@@ -9,7 +9,6 @@
 #define __CHRGFX__COLDEF_HPP
 
 #include "gfxdef.hpp"
-#include "image.hpp"
 #include "image_types.hpp"
 #include "rgb_layout.hpp"
 #include <vector>

@@ -153,8 +153,14 @@ int main(int argc, char ** argv)
 		}
 		else
 		{
-			blob paldata {is_paldata};
-			auto image = render_palette(*work_paldef, *work_coldef, paldata);
+			size_t pal_size {work_paldef->datasize_bytes()};
+			auto palbuffer {unique_ptr<byte_t>(new byte_t[pal_size])};
+			is_paldata.seekg(cfg.pal_line * pal_size, ios::beg);
+			is_paldata.read(reinterpret_cast<char *>(palbuffer.get()), pal_size);
+			if (! is_paldata.good())
+				throw runtime_error("Cannot read specified palette line index");
+
+			auto image = render_palette(*work_paldef, *work_coldef, palbuffer.get());
 			auto outimg {to_png(image)};
 			if (cfg.out_path.empty())
 				outimg.write_stream(cout);

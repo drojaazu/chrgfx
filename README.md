@@ -1,10 +1,13 @@
 # chrgfx
-A library with CLI utilities for converting tile (aka CHR) based graphics used in retro video games to and from PNG, with support for a wide range of hardware via external graphics definitions.
-
-The library itself, libchrgfx, can be integrated into any C++ application. 
+A library with CLI utilities for converting tile (aka CHR) based graphics used in retro video games to and from bitmap images, with support for a wide range of hardware via external graphics definitions. It is useful for viewing data as well as converting modern graphics into native formats for retro game development.
 
 ## Building
-chrgfx requires [png++](https://www.nongnu.org/pngpp/) to be installed and uses CMake for the build process. From the root of the project directory:
+
+chrgfx requires libpng and the [png++](https://www.nongnu.org/pngpp/) wrapper for the support utilities. These are available in most distro repositories. Installing the wrapper will include libpng as a dependency. In Arch Linux, the wrapper package is `png++`; in Debian, it is `libpng++-dev`.
+
+If you wish to build only libchrgfx without the utilities (and thus without the need for the png packages), pass `-DNO_UTILS=1` when running cmake.
+
+CMake is used for the build process. From the root of the project directory:
 
     mkdir build && cd build
     cmake ..
@@ -16,7 +19,7 @@ There are three support utilities included: `chr2png`, `png2chr`, and `palview`.
 
 ## chr2png
 
-This will convert encoded tile and/or palette data to a PNG image.
+This will convert encoded tile/palette data to a PNG image.
  
 ## png2chr
 
@@ -32,10 +35,9 @@ This will take a color palette and generate an image of color swatches correspon
 
 The conversion routines rely on graphics definitions (gfxdef), which describe the format of the data for encoding and decoding. There are three kinds of definitions: tile (chrdef), palette (paldef) and color (coldef).
 
-
 Graphics definitions can be mixed and modified at run time. With this system, chrgfx is extensible and can support practically any tile-based hardware.
 
-Graphics definitions can come from three possible sources.
+Graphics definitions are loaded from three possible sources.
 
 ### Internal Definitions
 
@@ -49,7 +51,7 @@ Please [see the readme in the gfxdef directory](share/gfxdef/README.md) and [the
 
 ### CLI Definitions
 
-Graphics definitions can also be defined on the command line. This is useful for testing or dealing with dynamic formats (for example, perhaps tile sizes are not consistent across multiple files).
+Graphics definitions can also be defined on the command line. This is useful for testing or dealing with dynamic formats (for example, perhaps tile sizes are not consistent across multiple files when running a batch conversion).
 
 Definitions specified on the command line override definitions loaded from internal/external sources in a piecemeal fashion. For example, you may load the `col_bgr_222_packed` coldef and then specify `--col-big-endian` on the command line to change the endianness aspect only.
 
@@ -63,9 +65,9 @@ The entries within the profile can be override by specifying a chrdef, paldef or
 
 ### gfxdef Loading Order
 
-Because definitions can be loaded from multiple sources, there is an ordering for processing to determine what definition is finally used. For any chrdef, paldef, or coldef specified by its ID:
+Because definitions can be loaded from multiple sources, there is an ordering for processing to determine what definition is finally used:
 
-1. If a hardware profile is specified, the external gfxdefs file is checked first to get the target chrdef/paldef/coldef from its list.
+1. If a profile is specified, the external gfxdefs file is checked first to get the target chrdef/paldef/coldef from that profile.
 2. The internal list is checked for the target gfxdef.
 3. If not present in the internal list, the gfxdef file is checked for the target gfxdef. If a chrdef/paldef/coldef ID was specified and was not found at this point, an error occurs.
 4. If a tile or color definition option is specified on the command line, that modifes the definition
@@ -77,6 +79,10 @@ NOTE: If a chrdef/paldef/coldef or profile ID was NOT specified, steps 1 to 3 ar
 ### Shared Options
 
 The following options are available for all three utilitiese (`chr2png`, `png2chr`, `palview`)
+
+`--help`, `-h`
+
+Display built in program usage
 
 `--gfx-def <filepath>`, `-G <filepath>`
 
@@ -97,37 +103,75 @@ Specify hardware profile to use
 
 These arguments specify the tile, color and palette encoding, respectively. They are only required if a graphics profile was not specified. If they are used in conjunction with a graphics profile, they will override that particular encoding. (For example, using `--chr-def` will override the tile encoding that was specified in the profile.)
 
-## Graphics Definitions
+Please [see the readme in the gfxdef directory](share/gfxdef/README.md) for more information about values represent in a gfxdef.
 
-In addition to "hardcoding" graphics definitions in the gfxdefs file, pixel and color layouts can be specified at the command line.
+The following options are used to build or modify a gfxdef:
 
-`--chr-width`
+`--chr-width <integer>`
 
-`--chr-height`
+Specify the width of a tile
 
-`--chr-bpp`
+`--chr-height <integer>`
 
-`--chr-plane-offsets`
+Specify the height of a tile
 
-`--chr-pixel-offsets`
+`--chr-bpp <integer>`
 
-`--chr-row-offsets`
+Specify the bits per pixel (BPP) of a tile
 
-`--col-bitdepth`
+`--chr-plane-offsets <p0,p1,p2...|[start:count:step]>`
 
-`--col-layout`
+Specify the offset (in bits) to the start of each plane within a pixel.
+
+This is written as either a comma-delimted list of values, or as a range in the format of [start:count:step]. Please [see the readme in the gfxdef directory](share/gfxdef/README.md) for more about this option and list/range formatting.
+
+The number of entries should match the bits per pixel value for the tile.
+
+`--chr-pixel-offsets <p0,p1,p2...|[start:count:step]>`
+
+Specify the start (in bits) to the start of each pixel within a row.
+
+Value is specified in the same format as `--chr-plane-offsets`.
+
+The number of entries should match the width of the tile.
+
+`--chr-row-offsets <r0,r1,r2...|[start:count:step]>`
+
+Specify the offset (in bits) to the start of each pixel row within a tile.
+
+Value is specified in the same format as `--chr-plane-offsets`.
+
+The number of entries should match the height of the tile.
+
+`--pal-datasize <integer>`
+
+Specify the size (in bits) of one palette.
+
+This is optional when defining a palette and should rarely be needed. It is only necessary when the size of palette differs entry datasize * palette length. For example, if a color entry is 2 bits with a palette length of 4, but the palette is stored in a 16 bit value. In such a case, the `--pal-datasize` should be 16.
+
+`--pal-entry-datasize <integer>`
+
+Specify the size (in bits) of a color entry.
+
+`--pal-length <integer>`
+
+Specify the number of entries in a single palette.
+
+`--col-bitdepth <integer>`
+
+Specify the bitdepth of a color.
+
+`--col-layout <red_offset,red_size,green_offset,green_size,blue_offset,blue_size>`
+
+Specify the groupings of red, green and blue color channels within a color value. This should be a comma delimited list of exactly 6 entries, in this format: red_offset, red_size, green_offset, green_size, blue_offset, blue_size
 
 Note that, for simplicity's sake, only one layout pass can be done via the command line. If you need to work with a complex color format that requires multiple layout passes, please use an external file (gfxdefs).
 
-`--col-big-endian`
+`--col-big-endian <1|0|true|false>`
 
+Specify that the color data is big-endian. Data is processed as little-endian by default.
 
-### chr2png - Usage
-
-
-
-
-
+### chr2png - Additional Options
 
 `--chr-data <filepath>`, `-c <filepath>`
 
@@ -135,42 +179,28 @@ Required; path to the encoded tile data
 
 `--pal-data <filepath>`, `-p <filepath>`
 
-Path to the encoded palette data; if not specified, an 8-bit (256 color) palette of random colors will be generated
+Path to the encoded palette data; if not specified, a palette of random colors will be generated
 
 `--output <filepath>`, `-o <filepath>`
 
 Path to output PNG image; if not specifed, will output to stdout
 
+`--pal-line <integer>`, `-l <integer>`
+
+Specify the palette line (also called the subpalette) to use for rendering when passing in palette data that contains more tha one palette
+
 `--row-size <integer>`, `-r <integer>`
 
 Specify the number of tiles in a row in the output PNG
 
-`--trns`, `-t`
+`--trns-index <integer>`, `-i <integer>`
 
-Enable transparency in output PNG image
-
-`--border`, `-b`
-
-Draw a 1 pixel border around tiles in output PNG image
-
-`--trans-index <integer>`, `-i <integer>`
-
-Specify palette index to use for transparency; if not specified, index 0 will be used
-
-`--list-gfxdefs`, `-l`
-
-List all encodings available in the gfxdefs file
-
-`--help`, `-h`
-
-Display built in program usage
+Specify a palette index to use for transparency. This is often index 0. If not specified, the output image will not have transparency.
 
 ### Example Usage
     chr2png --profile sega_md --chr-data sonic1_sprite.chr --pal-data sonic1.cram --trns --row-size 32 > sonic1_sprite.png
 
-## png2chr - Usage
-
-
+## png2chr - Additional Options
 
 `--png-data <filepath>`, `-b <filepath>` 
 
@@ -182,110 +212,32 @@ Path to the input PNG image; if not specified, expects PNG data piped from stdin
 
 Path to the output tile and palette data, respectively. One or both must be specified.
 
-`--list-gfxdefs`, `-l`
-
-List all encodings available in the gfxdefs file
-
-`--help`, `-h`
-
-Display built in help
-
 ### Example
     png2chr --profile nintendo_sfc --chr-output crono.chr --pal-output crono.pal < crono_sprite.png
 
-# libchrgfx
-The core of chrgfx is libchrgfx, which contains all the subroutines and data structures for converting between formats and importing/exporting PNG images. Most of the documentation appears in the source code.
+### palview - Additional Options
 
-You can include the `chrgfx.hpp` header for everything, or pick and choose headers for specific functionality.
+Images are generated with indexed color, unless `--full-pal` is specified, in which case direct color is used.
 
-Please see the readme in the gfxdefs directory for a high level overview of some of the concepts and data structures.
+`--pal-data <filepath>`, `-p <filepath>`
 
-## Non-gfxdef Formats / Custom Conversion Functions
-Though the vanilla tile/color/palette encoding system should work with most hardware, some formats may not fit cleanly into the algorithms. For example, the Super Famicom has a 3bpp quasi-format which won't work as a tile encoding. Or if we want to import a modern format, such as palette data from TileLayer Pro or Paint Shop Pro, the basic palette converter function is not sufficient.
+Path to the encoded palette data; if not specified, a palette of random colors will be generated
 
-In such cases, custom conversion code must be written. There are currently a handful of these within the `custom` namespace in libchrgfx. However, they are not yet integrated into the frontend tools (png2chr and chr2png).
+`--pal-line <integer>`, `-l <integer>`
 
-# Retro Graphics Primer
-The below is provided for those who are new to tile based graphics or who want clarification on some of the concepts around which chrgfx is designed.
+Specify the palette line (also called the subpalette) to use for rendering when passing in palette data that contains more tha one palette.
 
-## Tile (aka CHR)
-There are a number of ways that video games end up being displayed. There are vectors, in which elements are drawn based on on the math of their geometry. There are polygons, the basis for 3D gameplay that is now commonplace. There are LCD screens like the Game & Watch and Tiger handhelds, which have predrawn art that is displayed or cleared by electrical signals. And there are tile based games, most commonly used in the 2D arcade and home console hardware from the late 70's through the 90's. It is on the data from these tile based games that chrgfx is intended to operate.
+Ignored when `--full-pal` is specified.
 
-The basic unit of graphics in these games is the tile. Tiles are essentially very small bitmaps, where a bitmap is a 2D plane of dots (pixels) with each dot having one color. These tiles combine much like a jigsaw puzzle to form the larger backgrounds and sprites and, ultimately, full image on the screen. Tiles are generally 8 by 8 pixels in size, though in later systems they were commonly 16x16 or larger.
+`--full-pal`, `-f`
 
-An old term for a graphics tile is "CHR," which is short for "char," which is short for "character." This evolved from the world of programming, where the char data type is an unsigned 8-bit (1 byte) value. It was commonly used for holding text characters. In early game development days, it became synonymous with the tile data, since the limited size of graphics storage meant that tiles coule be reference with just one byte, a char type. It is commonly associated with the Nintendo Famicom's CHR graphics data bank, though other contemporaneous hardware used similar terminology.
+Renders an image with multiple palettes. It will draw as many palettes as the data provided contains.
 
-CHR is not really used as a term anymore, though I chose it for the program name to match the retro dev aesthetic. :)
+`--output <filepath>`, `-o <filepath>`
 
-## Colors
-In the digital grapics sense, a color is composed of levels of red, green and blue mixed together, which our eyes perceive as a certain hue. The amount of data allocated to each of these color levels is measured in bits; this is known as color depth. Modern photographic images are 24 bit, with 8 bits each for R, G and B levels. That gives us more than 16 million distinct colors to work with.
+Path to output PNG image; if not specifed, will output to stdout
 
-Older game hardware did not have such a large gamut available. The number of colors that could be generated was dependent on the video hardware in each system. For example, the Sega Mega Drive has 9 bit colors (3 bits each for R, G and B), which can generate up to 512 unique colors. Super Famicom colors are 15 bit (32,769 colors). And the original Gameboy is 2 bit, with a maximum of 4 colors.
-
-(To be clear, the bit depth of colors has nothing to do with the video game advertising of the 1990's, which heralded the Super Famicom/Sega Mega Drive/etc as "16 bit," and the next generations as "32 bit" and "64 bit." That advertising was intentionally ambiguous ("bigger number = better graphics!"), but it actually refers to the width of the data bus, which allowed more data to be addressable and thus more actual game content present. It was not directly related to graphics, per se.)
-
-Some early consoles did not use digital RGB, and instead generated their colors based on television broadcast signal standards, such as the Atari 2600 and the original Nintendo Famicom. Or perhaps there are only levels of brightness in a monochrome display, such as the Gameboy. Since such colors are inherently dependent on the output hardware, we cannot 100% accurately recreate these digitally. Moreover, there may be multiple hardware revisions that change color output minutely. (Once again, the Famicom and Gameboy are the best examples here: [There is much discussion about the color output of the various Famicom PPU revisions](https://wiki.nesdev.org/w/index.php/PPU_palettes), and while the Gameboy and Gameboy Pocket have essentially the same hardware, the screen on the original has a notably green tint, while the latter is a light gray.)
-
-In order to represent such devices, we create predefined, "best guess" equivalent RGB colors stored in a hardcoded reference palette. With this method, we can easily create multiple palettes for a system to represent its hardware variations (e.g. either a Gameboy original palette or a Gameboy Pocket palette applied to the same data).
-
-## Palettes
-There are two main methods for storing the colors of a bitmap: direct and indexed. In direct color mode, *each pixel specifies its own red, green and blue levels*. This is used almost exclusively in our modern digital world, where data size is not so much of a concern, used in photography, computers, modern video games, and practically anything involving a digital display. Direct color mode, however, was not often used by retro hardware until towards the 32 bit era and onward.
-
-In indexed color mode, colors themselves are divorced from pixels and stored as a seperate list. As a result, *each pixel specifies an entry in that color list*. This seperate color list is known as a color palette. Indexed color images are smaller in data size than direct color since each pixel only needs enough bits to reference one of those palette entries. The tradeoff here is that the color list is small, usually 256 color maximum. This means indexed mode is no good for things like photographs, which need a full range of color to reproduce what we see. But it works great for imagery with a narrow range of colors, like cartoon artwork and pixelated video game graphics.
-
-It's important to understand the distinction between colors *possible* and colors *available.* As we said in the previous section, the Super Famicom has 15bit color, meaning 32,769 colors are *possible.* However, its color palette only has 256 entries, which means only 256 colors are *available* to be displayed at any one time. And the graphics are 4 bits per pixel, meaning there are a maximum of 16 colors available in the tile. 
-
-## Graphics As Data
-So now that we have explained things at a theoretical level, let's look at how these concepts are implemented in data. It's important to have a basic understanding of how the data is stored and arranged when attempting to create graphics definitions.
-
-### Tile Data
-Since we already know the dimensions of tile and since the color/palette data is stored elsewhere, tile data boils down to simply an array of pixels, nothing more.
-
-The data layout of those pixels is organized in one of two ways: packed or planar. [Packed pixel](https://en.wikipedia.org/wiki/Packed_pixel) (also called linear or "chunky") format is the more intuitive of the two. In this style, *a single plixel is represented as sequential data*. Let's say we're working with 4bpp (bits per pixel) graphics. In a packed format, every *sequential* four bits represent a pixel. So the first byte of data is the first two pixels, the next byte is the next two pixels, and so on.
-
-The concept of [planar graphics](https://en.wikipedia.org/wiki/Planar_(computer_graphics)) takes some rudimentary knowledge of binary to fully understand. First, understand that, regardless of packed or planar format, a single pixel is the sum of each set bit within its data. With that in mind, if we break out each of the bit positions and visualize them as "layers" that combine to form a value, we arrive at the concept of [bitplanes](https://en.wikipedia.org/wiki/Bit_plane). *A bitplane is the group of all digits at a given bit position.* Bitplane 0 is the grouping of all bit 0 of all data in a tile; bitplane 1 is the group of bit 1 and so one. The sum of the digits at a certain pixel offset within each bitplane generates our final pixel color.
-
-Let's break down some data. If we're working with 4bpp tiles, then each pixel has four bits. In an 8x8 tile, that's 64 pixels * 4bpp = 256 bits. That means there are 64 bits of data in bit 0 across all pixels; and 64 bits of data for bit 1, and for bit 2 and bit 3.
-
-In packed format, bits 0 to 3 for each pixel are "packed" together, with each pixel stored sequentially.
-
-    pixel number  pix0 pix1 pix2 pix3 pix4 ...
-       pixel bit  3210 3210 3210 3210 3210 ...
-
-In planar format, the values of bit 0 for all pixels are stored together, followed by the values of bit 1 for all pixels, and so on.
-
-    pixel number pix0 pix1 pix2 ... pix0 pix1 pix2 ... pix0 pix1 pix2 ...
-       pixel bit  3    3    3   ...  2    2    2   ...  1    1    1   ...
-
-*In packed format, data is grouped by pixels; in planar format, data is grouped by bitplanes.*
-
-The [Neo-Geo Development Wiki has an excellent visualization](https://wiki.neogeodev.org/index.php?title=Sprite_graphics_format) of planar data that may help if you're having trouble understanding the concept.
-
-Ultimately, the different formats used on different hardware are variations on bitdepth and the arrangement of bitplanes/pixels. A tile encoding used by chrgfx is a "map" of this arrangement, used to decode/encode the tile graphics.
-
-### Color Data
-RGB colors are stored in as many bytes as it takes to contain all the data bits for each component; this is between 1 and 3 bytes.
-
-Since color data is operated on as a single data structure (8-bit byte, 16-bit short, 32-bit long), it is important to take into consideration the [endianness](https://en.wikipedia.org/wiki/Endianness) of the hardware you are working with because it will affect the order of the stored data.
-
-For example, Super Famicom colors are 5 bit, so for all three color components, we have 15 bits. This takes up two bytes (16bits, with one of the bits unused). It looks something like this:
-
-    15|       |8  7|       |0
-      xBBBBBGG      GGGRRRRR
-
-However, the SNES is a little endian system, which means the least significant bytes of a number are stored first. So in data storage, the data appears like this:
-
-    7|       |0  15|       |8
-      GGGRRRRR      xBBBBBGG
-
-It's important to specify if the color data is little or big endian so it can be properly processed on the local machine.
-
-(It's also important to note that endianness does not matter while in memory. Data is always stored with most significant bits to the "left" and less significant bits to the "right." Endianness only matters as data stored in a file, with which we are obviously working.)
-
-Note that a color data is only for devices which have colors with RGB components. Hardware that uses YIQ or other such non-RGB colorspaces will need a pre-defined palette of color approximations.
-
-### Palette Data
-A palette is simply an array of all the color values, ordered seqentially. So a palette of 64 entries of 16 bit colors would be 128 bytes in size, with color 0 at offset 0, color 1 at offset 2, and so on. There are some quirks on some systems (such as the Virtual Boy, which only uses 6 bits for a palette yet is stored in 2 bytes...), but they are rare. Palette data is just an array of the color values we previously discussed.
+### Example Usage
 
 ## Special Thanks
 
@@ -297,4 +249,4 @@ Special thanks to:
 
 - UCC BLACK canned coffee.
 
-- Greetz to dosdemon, mdl, sebmal, lord, eri, freem and the rest of the internet graybeards from the old scenes and IRC.
+- Greetz to dosdemon, mdl, sebmal, lord, eri, freem and the rest of the internet graybeards from IRC and the old scene.

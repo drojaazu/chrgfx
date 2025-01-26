@@ -52,6 +52,11 @@ public:
 		blue = sto<uint8_t>(color.substr(4, 2), 16);
 	}
 
+	operator std::string()
+	{
+		return to_html();
+	}
+
 	std::string to_html()
 	{
 		std::ostringstream oss;

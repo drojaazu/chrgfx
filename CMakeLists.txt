@@ -39,9 +39,13 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
 endif()
 
 add_subdirectory(lib/chrgfx)
-add_subdirectory(app/chr2png)
-add_subdirectory(app/png2chr)
-add_subdirectory(app/palview)
+
+if(NOT NO_UTILS)
+  add_subdirectory(app/shared)
+  add_subdirectory(app/chr2png)
+  add_subdirectory(app/png2chr)
+  add_subdirectory(app/palview)
+endif()
 
 install(FILES share/gfxdef/gfxdefs
   DESTINATION ${CMAKE_INSTALL_DATADIR}/chrgfx)

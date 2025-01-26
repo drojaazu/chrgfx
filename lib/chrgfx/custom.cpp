@@ -52,7 +52,6 @@ size_t encode_pal_tilelayerpro(palette const * palette, byte_t * out_pal)
 {
 	// 3 byte header, 1 byte type, 256 RGB entries
 	size_t out_size = 3 + 1 + (256 * 3);
-	auto out = (byte_t *) malloc(out_size);
 	out_pal[0] = 'T';
 	out_pal[1] = 'P';
 	out_pal[2] = 'L';

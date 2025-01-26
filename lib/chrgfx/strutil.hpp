@@ -292,7 +292,7 @@ ContainerT sto_container(std::basic_string_view<CharT> str, char const delim = '
 template <typename ContainerT, typename CharT>
 ContainerT sto_container(std::basic_string<CharT> const & str, char const delim = ',')
 {
-	return sto_container<ContainerT>(std::basic_string_view<CharT>(str));
+	return sto_container<ContainerT>(std::basic_string_view<CharT>(str), delim);
 }
 
 /**
