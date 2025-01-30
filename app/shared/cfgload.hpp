@@ -13,9 +13,9 @@
 #define __MOTOI__CFGLOAD_HPP
 
 #include "lineread.hpp"
+#include <map>
 #include <stdexcept>
 #include <string>
-#include <unordered_map>
 
 /*
 Example config block:
@@ -58,33 +58,19 @@ public:
 	file_parse_error(char const * message, size_t line_number);
 };
 
-using block_map = std::unordered_multimap<std::string, std::string>;
-using config_map = std::unordered_multimap<std::string, block_map>;
+using block_map = std::multimap<std::string, std::string>;
+using config_map = std::multimap<std::string, block_map>;
 
 class config_loader : public config_map
 {
 private:
-	/*
-		using config_map::operator=;
-		using config_map::clear;
-		using config_map::emplace;
-		using config_map::emplace_hint;
-		using config_map::erase;
-		using config_map::extract;
-		using config_map::insert;
-		using config_map::insert_or_assign;
-		using config_map::merge;
-		using config_map::swap;
-		using config_map::try_emplace;
-		*/
-
 	static auto constexpr COMMENT_MARKER {'#'};
 	static auto constexpr BLOCK_OPENER {'{'};
 	static auto constexpr BLOCK_CLOSER {'}'};
 
 	motoi::linereader<char> m_file;
 
-	enum class parse_state
+	enum class parse_state : uint8_t
 	{
 		search_header,
 		search_opener,

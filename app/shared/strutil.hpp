@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
@@ -99,12 +100,26 @@ constexpr auto WHITESPACE {"\t\n\v\f\r "};
 template <typename CharT>
 inline std::basic_string_view<CharT> trim_view(std::basic_string<CharT> const & str)
 {
+	if (str.size() == 0)
+		return str;
+	auto start {str.find_first_not_of(WHITESPACE)};
+	auto end {str.find_last_not_of(WHITESPACE)};
+	if (start == 0 && end == 0)
+		return std::string_view(str).substr(0, 0);
+
 	return std::string_view(str).substr(str.find_first_not_of(WHITESPACE), str.find_last_not_of(WHITESPACE) + 1);
 }
 
 template <typename CharT>
 inline std::basic_string_view<CharT> trim_view(std::basic_string_view<CharT> str)
 {
+	if (str.size() == 0)
+		return str;
+	auto start {str.find_first_not_of(WHITESPACE)};
+	auto end {str.find_last_not_of(WHITESPACE)};
+	if (start == 0 && end == 0)
+		return str.substr(0, 0);
+
 	return str.substr(str.find_first_not_of(WHITESPACE), str.find_last_not_of(WHITESPACE) + 1);
 }
 
@@ -134,7 +149,7 @@ template <typename NumT, typename CharT>
 NumT sto(std::basic_string_view<CharT> const & str, int const base = 10)
 {
 	NumT value;
-	auto ec = std::from_chars(str.data(), str.data() + str.size(), value, base).ec;
+	auto ec {std::from_chars(str.data(), str.data() + str.size(), value, base).ec};
 	if (ec == std::errc::result_out_of_range)
 	{
 		std::stringstream ss;
@@ -375,7 +390,7 @@ ContainerT sto_range(std::basic_string<CharT> const & str, char const delim = ':
 	if (str[0] != '[' || str[str.size() - 1] != ']')
 		throw std::runtime_error("invalid range specification");
 	std::string work_str {str.begin() + 1, str.end() - 1};
-	auto vals = sto_container<std::vector<int>>(work_str, delim);
+	auto vals {sto_container<std::vector<int>>(work_str, delim)};
 	int start, count, step;
 	switch (vals.size())
 	{
@@ -411,17 +426,28 @@ ContainerT sto_range(std::basic_string<CharT> const & str, char const delim = ':
  * case)
  */
 template <typename CharT>
-bool sto_bool(std::basic_string<CharT> const & str)
+bool sto_bool(std::basic_string_view<CharT> const & str)
 {
-	std::basic_string<CharT> s_work = str;
-	lower(s_work);
-	if (s_work == "t" || s_work == "true" || s_work == "1")
+	std::basic_string<CharT> str_work {str};
+	lower(str_work);
+	if (str_work == "t" || str_work == "true" || str_work == "1")
 		return true;
-	if (s_work == "f" || s_work == "false" || s_work == "0")
+	if (str_work == "f" || str_work == "false" || str_work == "0")
 		return false;
 	std::ostringstream oss;
 	oss << "Value \"" << str << "\" could not be interpreted as a boolean";
 	throw std::invalid_argument(oss.str());
+}
+
+/**
+ * @brief Parse a string as a boolean
+ * @note Allowed values: "t", "true", "1" for true, "f", "false", "0" for false (upper or lower
+ * case)
+ */
+template <typename CharT>
+bool sto_bool(std::basic_string<CharT> const & str)
+{
+	return sto_bool(std::basic_string_view<CharT>(str));
 }
 
 template <typename CharT>
@@ -429,7 +455,7 @@ std::basic_string<CharT> to_hex(const char * data, size_t const len)
 {
 	std::basic_ostringstream<CharT> oss;
 	// TODO: do we need to set hex/fill/width on each iter?
-	for (size_t iter = 0; iter < len; ++iter)
+	for (size_t iter {0}; iter < len; ++iter)
 		oss << std::hex << std::setfill('0') << std::setw(2) << (int) (unsigned char) data[iter];
 	return oss.str();
 }

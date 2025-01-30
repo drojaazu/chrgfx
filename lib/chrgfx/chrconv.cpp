@@ -23,7 +23,7 @@ void encode_chr(chrdef const & chrdef, pixel const * in_tile, byte_t * out_tile)
 	uint
 		// tile dimensions
 		chr_height {chrdef.height()},
-		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bitdepth()},
+		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bpp()},
 		// bit offsets in the input tile data
 		bitpos_x, bitpos_y, bitpos;
 
@@ -74,7 +74,7 @@ void decode_chr(chrdef const & chrdef, byte_t const * in_tile, pixel * out_tile)
 	uint
 		// tile dimensions
 		chr_height {chrdef.height()},
-		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bitdepth()}, work_bit,
+		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bpp()}, work_bit,
 		// bitwise position for the current row
 		bitpos_row,
 		// bitwise position for the curent pixel

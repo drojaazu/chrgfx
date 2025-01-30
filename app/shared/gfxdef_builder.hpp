@@ -47,7 +47,7 @@ class gfxdef_builder
 {
 protected:
 	string m_id;
-	string m_note;
+	string m_desc;
 	gfxdef_builder() {}
 
 public:
@@ -58,9 +58,9 @@ public:
 		m_id = id;
 	}
 
-	void set_note(string const & comment)
+	void set_desc(string const & comment)
 	{
-		m_note = comment;
+		m_desc = comment;
 	}
 };
 
@@ -86,7 +86,7 @@ public:
 	void from_def(rgbcoldef const & coldef)
 	{
 		set_id(coldef.id());
-		set_note(coldef.note());
+		set_desc(coldef.desc());
 		m_bitdepth = coldef.bitdepth();
 		m_layout = coldef.layout();
 	}
@@ -96,7 +96,7 @@ public:
 		for (auto const & entry : map)
 		{
 			SET_FIELD(id);
-			SET_FIELD(note);
+			SET_FIELD(desc);
 			SET_FIELD(bitdepth);
 			SET_FIELD(layout);
 			SET_FIELD(big_endian);
@@ -105,7 +105,7 @@ public:
 
 	void set_bitdepth(string const & bitdepth)
 	{
-		m_bitdepth = sto<uint>(bitdepth);
+		m_bitdepth = sto<uint>(trim_view(bitdepth));
 	}
 
 	void clear_layout()
@@ -135,7 +135,7 @@ public:
 			throw runtime_error("Bitdepth must be greater than zero");
 		if (m_layout.size() == 0)
 			throw runtime_error("rgb_layout list cannot be empty");
-		return new rgbcoldef {m_id, m_bitdepth, m_layout, m_big_endian, m_note};
+		return new rgbcoldef {m_id, m_bitdepth, m_layout, m_big_endian, m_desc};
 	}
 };
 
@@ -161,7 +161,7 @@ public:
 	void from_def(refcoldef const & coldef)
 	{
 		set_id(coldef.id());
-		set_note(coldef.note());
+		set_desc(coldef.desc());
 		m_refpal = coldef.refpal();
 	}
 
@@ -170,7 +170,7 @@ public:
 		for (auto const & entry : map)
 		{
 			SET_FIELD(id);
-			SET_FIELD(note);
+			SET_FIELD(desc);
 			SET_FIELD(big_endian);
 			SET_FIELD(refpal);
 		}
@@ -183,12 +183,12 @@ public:
 
 	void set_big_endian(string const & big_endian)
 	{
-		m_big_endian = sto_bool(big_endian);
+		m_big_endian = sto_bool(trim_view(big_endian));
 	}
 
 	[[nodiscard]] refcoldef * build() const
 	{
-		return new refcoldef {m_id, m_refpal, m_big_endian, m_note};
+		return new refcoldef {m_id, m_refpal, m_big_endian, m_desc};
 	}
 };
 
@@ -214,7 +214,7 @@ public:
 	void from_def(paldef const & paldef)
 	{
 		set_id(paldef.id());
-		set_note(paldef.note());
+		set_desc(paldef.desc());
 		m_entry_datasize = paldef.entry_datasize();
 		m_length = paldef.length();
 		m_datasize = paldef.datasize();
@@ -225,7 +225,7 @@ public:
 		for (auto const & entry : map)
 		{
 			SET_FIELD(id);
-			SET_FIELD(note);
+			SET_FIELD(desc);
 			SET_FIELD(length);
 			SET_FIELD(entry_datasize);
 			SET_FIELD(datasize);
@@ -239,12 +239,12 @@ public:
 
 	void set_entry_datasize(string const & entry_datasize)
 	{
-		m_entry_datasize = sto<uint>(entry_datasize);
+		m_entry_datasize = sto<uint>(trim_view(entry_datasize));
 	}
 
 	void set_datasize(string const & datasize)
 	{
-		m_datasize = sto<uint>(datasize);
+		m_datasize = sto<uint>(trim_view(datasize));
 	}
 
 	[[nodiscard]] paldef * build() const
@@ -257,7 +257,7 @@ public:
 		if (m_datasize == 0)
 			throw runtime_error("palette data size must be greater than zero");
 
-		return new paldef {m_id, m_entry_datasize, m_length, m_datasize, m_note};
+		return new paldef {m_id, m_entry_datasize, m_length, m_datasize, m_desc};
 	}
 };
 
@@ -266,7 +266,7 @@ class chrdef_builder : public gfxdef_builder
 private:
 	uint m_width {0};
 	uint m_height {0};
-	uint m_bitdepth {0};
+	uint m_bpp {0};
 	vector<uint> m_plane_offsets;
 	vector<uint> m_pixel_offsets;
 	vector<uint> m_row_offsets;
@@ -286,10 +286,10 @@ public:
 	void from_def(chrdef const & chrdef)
 	{
 		set_id(chrdef.id());
-		set_note(chrdef.note());
+		set_desc(chrdef.desc());
 		m_width = chrdef.width();
 		m_height = chrdef.height();
-		m_bitdepth = chrdef.bitdepth();
+		m_bpp = chrdef.bpp();
 		m_plane_offsets = chrdef.plane_offsets();
 		m_pixel_offsets = chrdef.pixel_offsets();
 		m_row_offsets = chrdef.row_offsets();
@@ -300,10 +300,10 @@ public:
 		for (auto const & entry : map)
 		{
 			SET_FIELD(id);
-			SET_FIELD(note);
+			SET_FIELD(desc);
 			SET_FIELD(width);
 			SET_FIELD(height);
-			SET_FIELD(bitdepth);
+			SET_FIELD(bpp);
 			SET_FIELD(plane_offsets);
 			SET_FIELD(pixel_offsets);
 			SET_FIELD(row_offsets);
@@ -312,17 +312,17 @@ public:
 
 	void set_width(string const & width)
 	{
-		m_width = sto<uint>(width);
+		m_width = sto<uint>(trim_view(width));
 	}
 
 	void set_height(string const & height)
 	{
-		m_height = sto<uint>(height);
+		m_height = sto<uint>(trim_view(height));
 	}
 
-	void set_bitdepth(string const & bitdepth)
+	void set_bpp(string const & bpp)
 	{
-		m_bitdepth = sto<uint>(bitdepth);
+		m_bpp = sto<uint>(trim_view(bpp));
 	}
 
 	void set_plane_offsets(string const & plane_offsets)
@@ -352,15 +352,15 @@ public:
 	[[nodiscard]] chrdef * build() const
 	{
 		// check the validity of the definition
-		if (m_bitdepth == 0)
+		if (m_bpp == 0)
 			throw runtime_error("Bitdepth must be greater than zero");
 		if (m_width > m_pixel_offsets.size())
 			throw runtime_error("CHR width must be equal to number of pixel offset entries");
 		if (m_height > m_row_offsets.size())
 			throw runtime_error("CHR height must be equal to number of row offset entries");
-		if (m_bitdepth > m_plane_offsets.size())
+		if (m_bpp > m_plane_offsets.size())
 			throw runtime_error("CHR bitdepth must be equal to number of plane offset entries");
-		return new chrdef {m_id, m_width, m_height, m_bitdepth, m_pixel_offsets, m_row_offsets, m_plane_offsets, m_note};
+		return new chrdef {m_id, m_width, m_height, m_bpp, m_pixel_offsets, m_row_offsets, m_plane_offsets, m_desc};
 	}
 };
 

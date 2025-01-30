@@ -77,15 +77,15 @@ psuedo:
 	for (rgb_layout const & this_pass : rgbcoldef.layout())
 	{
 		bitmask = create_bitmask8(this_pass.red_size());
-		red |= ((*in_color >> this_pass.red_shift()) & bitmask) << red_bitcount;
+		red |= (((*in_color >> this_pass.red_shift()) & bitmask) << red_bitcount);
 		red_bitcount += this_pass.red_size();
 
 		bitmask = create_bitmask8(this_pass.green_size());
-		green |= ((*in_color >> this_pass.green_shift()) & bitmask) << green_bitcount;
+		green |= (((*in_color >> this_pass.green_shift()) & bitmask) << green_bitcount);
 		green_bitcount += this_pass.green_size();
 
 		bitmask = create_bitmask8(this_pass.blue_size());
-		blue |= ((*in_color >> this_pass.blue_shift()) & bitmask) << blue_bitcount;
+		blue |= (((*in_color >> this_pass.blue_shift()) & bitmask) << blue_bitcount);
 		blue_bitcount += this_pass.blue_size();
 	}
 

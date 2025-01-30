@@ -34,7 +34,7 @@ uint chrdef::height() const
 	return m_height;
 }
 
-uint chrdef::bitdepth() const
+uint chrdef::bpp() const
 {
 	return m_bitdepth;
 }

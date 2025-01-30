@@ -53,7 +53,7 @@ public:
 	/**
 	 * @return uint Bit depth of the tile
 	 */
-	[[nodiscard]] uint bitdepth() const;
+	[[nodiscard]] uint bpp() const;
 
 	/**
 	 * @return uint Data size of a single tile *in bits*

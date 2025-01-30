@@ -21,7 +21,7 @@ string const & gfxdef::id() const
 	return m_id;
 };
 
-string const & gfxdef::note() const
+string const & gfxdef::desc() const
 {
 	return m_desc;
 }

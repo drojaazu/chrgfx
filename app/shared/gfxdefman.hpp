@@ -215,7 +215,7 @@ private:
 				delete m_chrdef;
 			}
 			if (! m_cfg.chrdef_bpp.empty())
-				builder.set_bitdepth(m_cfg.chrdef_bpp);
+				builder.set_bpp(m_cfg.chrdef_bpp);
 			if (! m_cfg.chrdef_width.empty())
 				builder.set_width(m_cfg.chrdef_width);
 			if (! m_cfg.chrdef_height.empty())
