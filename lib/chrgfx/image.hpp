@@ -43,7 +43,7 @@ public:
 	rgb(std::string_view color)
 	{
 		if (color[0] == '#')
-			color = color.begin() + 1;
+			color = {color.begin() + 1, color.length() - 1};
 		if (color.length() != 6)
 			throw std::runtime_error("invalid hex triplet specified for color (shorthand format not supported)");
 
@@ -147,8 +147,9 @@ public:
 		return m_colormap;
 	}
 
-	void color_map(color_map_t const & color_map)
+	void set_color_map(color_map_t const & color_map)
 	{
+		delete m_colormap;
 		m_colormap = new color_map_t(color_map);
 	}
 

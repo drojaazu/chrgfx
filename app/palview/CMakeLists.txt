@@ -18,7 +18,6 @@ PRIVATE
 	main.cpp
 	${PROJECT_SOURCE_DIR}/../shared/cfgload.cpp
 	${PROJECT_SOURCE_DIR}/../shared/filesys.hpp
-	${PROJECT_SOURCE_DIR}/../shared/fstreams.hpp
 	${PROJECT_SOURCE_DIR}/../shared/gfxdef_builder.hpp
 	${PROJECT_SOURCE_DIR}/../shared/gfxdefman.hpp
 	${PROJECT_SOURCE_DIR}/../shared/shared.cpp

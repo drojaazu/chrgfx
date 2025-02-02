@@ -26,30 +26,28 @@ void encode_col(rgbcoldef const & rgbcoldef, rgb_color const * in_color, uint32 
 		 as above
 	*/
 
-	uint8 bitdepth = rgbcoldef.bitdepth();
-	uint8 red {reduce_bitdepth(in_color->red, bitdepth)}, red_pass_shift {0},
-		green {reduce_bitdepth(in_color->green, bitdepth)}, green_pass_shift {0},
-		blue {reduce_bitdepth(in_color->blue, bitdepth)}, blue_pass_shift {0};
+	// clang-format off
+	uint8
+		red {reduce_bitdepth(in_color->red, rgbcoldef.bitdepth())},
+		green {reduce_bitdepth(in_color->green, rgbcoldef.bitdepth())},
+		blue {reduce_bitdepth(in_color->blue, rgbcoldef.bitdepth())},
+		red_bitcount {0}, green_bitcount {0}, blue_bitcount {0},
+		bitmask;
+	// clang-format on
 
-	uint8 bitmask;
-	uint32 temp;
-
-	for (auto const & this_pass : rgbcoldef.layout())
+	for (auto const & layout : rgbcoldef.layout())
 	{
-		bitmask = (create_bitmask8(this_pass.red_size())) << red_pass_shift;
-		temp = ((red & bitmask) >> red_pass_shift) << this_pass.red_shift();
-		*out_color |= temp;
-		red_pass_shift += this_pass.red_size();
+		bitmask = (create_bitmask8(layout.red_size())) << red_bitcount;
+		*out_color |= ((red & bitmask) >> red_bitcount) << layout.red_offset();
+		red_bitcount += layout.red_size();
 
-		bitmask = (create_bitmask8(this_pass.green_size())) << green_pass_shift;
-		temp = ((green & bitmask) >> green_pass_shift) << this_pass.green_shift();
-		*out_color |= temp;
-		green_pass_shift += this_pass.green_size();
+		bitmask = (create_bitmask8(layout.green_size())) << green_bitcount;
+		*out_color |= ((green & bitmask) >> green_bitcount) << layout.green_offset();
+		green_bitcount += layout.green_size();
 
-		bitmask = (create_bitmask8(this_pass.blue_size())) << blue_pass_shift;
-		temp = ((blue & bitmask) >> blue_pass_shift) << this_pass.blue_shift();
-		*out_color |= temp;
-		blue_pass_shift += this_pass.blue_size();
+		bitmask = (create_bitmask8(layout.blue_size())) << blue_bitcount;
+		*out_color |= ((blue & bitmask) >> blue_bitcount) << layout.blue_offset();
+		blue_bitcount += layout.blue_size();
 	}
 }
 
@@ -60,38 +58,41 @@ void encode_col(refcoldef const & refcoldef, rgb_color const * in_color, uint32 
 
 void decode_col(rgbcoldef const & rgbcoldef, uint32 const * in_color, rgb_color * out_color)
 {
-
 	/*
-psuedo:
+pseudo:
 -u32 data
 -for each pass
-	-shift red, apply mask, OR with R var
-	-shift green, apply mask, OR with G var
-	-shift blue, apply mask, OR with B var
--expand R, G, B
-
+	-shift color down by red offset, apply mask, shift up by bitcount, OR with current RED
+	-shift color down by green offset, apply mask, shift up by bitcount, OR with current GREEN
+	-shift color down by blue offset, apply mask, shift up by bitcount, OR with current BLUE
+-expand bits for each channel
  */
-	uint8 red {0}, green {0}, blue {0};
-	uint8 red_bitcount {0}, green_bitcount {0}, blue_bitcount {0};
-	uint8 bitmask;
+
+	// clang-format off
+	uint8
+		red {0}, green {0}, blue {0},
+		red_bitcount {0}, green_bitcount {0}, blue_bitcount {0},
+		bitmask;
+	// clang-format on
+
 	for (rgb_layout const & this_pass : rgbcoldef.layout())
 	{
 		bitmask = create_bitmask8(this_pass.red_size());
-		red |= (((*in_color >> this_pass.red_shift()) & bitmask) << red_bitcount);
+		red |= (((*in_color >> this_pass.red_offset()) & bitmask) << red_bitcount);
 		red_bitcount += this_pass.red_size();
 
 		bitmask = create_bitmask8(this_pass.green_size());
-		green |= (((*in_color >> this_pass.green_shift()) & bitmask) << green_bitcount);
+		green |= (((*in_color >> this_pass.green_offset()) & bitmask) << green_bitcount);
 		green_bitcount += this_pass.green_size();
 
 		bitmask = create_bitmask8(this_pass.blue_size());
-		blue |= (((*in_color >> this_pass.blue_shift()) & bitmask) << blue_bitcount);
+		blue |= (((*in_color >> this_pass.blue_offset()) & bitmask) << blue_bitcount);
 		blue_bitcount += this_pass.blue_size();
 	}
 
-	red = expand_bitdepth(red, red_bitcount);
-	green = expand_bitdepth(green, green_bitcount);
-	blue = expand_bitdepth(blue, blue_bitcount);
+	red = expand_bitdepth(red, rgbcoldef.bitdepth());
+	green = expand_bitdepth(green, rgbcoldef.bitdepth());
+	blue = expand_bitdepth(blue, rgbcoldef.bitdepth());
 	*out_color = rgb_color(red, green, blue);
 }
 

@@ -26,8 +26,9 @@ rgb_color refcoldef::by_value(uint const index) const
 
 uint refcoldef::by_color(rgb_color const & rgb) const
 {
+	// search for an exact match first
 	size_t idx {0};
-	for (auto & this_color : m_refpal)
+	for (auto const & this_color : m_refpal)
 	{
 		if (this_color.red == rgb.red && this_color.green == rgb.green && this_color.blue == rgb.blue)
 		{

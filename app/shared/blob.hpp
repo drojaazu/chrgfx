@@ -2,7 +2,10 @@
  * @file blob.hpp
  * @author Damian Rogers / damian@motoi.pro
  * @copyright ©2022 Motoi Productions / Released under MIT License
- * @brief Data block wrapper with templated iterators
+ * @brief Data blob wrapper with templated iterators
+ * @details The blob class is intended to contain an array of arbitrary data which may be composed of multiple data
+ * types and structures at various offsets, e.g., an image of a disk or a dump of a ROM module. It contains an iterator
+ * sub-class which can be templatized to iterate over a certain data type dynamically.
  *
  */
 
@@ -690,13 +693,13 @@ public:
 	template <typename IterT = char>
 	[[nodiscard]] iterator<IterT> begin_at(off_t offset, size_t stride = 1) const
 	{
-		return iterator<IterT>(reinterpret_cast<char *>(this->m_buffer) + offset, stride);
+		return iterator<IterT>(reinterpret_cast<int8_t *>(this->m_buffer) + offset, stride);
 	}
 
 	template <typename IterT = char>
 	const_iterator<IterT> cbegin_at(off_t offset, size_t stride = 1) const
 	{
-		return const_iterator<IterT>(reinterpret_cast<char *>(this->m_buffer), stride);
+		return const_iterator<IterT>(reinterpret_cast<int8_t *>(this->m_buffer), stride);
 	}
 
 	template <typename IterT = char>
@@ -705,7 +708,7 @@ public:
 		// determine the end iterator by considering the requested type and block
 		// size to ensure it does not exceed the allocated space
 		return iterator<IterT>(
-			(IterT *) (((char *) this->m_buffer) + (m_size - (m_size % (sizeof(IterT) * stride)))), stride);
+			(IterT *) (((int8_t *) this->m_buffer) + (m_size - (m_size % (sizeof(IterT) * stride)))), stride);
 	}
 
 	template <typename IterT = char>

@@ -3,7 +3,6 @@
 
 #include "shared.hpp"
 #include <getopt.h>
-#include <iostream>
 #include <stdexcept>
 
 using namespace std;
@@ -76,7 +75,6 @@ void process_args(int argc, char ** argv)
 				break;
 		}
 	}
-
 }
 
 #endif

@@ -1,5 +1,5 @@
 /**
- * @file img_process.hpp
+ * @file imaging.hpp
  * @author Damian Rogers / damian@motoi.pro
  * @copyright ©2022 Motoi Productions / Released under MIT License
  * @brief Tileset conversion functions
@@ -12,8 +12,8 @@
 #include "paldef.hpp"
 #include <optional>
 
-#ifndef __CHRGFX__IMG_PROCESS_HPP
-#define __CHRGFX__IMG_PROCESS_HPP
+#ifndef __CHRGFX__IMAGING_HPP
+#define __CHRGFX__IMAGING_HPP
 
 namespace chrgfx
 {

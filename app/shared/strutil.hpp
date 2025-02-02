@@ -104,7 +104,7 @@ inline std::basic_string_view<CharT> trim_view(std::basic_string<CharT> const & 
 		return str;
 	auto start {str.find_first_not_of(WHITESPACE)};
 	auto end {str.find_last_not_of(WHITESPACE)};
-	if (start == 0 && end == 0)
+	if (start == std::string::npos && end == std::string::npos)
 		return std::string_view(str).substr(0, 0);
 
 	return std::string_view(str).substr(str.find_first_not_of(WHITESPACE), str.find_last_not_of(WHITESPACE) + 1);
@@ -117,7 +117,7 @@ inline std::basic_string_view<CharT> trim_view(std::basic_string_view<CharT> str
 		return str;
 	auto start {str.find_first_not_of(WHITESPACE)};
 	auto end {str.find_last_not_of(WHITESPACE)};
-	if (start == 0 && end == 0)
+	if (start == std::string::npos && end == std::string::npos)
 		return str.substr(0, 0);
 
 	return str.substr(str.find_first_not_of(WHITESPACE), str.find_last_not_of(WHITESPACE) + 1);

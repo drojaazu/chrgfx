@@ -1,7 +1,7 @@
 #include "blob.hpp"
-#include "fstreams.hpp"
+#include "filesys.hpp"
 #include "gfxdefman.hpp"
-#include "imgfmt_png.hpp"
+#include "imageformat_png.hpp"
 #include "setup.hpp"
 #include <chrgfx/chrgfx.hpp>
 
@@ -20,6 +20,10 @@ void process_args(int argc, char ** argv);
 
 int main(int argc, char ** argv)
 {
+#ifdef DEBUG
+	chrono::high_resolution_clock::time_point t1, t2;
+#endif
+
 	try
 	{
 		/*******************************************************
@@ -27,81 +31,80 @@ int main(int argc, char ** argv)
 		 *******************************************************/
 
 #ifdef DEBUG
-		chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
+		t1 = chrono::high_resolution_clock::now();
 #endif
 		process_args(argc, argv);
 
 		gfxdef_manager defs(cfg);
-
-		istream * chrdata;
-		ifstream ifs;
-		if (cfg.chrdata_path == "-")
+		istream * chr_data;
+		ifstream ifs_chr_data;
+		if (cfg.chrdata_path.empty())
 		{
-			chrdata = &cin;
+			chr_data = &cin;
 		}
 		else
 		{
-			// see if we have good input before moving on
-			ifs = ifstream_checked(cfg.chrdata_path);
-			chrdata = &ifs;
+			ifs_chr_data = ifstream_checked(cfg.chrdata_path);
+			chr_data = &ifs_chr_data;
 		}
 
 #ifdef DEBUG
-		chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
+		t2 = chrono::high_resolution_clock::now();
 		auto duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-		cerr << "SETUP TIME: " << duration << "ms\n";
+		cerr << "SETUP: " << duration << "ms\n";
 #endif
 
 		/*******************************************************
 		 *                PALETTE CONVERSION
 		 *******************************************************/
+#ifdef DEBUG
+		t1 = chrono::high_resolution_clock::now();
+#endif
+
 		palette workpal;
+		if (! cfg.paldata_path.empty())
 		{
-#ifdef DEBUG
-			t1 = chrono::high_resolution_clock::now();
-#endif
-			if (! cfg.paldata_path.empty())
-			{
-				if (defs.paldef() == nullptr)
-					throw runtime_error("no paldef loaded");
-				if (defs.coldef() == nullptr)
-					throw runtime_error("no coldef loaded");
+			if (defs.paldef() == nullptr)
+				throw runtime_error("no paldef loaded");
+			if (defs.coldef() == nullptr)
+				throw runtime_error("no coldef loaded");
 
-				ifstream paldata {ifstream_checked(cfg.paldata_path)};
-				size_t pal_size {defs.paldef()->datasize_bytes()};
-				auto palbuffer {unique_ptr<byte_t>(new byte_t[pal_size])};
+			ifstream paldata {ifstream_checked(cfg.paldata_path)};
+			size_t pal_size {defs.paldef()->datasize_bytes()};
+			auto palbuffer {unique_ptr<byte_t>(new byte_t[pal_size])};
 
-				paldata.seekg(cfg.pal_line * pal_size, ios::beg);
-				paldata.read(reinterpret_cast<char *>(palbuffer.get()), pal_size);
-				if (! paldata.good())
-					throw runtime_error("Cannot read specified palette line index");
+			paldata.seekg(cfg.pal_line * pal_size, ios::beg);
+			paldata.read(reinterpret_cast<char *>(palbuffer.get()), pal_size);
+			if (! paldata.good())
+				throw runtime_error("Cannot read specified palette line index");
 
-				decode_pal(*defs.paldef(), *defs.coldef(), palbuffer.get(), &workpal);
-			}
-			else
-			{
-				workpal = make_pal_random();
-			}
-#ifdef DEBUG
-			t2 = chrono::high_resolution_clock::now();
-			duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
-
-			cerr << "PALETTE GENERATION: " << duration << "ms\n";
-#endif
-
-#ifdef DEBUG
-			t1 = chrono::high_resolution_clock::now();
-#endif
+			decode_pal(*defs.paldef(), *defs.coldef(), palbuffer.get(), &workpal);
 		}
+		else
+		{
+			workpal = make_pal_random();
+		}
+
+#ifdef DEBUG
+		t2 = chrono::high_resolution_clock::now();
+		duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+
+		cerr << "PALETTE GENERATION: " << duration << "ms\n";
+#endif
 
 		/*******************************************************
 		 *             TILE CONVERSION
 		 *******************************************************/
 
+#ifdef DEBUG
+		t1 = chrono::high_resolution_clock::now();
+#endif
+
 		if (defs.chrdef() == nullptr)
 			throw runtime_error("no chrdef loaded");
 
 		blob out_buffer;
+		// vector<pixel> out_buffer;
 		{
 #ifdef DEBUG
 			t1 = chrono::high_resolution_clock::now();
@@ -123,12 +126,13 @@ int main(int argc, char ** argv)
 			*/
 			while (true)
 			{
-				chrdata->read(reinterpret_cast<char *>(in_tile.get()), in_chunksize);
-				if (! chrdata->good())
+				chr_data->read(reinterpret_cast<char *>(in_tile.get()), in_chunksize);
+				if (! chr_data->good())
 					break;
 
 				decode_chr(*defs.chrdef(), in_tile.get(), out_tile.get());
 				out_buffer.append(out_tile.get(), out_chunksize);
+				// out_buffer.insert(out_buffer.end(), out_tile.get(), out_tile.get() + out_chunksize);
 			}
 
 #ifdef DEBUG
@@ -138,12 +142,18 @@ int main(int argc, char ** argv)
 			cerr << "TILE CONVERSION: " << to_string(duration) << "ms\n";
 #endif
 
+			/*******************************************************
+			 *             IMAGE RENDER
+			 *******************************************************/
+
 #ifdef DEBUG
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
 			auto rendered_tiles = render_tileset(*defs.chrdef(), out_buffer, out_buffer.size(), cfg.render_cfg);
-			rendered_tiles.color_map(workpal);
+			// auto rendered_tiles = render_tileset(*defs.chrdef(), out_buffer.data(), out_buffer.size(),
+			// cfg.render_cfg);
+			rendered_tiles.set_color_map(workpal);
 			png::image<png::index_pixel> outimg {to_png(rendered_tiles, cfg.render_cfg.trns_index)};
 
 #ifdef DEBUG
@@ -152,14 +162,18 @@ int main(int argc, char ** argv)
 			cerr << "PNG RENDER: " << duration << "ms\n";
 #endif
 
+			/*******************************************************
+			 *             STREAM OUTPUT
+			 *******************************************************/
+
 #ifdef DEBUG
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			if (cfg.out_path.empty())
+			if (cfg.out_png_path.empty())
 				outimg.write_stream(cout);
 			else
-				outimg.write(cfg.out_path);
+				outimg.write(cfg.out_png_path);
 
 #ifdef DEBUG
 			t2 = chrono::high_resolution_clock::now();

@@ -8,122 +8,124 @@ void encode_chr(chrdef const & chrdef, pixel const * in_tile, byte_t * out_tile)
 {
 	fill_n(out_tile, chrdef.datasize_bytes(), 0);
 
-	/*
-		-for every line...
-		--for every pixel...
-		---work pixel
-		bit position in output data: yoffset[curline] + xoffset[curpixel] +
-		poffset[curr]
-		--- cache yoffset[curline] + xoffset[curpixel] value
-		---for every bit plane...
-		---extract bit from input data
-		---if bit is zero, no need to do anything
-		---output data |= (input_bit << bit position mod)
-	*/
+	// clang-format off
 	uint
-		// tile dimensions
-		chr_height {chrdef.height()},
-		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bpp()},
 		// bit offsets in the input tile data
-		bitpos_x, bitpos_y, bitpos;
+		bitpos_row,
+		bitpos_pixel,
+		bitpos_plane,
+		//iterators
+		i_row,
+		i_pixel,
+		i_bitplane;
 
 	uint const
+		// tile dimensions
+		tile_height {chrdef.height()},
+		tile_width {chrdef.width()},
+		tile_bpp {chrdef.bpp()},
 		// pointers to bit offset definitions
-		*ptr_row_offset {chrdef.row_offsets().data()},
-		*ptr_pxl_offset {chrdef.pixel_offsets().data()}, *ptr_plane_offset {chrdef.plane_offsets().data()};
+		*ptr_row_offsets {chrdef.row_offsets().data()},
+		*ptr_pixel_offsets {chrdef.pixel_offsets().data()},
+		*ptr_plane_offsets {chrdef.plane_offsets().data()};
+	// clang-format on
 
-	byte_t const * ptr_in_pxl = in_tile;
-	byte_t this_pxl;
+	pixel const * ptr_in_pixel {in_tile};
+	byte_t work_byte;
 
-	// for every row of pixels...
-	for (uint i_row {0}; i_row < chr_height; ++i_row)
+	// for every row of pixels in the tile...
+	for (i_row = 0; i_row < tile_height; ++i_row, ++ptr_row_offsets)
 	{
-		bitpos_y = *ptr_row_offset++;
+		bitpos_row = *ptr_row_offsets;
 
 		// for every pixel in that row...
-		for (uint i_pxl {0}; i_pxl < chr_width; ++i_pxl, ++ptr_pxl_offset)
+		for (i_pixel = 0; i_pixel < tile_width; ++i_pixel, ++ptr_pixel_offsets, ++ptr_in_pixel)
 		{
-			this_pxl = *ptr_in_pxl++;
-
-			// if all the bitplanes are unset (i.e. the value is zero)
-			// we can skip the bitplane shenanigans altogether
-			if (this_pxl == 0)
+			work_byte = *ptr_in_pixel;
+			// if the byte is zero, we can skip the bitplane shenanigans altogether
+			// (since the output is already initialized to zero)
+			if (work_byte == 0)
 				continue;
+			bitpos_pixel = bitpos_row + *ptr_pixel_offsets;
 
-			bitpos_x = *ptr_pxl_offset;
 			// for every bit plane in that pixel...
-			for (uint i_bitplane {0}; i_bitplane < chr_bitdepth; ++i_bitplane, this_pxl >>= 1, ++ptr_plane_offset)
+			for (i_bitplane = 0; i_bitplane < tile_bpp; ++i_bitplane, work_byte >>= 1, ++ptr_plane_offsets)
 			{
-				// if the bit is unset, then do not set the equivalent bit in the
-				// output
-				if ((this_pxl & 1) == 0)
+				// if the whole byte is 0, we can skip all bit checking
+				if (work_byte == 0)
+					break;
+				// if the bit is unset, then do not set the equivalent bit in the output
+				if ((work_byte & 1) == 0)
 					continue;
 
 				// get the position in the output data for this bit
-				bitpos = bitpos_y + bitpos_x + *ptr_plane_offset;
-				*(out_tile + (bitpos >> 3)) |= (0x80 >> (bitpos % 8));
+				bitpos_plane = bitpos_pixel + *ptr_plane_offsets;
+				*(out_tile + (bitpos_plane >> 3)) |= (0x80 >> (bitpos_plane % 8));
 			}
-			ptr_plane_offset = chrdef.plane_offsets().data();
+
+			ptr_plane_offsets = chrdef.plane_offsets().data();
 		}
-		ptr_pxl_offset = chrdef.pixel_offsets().data();
+
+		ptr_pixel_offsets = chrdef.pixel_offsets().data();
 	}
 }
 
 void decode_chr(chrdef const & chrdef, byte_t const * in_tile, pixel * out_tile)
 {
+	// clang-format off
 	uint
-		// tile dimensions
-		chr_height {chrdef.height()},
-		chr_width {chrdef.width()}, chr_bitdepth {chrdef.bpp()}, work_bit,
-		// bitwise position for the current row
+		// bit offsets in the input tile data
 		bitpos_row,
-		// bitwise position for the curent pixel
 		bitpos_pixel,
-		// bitwise position for the current plane
-		bitpos_plane;
-
-	byte_t work_byte {0}, this_pxl {0};
-	byte_t * ptr_out_pixel = out_tile;
+		bitpos_plane,
+		//iterators
+		i_row,
+		i_pixel,
+		i_bitplane,
+		work_bit;
 
 	uint const
+		// tile dimensions
+		tile_height {chrdef.height()},
+		tile_width {chrdef.width()},
+		tile_bpp {chrdef.bpp()},
 		// pointers to bit offset definitions
-		*ptr_row_offset {chrdef.row_offsets().data()},
-		*ptr_pixel_offset {chrdef.pixel_offsets().data()}, *ptr_plane_offset {chrdef.plane_offsets().data()};
+		*ptr_row_offsets {chrdef.row_offsets().data()},
+		*ptr_pixel_offsets {chrdef.pixel_offsets().data()},
+		*ptr_plane_offsets {chrdef.plane_offsets().data()};
+	// clang-format on
 
-	// for every line...
-	for (uint i_row {0}; i_row < chr_height; ++i_row)
+	pixel * ptr_out_pixel {out_tile};
+	byte_t work_byte;
+
+	// for every row of pixels in the tile...
+	for (i_row = 0; i_row < tile_height; ++i_row, ++ptr_row_offsets)
 	{
-		bitpos_row = *ptr_row_offset++;
+		bitpos_row = *ptr_row_offsets;
 
-		// for every pixel in the line...
-		for (uint i_pxl {0}; i_pxl < chr_width; ++i_pxl, ++ptr_pixel_offset, this_pxl = 0)
+		// for every pixel in the row...
+		for (i_pixel = 0; i_pixel < tile_width; ++i_pixel, ++ptr_pixel_offsets, ++ptr_out_pixel)
 		{
-			bitpos_pixel = bitpos_row + *ptr_pixel_offset;
+			*ptr_out_pixel = 0;
+			bitpos_pixel = bitpos_row + *ptr_pixel_offsets;
 
-			// for every bit plane
-			for (uint i_bitplane {0}; i_bitplane < chr_bitdepth; ++i_bitplane)
+			// for every bit plane in that pixel...
+			for (i_bitplane = 0; i_bitplane < tile_bpp; ++i_bitplane, ++ptr_plane_offsets)
 			{
-				bitpos_plane = bitpos_pixel + *ptr_plane_offset++;
-
-				// reminder: >> 3 is to divide by 8 (since we're getting a byte offset using bits)
+				bitpos_plane = bitpos_pixel + *ptr_plane_offsets;
 				work_byte = in_tile[bitpos_plane >> 3];
-
-				// if work_byte is 0, no bits are set, so no bits will be set in the
-				// output, so let's move to the next byte_t
+				// if work_byte is 0, no bits are set, so no bits will be set in the output
 				if (work_byte == 0)
 					continue;
 
 				work_bit = bitpos_plane % 8;
-				// this_pxl |= ((work_byte << work_bit) & 0x80) >> i_bitplane;
-				// TODO: i_bitplane is only used here, can we work this '7 - ' math  into the loop header?
-				this_pxl |= ((work_byte << work_bit) & 0x80) >> (7 - i_bitplane);
+				*ptr_out_pixel |= ((work_byte << work_bit) & 0x80) >> (7 - i_bitplane);
 			}
 
-			*ptr_out_pixel++ = this_pxl;
-			ptr_plane_offset = chrdef.plane_offsets().data();
+			ptr_plane_offsets = chrdef.plane_offsets().data();
 		}
 
-		ptr_pixel_offset = chrdef.pixel_offsets().data();
+		ptr_pixel_offsets = chrdef.pixel_offsets().data();
 	}
 }
 

@@ -97,10 +97,6 @@ inline void trim(std::basic_string<CharT> & str)
 
 constexpr auto WHITESPACE {"\t\n\v\f\r "};
 
-// trim_view is broken right now, don't use it
-// basically, what if we are trimming a string that is only spaces "  "
-// the + 1 on the second argument to substr throws out of bounds
-// but we need that +1 because find_first/last_not_of returns the exact index
 template <typename CharT>
 inline std::basic_string_view<CharT> trim_view(std::basic_string<CharT> const & str)
 {

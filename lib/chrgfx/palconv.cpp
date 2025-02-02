@@ -8,6 +8,8 @@ namespace chrgfx
 
 using namespace std;
 
+char * (*fp_copy)(char *, char *, char *);
+
 void encode_pal(paldef const & paldef, coldef const & coldef, palette const * in_palette, byte_t * out_palette)
 {
 	size_t const
@@ -16,36 +18,17 @@ void encode_pal(paldef const & paldef, coldef const & coldef, palette const * in
 		// as above, in bytes
 		entry_datasize_bytes {((unsigned) (entry_datasize >> 3)) + (entry_datasize % 8 > 0 ? 1 : 0)},
 		// subpalette size, in bytes
-		subpal_datasize_bytes {(unsigned) (paldef.datasize() >> 3)},
-		// total number of entries in a subpalette
-		subpal_length {paldef.length()};
-	// total number of subpalettes available in the given palette
-	// subpal_count { basic_palette.size() / subpal_length };
-	/*
-		if(subpal_count == 0)
-		{
-			throw invalid_argument(
-					"Not enough entries within the given basic palette to create a "
-					"subpalette with the given paldef");
-		}
-
-	if(subpal_idx >= subpal_count)
-	{
-		throw out_of_range("Requested subpalette index beyond the range of the "
-											 "given palette data");
-	}
-*/
+		subpal_datasize_bytes {(unsigned) (paldef.datasize() >> 3)};
 
 	// used to copy the color entry bytes into a temp array
 	// to be cast as a machine-native u32
-	char * (*copyfunc)(char *, char *, char *);
 	if (bigend_sys == coldef.big_endian())
 	{
-		copyfunc = std::copy;
+		fp_copy = copy;
 	}
 	else
 	{
-		copyfunc = std::reverse_copy;
+		fp_copy = reverse_copy;
 	}
 
 	size_t
@@ -57,49 +40,39 @@ void encode_pal(paldef const & paldef, coldef const & coldef, palette const * in
 		// that the entry should be shifted in order to bring it to its correct
 		// value
 		bit_align_mod {0};
+	uint32 out_color {0};
 
-	std::fill_n(out_palette, subpal_datasize_bytes, 0);
+	fill_n(out_palette, subpal_datasize_bytes, 0);
 
-	// converted color
+	auto ptr_out_pal {out_palette};
 
-	auto out_ptr {out_palette};
-	size_t entry_count {0};
-
-	for (auto const & color : *in_palette)
+	for (size_t i_color {0}; i_color < paldef.length(); ++i_color)
 	{
-		// iterate over the colors in the color palette, but only up to the number
-		// of colors in the output format subpal length
-		if (entry_count >= subpal_length)
-			break;
-
+		auto const & in_color {(*in_palette)[i_color]};
 		byte_align_pos = bit_align_pos >> 3;
 		bit_align_mod = bit_align_pos % 8;
 
-		uint32 this_entry {0};
 		switch (coldef.type())
 		{
 			case rgb:
-				encode_col(static_cast<rgbcoldef const &>(coldef), &color, &this_entry);
+				encode_col(static_cast<rgbcoldef const &>(coldef), &in_color, &out_color);
 				break;
 			case ref:
-				encode_col(static_cast<refcoldef const &>(coldef), &color, &this_entry);
+				encode_col(static_cast<refcoldef const &>(coldef), &in_color, &out_color);
 				break;
 			default:
-				// should never happen, but for completeness:
+				// should never happen, but for completeness and to shut up the compiler:
 				throw runtime_error("Invalid coldef type");
 		}
 
 		if (bit_align_mod > 0)
 		{
-			this_entry <<= bit_align_mod;
-			this_entry |= static_cast<uint8>(out_palette[byte_align_pos]);
+			out_color <<= bit_align_mod;
+			out_color |= out_palette[byte_align_pos];
 		}
 
-		copyfunc((char *) &this_entry, ((char *) &this_entry) + entry_datasize_bytes, (char *) out_ptr);
-
-		out_ptr += entry_datasize_bytes;
-		++entry_count;
-
+		fp_copy((char *) &out_color, ((char *) &out_color) + entry_datasize_bytes, (char *) ptr_out_pal);
+		ptr_out_pal += entry_datasize_bytes;
 		byte_align_pos += entry_datasize;
 	}
 }
@@ -120,14 +93,13 @@ void decode_pal(paldef const & paldef, coldef const & coldef, byte_t const * in_
 
 	// used to copy the color entry bytes into a temp array
 	// to be cast as a machine-native u32
-	char * (*copyfunc)(char *, char *, char *);
 	if (bigend_sys == coldef.big_endian())
 	{
-		copyfunc = std::copy;
+		fp_copy = copy;
 	}
 	else
 	{
-		copyfunc = std::reverse_copy;
+		fp_copy = reverse_copy;
 	}
 
 	// processing loop setup
@@ -169,7 +141,7 @@ void decode_pal(paldef const & paldef, coldef const & coldef, byte_t const * in_
 		// a few times...
 
 		// copy all data for one color entry into the temp buffer
-		copyfunc((char *) paldata_iter + byte_offset,
+		fp_copy((char *) paldata_iter + byte_offset,
 			(char *) paldata_iter + byte_offset + temp_buff_size,
 			(char *) temp_buff.get());
 

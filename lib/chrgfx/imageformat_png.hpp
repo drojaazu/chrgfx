@@ -1,12 +1,12 @@
 /**
- * @file imgfmt_png.hpp
+ * @file imageformat_png.hpp
  * @author Damian Rogers / damian@motoi.pro
  * @copyright ©2022 Motoi Productions / Released under MIT License
  * @brief Functions for converting to/from PNG format
  */
 
-#ifndef __CHRGFX__IMGFMT_PNG_HPP
-#define __CHRGFX__IMGFMT_PNG_HPP
+#ifndef __CHRGFX__IMAGEFORMAT_PNG_HPP
+#define __CHRGFX__IMAGEFORMAT_PNG_HPP
 
 #include "image_types.hpp"
 #include "types.hpp"

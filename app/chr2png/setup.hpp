@@ -1,4 +1,4 @@
-#include "img_process.hpp"
+#include "imaging.hpp"
 #include "shared.hpp"
 #include <getopt.h>
 #include <stdexcept>
@@ -9,7 +9,7 @@ struct runtime_config_chr2png : runtime_config
 	std::string chrdata_path;
 	std::string paldata_path;
 	chrgfx::render_config render_cfg;
-	std::string out_path;
+	std::string out_png_path;
 	uint pal_line {0};
 } cfg;
 
@@ -102,7 +102,7 @@ void process_args(int argc, char ** argv)
 
 			// png output path
 			case 'o':
-				cfg.out_path = optarg;
+				cfg.out_png_path = optarg;
 				break;
 		}
 	}

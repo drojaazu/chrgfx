@@ -135,6 +135,13 @@ public:
 			throw runtime_error("Bitdepth must be greater than zero");
 		if (m_layout.size() == 0)
 			throw runtime_error("rgb_layout list cannot be empty");
+		for (auto const & layout : m_layout)
+		{
+			if (layout.red_size() > 8 || layout.green_size() > 8 || layout.blue_size() > 8)
+				throw runtime_error("datasize in a bit layout cannot be greater than 8 (maximum of 8 bits per color channel)");
+			if (layout.red_offset() > 32 || layout.green_offset() > 32 || layout.blue_offset() > 32)
+				throw runtime_error("color channel bit offsets cannot be greater than 32");
+		}
 		return new rgbcoldef {m_id, m_bitdepth, m_layout, m_big_endian, m_desc};
 	}
 };

@@ -12,7 +12,7 @@
 #ifndef __MOTOI__LINEREAD_HPP
 #define __MOTOI__LINEREAD_HPP
 
-#include "fstreams.hpp"
+#include "filesys.hpp"
 #include <string>
 
 namespace motoi

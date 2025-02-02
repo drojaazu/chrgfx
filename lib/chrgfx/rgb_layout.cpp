@@ -12,7 +12,7 @@ rgb_layout::rgb_layout(pair<short, uint> const & red, pair<short, uint> const & 
 {
 }
 
-short rgb_layout::red_shift() const
+short rgb_layout::red_offset() const
 {
 	return m_red.first;
 }
@@ -22,7 +22,7 @@ uint rgb_layout::red_size() const
 	return m_red.second;
 }
 
-short rgb_layout::green_shift() const
+short rgb_layout::green_offset() const
 {
 	return m_green.first;
 }
@@ -32,7 +32,7 @@ uint rgb_layout::green_size() const
 	return m_green.second;
 }
 
-short rgb_layout::blue_shift() const
+short rgb_layout::blue_offset() const
 {
 	return m_blue.first;
 }

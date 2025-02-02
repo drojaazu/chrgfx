@@ -345,10 +345,10 @@ rgbcoldef
   id col_snk_neogeo
   desc SNK NeoGeo
 
-  # 15 |                               |0
+  # 15 |               |               |0
   #    DDR0G0B0R4R3R2R1 G4G3G2G1B4B3B2B1
   # D = "dark bit", acts as shared LSB for all color components
-  bitdepth 5
+  bitdepth 6
   layout 15, 1, 15, 1, 15, 1
   layout 14, 1, 13, 1, 12, 1
   layout 8, 4, 4, 4, 0, 4

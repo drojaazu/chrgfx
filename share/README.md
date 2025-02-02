@@ -85,7 +85,7 @@ As a chrdef, it looks like this. Notice how the `plane_offsets` has an irregular
       plane_offsets 0,8,128,136
     }
 
-## chrdef Reference
+### chrdef Reference
 
 `width`, `height` - The pixel dimensions of a single tile
 
@@ -97,11 +97,11 @@ As a chrdef, it looks like this. Notice how the `plane_offsets` has an irregular
 
 `plane_offsets` - The offset (in bits) of each bitplane in one pixel; **the number of entries here must match the value of `bpp`.**
 
-### Palette Definitions (paldef)
+## Palette Definitions (paldef)
 
 When we think of a palette, we generally envision a structure that contains an ordered list of colors. This is still the case, but in chrgfx we split up the concept of palette structure and color data. If you imagine a carton of a dozen colorful Easter eggs, the eggs are the colors (coldef) while the carton holding them is the palette (paldef). Splitting of color data and palette structure gives us more flexibility and less redundancy, which we'll see later when we talk about profiles.
 
-## paldef reference
+### paldef reference
 
 `length` - The number of colors in the palette
 
@@ -109,9 +109,11 @@ When we think of a palette, we generally envision a structure that contains an o
 
 `datasize` - (Optional) The data size of a single palette *in bits*. This should only be needed in very rare circumstances where the size of a subpalette is greater than the sum of the color data. An example of this is the Nintendo Virtual Boy.
 
-### Color Definitions (coldef)
+## Color Definitions (coldef)
 
 Colors are derived in one of two ways: RGB color channel bit mapping or predefined color lists.
+
+### RGB colors (rgbcoldef)
 
 The first method calculates a color using RGB values specified by the size and position of each color channel within the data. This works for hardware that natively uses RGB colorspace, which is the majority.
 
@@ -128,13 +130,13 @@ Here is an example of an RGB definition using the Super Famicom:
       layout 0,5,5,5,10,5
     }
 
-The primary key here is `layout`, which defines the start offset and the number of bits for each color channel. It is a rigidly defined type, which will always have 6 entries:
+The primary key here is `layout`, which defines the start offset (reletaive to the least-significant bit) and the number of bits for each color channel. It is a rigidly defined type, which will always have 6 entries:
 
 ```red_offset, red_datasize, green_offset, green_datasize, blue_offset, blue_datasize```
 
 Note that the offset here is zero indexed.
 
-In the comment in the example above, we see that the red data occupies bits 0 to 4; green data is at bits 5 to 9; blue data is at bits 10 to 14. Therefore, we specify red starts at bit offset 0, and is 5 bits long; green starts at bit offset 5 and is 5 bits long; blue starts at bit offset 10 and is 5 bits long.
+In the comment within the example above, we see that the red data occupies bits 0 to 4; green data is at bits 5 to 9; blue data is at bits 10 to 14. Therefore, we specify red starts at bit offset 0, and is 5 bits long; green starts at bit offset 5 and is 5 bits long; blue starts at bit offset 10 and is 5 bits long.
 
 This is fine for simple layouts with single blocks of sequential data, like the Super Famicom, but let's look at the definition for the Neo-Geo next:
 
@@ -143,8 +145,8 @@ This is fine for simple layouts with single blocks of sequential data, like the 
       id col_snk_neogeo
       desc SNK NeoGeo
     
-      # 15 |                                   |0
-      #    D R0 G0 B0 R4R3R2R1 G4G3G2G1 B4B3B2B1
+      # 15 |               |               |0
+      #    DDR0G0B0R4R3R2R1 G4G3G2G1B4B3B2B1
       # D = "dark bit", acts as shared LSB for all color components
       bitdepth 6
       layout 15,1,15,1,15,1
@@ -153,74 +155,51 @@ This is fine for simple layouts with single blocks of sequential data, like the 
       big_endian 1
     }
 
+There are multiple `layout` entries here, and this is because the color format is a bit more complex. Looking at the example in the comment, we see bit 0 of each color channel occupying bits 12 to 14, while bits 1 to 4 of each channel are in bits 0 to 11. Moreover, there is a shared bit across all channels at bit 15.
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-NEED TO REVISIT RGBCOLDEF
+So, we must break this up into three parts, one for each grouping: the shared bit, bit 0, and bits 1 to 4. Ultimately, we want each color channel isolated, so each bit must be extracted and positioned in the correct order for that channel.
 
-We ALSO need the final bit position
-We cannot naively shift everything over to 0 and OR with the previous value
-We were originally shifting left by the bitcount, which makes sense if things are sequential
+Note that *the order of the layout entries affects the output bit position.* That is, *the order of the layout entries is important.* (This is only true for layouts; the order of configuration entries anywhere else in the `gfxdefs` file does not matter.)
 
-actually... it may be fine as is
-I think the Neogeo dark bit is just too abnormal to apply here
-Or maybe we just don't fully understand it
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+The layout order is relative to the LSB. So if a color channel has 1 bit in size in the first layout, it will occupy bit 0 in the output. If the same color channel in the next layout as 3 bits in size, it will occupy bits 1 to 3 in the output. And so on.
+
+In the example above, the "dark bit" acts as a shared LSB (taht is, bit 0) for all channels. It is in bit 15 in the input color, and is one bit. We specify that same value for all three channels since it is shared. Next is the lowest bit for the unique value on each channel, in bit 14 for red, 13 for green and 12 for blue. It is also 1 bit in size. Finally, the remaining bits are packed together and grouped by channel, with red at bit 8, green at bit 4 and blue at bit 0, each of which are 4 bits in size.
+
+`big_endian` indicates that the source data is in big endian format (little endian is default). Color data is often stored as a 16- or 32-bit type, so we must account for the source hardware architecture. When considering the bit layout, always visualize it in big-endian, with the MSB on the left and and the LSB on the right.
+
+#### rgbcoldef reference
+
+`bitdepth` - The size of each color component, in bits
+
+`layout` - The offset and count of bits for each color channel. Must have exactly 6 entries, consisting of: red offset, red size, green offset, green size, blue offset, blue size. 
+
+`big_endian` - (Optional) Indicates the original hardware is big endian; if not specified, default is 0 (false). The value should be either 1 (true, big endian) or 0 (false, little endian). This should be specified for hardware where color data is greater than 8 bits in size.
 
 
-
-`big_endian` indicates that the is in big endian format (little endian is default). Color data is often stored as a 16- or 32-bit type, so we must account for the source hardware architecture.
-
-The basic algorithm works by shifting the channel bitsand masking the component data. Therefore we specify the size of the data for each component and its position relative to the least significant bit. You can visualize this with the bit layout in the comments above. There are five bits of red, which are natually positioned at the LSB, so the shift is 0. There are five bits of green, which need to be shifted 5 bits to the right to arrive at the LSB. Finally, blue is 5 bits as well, shifted 10 bits to the right.
-
-
-Here we introduce the concept of passes. Each pass will process the whole data, and the bits extracted each time are combined from the LSB upwards to form the final color information. In this example with Neo-Geo color, we see that the channels are not entirely packed together: there is an extra bit for each channel in the upper part of the word. Moreover, there is a so-called "dark bit" which acts as the shared least significant bit for each channel.
-
-To parse data in this format, we need to make three passes: first for the "dark bit" acting as the lowest bit for each channel, then the single bit in the upper byte, and finally the packed data making up the rest of the color information. We thus indicate the sizes and shifts for each of these passes in sequential order for each color channel. The dark bit ends up in bit 0, the dangling low bit ends up in bit 1, and the remaining data ends up in bits 2 to 5, forming our complete 6 bit channel data.
-
-It is imperative that each color channel size/shift specifiers have a number of entries matching the amount of color passes. Also, if the color data is more than one byte in size, the endianness of the hardware should be specified to ensure compatibility.
+### Color Tables (refcoldef)
 
 For hardware which does not (usually old or very simple systems), the second method is used. This involves mapping all possible colors to approximate RGB values in a color map.
 
-Reference tables are much easier to understand and define. As an example, the original Nintendo Famicom uses the YIQ color space and encodes the colors directly into the TV signal. With 64 colors available, we need to provide an RGB value that approximates the original perceived color for each of those entries.
+Reference color tables are much easier to understand and define. As an example, the original Nintendo Famicom uses the YIQ color space and encodes the colors directly into the TV signal. Colors are not defined by the software, but rather chosen from a color palette created by the system. With 64 colors available, we need to provide an RGB value that approximates the original perceived color for each of those entries.
 
     refcoldef
     {
       id col_nintendo_fc
       comment Nintendo Famicom
-    
-      big_endian 0
 
       # a 'standard' 2C02 PPU palette, from:
       # https://wiki.nesdev.com/w/index.php/PPU_palettes
       refpal #545454,#001E74,#08102C,#300088,#440064,#5C0030,#540400,...
+
+      big_endian 0
     }
 
 (The full list of 64 colors was abridged here for readability.)
 
 The first entry will correspond to value 0, the next to value 1, and so on.
 
-## coldef reference
+#### refcoldef reference
 
-big_endian - (Optional) Indicates the original hardware is big endian; if not specified, default is 0 (false). The value should be either 1 (true, big endian) or 0 (false, little endian). This should be specified for hardware where color data is greater than 8 bits in size.
+`refpal` - A comma delimited list of HTML style RGB colors to represent each possible color on the original hardware
 
-### rgbcoldef reference
-
-`bitdepth` - The size of each color component, in bits
-
-`color_passes` - (Optional) Indicates the number of times the value will be passed; if not specified, the value will be 1. **If the value is greater than 1, each of the `*_shift` and `*_size` entries below must have a comma delimited list with a count of entries that match this setting.**
-
-`red_shift` - Specifies the number of spaces to shift the red component data to the right, into the LSB
-
-`green_shift` - As above, for green component data
-
-`blue_shift` - As above, for blue component data
-
-`red_size` - The size of the red component data, in bits
-
-`green_size` - As above, for green component data
-
-`blue_size` - As anove, for blue component data
-
-### refcoldef reference
-
-`refpal` - A comma delimited list of HTML style RGB colors to represent each possible non-RGB color on the original hardware
+`big_endian` - (Optional) Indicates the original hardware is big endian; if not specified, default is 0 (false). The value should be either 1 (true, big endian) or 0 (false, little endian). This should be specified for hardware where color data is greater than 8 bits in size.

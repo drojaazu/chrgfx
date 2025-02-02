@@ -1,4 +1,4 @@
-#include "img_process.hpp"
+#include "imaging.hpp"
 #include "image.hpp"
 #include <stdexcept>
 #ifdef DEBUG
@@ -64,7 +64,7 @@ image render_tileset(
 
 #ifdef DEBUG
 	cerr << dec;
-	cerr << "TILE RENDERING REPORT:\n";
+	cerr << "TILESET RENDERING REPORT:\n";
 	cerr << "\tTile count: " << chr_count << '\n';
 	cerr << "\tFinal row excess tiles: " << chr_excess_count << '\n';
 	cerr << "\tOut tile data size: " << chr_datasize << '\n';
@@ -112,28 +112,31 @@ image render_tileset(
 	return out_image;
 }
 
-uint const swatch_size {32};
+// TODO: make this configurable?
+static uint const swatch_size {32};
 
 image render_palette(paldef const & paldef, coldef const & coldef, byte_t const * in_palette)
 {
-	palette workpal;
-	decode_pal(paldef, coldef, in_palette, &workpal);
 	auto const row_width {paldef.length() * swatch_size};
 	image out_image(row_width, swatch_size);
 
-	auto ptr_out = out_image.pixel_map();
+	auto ptr_out_palstart {out_image.pixel_map()}, ptr_out_swatchpixel {ptr_out_palstart};
+
+	palette workpal;
+	decode_pal(paldef, coldef, in_palette, &workpal);
+
 	// fill one line...
 	for (auto iter_color_index {0}; iter_color_index < paldef.length(); ++iter_color_index)
 	{
-		auto ptr_swatch_pixel {ptr_out + (swatch_size * iter_color_index)};
-		fill(ptr_swatch_pixel, ptr_swatch_pixel + swatch_size, iter_color_index);
+		fill(ptr_out_swatchpixel, ptr_out_swatchpixel + swatch_size, iter_color_index);
+		ptr_out_swatchpixel += swatch_size;
 	}
 	// duplicate that line
 	for (auto iter_pixel_row {1}; iter_pixel_row < swatch_size; ++iter_pixel_row)
 	{
-		copy(ptr_out, ptr_out + row_width, ptr_out + (iter_pixel_row * row_width));
+		copy(ptr_out_palstart, ptr_out_palstart + row_width, ptr_out_palstart + (iter_pixel_row * row_width));
 	}
-	out_image.color_map(workpal);
+	out_image.set_color_map(workpal);
 
 	return out_image;
 }
@@ -142,42 +145,40 @@ motoi::image<rgb_color> render_palette_full(
 	paldef const & paldef, coldef const & coldef, byte_t const * in_palette, size_t const in_palette_datasize)
 {
 	if (in_palette_datasize < paldef.entry_datasize_bytes())
-		throw runtime_error("not enough data to render a palette");
+		throw runtime_error("Not enough input data to render a singley palette");
 
 	size_t const subpal_count {in_palette_datasize / paldef.datasize_bytes()}, row_width {swatch_size * paldef.length()};
 	auto ptr_in_subpal {in_palette};
 	motoi::image<rgb_color> out_image(row_width, swatch_size * subpal_count);
 
 	palette workpal;
-	auto ptr_out_subpal {out_image.pixel_map()};
-	auto palbuffer {unique_ptr<byte_t>(new byte_t[paldef.datasize_bytes()])};
-	for (size_t subpal_idx {0}; subpal_idx < subpal_count; ++subpal_idx)
+	auto ptr_out_palstart {out_image.pixel_map()}, ptr_out_swatchpixel {ptr_out_palstart};
+	for (size_t i_subpal_idx {0}; i_subpal_idx < subpal_count; ++i_subpal_idx)
 	{
 		decode_pal(paldef, coldef, ptr_in_subpal, &workpal);
 
-		// fill one line...
-		for (auto iter_color_index {0}; iter_color_index < paldef.length(); ++iter_color_index)
+		// make one pixel row of color swatches...
+		for (auto i_color_index {0}; i_color_index < paldef.length(); ++i_color_index)
 		{
-			auto ptr_swatch_pixel {ptr_out_subpal + (swatch_size * iter_color_index)};
-			fill(ptr_swatch_pixel, ptr_swatch_pixel + swatch_size, workpal[iter_color_index]);
+			fill(ptr_out_swatchpixel, ptr_out_swatchpixel + swatch_size, workpal[i_color_index]);
+			ptr_out_swatchpixel += swatch_size;
 		}
-		// duplicate that line
-		for (auto iter_pixel_row {1}; iter_pixel_row < swatch_size; ++iter_pixel_row)
+		// duplicate that line for the rest of the swatch height
+		for (auto i_pixel_row {1}; i_pixel_row < swatch_size; ++i_pixel_row)
 		{
-			copy(ptr_out_subpal, ptr_out_subpal + row_width, ptr_out_subpal + (iter_pixel_row * row_width));
+			copy(ptr_out_palstart, ptr_out_palstart + row_width, ptr_out_palstart + (i_pixel_row * row_width));
 		}
 
 		ptr_in_subpal += paldef.datasize_bytes();
-		ptr_out_subpal += row_width * swatch_size;
+		ptr_out_swatchpixel = ptr_out_palstart += row_width * swatch_size;
 	}
 
 	return out_image;
 }
 
-void make_tileset(chrdef const & chrdef, image const & in_bitmap, byte_t * out_chrset)
+void make_tileset(chrdef const & chrdef, image const & in_image, byte_t * out_tileset)
 {
-	// class to chunk a bitmap into tiles
-	// psuedo:
+	// pseudo:
 	// - get dimensions, divide by tile width
 	// - width in chrs, height in chrs
 	// - chrw * chrh = total tile count, provision vector<chr>
@@ -187,59 +188,69 @@ void make_tileset(chrdef const & chrdef, image const & in_bitmap, byte_t * out_c
 	// --- curr pixel row = get_row(src image pixel row counter ++)
 	// --- for each chr column
 	// ---- read curr pixel row 8 pixels, store into output vector of chrs
-	auto const chr_width {chrdef.width()}, chr_height {chrdef.height()}, bmp_width {in_bitmap.width()},
-		bmp_height {in_bitmap.height()};
 
-	if (chr_width == 0 || chr_height == 0)
+	// clang-format off
+	size_t const
+		tile_width {chrdef.width()},
+		tile_height {chrdef.height()},
+		image_width {in_image.width()},
+		image_height {in_image.height()};
+	// clang-format on
+
+	if (tile_width == 0 || tile_height == 0)
 		throw invalid_argument("Invalid tile dimensions");
 
-	if (bmp_width < chr_width || bmp_height < chr_height)
+	if (image_width < tile_width || image_height < tile_height)
 		throw invalid_argument("Source image too small to form a tile");
 
-	size_t const chr_datasize {chr_width * chr_height},
+	// clang-format off
+	size_t const
+		tile_datasize {tile_width * tile_height},
 		// input image dimensions (in tiles)
-		img_chrwidth {bmp_width / chr_width}, img_chrheight {bmp_height / chr_height},
-		chrrow_datasize {chr_datasize * img_chrwidth},
-		// offset to start of the pixel row in the next chr
-		// from the end of the previous
-		next_chr {chr_datasize - chr_width};
+		image_tilewidth {image_width / tile_width},
+		image_tileheight {image_height / tile_height},
+		tilerow_datasize {tile_datasize * image_tilewidth},
+		// offset to start of the same pixel row in the next tile from the end of the current tile's pixel row
+		next_tile {tile_datasize - tile_width};
 
 	// iters and counters
-	size_t i_chrrow {0}, i_chr_pxlrow {0}, i_chrcol {0};
+	size_t 
+		i_tile_row {0},
+		i_tile_pixelrow {0},
+		i_tile_column {0};
 
 	// input ptrs
 	byte_t const
-		// pointer to start of current pixel row
-		//*ptr_in_pxlrow {in_bitmap.pixbuf()},
 		// pointer to current pixel
-		* ptr_in_pxl {in_bitmap.pixel_map()};
+		* ptr_in_pixel {in_image.pixel_map()};
 
 	// output ptrs
 	byte_t
 		// pointer to start of current tile row
-		*ptr_out_chrrow {out_chrset},
+		*ptr_out_tilerow {out_tileset},
 		// pointer to start of the current pixel row within the current tile row
-		*ptr_out_pxlrow {ptr_out_chrrow},
+		*ptr_out_pixelrow {ptr_out_tilerow},
 		// pointer to current pixel
-		*ptr_out_pxl {ptr_out_pxlrow};
+		*ptr_out_pixel {ptr_out_pixelrow};
+	// clang-format on
 
 	// for each tile row...
-	for (i_chrrow = 0; i_chrrow < img_chrheight; ++i_chrrow)
+	for (i_tile_row = 0; i_tile_row < image_tileheight; ++i_tile_row)
 	{
 		// for each pixel row within the tile row...
-		for (i_chr_pxlrow = 0; i_chr_pxlrow < chr_height; ++i_chr_pxlrow)
+		for (i_tile_pixelrow = 0; i_tile_pixelrow < tile_height; ++i_tile_pixelrow)
 		{
 			// for each tile within the pixel row...
-			for (i_chrcol = 0; i_chrcol < img_chrwidth; ++i_chrcol)
+			for (i_tile_column = 0; i_tile_column < image_tilewidth; ++i_tile_column)
 			{
 				// for each [tile-width] pixel...
-				for (auto i {0}; i < chr_width; ++i)
-					*ptr_out_pxl++ = *ptr_in_pxl++;
-				ptr_out_pxl += next_chr;
+				for (auto i {0}; i < tile_width; ++i)
+					*ptr_out_pixel++ = *ptr_in_pixel++;
+				ptr_out_pixel += next_tile;
 			}
-			ptr_out_pxl = ptr_out_pxlrow += chr_width;
+			ptr_out_pixel = ptr_out_pixelrow += tile_width;
 		}
-		ptr_out_pxl = ptr_out_pxlrow = ptr_out_chrrow += chrrow_datasize;
+		ptr_out_pixel = ptr_out_pixelrow = ptr_out_tilerow += tilerow_datasize;
 	}
 }
 

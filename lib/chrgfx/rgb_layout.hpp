@@ -24,15 +24,15 @@ class rgb_layout
 public:
 	rgb_layout(pair<short, uint> const & red, pair<short, uint> const & green, pair<short, uint> const & blue);
 
-	[[nodiscard]] short red_shift() const;
+	[[nodiscard]] short red_offset() const;
 
 	[[nodiscard]] uint red_size() const;
 
-	[[nodiscard]] short green_shift() const;
+	[[nodiscard]] short green_offset() const;
 
 	[[nodiscard]] uint green_size() const;
 
-	[[nodiscard]] short blue_shift() const;
+	[[nodiscard]] short blue_offset() const;
 
 	[[nodiscard]] uint blue_size() const;
 

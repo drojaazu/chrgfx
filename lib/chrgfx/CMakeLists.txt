@@ -12,12 +12,12 @@ PRIVATE
   custom.cpp
   filesys.hpp
   gfxdef.cpp
-  imgfmt_png.cpp
+  imageformat_png.cpp
   palconv.cpp
   paldef.cpp
   rgb_layout.cpp
   strutil.hpp
-  img_process.cpp
+  imaging.cpp
   utils.cpp
 PUBLIC
   FILE_SET headers
@@ -33,11 +33,11 @@ PUBLIC
     custom.hpp
     filesys.hpp
     gfxdef.hpp
-    imgfmt_png.hpp
+    imageformat_png.hpp
     palconv.hpp
     paldef.hpp
     rgb_layout.hpp  
-    img_process.hpp
+    imaging.hpp
     types.hpp
     utils.hpp
 )

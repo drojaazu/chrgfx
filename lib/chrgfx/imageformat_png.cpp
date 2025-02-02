@@ -1,4 +1,4 @@
-#include "imgfmt_png.hpp"
+#include "imageformat_png.hpp"
 
 using namespace std;
 
@@ -24,7 +24,7 @@ image from_png(png::image<png::index_pixel> const & png_image)
 	for (auto const & color : png_palette)
 		basic_pal[counter++] = rgb_color(color.red, color.green, color.blue);
 
-	basic_img.color_map(basic_pal);
+	basic_img.set_color_map(basic_pal);
 
 	return basic_img;
 }

@@ -20,8 +20,11 @@ namespace chrgfx::custom
  *
  * By non-standard, we mean converters that can not use chrdefs/paldefs/coldefs.
  *
- * For example, tiles that do not have a regular bit pattern or psuedo-retro
- * file formats such as palettes for graphics editors.
+ * For example, tiles that do not have a regular bit pattern or pseudo-retro
+ * file formats such as palettes for PC graphics editors.
+ *
+ * Currently, this is not integrated with the main gfxdef system, and is not accessible
+ * with the frontend utilities. This should (hopefully) change in a future version.
  */
 
 using fp_encode_chr = size_t (*)(pixel const * in_chr, byte_t * out_chr);
