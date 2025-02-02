@@ -1,5 +1,4 @@
 CompileFlags:
-  # Treat code as C++, use C++17 standard, enable more warnings.
   Add: [-xc++, -std=c++17, -Wall]
 Diagnostics:
   ClangTidy:

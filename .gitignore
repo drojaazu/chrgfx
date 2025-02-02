@@ -1,5 +1,6 @@
-build/
-etc/
-docs/
-.vscode/
 .cache/
+.vscode/
+build/
+work
+docs/
+**/src/app.hpp
