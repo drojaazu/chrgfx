@@ -39,7 +39,6 @@ PUBLIC
     palconv.hpp
     paldef.hpp
     rgb_layout.hpp  
-    imaging.hpp
     types.hpp
     utils.hpp
 )

@@ -14,6 +14,14 @@ CMake is used for the build process. From the root of the project directory:
     make
     sudo make install
 
+Note that cmake installs library content to `/usr/local` by default, which is not included in the ld search path in some distros. If libchrgfx.so cannot be found, you may want to add `/usr/local/lib` to the search path using `ldconfig`, or manually specify the installation prefix, e.g.:
+
+    cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
+
+Manual uninstallation can be done using the install_manifest.txt file within the cmake build directory:
+
+    sudo xargs rm < install_manifest.txt 
+
 # Utilities
 There are three support utilities included: `chr2png`, `png2chr`, and `palview`.
 

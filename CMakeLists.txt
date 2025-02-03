@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(chrgfx VERSION 3.0.1)
+project(chrgfx VERSION 3.0.2)
 
 set(PROJECT_CONTACT "Damian R (damian@motoi.pro)")
 set(PROJECT_WEBSITE "https://github.com/drojaazu")
