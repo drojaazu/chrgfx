@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(chrgfx)
+project(chrgfx VERSION 3.0.1)
 
 set(PROJECT_CONTACT "Damian R (damian@motoi.pro)")
 set(PROJECT_WEBSITE "https://github.com/drojaazu")
@@ -47,7 +47,7 @@ if(NOT NO_UTILS)
   add_subdirectory(app/palview)
 endif()
 
-install(FILES share/gfxdef/gfxdefs
+install(FILES share/gfxdefs
   DESTINATION ${CMAKE_INSTALL_DATADIR}/chrgfx)
 
 #set(CMAKE_VERBOSE_MAKEFILE true)

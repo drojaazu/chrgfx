@@ -47,7 +47,7 @@ The chrgfx library has a number of common, generic definitions included. Please 
 
 External graphics definitions are stored in the `gfxdefs` file. The project comes with a number of definitions for many common hardware systems already created in this file.
 
-Please [see the readme in the gfxdef directory](share/gfxdef/README.md) and [the gfxdefs file itself](share/gfxdef/gfxdefs) for more details on the format.
+Please [see the readme in the gfxdef directory](share/README.md) and [the gfxdefs file itself](share/gfxdefs) for more details on the format.
 
 ### CLI Definitions
 
@@ -103,7 +103,7 @@ Specify hardware profile to use
 
 These arguments specify the tile, color and palette encoding, respectively. They are only required if a graphics profile was not specified. If they are used in conjunction with a graphics profile, they will override that particular encoding. (For example, using `--chr-def` will override the tile encoding that was specified in the profile.)
 
-Please [see the readme in the gfxdef directory](share/gfxdef/README.md) for more information about values represent in a gfxdef.
+Please [see the readme in the gfxdef directory](share/README.md) for more information about values represent in a gfxdef.
 
 The following options are used to build or modify a gfxdef:
 
@@ -123,7 +123,7 @@ Specify the bits per pixel (BPP) of a tile
 
 Specify the offset (in bits) to the start of each plane within a pixel.
 
-This is written as either a comma-delimted list of values, or as a range in the format of [start:count:step]. Please [see the readme in the gfxdef directory](share/gfxdef/README.md) for more about this option and list/range formatting.
+This is written as either a comma-delimted list of values, or as a range in the format of [start:count:step]. Please [see the readme in the gfxdef directory](share/README.md) for more about this option and list/range formatting.
 
 The number of entries should match the bits per pixel value for the tile.
 

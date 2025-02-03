@@ -16,6 +16,7 @@
 #include "custom.hpp"
 #include "gfxdef.hpp"
 #include "image.hpp"
+#include "image_types.hpp"
 #include "imageformat_png.hpp"
 #include "imaging.hpp"
 #include "palconv.hpp"

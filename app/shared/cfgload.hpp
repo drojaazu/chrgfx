@@ -13,6 +13,7 @@
 #define __MOTOI__CFGLOAD_HPP
 
 #include "lineread.hpp"
+#include <cstdint>
 #include <map>
 #include <stdexcept>
 #include <string>

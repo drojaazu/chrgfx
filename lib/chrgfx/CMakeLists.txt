@@ -23,7 +23,6 @@ PUBLIC
   FILE_SET headers
   TYPE HEADERS
   FILES
-    image.hpp
     builtin_defs.hpp
     chrconv.hpp
     chrdef.hpp
@@ -33,7 +32,10 @@ PUBLIC
     custom.hpp
     filesys.hpp
     gfxdef.hpp
+    image.hpp
+    image_types.hpp
     imageformat_png.hpp
+    imaging.hpp
     palconv.hpp
     paldef.hpp
     rgb_layout.hpp  
