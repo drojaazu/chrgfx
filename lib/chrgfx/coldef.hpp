@@ -11,6 +11,7 @@
 #include "gfxdef.hpp"
 #include "image_types.hpp"
 #include "rgb_layout.hpp"
+#include "types.hpp"
 #include <vector>
 
 namespace chrgfx
