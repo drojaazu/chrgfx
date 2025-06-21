@@ -10,13 +10,11 @@ PRIVATE
   colconv.cpp
   coldef.cpp
   custom.cpp
-  filesys.hpp
   gfxdef.cpp
   imageformat_png.cpp
   palconv.cpp
   paldef.cpp
   rgb_layout.cpp
-  strutil.hpp
   imaging.cpp
   utils.cpp
 PUBLIC
@@ -30,7 +28,6 @@ PUBLIC
     colconv.hpp
     coldef.hpp
     custom.hpp
-    filesys.hpp
     gfxdef.hpp
     image.hpp
     image_types.hpp
@@ -38,7 +35,8 @@ PUBLIC
     imaging.hpp
     palconv.hpp
     paldef.hpp
-    rgb_layout.hpp  
+    rgb_layout.hpp
+    strutil.hpp
     types.hpp
     utils.hpp
 )
