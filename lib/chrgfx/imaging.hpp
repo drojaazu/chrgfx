@@ -10,6 +10,7 @@
 #include "image_types.hpp"
 #include "palconv.hpp"
 #include "paldef.hpp"
+#include "types.hpp"
 #include <optional>
 
 #ifndef __CHRGFX__IMAGING_HPP

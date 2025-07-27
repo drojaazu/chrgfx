@@ -9,6 +9,7 @@
 #define __CHRGFX__CUSTOM_HPP
 
 #include "image_types.hpp"
+#include "types.hpp"
 #include <map>
 
 namespace chrgfx::custom

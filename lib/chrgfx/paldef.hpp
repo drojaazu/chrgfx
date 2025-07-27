@@ -9,6 +9,7 @@
 #define __CHRGFX__PALDEF_HPP
 
 #include "gfxdef.hpp"
+#include "types.hpp"
 #include <optional>
 #include <string>
 
