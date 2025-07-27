@@ -9,6 +9,7 @@
 #define __CHRGFX__CHRDEF_HPP
 
 #include "gfxdef.hpp"
+#include "types.hpp"
 #include <string>
 #include <vector>
 
