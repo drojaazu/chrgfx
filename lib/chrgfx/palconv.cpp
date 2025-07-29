@@ -48,17 +48,17 @@ void encode_pal(paldef const & paldef, coldef const & coldef, palette const * in
 
 	for (size_t i_color {0}; i_color < paldef.length(); ++i_color)
 	{
-		auto const & in_color {(*in_palette)[i_color]};
+		rgb_color const * in_color {&in_palette->at(i_color)};
 		byte_align_pos = bit_align_pos >> 3;
 		bit_align_mod = bit_align_pos % 8;
 
 		switch (coldef.type())
 		{
 			case rgb:
-				encode_col(static_cast<rgbcoldef const &>(coldef), &in_color, &out_color);
+				encode_col(static_cast<rgbcoldef const &>(coldef), in_color, &out_color);
 				break;
 			case ref:
-				encode_col(static_cast<refcoldef const &>(coldef), &in_color, &out_color);
+				encode_col(static_cast<refcoldef const &>(coldef), in_color, &out_color);
 				break;
 			default:
 				// should never happen, but for completeness and to shut up the compiler:

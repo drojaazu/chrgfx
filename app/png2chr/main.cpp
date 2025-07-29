@@ -141,7 +141,7 @@ int main(int argc, char ** argv)
 			t1 = chrono::high_resolution_clock::now();
 #endif
 
-			auto paldef_palette_data {unique_ptr<byte_t>(new byte_t[defs.paldef()->datasize() >> 3])};
+			auto paldef_palette_data {unique_ptr<byte_t>(new byte_t[defs.paldef()->entry_datasize_bytes()])};
 			encode_pal(*defs.paldef(), *defs.coldef(), image_data.color_map(), paldef_palette_data.get());
 
 #ifdef DEBUG

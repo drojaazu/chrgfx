@@ -35,6 +35,8 @@ void encode_col(rgbcoldef const & rgbcoldef, rgb_color const * in_color, uint32 
 		bitmask;
 	// clang-format on
 
+	*out_color = 0;
+
 	for (auto const & layout : rgbcoldef.layout())
 	{
 		bitmask = (create_bitmask8(layout.red_size())) << red_bitcount;
