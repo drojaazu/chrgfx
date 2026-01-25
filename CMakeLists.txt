@@ -38,6 +38,13 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
   endif()
 endif()
 
+# Set rpath for macOS
+if(APPLE)
+    set(CMAKE_INSTALL_RPATH "@executable_path/../lib;/usr/local/lib")
+    set(CMAKE_BUILD_RPATH "${CMAKE_BINARY_DIR}")
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif()
+
 add_subdirectory(lib/chrgfx)
 
 if(NOT NO_UTILS)
