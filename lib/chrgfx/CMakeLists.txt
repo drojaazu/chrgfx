@@ -1,4 +1,4 @@
-project(chrgfx VERSION 3.0.1 LANGUAGES CXX)
+project(chrgfx VERSION 3.0.4 LANGUAGES CXX)
 add_library(chrgfx SHARED)
 
 target_sources(chrgfx

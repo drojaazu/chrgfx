@@ -1,7 +1,7 @@
 /**
  * @author Damian R (damian@motoi.pro)
  * @brief 
- * @version 3.0.1
+ * @version 3.0.4
  * 
  * @copyright ©2017 Motoi Productions / Released under MIT License
  *
@@ -20,8 +20,8 @@ namespace APP
 {
 static unsigned int const VERSION_MAJOR {3};
 static unsigned int const VERSION_MINOR {0};
-static unsigned int const VERSION_PATCH {1};
-static char const * VERSION {"3.0.1"};
+static unsigned int const VERSION_PATCH {4};
+static char const * VERSION {"3.0.4"};
 
 static char const * NAME {"chrgfx"};
 static char const * COPYRIGHT {"©2017 Motoi Productions / Released under MIT License"};
